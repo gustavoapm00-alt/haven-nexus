@@ -1,4 +1,5 @@
 import ScrollReveal from './ScrollReveal';
+import founderImage from '@/assets/founder.jpg';
 
 const focusAreas = [
   'Building AI tools and systems for entrepreneurs',
@@ -12,19 +13,16 @@ const FounderSection = () => {
     <section id="founder" className="section-padding bg-secondary/30">
       <div className="container-main">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-          {/* Image placeholder */}
+          {/* Founder Image */}
           <ScrollReveal direction="left" className="order-2 lg:order-1">
-            <div className="aspect-square max-w-md mx-auto lg:mx-0 relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent rounded-sm" />
-              <div className="absolute inset-4 border border-primary/30 rounded-sm" />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-primary/20 flex items-center justify-center">
-                    <span className="font-display text-4xl text-primary">G</span>
-                  </div>
-                  <p className="text-muted-foreground text-sm">Gustavo</p>
-                </div>
-              </div>
+            <div className="aspect-square max-w-md mx-auto lg:mx-0 relative overflow-hidden rounded-sm">
+              <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent z-10" />
+              <img 
+                src={founderImage} 
+                alt="Gustavo - Founder of Haven Systems" 
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 border border-primary/20 rounded-sm z-20" />
             </div>
           </ScrollReveal>
 
