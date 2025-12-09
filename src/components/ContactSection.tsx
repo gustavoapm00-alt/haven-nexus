@@ -74,7 +74,7 @@ const ContactSection = () => {
           <div className="grid md:grid-cols-2 gap-8 mb-12">
             {/* Instagram */}
             <a
-              href="https://instagram.com/null.username__"
+              href="https://www.instagram.com/null.username__/"
               target="_blank"
               rel="noopener noreferrer"
               className="card-glow p-6 rounded-sm border border-border/50 flex items-center gap-4 hover:border-primary/30 transition-all duration-300 group"
