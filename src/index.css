@@ -81,15 +81,23 @@
     @apply max-w-7xl mx-auto;
   }
 
+  .bg-gradient-hero {
+    background: var(--gradient-hero);
+  }
+
+  .bg-glow-radial {
+    background: radial-gradient(circle, hsl(var(--primary) / 0.3) 0%, transparent 70%);
+  }
+
   .card-glow {
     @apply relative overflow-hidden;
-    background: linear-gradient(145deg, hsl(220 18% 12%) 0%, hsl(220 18% 8%) 100%);
+    background: var(--gradient-card);
   }
 
   .card-glow::before {
     content: '';
     @apply absolute inset-0 opacity-0 transition-opacity duration-500;
-    background: radial-gradient(800px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), hsl(180 100% 50% / 0.06), transparent 40%);
+    background: radial-gradient(800px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), hsl(var(--primary) / 0.06), transparent 40%);
   }
 
   .card-glow:hover::before {
@@ -98,18 +106,18 @@
 
   .text-gradient {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(135deg, hsl(180 100% 50%) 0%, hsl(190 100% 65%) 100%);
+    background-image: var(--gradient-accent);
   }
 
   .btn-primary {
     @apply inline-flex items-center justify-center px-8 py-4 font-semibold text-sm uppercase tracking-wider transition-all duration-300;
-    background: linear-gradient(135deg, hsl(180 100% 50%) 0%, hsl(190 100% 40%) 100%);
+    background: var(--gradient-accent);
     @apply text-background rounded-sm;
-    box-shadow: 0 0 30px hsl(180 100% 50% / 0.3);
+    box-shadow: var(--glow-primary);
   }
 
   .btn-primary:hover {
-    box-shadow: 0 0 50px hsl(180 100% 50% / 0.5);
+    box-shadow: var(--glow-strong);
     @apply scale-[1.02];
   }
 
@@ -166,9 +174,9 @@
 
 @keyframes glowPulse {
   0%, 100% {
-    box-shadow: 0 0 30px hsl(180 100% 50% / 0.2);
+    box-shadow: 0 0 30px hsl(var(--primary) / 0.2);
   }
   50% {
-    box-shadow: 0 0 50px hsl(180 100% 50% / 0.4);
+    box-shadow: 0 0 50px hsl(var(--primary) / 0.4);
   }
 }

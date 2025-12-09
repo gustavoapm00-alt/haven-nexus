@@ -7,15 +7,10 @@ const HeroSection = () => {
   return (
     <section
       id="home"
-      className="min-h-screen flex items-center justify-center relative overflow-hidden"
-      style={{
-        background: 'linear-gradient(135deg, hsl(220 20% 6%) 0%, hsl(220 25% 12%) 100%)',
-      }}
+      className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gradient-hero"
     >
       {/* Background glow effect */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full opacity-20 blur-3xl"
-        style={{ background: 'radial-gradient(circle, hsl(180 100% 50% / 0.3) 0%, transparent 70%)' }}
-      />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full opacity-20 blur-3xl bg-glow-radial" />
 
       <div className="container-main section-padding pt-32 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
