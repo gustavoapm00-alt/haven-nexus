@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import ScrollReveal from './ScrollReveal';
 
 const benefits = [
@@ -19,16 +20,39 @@ const EmailCaptureSection = () => {
 
     setIsSubmitting(true);
     
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    
-    toast({
-      title: "You're in!",
-      description: "Check your inbox soon.",
-    });
-    
-    setEmail('');
-    setIsSubmitting(false);
+    try {
+      const { error } = await supabase
+        .from('email_signups')
+        .insert({ email, source: 'blueprint' });
+
+      if (error) {
+        if (error.code === '23505') {
+          // Unique constraint violation - email already exists
+          toast({
+            title: "You're already on the list!",
+            description: "We'll keep you updated.",
+          });
+        } else {
+          throw error;
+        }
+      } else {
+        toast({
+          title: "You're in!",
+          description: "Check your inbox soon.",
+        });
+      }
+      
+      setEmail('');
+    } catch (error) {
+      console.error('Error submitting email:', error);
+      toast({
+        title: "Something went wrong",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
