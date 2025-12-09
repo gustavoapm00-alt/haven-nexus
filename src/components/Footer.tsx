@@ -15,7 +15,7 @@ const Footer = () => {
           {/* Links */}
           <div className="flex items-center gap-6">
             <a
-              href="https://instagram.com"
+              href="https://instagram.com/null.username__"
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-primary transition-colors"
@@ -24,7 +24,7 @@ const Footer = () => {
               <Instagram size={20} />
             </a>
             <a
-              href="mailto:hello@havensystems.co"
+              href="mailto:gustavoapm00@gmail.com"
               className="text-muted-foreground hover:text-primary transition-colors"
               aria-label="Email"
             >

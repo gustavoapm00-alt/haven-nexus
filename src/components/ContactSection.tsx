@@ -74,7 +74,7 @@ const ContactSection = () => {
           <div className="grid md:grid-cols-2 gap-8 mb-12">
             {/* Instagram */}
             <a
-              href="https://instagram.com"
+              href="https://instagram.com/null.username__"
               target="_blank"
               rel="noopener noreferrer"
               className="card-glow p-6 rounded-sm border border-border/50 flex items-center gap-4 hover:border-primary/30 transition-all duration-300 group"
@@ -84,13 +84,13 @@ const ContactSection = () => {
               </div>
               <div>
                 <p className="font-medium text-foreground">Instagram</p>
-                <p className="text-sm text-muted-foreground">DM me on Instagram: @your_handle</p>
+                <p className="text-sm text-muted-foreground">DM me on Instagram: @null.username__</p>
               </div>
             </a>
 
             {/* Email */}
             <a
-              href="mailto:hello@havensystems.co"
+              href="mailto:gustavoapm00@gmail.com"
               className="card-glow p-6 rounded-sm border border-border/50 flex items-center gap-4 hover:border-primary/30 transition-all duration-300 group"
             >
               <div className="p-3 bg-primary/10 rounded-sm group-hover:bg-primary/20 transition-colors">
@@ -98,7 +98,7 @@ const ContactSection = () => {
               </div>
               <div>
                 <p className="font-medium text-foreground">Email</p>
-                <p className="text-sm text-muted-foreground">Prefer email? hello@havensystems.co</p>
+                <p className="text-sm text-muted-foreground">Prefer email? gustavoapm00@gmail.com</p>
               </div>
             </a>
           </div>
