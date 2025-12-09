@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import { ArrowDown } from 'lucide-react';
 
 const tags = ['AI SaaS', 'Shopify & E-com Systems', 'Brand Building', 'Human Transformation'];
@@ -20,42 +21,78 @@ const HeroSection = () => {
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           {/* Left Content */}
           <div className="text-center lg:text-left">
-            <h1 className="font-display text-5xl md:text-6xl lg:text-7xl xl:text-8xl leading-none mb-6 animate-fade-up">
+            <motion.h1 
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: [0.25, 0.4, 0.25, 1] }}
+              className="font-display text-5xl md:text-6xl lg:text-7xl xl:text-8xl leading-none mb-6"
+            >
               I BUILD SYSTEMS THAT TURN{' '}
               <span className="text-gradient">SURVIVAL</span> INTO{' '}
               <span className="text-gradient">STRATEGY</span>.
-            </h1>
+            </motion.h1>
 
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto lg:mx-0 mb-8 animate-fade-up-delay-1">
+            <motion.p 
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.15, ease: [0.25, 0.4, 0.25, 1] }}
+              className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto lg:mx-0 mb-8"
+            >
               Haven Systems is my ecosystem of AI tools, Shopify builds, streetwear, supplements, 
               and future housing projects—created for people who are done surviving and ready to 
               architect a life that actually works.
-            </p>
+            </motion.p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8 animate-fade-up-delay-2">
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.3, ease: [0.25, 0.4, 0.25, 1] }}
+              className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8"
+            >
               <a href="#offers" className="btn-primary">
                 Work with me
               </a>
               <a href="#universe" className="btn-secondary">
                 Explore the universe
               </a>
-            </div>
+            </motion.div>
 
-            <div className="flex flex-wrap gap-2 justify-center lg:justify-start animate-fade-up-delay-3">
-              {tags.map((tag) => (
-                <span key={tag} className="tag-chip">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.45, ease: [0.25, 0.4, 0.25, 1] }}
+              className="flex flex-wrap gap-2 justify-center lg:justify-start"
+            >
+              {tags.map((tag, index) => (
+                <motion.span 
+                  key={tag} 
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.4, delay: 0.5 + index * 0.05 }}
+                  className="tag-chip"
+                >
                   {tag}
-                </span>
+                </motion.span>
               ))}
-            </div>
+            </motion.div>
 
-            <p className="text-sm text-muted-foreground mt-6 animate-fade-up-delay-3">
+            <motion.p 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.7 }}
+              className="text-sm text-muted-foreground mt-6"
+            >
               Based in Virginia. Building globally.
-            </p>
+            </motion.p>
           </div>
 
           {/* Right Visual */}
-          <div className="hidden lg:flex items-center justify-center">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1, delay: 0.3, ease: [0.25, 0.4, 0.25, 1] }}
+            className="hidden lg:flex items-center justify-center"
+          >
             <div className="relative w-full max-w-md aspect-square">
               {/* Abstract network visualization */}
               <div className="absolute inset-0 border border-primary/20 rounded-lg animate-glow-pulse" />
@@ -72,13 +109,18 @@ const HeroSection = () => {
               <div className="absolute bottom-16 left-20 w-2 h-2 rounded-full bg-primary/50 animate-pulse delay-200" />
               <div className="absolute bottom-10 right-10 w-3 h-3 rounded-full bg-primary/60 animate-pulse delay-300" />
             </div>
-          </div>
+          </motion.div>
         </div>
 
         {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1, delay: 1 }}
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce"
+        >
           <ArrowDown className="text-muted-foreground" size={24} />
-        </div>
+        </motion.div>
       </div>
     </section>
   );
