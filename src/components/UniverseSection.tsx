@@ -1,4 +1,6 @@
 import { Cpu, ShoppingCart, Shirt, Heart, Film, Building2 } from 'lucide-react';
+import ScrollReveal from './ScrollReveal';
+import StaggerContainer, { StaggerItem } from './StaggerContainer';
 
 const divisions = [
   {
@@ -43,56 +45,59 @@ const UniverseSection = () => {
   return (
     <section id="universe" className="section-padding bg-secondary/30">
       <div className="container-main">
-        <div className="text-center mb-16">
-          <h2 className="font-display text-4xl md:text-5xl lg:text-6xl mb-4">
-            THE HAVEN SYSTEMS <span className="text-gradient">UNIVERSE</span>
-          </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Every project fits into one of these divisions. This keeps the vision big and the execution focused.
-          </p>
-        </div>
+        <ScrollReveal>
+          <div className="text-center mb-16">
+            <h2 className="font-display text-4xl md:text-5xl lg:text-6xl mb-4">
+              THE HAVEN SYSTEMS <span className="text-gradient">UNIVERSE</span>
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Every project fits into one of these divisions. This keeps the vision big and the execution focused.
+            </p>
+          </div>
+        </ScrollReveal>
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <StaggerContainer className="grid md:grid-cols-2 gap-6" staggerDelay={0.1}>
           {divisions.map((division) => {
             const Icon = division.icon;
             return (
-              <div
-                key={division.title}
-                className="card-glow p-8 rounded-sm border border-border/50 group hover:border-primary/30 transition-all duration-500"
-              >
-                <div className="flex items-start gap-4">
-                  <div className="p-3 bg-primary/10 rounded-sm group-hover:bg-primary/20 transition-colors duration-300">
-                    <Icon className="w-6 h-6 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-display text-2xl text-foreground mb-1">
-                      {division.title}
-                    </h3>
-                    <p className="text-sm text-primary font-medium uppercase tracking-wider mb-3">
-                      {division.label}
-                    </p>
-                    <p className="text-muted-foreground leading-relaxed">
-                      {division.description}
-                    </p>
+              <StaggerItem key={division.title}>
+                <div className="card-glow p-8 rounded-sm border border-border/50 group hover:border-primary/30 transition-all duration-500 h-full">
+                  <div className="flex items-start gap-4">
+                    <div className="p-3 bg-primary/10 rounded-sm group-hover:bg-primary/20 transition-colors duration-300">
+                      <Icon className="w-6 h-6 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-display text-2xl text-foreground mb-1">
+                        {division.title}
+                      </h3>
+                      <p className="text-sm text-primary font-medium uppercase tracking-wider mb-3">
+                        {division.label}
+                      </p>
+                      <p className="text-muted-foreground leading-relaxed">
+                        {division.description}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </StaggerItem>
             );
           })}
-        </div>
+        </StaggerContainer>
 
-        <p className="text-center text-muted-foreground mt-12">
-          Want to collaborate on one of these divisions?{' '}
-          <a
-            href="https://instagram.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary hover:underline"
-          >
-            DM me on Instagram
-          </a>
-          .
-        </p>
+        <ScrollReveal delay={0.3}>
+          <p className="text-center text-muted-foreground mt-12">
+            Want to collaborate on one of these divisions?{' '}
+            <a
+              href="https://instagram.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              DM me on Instagram
+            </a>
+            .
+          </p>
+        </ScrollReveal>
       </div>
     </section>
   );

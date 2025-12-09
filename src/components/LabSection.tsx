@@ -1,3 +1,6 @@
+import ScrollReveal from './ScrollReveal';
+import StaggerContainer, { StaggerItem } from './StaggerContainer';
+
 const projects = [
   {
     title: 'Building: AI Sales Research Agent',
@@ -23,44 +26,47 @@ const LabSection = () => {
   return (
     <section id="lab" className="section-padding bg-secondary/30">
       <div className="container-main">
-        <div className="text-center mb-16">
-          <h2 className="font-display text-4xl md:text-5xl lg:text-6xl mb-4">
-            INSIDE THE <span className="text-gradient">HAVEN LAB</span>
-          </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Notes, experiments, and builds in progress.
-          </p>
-        </div>
+        <ScrollReveal>
+          <div className="text-center mb-16">
+            <h2 className="font-display text-4xl md:text-5xl lg:text-6xl mb-4">
+              INSIDE THE <span className="text-gradient">HAVEN LAB</span>
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Notes, experiments, and builds in progress.
+            </p>
+          </div>
+        </ScrollReveal>
 
-        <div className="grid md:grid-cols-3 gap-6">
+        <StaggerContainer className="grid md:grid-cols-3 gap-6" staggerDelay={0.1}>
           {projects.map((project) => (
-            <div
-              key={project.title}
-              className="card-glow p-8 rounded-sm border border-border/50 hover:border-primary/30 transition-all duration-500"
-            >
-              <span className={`inline-block px-3 py-1 text-xs font-medium rounded-sm mb-4 ${project.statusColor}`}>
-                {project.status}
-              </span>
+            <StaggerItem key={project.title}>
+              <div className="card-glow p-8 rounded-sm border border-border/50 hover:border-primary/30 transition-all duration-500 h-full">
+                <span className={`inline-block px-3 py-1 text-xs font-medium rounded-sm mb-4 ${project.statusColor}`}>
+                  {project.status}
+                </span>
 
-              <h3 className="font-display text-xl text-foreground mb-3">
-                {project.title}
-              </h3>
+                <h3 className="font-display text-xl text-foreground mb-3">
+                  {project.title}
+                </h3>
 
-              <p className="text-muted-foreground text-sm leading-relaxed">
-                {project.description}
-              </p>
-            </div>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  {project.description}
+                </p>
+              </div>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerContainer>
 
-        <div className="text-center mt-12">
-          <p className="text-muted-foreground mb-4">
-            Want early access to my builds?
-          </p>
-          <a href="#email-capture" className="text-primary hover:underline font-medium">
-            Join the Haven list →
-          </a>
-        </div>
+        <ScrollReveal delay={0.2}>
+          <div className="text-center mt-12">
+            <p className="text-muted-foreground mb-4">
+              Want early access to my builds?
+            </p>
+            <a href="#email-capture" className="text-primary hover:underline font-medium">
+              Join the Haven list →
+            </a>
+          </div>
+        </ScrollReveal>
       </div>
     </section>
   );

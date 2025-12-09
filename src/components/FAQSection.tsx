@@ -1,9 +1,11 @@
+import { motion } from 'framer-motion';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import ScrollReveal from './ScrollReveal';
 
 const faqs = [
   {
@@ -32,24 +34,33 @@ const FAQSection = () => {
   return (
     <section id="faq" className="section-padding bg-background">
       <div className="container-main max-w-3xl">
-        <h2 className="font-display text-4xl md:text-5xl lg:text-6xl text-center mb-12">
-          <span className="text-gradient">FAQ</span>
-        </h2>
+        <ScrollReveal>
+          <h2 className="font-display text-4xl md:text-5xl lg:text-6xl text-center mb-12">
+            <span className="text-gradient">FAQ</span>
+          </h2>
+        </ScrollReveal>
 
         <Accordion type="single" collapsible className="space-y-4">
           {faqs.map((faq, index) => (
-            <AccordionItem
+            <motion.div
               key={index}
-              value={`item-${index}`}
-              className="border border-border/50 rounded-sm px-6 bg-card data-[state=open]:border-primary/30 transition-colors"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-50px' }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
             >
-              <AccordionTrigger className="text-left font-medium text-foreground hover:text-primary py-6">
-                {faq.question}
-              </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground pb-6">
-                {faq.answer}
-              </AccordionContent>
-            </AccordionItem>
+              <AccordionItem
+                value={`item-${index}`}
+                className="border border-border/50 rounded-sm px-6 bg-card data-[state=open]:border-primary/30 transition-colors"
+              >
+                <AccordionTrigger className="text-left font-medium text-foreground hover:text-primary py-6">
+                  {faq.question}
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground pb-6">
+                  {faq.answer}
+                </AccordionContent>
+              </AccordionItem>
+            </motion.div>
           ))}
         </Accordion>
       </div>
