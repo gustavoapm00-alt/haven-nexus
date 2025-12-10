@@ -14,7 +14,7 @@ const FounderSection = () => {
       <div className="container-main">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           {/* Founder Image */}
-          <ScrollReveal direction="left" className="order-2 lg:order-1">
+          <ScrollReveal className="order-2 lg:order-1">
             <div className="aspect-square max-w-md mx-auto lg:mx-0 relative overflow-hidden rounded-sm">
               <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent z-10" />
               <img 
