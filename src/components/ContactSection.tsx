@@ -2,7 +2,14 @@ import { useState } from 'react';
 import { Instagram, Mail } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { contactFormSchema } from '@/lib/validations';
 import ScrollReveal from './ScrollReveal';
+
+type FormErrors = {
+  name?: string;
+  email?: string;
+  message?: string;
+};
 
 const ContactSection = () => {
   const [formData, setFormData] = useState({
@@ -10,31 +17,50 @@ const ContactSection = () => {
     email: '',
     message: '',
   });
+  const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value,
+      [name]: value,
     }));
+    if (errors[name as keyof FormErrors]) {
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.email || !formData.message) return;
+    setErrors({});
+
+    // Validate with Zod
+    const result = contactFormSchema.safeParse(formData);
+    if (!result.success) {
+      const fieldErrors: FormErrors = {};
+      result.error.errors.forEach((err) => {
+        const field = err.path[0] as keyof FormErrors;
+        if (!fieldErrors[field]) {
+          fieldErrors[field] = err.message;
+        }
+      });
+      setErrors(fieldErrors);
+      return;
+    }
 
     setIsSubmitting(true);
     
     try {
-      const { error } = await supabase
+      const { error: dbError } = await supabase
         .from('contact_submissions')
         .insert({
-          name: formData.name,
-          email: formData.email,
-          message: formData.message,
+          name: result.data.name,
+          email: result.data.email,
+          message: result.data.message,
         });
 
-      if (error) throw error;
+      if (dbError) throw dbError;
 
       toast({
         title: "Thanks for reaching out!",
@@ -42,8 +68,7 @@ const ContactSection = () => {
       });
       
       setFormData({ name: '', email: '', message: '' });
-    } catch (error) {
-      console.error('Error submitting contact form:', error);
+    } catch (err) {
       toast({
         title: "Something went wrong",
         description: "Please try again later.",
@@ -118,9 +143,14 @@ const ContactSection = () => {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 bg-background border border-border rounded-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors"
+                  maxLength={100}
+                  className={`w-full px-4 py-3 bg-background border rounded-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors ${
+                    errors.name ? 'border-destructive' : 'border-border'
+                  }`}
                 />
+                {errors.name && (
+                  <p className="text-destructive text-xs mt-1">{errors.name}</p>
+                )}
               </div>
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
@@ -132,9 +162,14 @@ const ContactSection = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 bg-background border border-border rounded-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors"
+                  maxLength={255}
+                  className={`w-full px-4 py-3 bg-background border rounded-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors ${
+                    errors.email ? 'border-destructive' : 'border-border'
+                  }`}
                 />
+                {errors.email && (
+                  <p className="text-destructive text-xs mt-1">{errors.email}</p>
+                )}
               </div>
             </div>
 
@@ -147,10 +182,18 @@ const ContactSection = () => {
                 name="message"
                 value={formData.message}
                 onChange={handleChange}
-                required
                 rows={4}
-                className="w-full px-4 py-3 bg-background border border-border rounded-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors resize-none"
+                maxLength={5000}
+                className={`w-full px-4 py-3 bg-background border rounded-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors resize-none ${
+                  errors.message ? 'border-destructive' : 'border-border'
+                }`}
               />
+              {errors.message && (
+                <p className="text-destructive text-xs mt-1">{errors.message}</p>
+              )}
+              <p className="text-muted-foreground text-xs mt-1 text-right">
+                {formData.message.length}/5000
+              </p>
             </div>
 
             <button
