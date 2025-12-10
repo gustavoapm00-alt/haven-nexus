@@ -32,9 +32,15 @@ const Footer = () => {
             </a>
           </div>
 
-          {/* Copyright */}
-          <div className="text-sm text-muted-foreground">
-            © Haven Systems {currentYear}
+          {/* Copyright & Admin */}
+          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <span>© Haven Systems {currentYear}</span>
+            <a
+              href="/auth"
+              className="hover:text-primary transition-colors"
+            >
+              Admin
+            </a>
           </div>
         </div>
 
