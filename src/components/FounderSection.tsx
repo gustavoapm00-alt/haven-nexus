@@ -20,7 +20,7 @@ const FounderSection = () => {
               <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent z-10" />
               <LazyImage 
                 src={founderImage} 
-                alt="Gustavo - Founder of Haven Systems" 
+                alt="Gustavo - Founder of AERELION" 
                 className="w-full h-full"
               />
               <div className="absolute inset-0 border border-primary/20 rounded-sm z-20" />
@@ -38,7 +38,7 @@ const FounderSection = () => {
             <ScrollReveal delay={0.1}>
               <div className="space-y-4 text-muted-foreground leading-relaxed">
                 <p>
-                  I'm Gustavo, the mind behind Haven Systems.
+                  I'm Gustavo, the mind behind AERELION.
                 </p>
 
                 <p>
@@ -60,7 +60,7 @@ const FounderSection = () => {
                 </p>
 
                 <p>
-                  Haven Systems is that lab—scaled. It's where my tech, business, creativity, and 
+                  AERELION is that lab—scaled. It's where my tech, business, creativity, and 
                   calling all meet.
                 </p>
 

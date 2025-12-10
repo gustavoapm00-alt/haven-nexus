@@ -29,7 +29,7 @@ const LabSection = () => {
         <ScrollReveal>
           <div className="text-center mb-16">
             <h2 className="font-display text-4xl md:text-5xl lg:text-6xl mb-4">
-              INSIDE THE <span className="text-gradient">HAVEN LAB</span>
+              INSIDE THE <span className="text-gradient">AERELION LAB</span>
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Notes, experiments, and builds in progress.
@@ -63,7 +63,7 @@ const LabSection = () => {
               Want early access to my builds?
             </p>
             <a href="#email-capture" className="text-primary hover:underline font-medium">
-              Join the Haven list →
+              Join the AERELION list →
             </a>
           </div>
         </ScrollReveal>
