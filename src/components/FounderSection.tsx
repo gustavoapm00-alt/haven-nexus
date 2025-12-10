@@ -1,4 +1,5 @@
 import ScrollReveal from './ScrollReveal';
+import LazyImage from './LazyImage';
 import founderImage from '@/assets/founder.jpg';
 
 const focusAreas = [
@@ -17,10 +18,10 @@ const FounderSection = () => {
           <ScrollReveal className="order-2 lg:order-1">
             <div className="aspect-square max-w-md mx-auto lg:mx-0 relative overflow-hidden rounded-sm">
               <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent z-10" />
-              <img 
+              <LazyImage 
                 src={founderImage} 
                 alt="Gustavo - Founder of Haven Systems" 
-                className="w-full h-full object-cover"
+                className="w-full h-full"
               />
               <div className="absolute inset-0 border border-primary/20 rounded-sm z-20" />
             </div>
