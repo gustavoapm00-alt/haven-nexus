@@ -41,8 +41,8 @@ const OffersSection = () => {
           {offers.map(offer => {
           const Icon = offer.icon;
           return <StaggerItem key={offer.title}>
-                <div className="card-glow p-8 rounded-sm border border-border/50 flex flex-col hover:border-primary/30 transition-all duration-500 h-full">
-                  <div className="p-3 bg-primary/10 rounded-sm w-fit mb-6">
+                <div className="card-glass p-8 rounded-sm flex flex-col transition-all duration-500 h-full">
+                  <div className="p-3 bg-primary/10 rounded-sm w-fit mb-6 backdrop-blur-sm">
                     <Icon className="w-6 h-6 text-primary" />
                   </div>
 

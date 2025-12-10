@@ -50,9 +50,9 @@ const UniverseSection = () => {
           {divisions.map(division => {
           const Icon = division.icon;
           return <StaggerItem key={division.title}>
-                <div className="card-glow p-8 rounded-sm border border-border/50 group hover:border-primary/30 transition-all duration-500 h-full">
+                <div className="card-glass p-8 rounded-sm group transition-all duration-500 h-full">
                   <div className="flex items-start gap-4">
-                    <div className="p-3 bg-primary/10 rounded-sm group-hover:bg-primary/20 transition-colors duration-300">
+                    <div className="p-3 bg-primary/10 rounded-sm group-hover:bg-primary/20 transition-colors duration-300 backdrop-blur-sm">
                       <Icon className="w-6 h-6 text-primary" />
                     </div>
                     <div>
