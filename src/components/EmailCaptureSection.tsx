@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { emailSignupSchema } from '@/lib/validations';
 import ScrollReveal from './ScrollReveal';
 
 const benefits = [
@@ -12,28 +13,35 @@ const benefits = [
 
 const EmailCaptureSection = () => {
   const [email, setEmail] = useState('');
+  const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) return;
+    setError('');
+
+    // Validate with Zod
+    const result = emailSignupSchema.safeParse({ email });
+    if (!result.success) {
+      setError(result.error.errors[0].message);
+      return;
+    }
 
     setIsSubmitting(true);
     
     try {
-      const { error } = await supabase
+      const { error: dbError } = await supabase
         .from('email_signups')
-        .insert({ email, source: 'blueprint' });
+        .insert({ email: result.data.email, source: 'blueprint' });
 
-      if (error) {
-        if (error.code === '23505') {
-          // Unique constraint violation - email already exists
+      if (dbError) {
+        if (dbError.code === '23505') {
           toast({
             title: "You're already on the list!",
             description: "We'll keep you updated.",
           });
         } else {
-          throw error;
+          throw dbError;
         }
       } else {
         toast({
@@ -43,8 +51,7 @@ const EmailCaptureSection = () => {
       }
       
       setEmail('');
-    } catch (error) {
-      console.error('Error submitting email:', error);
+    } catch (err) {
       toast({
         title: "Something went wrong",
         description: "Please try again later.",
@@ -82,14 +89,24 @@ const EmailCaptureSection = () => {
             </div>
 
             <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                required
-                className="flex-grow px-4 py-3 bg-background border border-border rounded-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors"
-              />
+              <div className="flex-grow">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (error) setError('');
+                  }}
+                  placeholder="Enter your email"
+                  maxLength={255}
+                  className={`w-full px-4 py-3 bg-background border rounded-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors ${
+                    error ? 'border-destructive' : 'border-border'
+                  }`}
+                />
+                {error && (
+                  <p className="text-destructive text-xs mt-1 text-left">{error}</p>
+                )}
+              </div>
               <button
                 type="submit"
                 disabled={isSubmitting}
