@@ -89,19 +89,50 @@
     background: radial-gradient(circle, hsl(var(--primary) / 0.3) 0%, transparent 70%);
   }
 
-  .card-glow {
+  /* Glassmorphism card styles */
+  .card-glass {
     @apply relative overflow-hidden;
-    background: var(--gradient-card);
+    background: hsl(var(--card) / 0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid hsl(var(--border) / 0.3);
+    box-shadow: 
+      0 4px 30px hsl(var(--primary) / 0.05),
+      inset 0 1px 0 hsl(var(--foreground) / 0.05);
   }
 
-  .card-glow::before {
+  .card-glass::before {
     content: '';
-    @apply absolute inset-0 opacity-0 transition-opacity duration-500 pointer-events-none;
-    background: radial-gradient(800px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), hsl(var(--primary) / 0.06), transparent 40%);
+    @apply absolute inset-0 opacity-0 transition-all duration-500 pointer-events-none;
+    background: radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), hsl(var(--primary) / 0.1), transparent 40%);
   }
 
-  .card-glow:hover::before {
+  .card-glass::after {
+    content: '';
+    @apply absolute inset-0 opacity-0 transition-all duration-500 pointer-events-none rounded-sm;
+    box-shadow: 
+      0 0 30px hsl(var(--primary) / 0.15),
+      0 0 60px hsl(var(--primary) / 0.1),
+      inset 0 0 0 1px hsl(var(--primary) / 0.1);
+  }
+
+  .card-glass:hover {
+    background: hsl(var(--card) / 0.5);
+    border-color: hsl(var(--primary) / 0.3);
+    transform: translateY(-2px);
+  }
+
+  .card-glass:hover::before {
     @apply opacity-100;
+  }
+
+  .card-glass:hover::after {
+    @apply opacity-100;
+  }
+
+  /* Legacy card-glow for backwards compatibility */
+  .card-glow {
+    @apply card-glass;
   }
 
   .text-gradient {

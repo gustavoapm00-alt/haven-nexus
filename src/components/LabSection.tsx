@@ -40,8 +40,8 @@ const LabSection = () => {
         <StaggerContainer className="grid md:grid-cols-3 gap-6" staggerDelay={0.1}>
           {projects.map((project) => (
             <StaggerItem key={project.title}>
-              <div className="card-glow p-8 rounded-sm border border-border/50 hover:border-primary/30 transition-all duration-500 h-full">
-                <span className={`inline-block px-3 py-1 text-xs font-medium rounded-sm mb-4 ${project.statusColor}`}>
+              <div className="card-glass p-8 rounded-sm transition-all duration-500 h-full">
+                <span className={`inline-block px-3 py-1 text-xs font-medium rounded-sm mb-4 backdrop-blur-sm ${project.statusColor}`}>
                   {project.status}
                 </span>
 
