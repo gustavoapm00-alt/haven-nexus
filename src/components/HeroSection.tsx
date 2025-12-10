@@ -156,7 +156,7 @@ const HeroSection = () => {
               transition={{ duration: 0.6, delay: 0.9 }}
               className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto lg:mx-0 mb-8"
             >
-              Haven Systems is my ecosystem of AI tools, Shopify builds, streetwear, supplements, 
+              AERELION is my ecosystem of AI tools, Shopify builds, streetwear, supplements, 
               and future housing projects—created for people who are done surviving and ready to 
               architect a life that actually works.
             </motion.p>

@@ -5,7 +5,7 @@ import { emailSignupSchema } from '@/lib/validations';
 import ScrollReveal from './ScrollReveal';
 
 const benefits = [
-  'A one-page view of the Haven Systems ecosystem',
+  'A one-page view of the AERELION ecosystem',
   'My daily routine for staying focused while working nights',
   'The exact tools I use for AI, Shopify, and content',
   'A mental model for turning chaos into strategy',
@@ -68,7 +68,7 @@ const EmailCaptureSection = () => {
         <ScrollReveal>
           <div className="card-glow p-8 md:p-12 rounded-sm border border-primary/30 text-center">
             <h2 className="font-display text-3xl md:text-4xl lg:text-5xl mb-4">
-              GET THE <span className="text-gradient">HAVEN SYSTEMS</span> BLUEPRINT
+              GET THE <span className="text-gradient">AERELION</span> BLUEPRINT
             </h2>
 
             <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">

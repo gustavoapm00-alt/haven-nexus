@@ -10,7 +10,7 @@ import ScrollReveal from './ScrollReveal';
 const faqs = [
   {
     question: 'Are you an agency?',
-    answer: 'No. Agencies sell services. Haven Systems builds systems. Some of those systems look like done-for-you projects (Shopify builds, AI setups, etc.), but the long-term vision is a full ecosystem of tools, brands, housing, and content.',
+    answer: 'No. Agencies sell services. AERELION builds systems. Some of those systems look like done-for-you projects (Shopify builds, AI setups, etc.), but the long-term vision is a full ecosystem of tools, brands, housing, and content.',
   },
   {
     question: 'How do we start working together?',
@@ -26,7 +26,7 @@ const faqs = [
   },
   {
     question: 'Where are you based?',
-    answer: 'I\'m based in Virginia, working nights and building Haven Systems from the ground up.',
+    answer: 'I\'m based in Virginia, working nights and building AERELION from the ground up.',
   },
 ];
 

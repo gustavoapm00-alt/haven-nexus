@@ -36,7 +36,7 @@ const Navbar = () => {
     >
       <div className="container-main section-padding !py-4 flex items-center justify-between">
         <a href="#home" className="font-display text-2xl tracking-wide text-foreground">
-          HAVEN SYSTEMS
+          AERELION
         </a>
 
         {/* Desktop Navigation */}

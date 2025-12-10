@@ -14,14 +14,14 @@ const WhatIsSection = () => {
       <div className="container-main max-w-4xl">
         <ScrollReveal>
           <h2 className="font-display text-4xl md:text-5xl lg:text-6xl text-center mb-12">
-            WHAT IS <span className="text-gradient">HAVEN SYSTEMS</span>?
+            WHAT IS <span className="text-gradient">AERELION</span>?
           </h2>
         </ScrollReveal>
 
         <ScrollReveal delay={0.1}>
           <div className="space-y-6 text-lg text-muted-foreground leading-relaxed">
             <p>
-              Haven Systems is my personal ecosystem of brands, tools, and projects.
+              AERELION is my personal ecosystem of brands, tools, and projects.
             </p>
 
             <p>
@@ -30,7 +30,7 @@ const WhatIsSection = () => {
             </p>
 
             <p className="font-medium text-foreground">
-              Everything I build lives under Haven Systems:
+              Everything I build lives under AERELION:
             </p>
 
             <ul className="space-y-3 pl-4">

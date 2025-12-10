@@ -9,7 +9,7 @@ const Footer = () => {
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           {/* Logo */}
           <div className="font-display text-xl tracking-wide text-foreground">
-            HAVEN SYSTEMS
+            AERELION
           </div>
 
           {/* Links */}
@@ -34,7 +34,7 @@ const Footer = () => {
 
           {/* Copyright & Admin */}
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <span>© Haven Systems {currentYear}</span>
+            <span>© AERELION {currentYear}</span>
             <a
               href="/auth"
               className="hover:text-primary transition-colors"

@@ -3,32 +3,32 @@ import ScrollReveal from './ScrollReveal';
 import StaggerContainer, { StaggerItem } from './StaggerContainer';
 const divisions = [{
   icon: Cpu,
-  title: 'HavenTech',
+  title: 'AerelionTech',
   label: 'AI tools, software, and systems',
   description: 'AI agents, research tools, scrapers, and SaaS products that help entrepreneurs and operators move faster, make better decisions, and automate the boring work.'
 }, {
   icon: ShoppingCart,
-  title: 'HavenCommerce',
+  title: 'AerelionCommerce',
   label: 'E-commerce and digital infrastructure',
   description: 'High-converting Shopify builds, product validation systems, and done-for-you store setups. From branding to structure, I build online stores that feel premium and perform.'
 }, {
   icon: Shirt,
-  title: 'HavenWear',
+  title: 'AerelionWear',
   label: 'Clothing and identity',
   description: 'Streetwear and faith-inspired apparel that carries story, emotion, and calling. Clothing for the lost, the different, the ones rebuilding themselves.'
 }, {
   icon: Heart,
-  title: 'Haven Health',
+  title: 'Aerelion Health',
   label: 'Supplements and performance',
   description: 'Mind–body–spirit focused supplements designed for people rebuilding themselves—especially those healing from addiction, depression, and burnout.'
 }, {
   icon: Film,
-  title: 'Haven Media',
+  title: 'Aerelion Media',
   label: 'Stories, content, and films',
   description: 'Short films, testimony-based content, and faceless digital storytelling that documents real transformation, real pain, and real breakthrough.'
 }, {
   icon: Building2,
-  title: 'Haven Housing & Development',
+  title: 'Aerelion Housing & Development',
   label: 'Future builds and real estate',
   description: 'Long-term, I\'m building housing and development projects for people who need a fresh start—Section 8 rehabs, transitional housing, and structures that restore dignity.'
 }];
@@ -38,7 +38,7 @@ const UniverseSection = () => {
         <ScrollReveal>
           <div className="text-center mb-16">
             <h2 className="font-display text-4xl md:text-5xl lg:text-6xl mb-4">
-              THE HAVEN SYSTEMS <span className="text-gradient">UNIVERSE</span>
+              THE AERELION <span className="text-gradient">UNIVERSE</span>
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Every project fits into one of these divisions. This keeps the vision big and the execution focused.
