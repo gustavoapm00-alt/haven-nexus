@@ -52,8 +52,11 @@ const Auth = () => {
     setIsSubmitting(true);
 
     try {
+      console.log('Auth: Attempting', isLogin ? 'login' : 'signup', { email });
+      
       if (isLogin) {
         const { error } = await signIn(email, password);
+        console.log('Auth: Sign in result', { error: error?.message });
         if (error) {
           if (error.message.includes('Invalid login credentials')) {
             toast({
@@ -71,6 +74,7 @@ const Auth = () => {
         }
       } else {
         const { error } = await signUp(email, password, displayName);
+        console.log('Auth: Sign up result', { error: error?.message });
         if (error) {
           if (error.message.includes('already registered')) {
             toast({
@@ -94,6 +98,13 @@ const Auth = () => {
           setPassword('');
         }
       }
+    } catch (err) {
+      console.error('Auth: Unexpected error', err);
+      toast({
+        title: 'Unexpected error',
+        description: 'Something went wrong. Please try again.',
+        variant: 'destructive',
+      });
     } finally {
       setIsSubmitting(false);
     }
