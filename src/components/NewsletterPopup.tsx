@@ -85,9 +85,9 @@ const NewsletterPopup = () => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md mx-4"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
           >
-            <div className="relative bg-card border border-primary/20 rounded-2xl p-8 shadow-2xl shadow-primary/10">
+            <div className="relative w-full max-w-md bg-card border border-primary/20 rounded-2xl p-8 shadow-2xl shadow-primary/10">
               {/* Glow effect */}
               <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent rounded-2xl" />
               
