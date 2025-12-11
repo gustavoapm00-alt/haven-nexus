@@ -1,6 +1,6 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Helmet } from 'react-helmet';
+import SEO from '@/components/SEO';
 import AmbientAudioPlayer from '@/components/AmbientAudioPlayer';
 
 const fadeIn = {
@@ -66,10 +66,12 @@ const Section = ({
 const Sanctuary = () => {
   return (
     <>
-      <Helmet>
-        <title>Sanctuary | AERELION</title>
-        <meta name="description" content="A sanctuary for builders. A calling to Próspera. Where visionaries, founders, and creators return to the essence of who they are." />
-      </Helmet>
+      <SEO 
+        title="Sanctuary"
+        description="A sanctuary for builders. A calling to Próspera. Where visionaries, founders, and creators return to the essence of who they are and discover who they are meant to become."
+        keywords="Próspera, Honduras, visionary builders, sanctuary, AERELION mission, purpose-driven"
+        canonicalUrl="/sanctuary"
+      />
 
       <main className="relative min-h-screen bg-background text-foreground overflow-hidden">
         <CosmicGlow />

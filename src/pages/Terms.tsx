@@ -2,10 +2,20 @@ import { Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ScrollReveal from '@/components/ScrollReveal';
+import SEO, { schemas } from '@/components/SEO';
 
 const Terms = () => {
   return (
     <div className="min-h-screen bg-background">
+      <SEO 
+        title="Terms of Service"
+        description="Terms of Service for Aerlion Systems AI automation platform. Read our terms regarding services, user responsibilities, payment, and liability."
+        canonicalUrl="/terms"
+        structuredData={schemas.breadcrumb([
+          { name: 'Home', url: '/' },
+          { name: 'Terms', url: '/terms' }
+        ])}
+      />
       <Navbar />
       
       <main className="pt-24">

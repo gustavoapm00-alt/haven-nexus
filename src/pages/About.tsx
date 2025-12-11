@@ -3,6 +3,7 @@ import { ArrowRight, Target, Lightbulb, Users, Zap } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ScrollReveal from '@/components/ScrollReveal';
+import SEO, { schemas } from '@/components/SEO';
 
 const values = [
   {
@@ -30,6 +31,16 @@ const values = [
 const About = () => {
   return (
     <div className="min-h-screen bg-background">
+      <SEO 
+        title="About"
+        description="Aerlion Systems is an AI automation company helping businesses scale through intelligent technology. Learn about our mission, values, and leadership."
+        keywords="about Aerlion Systems, AI automation company, business automation, Gustavo Puerto Martinez, company values"
+        canonicalUrl="/about"
+        structuredData={schemas.breadcrumb([
+          { name: 'Home', url: '/' },
+          { name: 'About', url: '/about' }
+        ])}
+      />
       <Navbar />
       
       <main className="pt-24">

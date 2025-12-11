@@ -2,10 +2,20 @@ import { Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ScrollReveal from '@/components/ScrollReveal';
+import SEO, { schemas } from '@/components/SEO';
 
 const Privacy = () => {
   return (
     <div className="min-h-screen bg-background">
+      <SEO 
+        title="Privacy Policy"
+        description="Privacy Policy for Aerlion Systems. Learn how we collect, use, and protect your personal information when using our AI automation services."
+        canonicalUrl="/privacy"
+        structuredData={schemas.breadcrumb([
+          { name: 'Home', url: '/' },
+          { name: 'Privacy', url: '/privacy' }
+        ])}
+      />
       <Navbar />
       
       <main className="pt-24">

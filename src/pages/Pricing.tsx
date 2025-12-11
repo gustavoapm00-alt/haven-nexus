@@ -4,6 +4,7 @@ import { Check, ArrowRight, Zap, Crown, Rocket, Building, Loader2 } from 'lucide
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ScrollReveal from '@/components/ScrollReveal';
+import SEO, { schemas } from '@/components/SEO';
 import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/hooks/useSubscription';
 import { STRIPE_TIERS, TierKey } from '@/lib/stripe-config';
@@ -146,8 +147,23 @@ const Pricing = () => {
 
   const isCurrentPlan = (tierKey: TierKey) => subscribed && currentTier === tierKey;
 
+  const faqSchema = schemas.faqPage(faqs.map(f => ({ question: f.q, answer: f.a })));
+
   return (
     <div className="min-h-screen bg-background">
+      <SEO 
+        title="Pricing"
+        description="Simple, transparent pricing for AI automation. Start free with our 14-day trial. Plans from $19/mo for Starter to $99/mo for Elite. No hidden fees."
+        keywords="AI automation pricing, business automation cost, AI agent subscription, workflow automation plans"
+        canonicalUrl="/pricing"
+        structuredData={[
+          schemas.breadcrumb([{ name: 'Home', url: '/' }, { name: 'Pricing', url: '/pricing' }]),
+          faqSchema,
+          schemas.product('Starter Plan', 'Basic AI agent tools for entrepreneurs', '19'),
+          schemas.product('Pro Plan', 'Advanced AI tools for growing businesses', '49'),
+          schemas.product('Elite Plan', 'Full AI suite with unlimited capabilities', '99')
+        ]}
+      />
       <Navbar />
       
       <main className="pt-24">
