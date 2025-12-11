@@ -1,18 +1,19 @@
 import { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 
 const navLinks = [
-  { name: 'Home', href: '#home' },
-  { name: 'Universe', href: '#universe' },
-  { name: 'Offers', href: '#offers' },
-  { name: 'Lab', href: '#lab' },
-  { name: 'Founder', href: '#founder' },
-  { name: 'Contact', href: '#contact' },
+  { name: 'Home', href: '/' },
+  { name: 'Services', href: '/services' },
+  { name: 'Pricing', href: '/pricing' },
+  { name: 'About', href: '/about' },
+  { name: 'Contact', href: '/contact' },
 ];
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -26,6 +27,10 @@ const Navbar = () => {
     setIsMobileMenuOpen(false);
   };
 
+  const isActive = (href: string) => {
+    return location.pathname === href;
+  };
+
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -35,21 +40,28 @@ const Navbar = () => {
       }`}
     >
       <div className="container-main section-padding !py-4 flex items-center justify-between">
-        <a href="#home" className="font-display text-2xl tracking-wide text-foreground">
-          AERELION
-        </a>
+        <Link to="/" className="font-display text-2xl tracking-wide text-foreground">
+          AERLION
+        </Link>
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-8">
           {navLinks.map((link) => (
-            <a
+            <Link
               key={link.name}
-              href={link.href}
-              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors duration-300 uppercase tracking-wider"
+              to={link.href}
+              className={`text-sm font-medium transition-colors duration-300 uppercase tracking-wider ${
+                isActive(link.href)
+                  ? 'text-primary'
+                  : 'text-muted-foreground hover:text-primary'
+              }`}
             >
               {link.name}
-            </a>
+            </Link>
           ))}
+          <Link to="/pricing" className="btn-primary !py-2 !px-4 text-xs">
+            Start Free Trial
+          </Link>
         </div>
 
         {/* Mobile Menu Button */}
@@ -70,15 +82,28 @@ const Navbar = () => {
       >
         <div className="flex flex-col py-4">
           {navLinks.map((link) => (
-            <a
+            <Link
               key={link.name}
-              href={link.href}
+              to={link.href}
               onClick={handleLinkClick}
-              className="px-6 py-3 text-sm font-medium text-muted-foreground hover:text-primary hover:bg-secondary/50 transition-colors duration-300 uppercase tracking-wider"
+              className={`px-6 py-3 text-sm font-medium transition-colors duration-300 uppercase tracking-wider ${
+                isActive(link.href)
+                  ? 'text-primary bg-secondary/50'
+                  : 'text-muted-foreground hover:text-primary hover:bg-secondary/50'
+              }`}
             >
               {link.name}
-            </a>
+            </Link>
           ))}
+          <div className="px-6 py-3">
+            <Link 
+              to="/pricing" 
+              onClick={handleLinkClick}
+              className="btn-primary !py-2 !px-4 text-xs w-full justify-center"
+            >
+              Start Free Trial
+            </Link>
+          </div>
         </div>
       </div>
     </nav>
