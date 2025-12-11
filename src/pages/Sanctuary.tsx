@@ -1,7 +1,72 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, useReducedMotion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import SEO from '@/components/SEO';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+
+// Exit Door Icon Component - minimal open door outline
+const ExitDoor = () => {
+  const navigate = useNavigate();
+  const [isExiting, setIsExiting] = useState(false);
+
+  const handleExit = () => {
+    setIsExiting(true);
+    setTimeout(() => {
+      navigate('/');
+    }, 600);
+  };
+
+  return (
+    <>
+      {/* Fade to black overlay */}
+      <AnimatePresence>
+        {isExiting && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, ease: 'easeInOut' }}
+            className="fixed inset-0 bg-black z-[100]"
+          />
+        )}
+      </AnimatePresence>
+
+      <TooltipProvider delayDuration={200}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={handleExit}
+              aria-label="Leave the Sanctuary"
+              className="fixed top-5 right-5 z-50 p-2 rounded-md transition-all duration-300 hover:scale-105 hover:brightness-125 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background"
+            >
+              {/* Minimal open door icon - rectangle with gap */}
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="text-foreground/50 hover:text-foreground/80 transition-colors"
+              >
+                {/* Door frame */}
+                <path d="M3 21V3h18v18" />
+                {/* Door opening (gap) */}
+                <path d="M9 21V7l8-2v18" />
+                {/* Door handle */}
+                <circle cx="14" cy="12" r="1" fill="currentColor" />
+              </svg>
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="bg-background/95 backdrop-blur-sm border-border/50">
+            <p className="text-sm">Leave the Sanctuary</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    </>
+  );
+};
 
 const fadeIn = {
   hidden: { opacity: 0, y: 30 },
@@ -264,6 +329,7 @@ const Sanctuary = () => {
       />
 
       <main className="relative min-h-screen bg-background text-foreground overflow-x-hidden">
+        <ExitDoor />
         <ParallaxCosmicNebula />
         <ParallaxSacredGeometry />
         <FloatingWisdom />
