@@ -4,6 +4,7 @@ import { ArrowRight, Zap, Bot, ShoppingBag, Workflow, Shield, Clock } from 'luci
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ScrollReveal from '@/components/ScrollReveal';
+import SEO from '@/components/SEO';
 
 const features = [
   {
@@ -32,6 +33,11 @@ const benefits = [
 const Index = () => {
   return (
     <div className="min-h-screen bg-background">
+      <SEO 
+        canonicalUrl="/"
+        description="Aerlion Systems builds intelligent automation solutions that handle repetitive tasks so you can focus on growth. AI agents, workflows, and e-commerce solutions."
+        keywords="AI automation, business automation, AI agents, workflow automation, e-commerce automation, Shopify development"
+      />
       <Navbar />
       
       <main>

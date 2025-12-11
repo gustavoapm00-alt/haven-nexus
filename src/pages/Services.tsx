@@ -3,6 +3,7 @@ import { Bot, Workflow, ShoppingBag, Cpu, Database, Palette, ArrowRight, Check }
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ScrollReveal from '@/components/ScrollReveal';
+import SEO, { schemas } from '@/components/SEO';
 
 const services = [
   {
@@ -80,8 +81,20 @@ const services = [
 ];
 
 const Services = () => {
+  const servicesSchema = services.map(s => schemas.service(s.title, s.description));
+  
   return (
     <div className="min-h-screen bg-background">
+      <SEO 
+        title="Services"
+        description="AI automation services including custom AI agents, automated workflows, e-commerce solutions, AI integration, SaaS development, and brand digital foundation."
+        keywords="AI agents, workflow automation, Shopify development, SaaS development, AI integration, business automation services"
+        canonicalUrl="/services"
+        structuredData={[
+          schemas.breadcrumb([{ name: 'Home', url: '/' }, { name: 'Services', url: '/services' }]),
+          ...servicesSchema
+        ]}
+      />
       <Navbar />
       
       <main className="pt-24">

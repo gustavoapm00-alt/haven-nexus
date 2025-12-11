@@ -6,6 +6,7 @@ import { contactFormSchema } from '@/lib/validations';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ScrollReveal from '@/components/ScrollReveal';
+import SEO, { schemas } from '@/components/SEO';
 
 interface FormErrors {
   name?: string;
@@ -79,6 +80,16 @@ const Contact = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO 
+        title="Contact"
+        description="Get in touch with Aerlion Systems. Contact us about AI automation, business automation solutions, or any questions. We respond within 24-48 hours."
+        keywords="contact Aerlion Systems, AI automation inquiry, business automation contact, get in touch"
+        canonicalUrl="/contact"
+        structuredData={schemas.breadcrumb([
+          { name: 'Home', url: '/' },
+          { name: 'Contact', url: '/contact' }
+        ])}
+      />
       <Navbar />
       
       <main className="pt-24">

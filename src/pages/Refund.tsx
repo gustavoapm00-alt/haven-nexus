@@ -2,10 +2,20 @@ import { Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ScrollReveal from '@/components/ScrollReveal';
+import SEO, { schemas } from '@/components/SEO';
 
 const Refund = () => {
   return (
     <div className="min-h-screen bg-background">
+      <SEO 
+        title="Refund Policy"
+        description="Refund Policy for Aerlion Systems. Learn about our free trial, subscription refunds, and refund process for AI automation services."
+        canonicalUrl="/refund"
+        structuredData={schemas.breadcrumb([
+          { name: 'Home', url: '/' },
+          { name: 'Refund', url: '/refund' }
+        ])}
+      />
       <Navbar />
       
       <main className="pt-24">

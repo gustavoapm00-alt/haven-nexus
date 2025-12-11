@@ -1,3 +1,6 @@
+# Aerlion Systems - robots.txt
+# https://aerlion.systems
+
 User-agent: Googlebot
 Allow: /
 
@@ -12,3 +15,9 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /auth
+Disallow: /admin
+Disallow: /reset-password
+
+# Sitemap
+Sitemap: https://aerlion.systems/sitemap.xml
