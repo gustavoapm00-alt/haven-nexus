@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Check, ArrowRight, Zap, Crown, Building } from 'lucide-react';
+import { Check, ArrowRight, Zap, Crown, Rocket, Building } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ScrollReveal from '@/components/ScrollReveal';
@@ -8,73 +8,96 @@ const tiers = [
   {
     name: 'Starter',
     icon: Zap,
-    description: 'Essential automation tools for small businesses getting started.',
+    price: '$19',
+    period: '/mo',
+    description: 'Perfect for entrepreneurs getting started with AI automation.',
     highlight: false,
     features: [
-      'Basic AI chatbot',
-      '3 automated workflows',
+      '1 project',
+      'Basic AI Agent Tools',
       'Email support',
+      '1,000 AI interactions/month',
       'Standard integrations',
-      'Basic analytics dashboard',
-      '1,000 AI interactions/month'
+      'Basic analytics dashboard'
     ],
-    cta: 'Start Free Trial'
+    cta: 'Start Free Trial',
+    ctaLink: '/auth?plan=starter'
   },
   {
-    name: 'Professional',
+    name: 'Pro',
     icon: Crown,
-    description: 'Complete automation suite with advanced AI capabilities.',
+    price: '$49',
+    period: '/mo',
+    description: 'Advanced tools for growing businesses ready to scale.',
     highlight: true,
     badge: 'Most Popular',
     features: [
-      'Advanced AI agents',
-      'Unlimited workflows',
+      '5 projects',
+      'Advanced AI Agent Tools',
       'Priority support',
+      '10,000 AI interactions/month',
       'Custom integrations',
       'Advanced analytics & reporting',
-      '25,000 AI interactions/month',
-      'E-commerce automation',
-      'Team collaboration tools',
-      'API access'
+      'Workflow automation',
+      'Team collaboration (3 seats)'
     ],
-    cta: 'Start Free Trial'
+    cta: 'Start Free Trial',
+    ctaLink: '/auth?plan=pro'
   },
   {
-    name: 'Enterprise',
-    icon: Building,
-    description: 'Custom solutions for organizations with complex needs.',
+    name: 'AERELION Elite',
+    icon: Rocket,
+    price: '$99',
+    period: '/mo',
+    description: 'Full power for teams demanding unlimited capabilities.',
     highlight: false,
     features: [
-      'Everything in Professional',
+      'Unlimited projects',
+      'Full AI Agent Suite',
+      'API Access',
       'Unlimited AI interactions',
-      'Dedicated account manager',
-      'Custom AI model training',
-      'SLA guarantees',
-      'On-premise deployment option',
+      'Team Collaboration Tools',
+      'White-label options',
       'Advanced security features',
-      'White-label solutions',
-      'Custom development'
+      'Dedicated Slack channel'
     ],
-    cta: 'Contact Sales'
+    cta: 'Start Free Trial',
+    ctaLink: '/auth?plan=elite'
   }
 ];
+
+const enterpriseTier = {
+  name: 'Enterprise',
+  icon: Building,
+  description: 'Custom solutions for organizations with complex requirements and dedicated support needs.',
+  features: [
+    'Unlimited seats',
+    'Custom onboarding & integrations',
+    'Dedicated engineer',
+    'SLA guarantees',
+    'On-premise deployment option',
+    'Custom AI model training',
+    'Priority 24/7 support',
+    'Custom contract terms'
+  ]
+};
 
 const faqs = [
   {
     q: 'How does the free trial work?',
-    a: 'Start with a 14-day free trial of our Professional tier. No credit card required. You\'ll have full access to all features during the trial period.'
+    a: 'Start with a 14-day free trial on any plan. No credit card required. You\'ll have full access to all features during the trial period.'
   },
   {
     q: 'Can I change plans later?',
     a: 'Absolutely. You can upgrade or downgrade your plan at any time. Changes take effect immediately, and we\'ll prorate any billing adjustments.'
   },
   {
-    q: 'What happens if I exceed my AI interaction limit?',
-    a: 'We\'ll notify you when you\'re approaching your limit. You can upgrade your plan or purchase additional interactions as needed.'
+    q: 'What happens after the free trial?',
+    a: 'After your trial ends, you can continue with a paid subscription or downgrade. Your data and configurations will be preserved.'
   },
   {
-    q: 'Do you offer custom pricing for large teams?',
-    a: 'Yes. Contact our sales team for custom pricing on Enterprise plans tailored to your organization\'s specific needs.'
+    q: 'Do you offer refunds?',
+    a: 'Yes, we offer a 30-day money-back guarantee on all plans. If you\'re not satisfied, contact us for a full refund.'
   }
 ];
 
@@ -94,7 +117,7 @@ const Pricing = () => {
                   SIMPLE, <span className="text-gradient">TRANSPARENT</span> PRICING
                 </h1>
                 <p className="text-xl text-muted-foreground">
-                  Start free. Scale as you grow. Contact us for custom enterprise solutions.
+                  Start free. Scale as you grow. No hidden fees.
                 </p>
               </div>
             </ScrollReveal>
@@ -108,7 +131,7 @@ const Pricing = () => {
               {tiers.map((tier, index) => (
                 <ScrollReveal key={index} delay={index * 0.1}>
                   <div className={`card-glass p-8 rounded-lg h-full flex flex-col relative ${
-                    tier.highlight ? 'border-primary/50' : ''
+                    tier.highlight ? 'border-primary/50 ring-2 ring-primary/20' : ''
                   }`}>
                     {tier.badge && (
                       <div className="absolute -top-3 left-1/2 -translate-x-1/2">
@@ -123,7 +146,8 @@ const Pricing = () => {
                     <p className="text-muted-foreground mb-6">{tier.description}</p>
                     
                     <div className="mb-6">
-                      <span className="font-display text-4xl">Contact for Pricing</span>
+                      <span className="font-display text-5xl">{tier.price}</span>
+                      <span className="text-muted-foreground">{tier.period}</span>
                     </div>
 
                     <ul className="space-y-3 mb-8 flex-grow">
@@ -136,7 +160,7 @@ const Pricing = () => {
                     </ul>
 
                     <Link 
-                      to={tier.name === 'Enterprise' ? '/contact' : '/contact'} 
+                      to={tier.ctaLink}
                       className={tier.highlight ? 'btn-primary w-full justify-center' : 'btn-secondary w-full justify-center'}
                     >
                       {tier.cta}
@@ -146,6 +170,38 @@ const Pricing = () => {
                 </ScrollReveal>
               ))}
             </div>
+
+            {/* Enterprise Tier */}
+            <ScrollReveal delay={0.3}>
+              <div className="mt-12 card-glass p-8 md:p-12 rounded-lg">
+                <div className="grid md:grid-cols-2 gap-8 items-center">
+                  <div>
+                    <div className="flex items-center gap-4 mb-4">
+                      <enterpriseTier.icon className="h-10 w-10 text-primary" />
+                      <h3 className="font-display text-3xl">{enterpriseTier.name}</h3>
+                    </div>
+                    <p className="text-muted-foreground mb-6">{enterpriseTier.description}</p>
+                    <div className="mb-6">
+                      <span className="font-display text-4xl">Custom Pricing</span>
+                    </div>
+                    <Link to="/contact" className="btn-primary">
+                      Contact Sales
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </div>
+                  <div>
+                    <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {enterpriseTier.features.map((feature, idx) => (
+                        <li key={idx} className="flex items-start gap-2 text-sm text-muted-foreground">
+                          <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </ScrollReveal>
           </div>
         </section>
 
@@ -177,13 +233,13 @@ const Pricing = () => {
             <ScrollReveal>
               <div className="text-center">
                 <h2 className="font-display text-4xl md:text-5xl mb-6">
-                  STILL HAVE <span className="text-gradient">QUESTIONS</span>?
+                  READY TO <span className="text-gradient">GET STARTED</span>?
                 </h2>
                 <p className="text-muted-foreground text-lg mb-8 max-w-2xl mx-auto">
-                  Our team is ready to help you find the perfect automation solution for your business.
+                  Start your 14-day free trial today. No credit card required.
                 </p>
-                <Link to="/contact" className="btn-primary">
-                  Talk to Sales
+                <Link to="/auth?plan=free-trial" className="btn-primary">
+                  Start Free Trial
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </div>

@@ -3,8 +3,6 @@ import { ArrowRight, Target, Lightbulb, Users, Zap } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ScrollReveal from '@/components/ScrollReveal';
-import LazyImage from '@/components/LazyImage';
-import founderImage from '@/assets/founder.jpg';
 
 const values = [
   {
@@ -108,36 +106,24 @@ const About = () => {
             </ScrollReveal>
 
             <ScrollReveal delay={0.1}>
-              <div className="grid md:grid-cols-2 gap-12 items-center max-w-5xl mx-auto">
-                <div className="relative">
-                  <div className="card-glass p-2 rounded-lg overflow-hidden">
-                    <LazyImage
-                      src={founderImage}
-                      alt="Gustavo - Founder of Aerlion Systems"
-                      className="w-full aspect-square object-cover rounded-md"
-                    />
-                  </div>
-                </div>
-                
-                <div>
-                  <span className="tag-chip mb-4">Founder & CEO</span>
-                  <h3 className="font-display text-4xl mb-4">GUSTAVO</h3>
-                  <div className="space-y-4 text-muted-foreground">
-                    <p>
-                      Gustavo founded Aerlion Systems with a clear mission: to help entrepreneurs 
-                      and businesses escape the trap of endless manual work through intelligent automation.
-                    </p>
-                    <p>
-                      His journey from personal challenges to building systems that create lasting 
-                      change drives the company's human-centered approach to technology. He believes 
-                      that the right systems can transform not just businesses, but lives.
-                    </p>
-                    <p>
-                      Today, Gustavo leads a team dedicated to making AI automation accessible to 
-                      businesses of all sizes, combining cutting-edge technology with practical, 
-                      results-driven solutions.
-                    </p>
-                  </div>
+              <div className="card-glass p-8 md:p-12 rounded-lg max-w-3xl mx-auto text-center">
+                <span className="tag-chip mb-4">Founder & Visionary</span>
+                <h3 className="font-display text-4xl mb-2">GUSTAVO PUERTO MARTINEZ</h3>
+                <div className="space-y-4 text-muted-foreground mt-6">
+                  <p>
+                    Gustavo founded Aerlion Systems with a clear mission: to help entrepreneurs 
+                    and businesses escape the trap of endless manual work through intelligent automation.
+                  </p>
+                  <p>
+                    His journey from personal challenges to building systems that create lasting 
+                    change drives the company's human-centered approach to technology. He believes 
+                    that the right systems can transform not just businesses, but lives.
+                  </p>
+                  <p>
+                    Today, Gustavo leads a team dedicated to making AI automation accessible to 
+                    businesses of all sizes, combining cutting-edge technology with practical, 
+                    results-driven solutions.
+                  </p>
                 </div>
               </div>
             </ScrollReveal>

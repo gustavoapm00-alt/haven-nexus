@@ -137,11 +137,11 @@ const Services = () => {
                   READY TO GET <span className="text-gradient">STARTED</span>?
                 </h2>
                 <p className="text-muted-foreground text-lg mb-8 max-w-2xl mx-auto">
-                  Contact our team to discuss your automation needs and get a custom quote.
+                  Start your free trial today and experience the power of AI automation.
                 </p>
                 <div className="flex flex-wrap justify-center gap-4">
-                  <Link to="/contact" className="btn-primary">
-                    Contact Sales
+                  <Link to="/auth?plan=free-trial" className="btn-primary">
+                    Start Free Trial
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                   <Link to="/pricing" className="btn-secondary">

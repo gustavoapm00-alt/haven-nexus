@@ -210,12 +210,12 @@ const Index = () => {
                   See how AI automation can transform your business.
                 </p>
                 <div className="flex flex-wrap justify-center gap-4">
-                  <Link to="/pricing" className="btn-primary">
+                  <Link to="/auth?plan=free-trial" className="btn-primary">
                     Start Free Trial
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
-                  <Link to="/contact" className="btn-secondary">
-                    Contact Sales
+                  <Link to="/pricing" className="btn-secondary">
+                    View Pricing
                   </Link>
                 </div>
               </div>
