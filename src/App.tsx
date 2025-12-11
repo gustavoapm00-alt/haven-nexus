@@ -17,6 +17,7 @@ import Refund from "./pages/Refund";
 import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
 import ResetPassword from "./pages/ResetPassword";
+import Sanctuary from "./pages/Sanctuary";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -42,6 +43,7 @@ const App = () => (
               <Route path="/auth" element={<Auth />} />
               <Route path="/admin" element={<Admin />} />
               <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/sanctuary" element={<Sanctuary />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
