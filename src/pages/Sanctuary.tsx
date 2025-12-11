@@ -1,6 +1,7 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
+import AmbientAudioPlayer from '@/components/AmbientAudioPlayer';
 
 const fadeIn = {
   hidden: { opacity: 0, y: 30 },
@@ -254,6 +255,9 @@ const Sanctuary = () => {
 
         {/* Footer spacer */}
         <div className="h-24" />
+
+        {/* Ambient Audio Player */}
+        <AmbientAudioPlayer />
       </main>
     </>
   );
