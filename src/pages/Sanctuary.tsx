@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { motion, useReducedMotion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useRef } from 'react';
+import { motion, useReducedMotion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import SEO from '@/components/SEO';
 
@@ -48,85 +48,124 @@ const FloatingWisdom = () => {
   );
 };
 
-// Enhanced Sacred Geometry with softer glow
-const SacredGeometry = () => (
-  <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-    {/* Large outer circle */}
-    <motion.div
-      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1200px] h-[1200px] border border-primary/5 rounded-full"
-      animate={{ rotate: 360 }}
-      transition={{ duration: 180, repeat: Infinity, ease: "linear" }}
-    />
-    {/* Middle circle */}
-    <motion.div
-      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] border border-primary/8 rounded-full"
-      animate={{ rotate: -360 }}
-      transition={{ duration: 140, repeat: Infinity, ease: "linear" }}
-    />
-    {/* Inner circle */}
-    <motion.div
-      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] border border-primary/10 rounded-full"
-      animate={{ rotate: 360 }}
-      transition={{ duration: 100, repeat: Infinity, ease: "linear" }}
-    />
-    {/* Sacred cross lines */}
-    <div className="absolute top-0 left-1/2 w-px h-full bg-gradient-to-b from-transparent via-primary/8 to-transparent" />
-    <div className="absolute top-1/2 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/8 to-transparent" />
-    {/* Diagonal lines */}
-    <div className="absolute top-0 left-0 w-full h-full">
-      <div className="absolute top-0 left-0 w-full h-px origin-top-left rotate-45 bg-gradient-to-r from-transparent via-primary/5 to-transparent scale-x-150" />
-      <div className="absolute top-0 right-0 w-full h-px origin-top-right -rotate-45 bg-gradient-to-r from-transparent via-primary/5 to-transparent scale-x-150" />
+// Parallax Sacred Geometry with scroll-based movement
+const ParallaxSacredGeometry = () => {
+  const { scrollYProgress } = useScroll();
+  const shouldReduceMotion = useReducedMotion();
+  
+  const rotate1 = useTransform(scrollYProgress, [0, 1], [0, shouldReduceMotion ? 0 : 180]);
+  const rotate2 = useTransform(scrollYProgress, [0, 1], [0, shouldReduceMotion ? 0 : -120]);
+  const rotate3 = useTransform(scrollYProgress, [0, 1], [0, shouldReduceMotion ? 0 : 90]);
+  const y1 = useTransform(scrollYProgress, [0, 1], [0, shouldReduceMotion ? 0 : -200]);
+  const y2 = useTransform(scrollYProgress, [0, 1], [0, shouldReduceMotion ? 0 : -100]);
+
+  return (
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+      {/* Large outer circle - slowest parallax */}
+      <motion.div
+        style={{ rotate: rotate1, y: y1 }}
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1200px] h-[1200px] border border-primary/5 rounded-full"
+      />
+      {/* Middle circle - medium parallax */}
+      <motion.div
+        style={{ rotate: rotate2, y: y2 }}
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] border border-primary/8 rounded-full"
+      />
+      {/* Inner circle - fastest parallax */}
+      <motion.div
+        style={{ rotate: rotate3 }}
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] border border-primary/10 rounded-full"
+      />
+      {/* Sacred cross lines */}
+      <div className="absolute top-0 left-1/2 w-px h-full bg-gradient-to-b from-transparent via-primary/8 to-transparent" />
+      <div className="absolute top-1/2 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/8 to-transparent" />
+      {/* Diagonal lines */}
+      <div className="absolute top-0 left-0 w-full h-full">
+        <div className="absolute top-0 left-0 w-full h-px origin-top-left rotate-45 bg-gradient-to-r from-transparent via-primary/5 to-transparent scale-x-150" />
+        <div className="absolute top-0 right-0 w-full h-px origin-top-right -rotate-45 bg-gradient-to-r from-transparent via-primary/5 to-transparent scale-x-150" />
+      </div>
+      {/* Arc elements */}
+      <svg className="absolute inset-0 w-full h-full opacity-10" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <path d="M 50 10 A 40 40 0 0 1 90 50" stroke="hsl(var(--primary))" strokeWidth="0.1" fill="none" />
+        <path d="M 50 90 A 40 40 0 0 1 10 50" stroke="hsl(var(--primary))" strokeWidth="0.1" fill="none" />
+      </svg>
     </div>
-    {/* Arc elements */}
-    <svg className="absolute inset-0 w-full h-full opacity-10" viewBox="0 0 100 100" preserveAspectRatio="none">
-      <path d="M 50 10 A 40 40 0 0 1 90 50" stroke="hsl(var(--primary))" strokeWidth="0.1" fill="none" />
-      <path d="M 50 90 A 40 40 0 0 1 10 50" stroke="hsl(var(--primary))" strokeWidth="0.1" fill="none" />
-    </svg>
-  </div>
-);
+  );
+};
 
-// Cosmic Nebula Background
-const CosmicNebula = () => (
-  <div className="fixed inset-0 pointer-events-none z-0">
-    {/* Main cosmic glow - softened */}
-    <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[1200px] h-[800px] bg-primary/3 rounded-full blur-[200px]" />
-    <div className="absolute bottom-1/3 left-1/4 w-[600px] h-[600px] bg-accent/4 rounded-full blur-[150px]" />
-    <div className="absolute top-1/3 right-1/4 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[120px]" />
-    {/* Subtle star-like points */}
-    <div className="absolute top-20 left-[20%] w-1 h-1 bg-foreground/20 rounded-full" />
-    <div className="absolute top-[40%] left-[10%] w-0.5 h-0.5 bg-foreground/15 rounded-full" />
-    <div className="absolute top-[60%] right-[15%] w-1 h-1 bg-foreground/20 rounded-full" />
-    <div className="absolute bottom-[30%] left-[30%] w-0.5 h-0.5 bg-foreground/10 rounded-full" />
-    <div className="absolute top-[25%] right-[25%] w-0.5 h-0.5 bg-primary/30 rounded-full" />
-  </div>
-);
+// Parallax Cosmic Nebula Background
+const ParallaxCosmicNebula = () => {
+  const { scrollYProgress } = useScroll();
+  const shouldReduceMotion = useReducedMotion();
+  
+  const y1 = useTransform(scrollYProgress, [0, 1], [0, shouldReduceMotion ? 0 : -300]);
+  const y2 = useTransform(scrollYProgress, [0, 1], [0, shouldReduceMotion ? 0 : -150]);
+  const y3 = useTransform(scrollYProgress, [0, 1], [0, shouldReduceMotion ? 0 : -200]);
+  const scale = useTransform(scrollYProgress, [0, 0.5, 1], [1, shouldReduceMotion ? 1 : 1.1, shouldReduceMotion ? 1 : 1.2]);
 
-// Section wrapper with animation
-const Section = ({ 
+  return (
+    <div className="fixed inset-0 pointer-events-none z-0">
+      {/* Main cosmic glow - parallax */}
+      <motion.div 
+        style={{ y: y1, scale }}
+        className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[1200px] h-[800px] bg-primary/3 rounded-full blur-[200px]" 
+      />
+      <motion.div 
+        style={{ y: y2 }}
+        className="absolute bottom-1/3 left-1/4 w-[600px] h-[600px] bg-accent/4 rounded-full blur-[150px]" 
+      />
+      <motion.div 
+        style={{ y: y3 }}
+        className="absolute top-1/3 right-1/4 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[120px]" 
+      />
+      {/* Subtle star-like points with parallax */}
+      <motion.div style={{ y: useTransform(scrollYProgress, [0, 1], [0, -50]) }} className="absolute top-20 left-[20%] w-1 h-1 bg-foreground/20 rounded-full" />
+      <motion.div style={{ y: useTransform(scrollYProgress, [0, 1], [0, -80]) }} className="absolute top-[40%] left-[10%] w-0.5 h-0.5 bg-foreground/15 rounded-full" />
+      <motion.div style={{ y: useTransform(scrollYProgress, [0, 1], [0, -60]) }} className="absolute top-[60%] right-[15%] w-1 h-1 bg-foreground/20 rounded-full" />
+      <motion.div style={{ y: useTransform(scrollYProgress, [0, 1], [0, -40]) }} className="absolute bottom-[30%] left-[30%] w-0.5 h-0.5 bg-foreground/10 rounded-full" />
+      <motion.div style={{ y: useTransform(scrollYProgress, [0, 1], [0, -70]) }} className="absolute top-[25%] right-[25%] w-0.5 h-0.5 bg-primary/30 rounded-full" />
+    </div>
+  );
+};
+
+// Parallax Section wrapper with scroll-based effects
+const ParallaxSection = ({ 
   children, 
   className = "", 
   delay = 0,
-  id
+  id,
+  parallaxIntensity = 0.1
 }: { 
   children: React.ReactNode; 
   className?: string; 
   delay?: number;
   id?: string;
+  parallaxIntensity?: number;
 }) => {
+  const ref = useRef<HTMLElement>(null);
   const shouldReduceMotion = useReducedMotion();
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"]
+  });
+  
+  const y = useTransform(scrollYProgress, [0, 1], [shouldReduceMotion ? 0 : 50 * parallaxIntensity, shouldReduceMotion ? 0 : -50 * parallaxIntensity]);
+  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0.3, 1, 1, 0.3]);
   
   if (shouldReduceMotion) {
-    return <section id={id} className={`py-28 md:py-36 px-6 ${className}`}>{children}</section>;
+    return <section ref={ref} id={id} className={`py-28 md:py-36 px-6 ${className}`}>{children}</section>;
   }
   
   return (
     <motion.section
+      ref={ref}
       id={id}
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, margin: "-100px" }}
       variants={fadeIn}
       transition={{ duration: 1, delay, ease: [0.25, 0.4, 0.25, 1] }}
+      style={{ y, opacity }}
       className={`py-28 md:py-36 px-6 ${className}`}
     >
       {children}
@@ -134,12 +173,85 @@ const Section = ({
   );
 };
 
-// Divider component
-const Divider = () => (
-  <div className="flex justify-center py-8">
-    <div className="w-32 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
-  </div>
-);
+// Parallax Hero Section
+const ParallaxHero = () => {
+  const ref = useRef<HTMLElement>(null);
+  const shouldReduceMotion = useReducedMotion();
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start start", "end start"]
+  });
+  
+  const titleY = useTransform(scrollYProgress, [0, 1], [0, shouldReduceMotion ? 0 : 150]);
+  const subtitleY = useTransform(scrollYProgress, [0, 1], [0, shouldReduceMotion ? 0 : 100]);
+  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+  const scale = useTransform(scrollYProgress, [0, 0.5], [1, shouldReduceMotion ? 1 : 0.95]);
+
+  return (
+    <section ref={ref} className="relative min-h-screen flex flex-col items-center justify-center px-6 text-center overflow-hidden">
+      <motion.div style={{ y: titleY, opacity, scale }}>
+        <motion.h1
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1.2, ease: [0.25, 0.4, 0.25, 1] }}
+          className="font-display text-5xl md:text-7xl lg:text-8xl tracking-tight mb-10 leading-[1.1] max-w-5xl"
+        >
+          A Sanctuary for Builders.
+          <br />
+          <span className="text-primary/90">A Calling to Próspera.</span>
+        </motion.h1>
+      </motion.div>
+      
+      <motion.div style={{ y: subtitleY, opacity }}>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1.2, delay: 0.5 }}
+          className="text-lg md:text-xl text-muted-foreground max-w-2xl leading-relaxed font-light"
+        >
+          A quiet place where visionaries, founders, and creators return to who they are — and discover who they are meant to become.
+        </motion.p>
+      </motion.div>
+      
+      {/* Scroll indicator */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 2 }}
+        style={{ opacity }}
+        className="absolute bottom-16 left-1/2 -translate-x-1/2"
+      >
+        <motion.div
+          animate={{ y: [0, 10, 0] }}
+          transition={{ duration: 2.5, repeat: Infinity }}
+          className="w-px h-20 bg-gradient-to-b from-primary/40 to-transparent"
+        />
+      </motion.div>
+    </section>
+  );
+};
+
+// Divider component with parallax
+const ParallaxDivider = () => {
+  const ref = useRef<HTMLDivElement>(null);
+  const shouldReduceMotion = useReducedMotion();
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"]
+  });
+  
+  const scaleX = useTransform(scrollYProgress, [0, 0.5, 1], [0.5, shouldReduceMotion ? 0.5 : 1, 0.5]);
+  const opacity = useTransform(scrollYProgress, [0, 0.5, 1], [0.2, 0.6, 0.2]);
+
+  return (
+    <div ref={ref} className="flex justify-center py-8">
+      <motion.div 
+        style={{ scaleX, opacity }}
+        className="w-32 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent origin-center" 
+      />
+    </div>
+  );
+};
 
 const Sanctuary = () => {
   return (
@@ -152,48 +264,15 @@ const Sanctuary = () => {
       />
 
       <main className="relative min-h-screen bg-background text-foreground overflow-x-hidden">
-        <CosmicNebula />
-        <SacredGeometry />
+        <ParallaxCosmicNebula />
+        <ParallaxSacredGeometry />
         <FloatingWisdom />
 
         {/* SECTION 1 — HERO */}
-        <section className="relative min-h-screen flex flex-col items-center justify-center px-6 text-center">
-          <motion.h1
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.2, ease: [0.25, 0.4, 0.25, 1] }}
-            className="font-display text-5xl md:text-7xl lg:text-8xl tracking-tight mb-10 leading-[1.1] max-w-5xl"
-          >
-            A Sanctuary for Builders.
-            <br />
-            <span className="text-primary/90">A Calling to Próspera.</span>
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1.2, delay: 0.5 }}
-            className="text-lg md:text-xl text-muted-foreground max-w-2xl leading-relaxed font-light"
-          >
-            A quiet place where visionaries, founders, and creators return to who they are — and discover who they are meant to become.
-          </motion.p>
-          
-          {/* Scroll indicator */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 2 }}
-            className="absolute bottom-16 left-1/2 -translate-x-1/2"
-          >
-            <motion.div
-              animate={{ y: [0, 10, 0] }}
-              transition={{ duration: 2.5, repeat: Infinity }}
-              className="w-px h-20 bg-gradient-to-b from-primary/40 to-transparent"
-            />
-          </motion.div>
-        </section>
+        <ParallaxHero />
 
         {/* SECTION 2 — INVOCATION (ESSENCE OF AERELION) */}
-        <Section className="relative">
+        <ParallaxSection className="relative" parallaxIntensity={0.3}>
           <div className="max-w-4xl mx-auto text-center">
             <p className="text-xl md:text-2xl lg:text-3xl text-foreground/85 leading-[1.8] font-light tracking-wide">
               "AERELION is not a marketplace.
@@ -207,12 +286,12 @@ const Sanctuary = () => {
               and the soul remembers its direction."
             </p>
           </div>
-        </Section>
+        </ParallaxSection>
 
-        <Divider />
+        <ParallaxDivider />
 
         {/* SECTION 3 — ORIGIN (WHO GUSTAVO IS) */}
-        <Section delay={0.1}>
+        <ParallaxSection delay={0.1} parallaxIntensity={0.4}>
           <div className="max-w-3xl mx-auto md:text-left text-center">
             <p className="text-lg md:text-xl text-foreground/80 leading-[1.9] italic">
               "I was shaped by Honduras.
@@ -231,12 +310,12 @@ const Sanctuary = () => {
               — Gustavo
             </p>
           </div>
-        </Section>
+        </ParallaxSection>
 
-        <Divider />
+        <ParallaxDivider />
 
         {/* SECTION 4 — THE CALLING (WHY PRÓSPERA) */}
-        <Section delay={0.1} className="relative">
+        <ParallaxSection delay={0.1} className="relative" parallaxIntensity={0.5}>
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/3 to-transparent pointer-events-none" />
           {/* Subtle Honduras outline suggestion */}
           <div className="absolute inset-0 opacity-5 pointer-events-none flex items-center justify-center">
@@ -258,12 +337,12 @@ const Sanctuary = () => {
               <span className="text-primary/90 not-italic font-normal">Próspera is where that future begins."</span>
             </p>
           </div>
-        </Section>
+        </ParallaxSection>
 
-        <Divider />
+        <ParallaxDivider />
 
         {/* SECTION 5 — THE MISSION */}
-        <Section delay={0.1}>
+        <ParallaxSection delay={0.1} parallaxIntensity={0.4}>
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="font-display text-3xl md:text-4xl mb-12 text-primary/70">The Mission</h2>
             <p className="text-lg md:text-xl text-foreground/80 leading-[1.9] italic">
@@ -282,12 +361,12 @@ const Sanctuary = () => {
               and opportunities that transform lives."
             </p>
           </div>
-        </Section>
+        </ParallaxSection>
 
-        <Divider />
+        <ParallaxDivider />
 
         {/* SECTION 6 — LETTER TO HONDURAS */}
-        <Section delay={0.1} className="relative">
+        <ParallaxSection delay={0.1} className="relative" parallaxIntensity={0.3}>
           <div className="absolute inset-0 bg-gradient-radial from-primary/5 via-transparent to-transparent pointer-events-none" />
           <div className="max-w-3xl mx-auto relative">
             <h2 className="font-display text-3xl md:text-4xl mb-16 text-center text-primary/70">Letter to Honduras</h2>
@@ -347,12 +426,12 @@ const Sanctuary = () => {
               </div>
             </div>
           </div>
-        </Section>
+        </ParallaxSection>
 
-        <Divider />
+        <ParallaxDivider />
 
         {/* SECTION 7 — THE SANCTUARY MESSAGE (FOR VISITORS) */}
-        <Section delay={0.1} className="relative">
+        <ParallaxSection delay={0.1} className="relative" parallaxIntensity={0.4}>
           <div className="max-w-3xl mx-auto text-center">
             <p className="text-xl md:text-2xl text-foreground/85 leading-[1.9] font-light">
               "If you carry a vision too heavy for ordinary life,
@@ -366,12 +445,12 @@ const Sanctuary = () => {
               Here, you may begin again."
             </p>
           </div>
-        </Section>
+        </ParallaxSection>
 
-        <Divider />
+        <ParallaxDivider />
 
         {/* SECTION 8 — INVITATION (CTA WITHOUT SALES) */}
-        <Section delay={0.1}>
+        <ParallaxSection delay={0.1} parallaxIntensity={0.2}>
           <div className="max-w-2xl mx-auto text-center">
             <Link
               to="/contact"
@@ -385,7 +464,7 @@ const Sanctuary = () => {
               All beginnings start with a word.
             </p>
           </div>
-        </Section>
+        </ParallaxSection>
 
         {/* SECTION 9 — FINAL BLESSING */}
         <section className="py-36 md:py-48 px-6">
