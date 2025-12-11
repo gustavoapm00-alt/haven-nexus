@@ -1,11 +1,17 @@
-import { Link } from 'react-router-dom';
-import { Check, ArrowRight, Zap, Crown, Rocket, Building } from 'lucide-react';
+import { useState } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Check, ArrowRight, Zap, Crown, Rocket, Building, Loader2 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ScrollReveal from '@/components/ScrollReveal';
+import { useAuth } from '@/hooks/useAuth';
+import { useSubscription } from '@/hooks/useSubscription';
+import { STRIPE_TIERS, TierKey } from '@/lib/stripe-config';
+import { toast } from 'sonner';
 
 const tiers = [
   {
+    key: 'starter' as TierKey,
     name: 'Starter',
     icon: Zap,
     price: '$19',
@@ -20,10 +26,9 @@ const tiers = [
       'Standard integrations',
       'Basic analytics dashboard'
     ],
-    cta: 'Start Free Trial',
-    ctaLink: '/auth?plan=starter'
   },
   {
+    key: 'pro' as TierKey,
     name: 'Pro',
     icon: Crown,
     price: '$49',
@@ -41,10 +46,9 @@ const tiers = [
       'Workflow automation',
       'Team collaboration (3 seats)'
     ],
-    cta: 'Start Free Trial',
-    ctaLink: '/auth?plan=pro'
   },
   {
+    key: 'elite' as TierKey,
     name: 'AERELION Elite',
     icon: Rocket,
     price: '$99',
@@ -61,8 +65,6 @@ const tiers = [
       'Advanced security features',
       'Dedicated Slack channel'
     ],
-    cta: 'Start Free Trial',
-    ctaLink: '/auth?plan=elite'
   }
 ];
 
@@ -102,6 +104,48 @@ const faqs = [
 ];
 
 const Pricing = () => {
+  const { user } = useAuth();
+  const { subscribed, tier: currentTier, createCheckout, openCustomerPortal } = useSubscription();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [loadingTier, setLoadingTier] = useState<string | null>(null);
+
+  // Show toast if checkout was cancelled
+  if (searchParams.get('checkout') === 'cancelled') {
+    toast.info('Checkout cancelled');
+    navigate('/pricing', { replace: true });
+  }
+
+  const handleSubscribe = async (tierKey: TierKey) => {
+    if (!user) {
+      navigate(`/auth?plan=${tierKey}`);
+      return;
+    }
+
+    setLoadingTier(tierKey);
+    const priceId = STRIPE_TIERS[tierKey].priceId;
+    const url = await createCheckout(priceId);
+    
+    if (url) {
+      window.location.href = url;
+    } else {
+      toast.error('Failed to create checkout session');
+    }
+    setLoadingTier(null);
+  };
+
+  const getButtonText = (tierKey: TierKey) => {
+    if (subscribed && currentTier === tierKey) {
+      return 'Current Plan';
+    }
+    if (subscribed) {
+      return 'Switch Plan';
+    }
+    return 'Start Free Trial';
+  };
+
+  const isCurrentPlan = (tierKey: TierKey) => subscribed && currentTier === tierKey;
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -132,11 +176,18 @@ const Pricing = () => {
                 <ScrollReveal key={index} delay={index * 0.1}>
                   <div className={`card-glass p-8 rounded-lg h-full flex flex-col relative ${
                     tier.highlight ? 'border-primary/50 ring-2 ring-primary/20' : ''
-                  }`}>
-                    {tier.badge && (
+                  } ${isCurrentPlan(tier.key) ? 'ring-2 ring-green-500/50 border-green-500/50' : ''}`}>
+                    {tier.badge && !isCurrentPlan(tier.key) && (
                       <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                         <span className="bg-primary text-primary-foreground text-xs font-bold px-4 py-1 rounded-full uppercase tracking-wider">
                           {tier.badge}
+                        </span>
+                      </div>
+                    )}
+                    {isCurrentPlan(tier.key) && (
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                        <span className="bg-green-500 text-white text-xs font-bold px-4 py-1 rounded-full uppercase tracking-wider">
+                          Your Plan
                         </span>
                       </div>
                     )}
@@ -159,13 +210,22 @@ const Pricing = () => {
                       ))}
                     </ul>
 
-                    <Link 
-                      to={tier.ctaLink}
-                      className={tier.highlight ? 'btn-primary w-full justify-center' : 'btn-secondary w-full justify-center'}
+                    <button
+                      onClick={() => isCurrentPlan(tier.key) ? openCustomerPortal() : handleSubscribe(tier.key)}
+                      disabled={loadingTier === tier.key}
+                      className={`${tier.highlight ? 'btn-primary' : 'btn-secondary'} w-full justify-center ${
+                        isCurrentPlan(tier.key) ? 'bg-green-500/20 border-green-500/50 hover:bg-green-500/30' : ''
+                      }`}
                     >
-                      {tier.cta}
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Link>
+                      {loadingTier === tier.key ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <>
+                          {getButtonText(tier.key)}
+                          {!isCurrentPlan(tier.key) && <ArrowRight className="ml-2 h-4 w-4" />}
+                        </>
+                      )}
+                    </button>
                   </div>
                 </ScrollReveal>
               ))}
@@ -205,6 +265,26 @@ const Pricing = () => {
           </div>
         </section>
 
+        {/* Manage Subscription */}
+        {subscribed && (
+          <section className="section-padding pt-0">
+            <div className="container-main">
+              <ScrollReveal>
+                <div className="card-glass p-8 rounded-lg text-center">
+                  <h3 className="font-display text-2xl mb-4">Manage Your Subscription</h3>
+                  <p className="text-muted-foreground mb-6">
+                    Update payment method, change plan, or cancel your subscription.
+                  </p>
+                  <button onClick={openCustomerPortal} className="btn-secondary">
+                    Open Billing Portal
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </button>
+                </div>
+              </ScrollReveal>
+            </div>
+          </section>
+        )}
+
         {/* FAQs */}
         <section className="section-padding bg-card/30">
           <div className="container-main max-w-3xl">
@@ -238,10 +318,13 @@ const Pricing = () => {
                 <p className="text-muted-foreground text-lg mb-8 max-w-2xl mx-auto">
                   Start your 14-day free trial today. No credit card required.
                 </p>
-                <Link to="/auth?plan=free-trial" className="btn-primary">
+                <button 
+                  onClick={() => user ? handleSubscribe('pro') : navigate('/auth?plan=pro')}
+                  className="btn-primary"
+                >
                   Start Free Trial
                   <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
+                </button>
               </div>
             </ScrollReveal>
           </div>
