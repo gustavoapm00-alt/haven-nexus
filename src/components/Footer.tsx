@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { Instagram, Mail } from 'lucide-react';
 
 const Footer = () => {
@@ -12,8 +13,14 @@ const Footer = () => {
             AERELION
           </div>
 
-          {/* Links */}
-          <div className="flex items-center gap-6">
+          {/* Navigation Links */}
+          <div className="flex items-center gap-6 text-sm">
+            <Link
+              to="/sanctuary"
+              className="text-muted-foreground hover:text-primary transition-colors"
+            >
+              Sanctuary
+            </Link>
             <a
               href="https://instagram.com/null.username__"
               target="_blank"
