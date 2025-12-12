@@ -168,7 +168,11 @@ const Admin = () => {
           </div>
 
           {/* Quick Actions */}
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-3 gap-6">
+            <Link to="/console/agents" className="card-glass p-6 rounded-lg hover:border-primary/50 transition-colors">
+              <h3 className="font-display text-xl mb-2">Agent Console</h3>
+              <p className="text-muted-foreground text-sm">Manage and run your AI agents</p>
+            </Link>
             <Link to="/services" className="card-glass p-6 rounded-lg hover:border-primary/50 transition-colors">
               <h3 className="font-display text-xl mb-2">Explore Services</h3>
               <p className="text-muted-foreground text-sm">Discover what you can automate with AERELION</p>
