@@ -3,12 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { Loader2, Play, AlertTriangle, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { Loader2, Play, AlertTriangle, CheckCircle, XCircle, Clock, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import ConsoleLayout from '@/components/console/ConsoleLayout';
 import SecretsWarningBanner from '@/components/console/SecretsWarningBanner';
 
@@ -328,6 +329,9 @@ const RunAgent = () => {
               Agent Run Result
               {currentRun && getStatusIcon(currentRun.status)}
             </DialogTitle>
+            <DialogDescription>
+              View the status, output, and any errors from this agent run.
+            </DialogDescription>
           </DialogHeader>
           
           {currentRun && (
@@ -347,12 +351,17 @@ const RunAgent = () => {
                 </div>
               )}
               {currentRun.error && (
-                <div>
-                  <Label className="text-destructive">Error</Label>
-                  <pre className="mt-1 p-3 bg-destructive/10 border border-destructive/20 rounded text-sm overflow-auto max-h-40">
-                    {currentRun.error}
-                  </pre>
-                </div>
+                <Collapsible defaultOpen={true}>
+                  <CollapsibleTrigger className="flex items-center gap-2 w-full text-left group">
+                    <ChevronDown className="w-4 h-4 text-destructive transition-transform group-data-[state=closed]:-rotate-90" />
+                    <Label className="text-destructive cursor-pointer">View Error Details</Label>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <pre className="mt-2 p-3 bg-destructive/10 border border-destructive/20 rounded text-sm overflow-auto max-h-60 whitespace-pre-wrap break-words font-mono">
+                      {currentRun.error}
+                    </pre>
+                  </CollapsibleContent>
+                </Collapsible>
               )}
               {currentRun.output_json && (
                 <div>
