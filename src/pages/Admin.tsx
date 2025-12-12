@@ -94,7 +94,7 @@ const Admin = () => {
     navigate('/');
   };
 
-  if (isLoading) {
+  if (isLoading || !user) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -256,7 +256,35 @@ const Admin = () => {
 
       {/* Content */}
       <main className="max-w-7xl mx-auto px-6 py-8">
+        {/* Console Quick Actions */}
+        <h2 className="font-display text-2xl mb-4">Console</h2>
+        <div className="grid md:grid-cols-2 gap-6 mb-8">
+          <Link to="/console/agents" className="card-glass p-6 rounded-lg hover:border-primary/50 transition-colors group">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
+                <Bot className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-display text-xl mb-1">Agent Registry</h3>
+                <p className="text-muted-foreground text-sm">Manage your AI agents</p>
+              </div>
+            </div>
+          </Link>
+          <Link to="/console/run-agent" className="card-glass p-6 rounded-lg hover:border-primary/50 transition-colors group">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
+                <Play className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-display text-xl mb-1">Run Agent</h3>
+                <p className="text-muted-foreground text-sm">Execute and test your agents</p>
+              </div>
+            </div>
+          </Link>
+        </div>
+
         {/* Stats */}
+        <h2 className="font-display text-2xl mb-4">Data Overview</h2>
         <div className="grid md:grid-cols-2 gap-6 mb-8">
           <div className="card-glass p-6 rounded-lg">
             <div className="flex items-center gap-4">
