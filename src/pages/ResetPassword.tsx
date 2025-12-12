@@ -24,20 +24,29 @@ const ResetPassword = () => {
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isValidating, setIsValidating] = useState(true);
   
   const { session, updatePassword, isLoading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    // If no session after loading, redirect to auth
-    if (!isLoading && !session) {
-      toast({
-        title: 'Invalid or expired link',
-        description: 'Please request a new password reset link.',
-        variant: 'destructive',
-      });
-      navigate('/auth');
-    }
+    // Wait for auth to fully initialize and session to be established from URL token
+    if (isLoading) return;
+    
+    // Give extra time for Supabase to process the recovery token from URL
+    const timer = setTimeout(() => {
+      setIsValidating(false);
+      if (!session) {
+        toast({
+          title: 'Invalid or expired link',
+          description: 'Please request a new password reset link.',
+          variant: 'destructive',
+        });
+        navigate('/auth');
+      }
+    }, 1500);
+    
+    return () => clearTimeout(timer);
   }, [session, isLoading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -93,7 +102,7 @@ const ResetPassword = () => {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || isValidating) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
