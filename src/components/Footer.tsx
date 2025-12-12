@@ -1,11 +1,12 @@
 import { Link } from 'react-router-dom';
 import { Instagram, Mail } from 'lucide-react';
+import { forwardRef } from 'react';
 
-const Footer = () => {
+const Footer = forwardRef<HTMLElement>((_, ref) => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="section-padding !py-12 bg-background border-t border-border/30">
+    <footer ref={ref} className="section-padding !py-12 bg-background border-t border-border/30">
       <div className="container-main">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           {/* Logo */}
@@ -57,6 +58,8 @@ const Footer = () => {
       </div>
     </footer>
   );
-};
+});
+
+Footer.displayName = 'Footer';
 
 export default Footer;
