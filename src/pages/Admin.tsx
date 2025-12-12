@@ -5,7 +5,7 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { toast as sonnerToast } from 'sonner';
-import { Loader2, LogOut, Mail, MessageSquare, Trash2, RefreshCw, CreditCard, Crown, ArrowRight } from 'lucide-react';
+import { Loader2, LogOut, Mail, MessageSquare, Trash2, RefreshCw, CreditCard, Crown, ArrowRight, Bot, Play, Ticket, FolderKanban } from 'lucide-react';
 import { STRIPE_TIERS } from '@/lib/stripe-config';
 
 interface EmailSignup {
@@ -167,19 +167,68 @@ const Admin = () => {
             </div>
           </div>
 
-          {/* Quick Actions */}
+          {/* Console Quick Actions */}
+          <h2 className="font-display text-2xl mb-4">Console</h2>
+          <div className="grid md:grid-cols-2 gap-6 mb-8">
+            <Link to="/console/agents" className="card-glass p-6 rounded-lg hover:border-primary/50 transition-colors group">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
+                  <Bot className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-display text-xl mb-1">Agent Registry</h3>
+                  <p className="text-muted-foreground text-sm">Manage your AI agents</p>
+                </div>
+              </div>
+            </Link>
+            <Link to="/console/run-agent" className="card-glass p-6 rounded-lg hover:border-primary/50 transition-colors group">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
+                  <Play className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-display text-xl mb-1">Run Agent</h3>
+                  <p className="text-muted-foreground text-sm">Execute and test your agents</p>
+                </div>
+              </div>
+            </Link>
+          </div>
+
+          {/* Coming Soon */}
+          <h2 className="font-display text-2xl mb-4">Coming Soon</h2>
           <div className="grid md:grid-cols-3 gap-6">
-            <Link to="/console/agents" className="card-glass p-6 rounded-lg hover:border-primary/50 transition-colors">
-              <h3 className="font-display text-xl mb-2">Agent Console</h3>
-              <p className="text-muted-foreground text-sm">Manage and run your AI agents</p>
-            </Link>
-            <Link to="/services" className="card-glass p-6 rounded-lg hover:border-primary/50 transition-colors">
-              <h3 className="font-display text-xl mb-2">Explore Services</h3>
-              <p className="text-muted-foreground text-sm">Discover what you can automate with AERELION</p>
-            </Link>
-            <Link to="/contact" className="card-glass p-6 rounded-lg hover:border-primary/50 transition-colors">
-              <h3 className="font-display text-xl mb-2">Get Help</h3>
-              <p className="text-muted-foreground text-sm">Contact our team for support</p>
+            <div className="card-glass p-6 rounded-lg opacity-50 cursor-not-allowed">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-secondary rounded-lg">
+                  <FolderKanban className="w-6 h-6 text-muted-foreground" />
+                </div>
+                <div>
+                  <h3 className="font-display text-xl mb-1">Projects</h3>
+                  <p className="text-muted-foreground text-sm">Manage workspaces</p>
+                </div>
+              </div>
+            </div>
+            <div className="card-glass p-6 rounded-lg opacity-50 cursor-not-allowed">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-secondary rounded-lg">
+                  <Ticket className="w-6 h-6 text-muted-foreground" />
+                </div>
+                <div>
+                  <h3 className="font-display text-xl mb-1">Tickets</h3>
+                  <p className="text-muted-foreground text-sm">Support requests</p>
+                </div>
+              </div>
+            </div>
+            <Link to="/services" className="card-glass p-6 rounded-lg hover:border-primary/50 transition-colors group">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
+                  <ArrowRight className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-display text-xl mb-1">Explore Services</h3>
+                  <p className="text-muted-foreground text-sm">Discover what you can automate</p>
+                </div>
+              </div>
             </Link>
           </div>
         </main>
