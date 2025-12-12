@@ -14,6 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_runs: {
+        Row: {
+          attempt_count: number
+          created_at: string
+          error: string | null
+          id: string
+          idempotency_key: string | null
+          input_json: Json
+          org_id: string
+          output_json: Json | null
+          relevance_agent_id: string
+          relevance_trace_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          attempt_count?: number
+          created_at?: string
+          error?: string | null
+          id?: string
+          idempotency_key?: string | null
+          input_json?: Json
+          org_id: string
+          output_json?: Json | null
+          relevance_agent_id: string
+          relevance_trace_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          attempt_count?: number
+          created_at?: string
+          error?: string | null
+          id?: string
+          idempotency_key?: string | null
+          input_json?: Json
+          org_id?: string
+          output_json?: Json | null
+          relevance_agent_id?: string
+          relevance_trace_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_runs_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_runs_relevance_agent_id_fkey"
+            columns: ["relevance_agent_id"]
+            isOneToOne: false
+            referencedRelation: "relevance_agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contact_submissions: {
         Row: {
           created_at: string
@@ -59,6 +119,53 @@ export type Database = {
         }
         Relationships: []
       }
+      org_members: {
+        Row: {
+          created_at: string
+          org_id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          org_id: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          org_id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_members_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orgs: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -82,6 +189,50 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      relevance_agents: {
+        Row: {
+          agent_key: string
+          created_at: string
+          id: string
+          is_enabled: boolean
+          name: string
+          org_id: string
+          outbound_secret: string | null
+          trigger_url: string
+          updated_at: string
+        }
+        Insert: {
+          agent_key: string
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          name: string
+          org_id: string
+          outbound_secret?: string | null
+          trigger_url: string
+          updated_at?: string
+        }
+        Update: {
+          agent_key?: string
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          name?: string
+          org_id?: string
+          outbound_secret?: string | null
+          trigger_url?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "relevance_agents_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -114,6 +265,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_org_member: {
+        Args: { _org_id: string; _user_id: string }
         Returns: boolean
       }
     }
