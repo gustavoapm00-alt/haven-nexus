@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, User } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
 const navLinks = [
   { name: 'Home', href: '/' },
@@ -15,6 +16,7 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const { user, isLoading } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -63,6 +65,15 @@ const Navbar = () => {
           <Link to="/pricing" className="btn-primary !py-2 !px-4 text-xs">
             Start Free Trial
           </Link>
+          {!isLoading && (
+            <Link 
+              to={user ? "/admin" : "/auth"} 
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+            >
+              <User className="w-4 h-4" />
+              {user ? "Admin" : "Login"}
+            </Link>
+          )}
         </div>
 
         {/* Mobile Menu Button */}
@@ -96,7 +107,7 @@ const Navbar = () => {
               {link.name}
             </Link>
           ))}
-          <div className="px-6 py-3">
+          <div className="px-6 py-3 space-y-2">
             <Link 
               to="/pricing" 
               onClick={handleLinkClick}
@@ -104,6 +115,16 @@ const Navbar = () => {
             >
               Start Free Trial
             </Link>
+            {!isLoading && (
+              <Link 
+                to={user ? "/admin" : "/auth"} 
+                onClick={handleLinkClick}
+                className="flex items-center justify-center gap-2 py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+              >
+                <User className="w-4 h-4" />
+                {user ? "Admin" : "Login"}
+              </Link>
+            )}
           </div>
         </div>
       </div>
