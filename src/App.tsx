@@ -21,11 +21,12 @@ import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
 import ResetPassword from "./pages/ResetPassword";
 import Sanctuary from "./pages/Sanctuary";
-import AgentRegistry from "./pages/console/AgentRegistry";
-import RunAgent from "./pages/console/RunAgent";
 import Dashboard from "./pages/Dashboard";
 import EcomPricing from "./pages/pricing/EcomPricing";
 import AgentRun from "./pages/agents/AgentRun";
+import StudioAgents from "./pages/studio/StudioAgents";
+import StudioPlans from "./pages/studio/StudioPlans";
+import StudioEntitlements from "./pages/studio/StudioEntitlements";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -55,11 +56,13 @@ const App = () => (
               <Route path="/admin" element={<Admin />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/sanctuary" element={<Sanctuary />} />
-              <Route path="/console/agents" element={<AgentRegistry />} />
-              <Route path="/console/run-agent" element={<RunAgent />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/pricing/ecom" element={<EcomPricing />} />
               <Route path="/agents/:agentKey" element={<AgentRun />} />
+              {/* Admin Studio Routes */}
+              <Route path="/studio/agents" element={<StudioAgents />} />
+              <Route path="/studio/plans" element={<StudioPlans />} />
+              <Route path="/studio/entitlements" element={<StudioEntitlements />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
