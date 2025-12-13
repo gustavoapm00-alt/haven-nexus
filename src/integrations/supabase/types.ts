@@ -14,8 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_catalog: {
+        Row: {
+          agent_key: string
+          category: string
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          model: string | null
+          name: string
+          output_schema: Json | null
+          system_prompt: string
+          user_prompt_template: string
+        }
+        Insert: {
+          agent_key: string
+          category: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          model?: string | null
+          name: string
+          output_schema?: Json | null
+          system_prompt: string
+          user_prompt_template: string
+        }
+        Update: {
+          agent_key?: string
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          model?: string | null
+          name?: string
+          output_schema?: Json | null
+          system_prompt?: string
+          user_prompt_template?: string
+        }
+        Relationships: []
+      }
       agent_runs: {
         Row: {
+          agent_key: string | null
           attempt_count: number
           created_at: string
           error: string | null
@@ -24,12 +67,14 @@ export type Database = {
           input_json: Json
           org_id: string
           output_json: Json | null
+          output_text: string | null
           relevance_agent_id: string
           relevance_trace_id: string | null
           status: string
           updated_at: string
         }
         Insert: {
+          agent_key?: string | null
           attempt_count?: number
           created_at?: string
           error?: string | null
@@ -38,12 +83,14 @@ export type Database = {
           input_json?: Json
           org_id: string
           output_json?: Json | null
+          output_text?: string | null
           relevance_agent_id: string
           relevance_trace_id?: string | null
           status?: string
           updated_at?: string
         }
         Update: {
+          agent_key?: string | null
           attempt_count?: number
           created_at?: string
           error?: string | null
@@ -52,6 +99,7 @@ export type Database = {
           input_json?: Json
           org_id?: string
           output_json?: Json | null
+          output_text?: string | null
           relevance_agent_id?: string
           relevance_trace_id?: string | null
           status?: string
@@ -63,13 +111,6 @@ export type Database = {
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "orgs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "agent_runs_relevance_agent_id_fkey"
-            columns: ["relevance_agent_id"]
-            isOneToOne: false
-            referencedRelation: "relevance_agents"
             referencedColumns: ["id"]
           },
         ]
@@ -148,6 +189,51 @@ export type Database = {
           },
         ]
       }
+      org_subscriptions: {
+        Row: {
+          org_id: string
+          period_end: string | null
+          period_start: string | null
+          plan_id: string | null
+          runs_used_this_period: number
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          org_id: string
+          period_end?: string | null
+          period_start?: string | null
+          plan_id?: string | null
+          runs_used_this_period?: number
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          org_id?: string
+          period_end?: string | null
+          period_start?: string | null
+          plan_id?: string | null
+          runs_used_this_period?: number
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_subscriptions_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: true
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orgs: {
         Row: {
           created_at: string
@@ -163,6 +249,72 @@ export type Database = {
           created_at?: string
           id?: string
           name?: string
+        }
+        Relationships: []
+      }
+      plan_entitlements: {
+        Row: {
+          agent_key: string
+          included: boolean | null
+          per_agent_run_limit: number | null
+          plan_id: string
+        }
+        Insert: {
+          agent_key: string
+          included?: boolean | null
+          per_agent_run_limit?: number | null
+          plan_id: string
+        }
+        Update: {
+          agent_key?: string
+          included?: boolean | null
+          per_agent_run_limit?: number | null
+          plan_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_entitlements_agent_key_fkey"
+            columns: ["agent_key"]
+            isOneToOne: false
+            referencedRelation: "agent_catalog"
+            referencedColumns: ["agent_key"]
+          },
+          {
+            foreignKeyName: "plan_entitlements_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plans: {
+        Row: {
+          category: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          monthly_run_limit: number
+          name: string
+          price_display: string
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          monthly_run_limit?: number
+          name: string
+          price_display: string
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          monthly_run_limit?: number
+          name?: string
+          price_display?: string
         }
         Relationships: []
       }

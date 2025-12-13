@@ -10,7 +10,4 @@ verify_jwt = true
 verify_jwt = true
 
 [functions.agents-run]
-verify_jwt = false
-
-[functions.relevance-callback]
-verify_jwt = false
+verify_jwt = true

@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Bot, Workflow, ShoppingBag, Cpu, Database, Palette, ArrowRight, Check } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -81,7 +81,14 @@ const services = [
 ];
 
 const Services = () => {
+  const navigate = useNavigate();
   const servicesSchema = services.map(s => schemas.service(s.title, s.description));
+
+  const handleServiceClick = (title: string) => {
+    if (title === 'E-Commerce Solutions') {
+      navigate('/pricing/ecom');
+    }
+  };
   
   return (
     <div className="min-h-screen bg-background">
@@ -122,7 +129,10 @@ const Services = () => {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {services.map((service, index) => (
                 <ScrollReveal key={index} delay={index * 0.1}>
-                  <div className="card-glass p-8 rounded-lg h-full flex flex-col">
+                  <div 
+                    className={`card-glass p-8 rounded-lg h-full flex flex-col ${service.title === 'E-Commerce Solutions' ? 'cursor-pointer hover:border-primary/50 transition-colors' : ''}`}
+                    onClick={() => handleServiceClick(service.title)}
+                  >
                     <service.icon className="h-12 w-12 text-primary mb-6" />
                     <h3 className="font-display text-2xl mb-4">{service.title}</h3>
                     <p className="text-muted-foreground mb-6">{service.description}</p>
