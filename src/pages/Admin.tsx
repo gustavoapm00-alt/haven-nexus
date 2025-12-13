@@ -5,9 +5,14 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { toast as sonnerToast } from 'sonner';
-import { Loader2, LogOut, Mail, MessageSquare, Trash2, RefreshCw, CreditCard, Crown, ArrowRight, Bot, Play, Ticket, FolderKanban } from 'lucide-react';
+import { 
+  Loader2, LogOut, Mail, MessageSquare, Trash2, RefreshCw, 
+  CreditCard, Crown, ArrowRight, Bot, Play, Ticket, FolderKanban,
+  LayoutDashboard
+} from 'lucide-react';
 import { STRIPE_TIERS } from '@/lib/stripe-config';
 import { OnboardingModal, useOnboarding } from '@/components/OnboardingModal';
+import { Button } from '@/components/ui/button';
 
 interface EmailSignup {
   id: string;
@@ -113,29 +118,29 @@ const Admin = () => {
           onClose={closeOnboarding} 
           userName={user?.email?.split('@')[0]}
         />
-        <header className="border-b border-border">
+        <header className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
           <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
             <Link to="/" className="font-display text-2xl">
               AERELION <span className="text-primary">DASHBOARD</span>
             </Link>
-            <button
-              onClick={handleSignOut}
-              className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <LogOut className="w-4 h-4" />
+            <Button variant="ghost" onClick={handleSignOut}>
+              <LogOut className="w-4 h-4 mr-2" />
               Sign Out
-            </button>
+            </Button>
           </div>
         </header>
 
-        <main className="max-w-4xl mx-auto px-6 py-12">
-          <h1 className="font-display text-4xl mb-8">Welcome Back</h1>
+        <main className="max-w-5xl mx-auto px-6 py-12">
+          <div className="mb-8">
+            <h1 className="font-display text-4xl mb-2">Welcome Back</h1>
+            <p className="text-muted-foreground">Manage your AI agents and monitor execution.</p>
+          </div>
           
           {/* Subscription Status */}
-          <div className="card-glass p-8 rounded-lg mb-8">
-            <div className="flex items-start justify-between gap-4">
+          <div className="card-glass p-8 rounded-lg mb-10">
+            <div className="flex items-start justify-between gap-4 flex-wrap">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-primary/10 rounded-lg">
+                <div className="p-3 bg-primary/10 rounded-xl">
                   <Crown className="w-8 h-8 text-primary" />
                 </div>
                 <div>
@@ -161,82 +166,110 @@ const Admin = () => {
                 </div>
               </div>
               {subscribed ? (
-                <button onClick={openCustomerPortal} className="btn-secondary">
+                <Button variant="outline" onClick={openCustomerPortal}>
                   <CreditCard className="w-4 h-4 mr-2" />
                   Manage Billing
-                </button>
+                </Button>
               ) : (
-                <Link to="/pricing" className="btn-primary">
-                  View Plans
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                <Link to="/pricing">
+                  <Button>
+                    View Plans
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
                 </Link>
               )}
             </div>
           </div>
 
-          {/* Console Quick Actions */}
-          <h2 className="font-display text-2xl mb-4">Console</h2>
-          <div className="grid md:grid-cols-2 gap-6 mb-8">
-            <Link to="/console/agents" className="card-glass p-6 rounded-lg hover:border-primary/50 transition-colors group">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
-                  <Bot className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <h3 className="font-display text-xl mb-1">Agent Registry</h3>
-                  <p className="text-muted-foreground text-sm">Manage your AI agents</p>
-                </div>
+          {/* AERELION CORE - Console Section */}
+          <div className="mb-10">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <LayoutDashboard className="w-5 h-5 text-primary" />
               </div>
-            </Link>
-            <Link to="/console/run-agent" className="card-glass p-6 rounded-lg hover:border-primary/50 transition-colors group">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
-                  <Play className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <h3 className="font-display text-xl mb-1">Run Agent</h3>
-                  <p className="text-muted-foreground text-sm">Execute and test your agents</p>
-                </div>
+              <div>
+                <h2 className="font-display text-2xl">AERELION CORE</h2>
+                <p className="text-muted-foreground text-sm">Execution Control Plane</p>
               </div>
-            </Link>
+            </div>
+            
+            <div className="grid md:grid-cols-2 gap-6">
+              <Link 
+                to="/console/agents" 
+                className="group relative card-glass p-6 rounded-xl border-2 border-transparent hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5"
+              >
+                <div className="flex items-start gap-4">
+                  <div className="p-4 bg-primary/10 rounded-xl group-hover:bg-primary/20 group-hover:scale-105 transition-all">
+                    <Bot className="w-8 h-8 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-display text-xl mb-1 group-hover:text-primary transition-colors">Agent Registry</h3>
+                    <p className="text-muted-foreground text-sm mb-3">Register, configure, and manage your Relevance AI agents with webhook URLs and security settings.</p>
+                    <span className="text-primary text-sm flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      Open Registry <ArrowRight className="w-4 h-4" />
+                    </span>
+                  </div>
+                </div>
+              </Link>
+              
+              <Link 
+                to="/console/run-agent" 
+                className="group relative card-glass p-6 rounded-xl border-2 border-transparent hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5"
+              >
+                <div className="flex items-start gap-4">
+                  <div className="p-4 bg-primary/10 rounded-xl group-hover:bg-primary/20 group-hover:scale-105 transition-all">
+                    <Play className="w-8 h-8 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-display text-xl mb-1 group-hover:text-primary transition-colors">Run Console</h3>
+                    <p className="text-muted-foreground text-sm mb-3">Trigger agents, monitor execution status, and inspect inputs/outputs with full audit history.</p>
+                    <span className="text-primary text-sm flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      Open Console <ArrowRight className="w-4 h-4" />
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            </div>
           </div>
 
           {/* Coming Soon */}
-          <h2 className="font-display text-2xl mb-4">Coming Soon</h2>
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="card-glass p-6 rounded-lg opacity-50 cursor-not-allowed">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-secondary rounded-lg">
-                  <FolderKanban className="w-6 h-6 text-muted-foreground" />
-                </div>
-                <div>
-                  <h3 className="font-display text-xl mb-1">Projects</h3>
-                  <p className="text-muted-foreground text-sm">Manage workspaces</p>
+          <div>
+            <h2 className="font-display text-xl mb-4 text-muted-foreground">Coming Soon</h2>
+            <div className="grid md:grid-cols-3 gap-4">
+              <div className="card-glass p-5 rounded-xl opacity-50 cursor-not-allowed">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-secondary rounded-lg">
+                    <FolderKanban className="w-5 h-5 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium">Projects</h3>
+                    <p className="text-muted-foreground text-xs">Manage workspaces</p>
+                  </div>
                 </div>
               </div>
+              <div className="card-glass p-5 rounded-xl opacity-50 cursor-not-allowed">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-secondary rounded-lg">
+                    <Ticket className="w-5 h-5 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium">Tickets</h3>
+                    <p className="text-muted-foreground text-xs">Support requests</p>
+                  </div>
+                </div>
+              </div>
+              <Link to="/services" className="card-glass p-5 rounded-xl hover:border-primary/50 transition-colors group">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
+                    <ArrowRight className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium group-hover:text-primary transition-colors">Explore Services</h3>
+                    <p className="text-muted-foreground text-xs">Discover what you can automate</p>
+                  </div>
+                </div>
+              </Link>
             </div>
-            <div className="card-glass p-6 rounded-lg opacity-50 cursor-not-allowed">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-secondary rounded-lg">
-                  <Ticket className="w-6 h-6 text-muted-foreground" />
-                </div>
-                <div>
-                  <h3 className="font-display text-xl mb-1">Tickets</h3>
-                  <p className="text-muted-foreground text-sm">Support requests</p>
-                </div>
-              </div>
-            </div>
-            <Link to="/services" className="card-glass p-6 rounded-lg hover:border-primary/50 transition-colors group">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
-                  <ArrowRight className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <h3 className="font-display text-xl mb-1">Explore Services</h3>
-                  <p className="text-muted-foreground text-sm">Discover what you can automate</p>
-                </div>
-              </div>
-            </Link>
           </div>
         </main>
       </div>
@@ -251,48 +284,62 @@ const Admin = () => {
         userName={user?.email?.split('@')[0]}
       />
       {/* Header */}
-      <header className="border-b border-border">
+      <header className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link to="/" className="font-display text-2xl">
             AERELION <span className="text-primary">ADMIN</span>
           </Link>
-          <button
-            onClick={handleSignOut}
-            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <LogOut className="w-4 h-4" />
+          <Button variant="ghost" onClick={handleSignOut}>
+            <LogOut className="w-4 h-4 mr-2" />
             Sign Out
-          </button>
+          </Button>
         </div>
       </header>
 
       {/* Content */}
       <main className="max-w-7xl mx-auto px-6 py-8">
-        {/* Console Quick Actions */}
-        <h2 className="font-display text-2xl mb-4">Console</h2>
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
-          <Link to="/console/agents" className="card-glass p-6 rounded-lg hover:border-primary/50 transition-colors group">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
-                <Bot className="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <h3 className="font-display text-xl mb-1">Agent Registry</h3>
-                <p className="text-muted-foreground text-sm">Manage your AI agents</p>
-              </div>
+        {/* AERELION CORE Section */}
+        <div className="mb-10">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <LayoutDashboard className="w-5 h-5 text-primary" />
             </div>
-          </Link>
-          <Link to="/console/run-agent" className="card-glass p-6 rounded-lg hover:border-primary/50 transition-colors group">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
-                <Play className="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <h3 className="font-display text-xl mb-1">Run Agent</h3>
-                <p className="text-muted-foreground text-sm">Execute and test your agents</p>
-              </div>
+            <div>
+              <h2 className="font-display text-2xl">AERELION CORE</h2>
+              <p className="text-muted-foreground text-sm">Execution Control Plane</p>
             </div>
-          </Link>
+          </div>
+          
+          <div className="grid md:grid-cols-2 gap-6">
+            <Link 
+              to="/console/agents" 
+              className="group card-glass p-6 rounded-xl border-2 border-transparent hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5"
+            >
+              <div className="flex items-start gap-4">
+                <div className="p-4 bg-primary/10 rounded-xl group-hover:bg-primary/20 group-hover:scale-105 transition-all">
+                  <Bot className="w-8 h-8 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-display text-xl mb-1 group-hover:text-primary transition-colors">Agent Registry</h3>
+                  <p className="text-muted-foreground text-sm">Register and manage your AI agents</p>
+                </div>
+              </div>
+            </Link>
+            <Link 
+              to="/console/run-agent" 
+              className="group card-glass p-6 rounded-xl border-2 border-transparent hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5"
+            >
+              <div className="flex items-start gap-4">
+                <div className="p-4 bg-primary/10 rounded-xl group-hover:bg-primary/20 group-hover:scale-105 transition-all">
+                  <Play className="w-8 h-8 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-display text-xl mb-1 group-hover:text-primary transition-colors">Run Console</h3>
+                  <p className="text-muted-foreground text-sm">Execute agents and inspect runs</p>
+                </div>
+              </div>
+            </Link>
+          </div>
         </div>
 
         {/* Stats */}

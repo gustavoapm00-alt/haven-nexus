@@ -1,7 +1,8 @@
 import { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { LogOut, Bot, Play, Settings, Home } from 'lucide-react';
+import { LogOut, Bot, Play, LayoutDashboard, Home, ChevronLeft } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface ConsoleLayoutProps {
   children: ReactNode;
@@ -18,56 +19,61 @@ const ConsoleLayout = ({ children }: ConsoleLayoutProps) => {
 
   const navItems = [
     { path: '/console/agents', label: 'Agent Registry', icon: Bot },
-    { path: '/console/run-agent', label: 'Run Agent', icon: Play },
+    { path: '/console/run-agent', label: 'Run Console', icon: Play },
   ];
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-border">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link to="/" className="font-display text-2xl">
-            AERELION <span className="text-primary">CONSOLE</span>
-          </Link>
+      <header className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link
-              to="/"
-              className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm"
-            >
-              <Home className="w-4 h-4" />
-              Home
+            <Link to="/admin" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+              <ChevronLeft className="w-4 h-4" />
+              <span className="text-sm">Back to Dashboard</span>
             </Link>
-            <Link
-              to="/admin"
-              className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm"
-            >
-              <Settings className="w-4 h-4" />
-              Dashboard
+            <span className="text-border">|</span>
+            <Link to="/" className="font-display text-xl">
+              AERELION <span className="text-primary">CORE</span>
             </Link>
-            <button
-              onClick={handleSignOut}
-              className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm"
-            >
-              <LogOut className="w-4 h-4" />
+          </div>
+          <div className="flex items-center gap-3">
+            <Link to="/">
+              <Button variant="ghost" size="sm">
+                <Home className="w-4 h-4 mr-2" />
+                Home
+              </Button>
+            </Link>
+            <Link to="/admin">
+              <Button variant="ghost" size="sm">
+                <LayoutDashboard className="w-4 h-4 mr-2" />
+                Dashboard
+              </Button>
+            </Link>
+            <Button variant="ghost" size="sm" onClick={handleSignOut}>
+              <LogOut className="w-4 h-4 mr-2" />
               Sign Out
-            </button>
+            </Button>
           </div>
         </div>
       </header>
 
       <div className="max-w-7xl mx-auto px-6 py-8 flex gap-8">
         {/* Sidebar */}
-        <aside className="w-48 flex-shrink-0">
-          <nav className="space-y-1">
+        <aside className="w-56 flex-shrink-0">
+          <nav className="space-y-1 sticky top-24">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3 px-3">
+              Execution Core
+            </p>
             {navItems.map((item) => {
               const isActive = location.pathname === item.path;
               return (
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                     isActive
-                      ? 'bg-primary text-primary-foreground'
+                      ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
                       : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
                   }`}
                 >
