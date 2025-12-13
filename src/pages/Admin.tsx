@@ -7,7 +7,7 @@ import { toast } from '@/hooks/use-toast';
 import { toast as sonnerToast } from 'sonner';
 import { 
   Loader2, LogOut, Mail, MessageSquare, Trash2, RefreshCw, 
-  CreditCard, Crown, ArrowRight, Bot, Play, Ticket, FolderKanban,
+  CreditCard, Crown, ArrowRight, Bot, Zap, Settings,
   LayoutDashboard
 } from 'lucide-react';
 import { STRIPE_TIERS } from '@/lib/stripe-config';
@@ -109,8 +109,8 @@ const Admin = () => {
     );
   }
 
+  // Non-admin users: redirect to dashboard
   if (!isAdmin) {
-    // Non-admin users see their subscription dashboard
     return (
       <div className="min-h-screen bg-background">
         <OnboardingModal 
@@ -121,19 +121,27 @@ const Admin = () => {
         <header className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
           <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
             <Link to="/" className="font-display text-2xl">
-              AERELION <span className="text-primary">DASHBOARD</span>
+              AERELION
             </Link>
-            <Button variant="ghost" onClick={handleSignOut}>
-              <LogOut className="w-4 h-4 mr-2" />
-              Sign Out
-            </Button>
+            <div className="flex items-center gap-4">
+              <Link to="/dashboard">
+                <Button variant="outline" size="sm">
+                  <LayoutDashboard className="w-4 h-4 mr-2" />
+                  Dashboard
+                </Button>
+              </Link>
+              <Button variant="ghost" onClick={handleSignOut}>
+                <LogOut className="w-4 h-4 mr-2" />
+                Sign Out
+              </Button>
+            </div>
           </div>
         </header>
 
         <main className="max-w-5xl mx-auto px-6 py-12">
           <div className="mb-8">
             <h1 className="font-display text-4xl mb-2">Welcome Back</h1>
-            <p className="text-muted-foreground">Manage your AI agents and monitor execution.</p>
+            <p className="text-muted-foreground">You're logged in but don't have admin access.</p>
           </div>
           
           {/* Subscription Status */}
@@ -171,7 +179,7 @@ const Admin = () => {
                   Manage Billing
                 </Button>
               ) : (
-                <Link to="/pricing">
+                <Link to="/pricing/ecom">
                   <Button>
                     View Plans
                     <ArrowRight className="ml-2 h-4 w-4" />
@@ -181,101 +189,43 @@ const Admin = () => {
             </div>
           </div>
 
-          {/* AERELION CORE - Console Section */}
-          <div className="mb-10">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <LayoutDashboard className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <h2 className="font-display text-2xl">AERELION CORE</h2>
-                <p className="text-muted-foreground text-sm">Execution Control Plane</p>
-              </div>
-            </div>
-            
-            <div className="grid md:grid-cols-2 gap-6">
-              <Link 
-                to="/console/agents" 
-                className="group relative card-glass p-6 rounded-xl border-2 border-transparent hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5"
-              >
-                <div className="flex items-start gap-4">
-                  <div className="p-4 bg-primary/10 rounded-xl group-hover:bg-primary/20 group-hover:scale-105 transition-all">
-                    <Bot className="w-8 h-8 text-primary" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-display text-xl mb-1 group-hover:text-primary transition-colors">Agent Registry</h3>
-                    <p className="text-muted-foreground text-sm mb-3">Register, configure, and manage your Relevance AI agents with webhook URLs and security settings.</p>
-                    <span className="text-primary text-sm flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      Open Registry <ArrowRight className="w-4 h-4" />
-                    </span>
-                  </div>
+          {/* Quick Links */}
+          <div className="grid md:grid-cols-2 gap-6">
+            <Link 
+              to="/dashboard" 
+              className="group card-glass p-6 rounded-xl border-2 border-transparent hover:border-primary/50 transition-all"
+            >
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-primary/10 rounded-xl group-hover:bg-primary/20 transition-colors">
+                  <Bot className="w-6 h-6 text-primary" />
                 </div>
-              </Link>
-              
-              <Link 
-                to="/console/run-agent" 
-                className="group relative card-glass p-6 rounded-xl border-2 border-transparent hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5"
-              >
-                <div className="flex items-start gap-4">
-                  <div className="p-4 bg-primary/10 rounded-xl group-hover:bg-primary/20 group-hover:scale-105 transition-all">
-                    <Play className="w-8 h-8 text-primary" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-display text-xl mb-1 group-hover:text-primary transition-colors">Run Console</h3>
-                    <p className="text-muted-foreground text-sm mb-3">Trigger agents, monitor execution status, and inspect inputs/outputs with full audit history.</p>
-                    <span className="text-primary text-sm flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      Open Console <ArrowRight className="w-4 h-4" />
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            </div>
-          </div>
-
-          {/* Coming Soon */}
-          <div>
-            <h2 className="font-display text-xl mb-4 text-muted-foreground">Coming Soon</h2>
-            <div className="grid md:grid-cols-3 gap-4">
-              <div className="card-glass p-5 rounded-xl opacity-50 cursor-not-allowed">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-secondary rounded-lg">
-                    <FolderKanban className="w-5 h-5 text-muted-foreground" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium">Projects</h3>
-                    <p className="text-muted-foreground text-xs">Manage workspaces</p>
-                  </div>
+                <div>
+                  <h3 className="font-display text-lg group-hover:text-primary transition-colors">AI Agents Dashboard</h3>
+                  <p className="text-muted-foreground text-sm">Run your unlocked AI agents</p>
                 </div>
               </div>
-              <div className="card-glass p-5 rounded-xl opacity-50 cursor-not-allowed">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-secondary rounded-lg">
-                    <Ticket className="w-5 h-5 text-muted-foreground" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium">Tickets</h3>
-                    <p className="text-muted-foreground text-xs">Support requests</p>
-                  </div>
+            </Link>
+            <Link 
+              to="/pricing/ecom" 
+              className="group card-glass p-6 rounded-xl border-2 border-transparent hover:border-primary/50 transition-all"
+            >
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-primary/10 rounded-xl group-hover:bg-primary/20 transition-colors">
+                  <Zap className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-display text-lg group-hover:text-primary transition-colors">Upgrade Plan</h3>
+                  <p className="text-muted-foreground text-sm">Unlock more AI agents</p>
                 </div>
               </div>
-              <Link to="/services" className="card-glass p-5 rounded-xl hover:border-primary/50 transition-colors group">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
-                    <ArrowRight className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium group-hover:text-primary transition-colors">Explore Services</h3>
-                    <p className="text-muted-foreground text-xs">Discover what you can automate</p>
-                  </div>
-                </div>
-              </Link>
-            </div>
+            </Link>
           </div>
         </main>
       </div>
     );
   }
 
+  // Admin view
   return (
     <div className="min-h-screen bg-background">
       <OnboardingModal 
@@ -283,36 +233,42 @@ const Admin = () => {
         onClose={closeOnboarding} 
         userName={user?.email?.split('@')[0]}
       />
-      {/* Header */}
       <header className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link to="/" className="font-display text-2xl">
             AERELION <span className="text-primary">ADMIN</span>
           </Link>
-          <Button variant="ghost" onClick={handleSignOut}>
-            <LogOut className="w-4 h-4 mr-2" />
-            Sign Out
-          </Button>
+          <div className="flex items-center gap-4">
+            <Link to="/dashboard">
+              <Button variant="outline" size="sm">
+                <LayoutDashboard className="w-4 h-4 mr-2" />
+                Dashboard
+              </Button>
+            </Link>
+            <Button variant="ghost" onClick={handleSignOut}>
+              <LogOut className="w-4 h-4 mr-2" />
+              Sign Out
+            </Button>
+          </div>
         </div>
       </header>
 
-      {/* Content */}
       <main className="max-w-7xl mx-auto px-6 py-8">
-        {/* AERELION CORE Section */}
+        {/* Admin Studio Section */}
         <div className="mb-10">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-2 bg-primary/10 rounded-lg">
-              <LayoutDashboard className="w-5 h-5 text-primary" />
+              <Settings className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <h2 className="font-display text-2xl">AERELION CORE</h2>
-              <p className="text-muted-foreground text-sm">Execution Control Plane</p>
+              <h2 className="font-display text-2xl">Admin Studio</h2>
+              <p className="text-muted-foreground text-sm">Manage agents, plans, and entitlements</p>
             </div>
           </div>
           
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-3 gap-6">
             <Link 
-              to="/console/agents" 
+              to="/studio/agents" 
               className="group card-glass p-6 rounded-xl border-2 border-transparent hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5"
             >
               <div className="flex items-start gap-4">
@@ -320,29 +276,45 @@ const Admin = () => {
                   <Bot className="w-8 h-8 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-display text-xl mb-1 group-hover:text-primary transition-colors">Agent Registry</h3>
-                  <p className="text-muted-foreground text-sm">Register and manage your AI agents</p>
+                  <h3 className="font-display text-xl mb-1 group-hover:text-primary transition-colors">Agent Templates</h3>
+                  <p className="text-muted-foreground text-sm">Create and edit AI agent prompts</p>
                 </div>
               </div>
             </Link>
+            
             <Link 
-              to="/console/run-agent" 
+              to="/studio/plans" 
               className="group card-glass p-6 rounded-xl border-2 border-transparent hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5"
             >
               <div className="flex items-start gap-4">
                 <div className="p-4 bg-primary/10 rounded-xl group-hover:bg-primary/20 group-hover:scale-105 transition-all">
-                  <Play className="w-8 h-8 text-primary" />
+                  <Zap className="w-8 h-8 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-display text-xl mb-1 group-hover:text-primary transition-colors">Run Console</h3>
-                  <p className="text-muted-foreground text-sm">Execute agents and inspect runs</p>
+                  <h3 className="font-display text-xl mb-1 group-hover:text-primary transition-colors">Plans</h3>
+                  <p className="text-muted-foreground text-sm">Configure pricing tiers and limits</p>
+                </div>
+              </div>
+            </Link>
+            
+            <Link 
+              to="/studio/entitlements" 
+              className="group card-glass p-6 rounded-xl border-2 border-transparent hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5"
+            >
+              <div className="flex items-start gap-4">
+                <div className="p-4 bg-primary/10 rounded-xl group-hover:bg-primary/20 group-hover:scale-105 transition-all">
+                  <Crown className="w-8 h-8 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-display text-xl mb-1 group-hover:text-primary transition-colors">Entitlements</h3>
+                  <p className="text-muted-foreground text-sm">Map agents to plans</p>
                 </div>
               </div>
             </Link>
           </div>
         </div>
 
-        {/* Stats */}
+        {/* Data Overview */}
         <h2 className="font-display text-2xl mb-4">Data Overview</h2>
         <div className="grid md:grid-cols-2 gap-6 mb-8">
           <div className="card-glass p-6 rounded-lg">
@@ -428,19 +400,21 @@ const Admin = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {emails.map((signup) => (
-                    <tr key={signup.id} className="hover:bg-secondary/30 transition-colors">
-                      <td className="px-6 py-4 text-sm">{signup.email}</td>
-                      <td className="px-6 py-4 text-sm text-muted-foreground">
-                        {signup.source || '-'}
+                  {emails.map((email) => (
+                    <tr key={email.id} className="hover:bg-secondary/30 transition-colors">
+                      <td className="px-6 py-4 font-medium">{email.email}</td>
+                      <td className="px-6 py-4 text-muted-foreground">
+                        <span className="px-2 py-1 bg-secondary rounded text-xs">
+                          {email.source || 'unknown'}
+                        </span>
                       </td>
-                      <td className="px-6 py-4 text-sm text-muted-foreground">
-                        {new Date(signup.created_at).toLocaleDateString()}
+                      <td className="px-6 py-4 text-muted-foreground text-sm">
+                        {new Date(email.created_at).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4 text-right">
                         <button
-                          onClick={() => handleDeleteEmail(signup.id)}
-                          className="p-2 text-muted-foreground hover:text-destructive transition-colors"
+                          onClick={() => handleDeleteEmail(email.id)}
+                          className="p-2 text-muted-foreground hover:text-red-500 transition-colors"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -455,30 +429,47 @@ const Admin = () => {
               No contact submissions yet
             </div>
           ) : (
-            <div className="divide-y divide-border">
-              {contacts.map((contact) => (
-                <div key={contact.id} className="p-6 hover:bg-secondary/30 transition-colors">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className="font-medium">{contact.name}</span>
-                        <span className="text-muted-foreground text-sm">{contact.email}</span>
-                      </div>
-                      <p className="text-muted-foreground text-sm mb-2">{contact.message}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(contact.created_at).toLocaleString()}
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => handleDeleteContact(contact.id)}
-                      className="p-2 text-muted-foreground hover:text-destructive transition-colors"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <table className="w-full">
+              <thead className="bg-secondary/50">
+                <tr>
+                  <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    Name
+                  </th>
+                  <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    Email
+                  </th>
+                  <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    Message
+                  </th>
+                  <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    Date
+                  </th>
+                  <th className="px-6 py-3"></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {contacts.map((contact) => (
+                  <tr key={contact.id} className="hover:bg-secondary/30 transition-colors">
+                    <td className="px-6 py-4 font-medium">{contact.name}</td>
+                    <td className="px-6 py-4 text-muted-foreground">{contact.email}</td>
+                    <td className="px-6 py-4 text-muted-foreground text-sm max-w-xs truncate">
+                      {contact.message}
+                    </td>
+                    <td className="px-6 py-4 text-muted-foreground text-sm">
+                      {new Date(contact.created_at).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <button
+                        onClick={() => handleDeleteContact(contact.id)}
+                        className="p-2 text-muted-foreground hover:text-red-500 transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
         </div>
       </main>
