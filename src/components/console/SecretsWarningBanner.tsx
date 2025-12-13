@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Info, ExternalLink, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -23,9 +23,9 @@ const SecretsWarningBanner = () => {
       <div className="flex items-start gap-3">
         <Info className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
         <div className="flex-1 text-sm">
-          <p className="font-medium text-primary mb-1">Security Secrets Reminder</p>
+          <p className="font-medium text-primary mb-1">Security Recommendation</p>
           <p className="text-muted-foreground mb-2">
-            For production security, ensure these secrets are configured in your Lovable project settings:
+            For production security, we recommend configuring these secrets in your project settings:
           </p>
           <ul className="list-disc list-inside text-muted-foreground space-y-1 mb-2">
             <li><code className="bg-background px-1 rounded text-foreground">RELEVANCE_DEFAULT_OUTBOUND_SECRET</code> — sent to Relevance in webhook headers</li>
@@ -44,13 +44,12 @@ const SecretsWarningBanner = () => {
           </p>
         </div>
         <Button
-          variant="ghost"
-          size="icon"
-          className="flex-shrink-0 h-8 w-8 text-muted-foreground hover:text-foreground"
+          variant="outline"
+          size="sm"
+          className="flex-shrink-0"
           onClick={handleDismiss}
-          aria-label="Dismiss reminder"
         >
-          <X className="w-4 h-4" />
+          Got it
         </Button>
       </div>
     </div>
