@@ -23,6 +23,9 @@ import ResetPassword from "./pages/ResetPassword";
 import Sanctuary from "./pages/Sanctuary";
 import AgentRegistry from "./pages/console/AgentRegistry";
 import RunAgent from "./pages/console/RunAgent";
+import Dashboard from "./pages/Dashboard";
+import EcomPricing from "./pages/pricing/EcomPricing";
+import AgentRun from "./pages/agents/AgentRun";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -54,6 +57,9 @@ const App = () => (
               <Route path="/sanctuary" element={<Sanctuary />} />
               <Route path="/console/agents" element={<AgentRegistry />} />
               <Route path="/console/run-agent" element={<RunAgent />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/pricing/ecom" element={<EcomPricing />} />
+              <Route path="/agents/:agentKey" element={<AgentRun />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
