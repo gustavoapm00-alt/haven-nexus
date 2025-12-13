@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, forwardRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, User } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
@@ -12,7 +12,7 @@ const navLinks = [
   { name: 'Contact', href: '/contact' },
 ];
 
-const Navbar = () => {
+const Navbar = forwardRef<HTMLElement>((_, ref) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
@@ -36,6 +36,7 @@ const Navbar = () => {
 
   return (
     <nav
+      ref={ref}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled
           ? 'bg-background/90 backdrop-blur-md border-b border-border/50'
@@ -130,6 +131,8 @@ const Navbar = () => {
       </div>
     </nav>
   );
-};
+});
+
+Navbar.displayName = 'Navbar';
 
 export default Navbar;
