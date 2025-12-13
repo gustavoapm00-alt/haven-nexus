@@ -7,6 +7,7 @@ import { toast } from '@/hooks/use-toast';
 import { toast as sonnerToast } from 'sonner';
 import { Loader2, LogOut, Mail, MessageSquare, Trash2, RefreshCw, CreditCard, Crown, ArrowRight, Bot, Play, Ticket, FolderKanban } from 'lucide-react';
 import { STRIPE_TIERS } from '@/lib/stripe-config';
+import { OnboardingModal, useOnboarding } from '@/components/OnboardingModal';
 
 interface EmailSignup {
   id: string;
@@ -28,6 +29,7 @@ const Admin = () => {
   const { subscribed, tier, subscriptionEnd, isLoading: subLoading, openCustomerPortal, checkSubscription } = useSubscription();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { showOnboarding, closeOnboarding } = useOnboarding();
   
   const [activeTab, setActiveTab] = useState<'emails' | 'contacts'>('emails');
   const [emails, setEmails] = useState<EmailSignup[]>([]);
@@ -106,6 +108,11 @@ const Admin = () => {
     // Non-admin users see their subscription dashboard
     return (
       <div className="min-h-screen bg-background">
+        <OnboardingModal 
+          isOpen={showOnboarding} 
+          onClose={closeOnboarding} 
+          userName={user?.email?.split('@')[0]}
+        />
         <header className="border-b border-border">
           <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
             <Link to="/" className="font-display text-2xl">
@@ -238,6 +245,11 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <OnboardingModal 
+        isOpen={showOnboarding} 
+        onClose={closeOnboarding} 
+        userName={user?.email?.split('@')[0]}
+      />
       {/* Header */}
       <header className="border-b border-border">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
