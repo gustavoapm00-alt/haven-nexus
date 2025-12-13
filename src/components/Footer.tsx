@@ -40,6 +40,30 @@ const Footer = forwardRef<HTMLElement>((_, ref) => {
             </a>
           </div>
 
+          {/* Legal Links */}
+          <div className="flex items-center gap-4 text-xs text-muted-foreground/70">
+            <Link
+              to="/intellectual-property"
+              className="hover:text-muted-foreground transition-colors"
+            >
+              IP & Use
+            </Link>
+            <span className="text-muted-foreground/30">·</span>
+            <Link
+              to="/confidentiality"
+              className="hover:text-muted-foreground transition-colors"
+            >
+              Confidentiality
+            </Link>
+            <span className="text-muted-foreground/30">·</span>
+            <Link
+              to="/disclaimer"
+              className="hover:text-muted-foreground transition-colors"
+            >
+              Disclaimer
+            </Link>
+          </div>
+
           {/* Copyright & Admin */}
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <span>© AERELION {currentYear}</span>

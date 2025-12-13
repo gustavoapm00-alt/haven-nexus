@@ -14,6 +14,9 @@ import Contact from "./pages/Contact";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import Refund from "./pages/Refund";
+import IntellectualProperty from "./pages/IntellectualProperty";
+import Confidentiality from "./pages/Confidentiality";
+import Disclaimer from "./pages/Disclaimer";
 import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
 import ResetPassword from "./pages/ResetPassword";
@@ -42,6 +45,9 @@ const App = () => (
               <Route path="/terms" element={<Terms />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/refund" element={<Refund />} />
+              <Route path="/intellectual-property" element={<IntellectualProperty />} />
+              <Route path="/confidentiality" element={<Confidentiality />} />
+              <Route path="/disclaimer" element={<Disclaimer />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/admin" element={<Admin />} />
               <Route path="/reset-password" element={<ResetPassword />} />
