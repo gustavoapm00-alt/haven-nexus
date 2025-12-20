@@ -121,14 +121,20 @@ const Dashboard = () => {
         <main className="pt-24 pb-16">
           <div className="container-main text-center">
             <AlertCircle className="w-16 h-16 text-muted-foreground mx-auto mb-6" />
-            <h1 className="font-display text-4xl mb-4">No Active Plan</h1>
-            <p className="text-muted-foreground mb-8">
-              Choose a plan to unlock AI agents and start automating your business.
+            <h1 className="font-display text-4xl mb-4">No Active Platform Access</h1>
+            <p className="text-muted-foreground mb-8 max-w-md mx-auto">
+              You don't have an active platform subscription. Explore entry modes 
+              to find the right way to engage with AERELION.
             </p>
-            <Button onClick={() => navigate('/pricing/ecom')} className="btn-primary">
-              View E-Commerce Plans
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button onClick={() => navigate('/get-started')} className="btn-primary">
+                Take Intake Assessment
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+              <Button onClick={() => navigate('/pricing')} variant="outline" className="btn-secondary">
+                View Entry Modes
+              </Button>
+            </div>
           </div>
         </main>
         <Footer />
@@ -147,8 +153,8 @@ const Dashboard = () => {
         <div className="container-main">
           <ScrollReveal>
             <div className="mb-8">
-              <h1 className="font-display text-4xl mb-2">Dashboard</h1>
-              <p className="text-muted-foreground">Manage your AI agents and monitor usage.</p>
+              <h1 className="font-display text-4xl mb-2">Operations Dashboard</h1>
+              <p className="text-muted-foreground">Monitor your systems and access automation agents.</p>
             </div>
           </ScrollReveal>
 
@@ -158,7 +164,7 @@ const Dashboard = () => {
               <div className="card-glass p-6 rounded-xl">
                 <div className="flex items-center gap-3 mb-4">
                   <Zap className="w-5 h-5 text-primary" />
-                  <h2 className="font-display text-xl">Current Plan</h2>
+                  <h2 className="font-display text-xl">Current Access</h2>
                 </div>
                 <p className="text-2xl font-bold mb-1">{subscription.plan.name}</p>
                 <p className="text-muted-foreground">{subscription.plan.price_display}</p>
@@ -184,7 +190,7 @@ const Dashboard = () => {
                 </div>
                 <Progress value={usagePercent} className="h-2 mb-2" />
                 <p className="text-sm text-muted-foreground">
-                  {runsRemaining} runs remaining this month
+                  {runsRemaining} runs remaining this period
                 </p>
               </div>
             </div>
@@ -193,8 +199,8 @@ const Dashboard = () => {
           {/* Agents Grid */}
           <ScrollReveal delay={0.2}>
             <div className="mb-6">
-              <h2 className="font-display text-2xl mb-2">Your AI Agents</h2>
-              <p className="text-muted-foreground text-sm">Click an agent to run it</p>
+              <h2 className="font-display text-2xl mb-2">Available Agents</h2>
+              <p className="text-muted-foreground text-sm">Access your automation agents</p>
             </div>
           </ScrollReveal>
 
@@ -227,7 +233,11 @@ const Dashboard = () => {
           {agents.length === 0 && (
             <div className="card-glass p-12 rounded-xl text-center">
               <Bot className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">No agents available for your plan.</p>
+              <p className="text-muted-foreground mb-4">No agents available for your current access level.</p>
+              <Link to="/pricing" className="btn-secondary inline-flex">
+                Explore Entry Modes
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Link>
             </div>
           )}
         </div>

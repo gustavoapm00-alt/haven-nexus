@@ -17,13 +17,35 @@ const Footer = forwardRef<HTMLElement>((_, ref) => {
           {/* Navigation Links */}
           <div className="flex items-center gap-6 text-sm">
             <Link
-              to="/sanctuary"
+              to="/capabilities"
               className="text-muted-foreground hover:text-primary transition-colors"
             >
-              Sanctuary
+              Capabilities
             </Link>
+            <Link
+              to="/reliability"
+              className="text-muted-foreground hover:text-primary transition-colors"
+            >
+              Reliability
+            </Link>
+            <Link
+              to="/proof"
+              className="text-muted-foreground hover:text-primary transition-colors"
+            >
+              Proof
+            </Link>
+            <Link
+              to="/about"
+              className="text-muted-foreground hover:text-primary transition-colors"
+            >
+              About
+            </Link>
+          </div>
+
+          {/* Social Links */}
+          <div className="flex items-center gap-4">
             <a
-              href="https://instagram.com/null.username__"
+              href="https://instagram.com/aerlion.systems"
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-primary transition-colors"
@@ -32,52 +54,53 @@ const Footer = forwardRef<HTMLElement>((_, ref) => {
               <Instagram size={20} />
             </a>
             <a
-              href="mailto:gustavoapm00@gmail.com"
+              href="mailto:contact@aerlion.systems"
               className="text-muted-foreground hover:text-primary transition-colors"
               aria-label="Email"
             >
               <Mail size={20} />
             </a>
           </div>
-
-          {/* Legal Links */}
-          <div className="flex items-center gap-4 text-xs text-muted-foreground/70">
-            <Link
-              to="/intellectual-property"
-              className="hover:text-muted-foreground transition-colors"
-            >
-              IP & Use
-            </Link>
-            <span className="text-muted-foreground/30">·</span>
-            <Link
-              to="/confidentiality"
-              className="hover:text-muted-foreground transition-colors"
-            >
-              Confidentiality
-            </Link>
-            <span className="text-muted-foreground/30">·</span>
-            <Link
-              to="/disclaimer"
-              className="hover:text-muted-foreground transition-colors"
-            >
-              Disclaimer
-            </Link>
-          </div>
-
-          {/* Copyright & Admin */}
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <span>© AERELION {currentYear}</span>
-            <a
-              href="/auth"
-              className="hover:text-primary transition-colors"
-            >
-              Admin
-            </a>
-          </div>
         </div>
 
-        <p className="text-center text-xs text-muted-foreground/60 mt-8">
-          This site shares personal experience, not medical or financial advice.
+        {/* Legal Links */}
+        <div className="flex flex-wrap items-center justify-center gap-4 mt-8 text-xs text-muted-foreground/70">
+          <Link
+            to="/intellectual-property"
+            className="hover:text-muted-foreground transition-colors"
+          >
+            IP & Use
+          </Link>
+          <span className="text-muted-foreground/30">·</span>
+          <Link
+            to="/confidentiality"
+            className="hover:text-muted-foreground transition-colors"
+          >
+            Confidentiality
+          </Link>
+          <span className="text-muted-foreground/30">·</span>
+          <Link
+            to="/disclaimer"
+            className="hover:text-muted-foreground transition-colors"
+          >
+            Disclaimer
+          </Link>
+          <span className="text-muted-foreground/30">·</span>
+          <Link
+            to="/contact"
+            className="hover:text-muted-foreground transition-colors"
+          >
+            Contact
+          </Link>
+        </div>
+
+        {/* Copyright */}
+        <div className="text-center mt-6 text-sm text-muted-foreground">
+          © AERELION {currentYear}
+        </div>
+
+        <p className="text-center text-xs text-muted-foreground/60 mt-4">
+          AERELION builds operational systems. We do not promise revenue outcomes or autonomous businesses.
         </p>
       </div>
     </footer>

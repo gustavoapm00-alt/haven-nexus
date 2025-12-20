@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Mail, Instagram, ArrowRight, Send } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Mail, Instagram, Send, ArrowRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { contactFormSchema } from '@/lib/validations';
@@ -62,8 +63,8 @@ const Contact = () => {
       if (error) throw error;
 
       toast({
-        title: "Message sent!",
-        description: "We'll get back to you within 24-48 hours.",
+        title: "Message received",
+        description: "We'll review your inquiry and respond within 24-48 hours.",
       });
 
       setFormData({ name: '', email: '', message: '' });
@@ -82,8 +83,8 @@ const Contact = () => {
     <div className="min-h-screen bg-background">
       <SEO 
         title="Contact"
-        description="Get in touch with Aerlion Systems. Contact us about AI automation, business automation solutions, or any questions. We respond within 24-48 hours."
-        keywords="contact Aerlion Systems, AI automation inquiry, business automation contact, get in touch"
+        description="Get in touch with AERELION Systems. For operational questions, system inquiries, or to start a conversation about your automation needs."
+        keywords="contact AERELION Systems, automation inquiry, operational systems contact"
         canonicalUrl="/contact"
         structuredData={schemas.breadcrumb([
           { name: 'Home', url: '/' },
@@ -100,12 +101,31 @@ const Contact = () => {
               <div className="text-center max-w-3xl mx-auto">
                 <span className="tag-chip mb-6">Contact</span>
                 <h1 className="font-display text-5xl md:text-6xl mb-6">
-                  LET'S <span className="text-gradient">TALK</span>
+                  START A <span className="text-gradient">CONVERSATION</span>
                 </h1>
                 <p className="text-xl text-muted-foreground">
-                  Ready to automate your business? Reach out and we'll get back to you 
-                  within 24-48 hours.
+                  Have a question or want to discuss your operational challenges? 
+                  We respond within 24-48 hours.
                 </p>
+              </div>
+            </ScrollReveal>
+          </div>
+        </section>
+
+        {/* Intake Prompt */}
+        <section className="section-padding pt-0">
+          <div className="container-main max-w-2xl">
+            <ScrollReveal>
+              <div className="card-glass p-6 rounded-lg text-center mb-12">
+                <h2 className="font-display text-xl mb-2">Looking to Engage?</h2>
+                <p className="text-muted-foreground text-sm mb-4">
+                  If you're ready to explore working with AERELION, the qualification intake 
+                  will route you to the right entry mode faster than a general message.
+                </p>
+                <Link to="/get-started" className="btn-primary inline-flex">
+                  Take the Intake Assessment
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
               </div>
             </ScrollReveal>
           </div>
@@ -120,8 +140,8 @@ const Contact = () => {
                 <div>
                   <h2 className="font-display text-3xl mb-6">GET IN TOUCH</h2>
                   <p className="text-muted-foreground mb-8">
-                    Whether you have a question about our services, pricing, or just want 
-                    to say hello, we'd love to hear from you.
+                    For general inquiries, questions about our capabilities, 
+                    or anything else — reach out below.
                   </p>
 
                   <div className="space-y-6">
@@ -133,7 +153,7 @@ const Contact = () => {
                         <Mail className="h-5 w-5 text-primary" />
                       </div>
                       <div>
-                        <p className="font-medium">Email Us</p>
+                        <p className="font-medium">Email</p>
                         <p className="text-muted-foreground text-sm">contact@aerlion.systems</p>
                       </div>
                     </a>
@@ -157,8 +177,8 @@ const Contact = () => {
                   <div className="mt-8 p-6 card-glass rounded-lg">
                     <h3 className="font-display text-xl mb-2">Response Time</h3>
                     <p className="text-muted-foreground text-sm">
-                      We typically respond within 24-48 business hours. For urgent matters, 
-                      reach out via Instagram DM for faster response.
+                      We typically respond within 24-48 business hours. For faster routing, 
+                      use the intake assessment above.
                     </p>
                   </div>
                 </div>
@@ -223,7 +243,7 @@ const Contact = () => {
                         className={`w-full px-4 py-3 bg-background border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors resize-none ${
                           errors.message ? 'border-destructive' : 'border-border'
                         }`}
-                        placeholder="Tell us about your project..."
+                        placeholder="Tell us about your operational challenges..."
                       />
                       {errors.message && (
                         <p className="text-destructive text-sm mt-1">{errors.message}</p>
@@ -233,7 +253,7 @@ const Contact = () => {
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="btn-primary w-full justify-center"
+                      className="btn-secondary w-full justify-center"
                     >
                       {isSubmitting ? (
                         'Sending...'
