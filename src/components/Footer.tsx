@@ -1,116 +1,84 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Instagram, Mail } from 'lucide-react';
 import { forwardRef } from 'react';
 
 const Footer = forwardRef<HTMLElement>((_, ref) => {
   const currentYear = new Date().getFullYear();
-  const location = useLocation();
-
-  const handleAnchorClick = (href: string) => {
-    if (location.pathname === '/') {
-      const targetId = href.replace('/#', '');
-      const element = document.getElementById(targetId);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
-      }
-    }
-  };
 
   return (
     <footer ref={ref} className="section-padding !py-12 bg-background border-t border-border/30">
       <div className="container-main">
-        <div className="grid md:grid-cols-4 gap-8 mb-8">
-          {/* Logo & Description */}
-          <div className="md:col-span-2">
-            <div className="font-display text-xl tracking-wide text-foreground mb-4">
-              AERELION
-            </div>
-            <p className="text-muted-foreground text-sm max-w-md">
-              We build workflow automations that replace repetitive manual work in 14 days. Fixed scope, fast delivery, documented handoff.
-            </p>
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+          {/* Logo */}
+          <div className="font-display text-xl tracking-wide text-foreground">
+            AERELION
           </div>
 
-          {/* Quick Links */}
-          <div>
-            <h4 className="font-medium text-sm uppercase tracking-wider mb-4">Quick Links</h4>
-            <div className="space-y-2 text-sm">
-              <Link
-                to="/#offer"
-                onClick={() => handleAnchorClick('/#offer')}
-                className="block text-muted-foreground hover:text-primary transition-colors"
-              >
-                Our Offer
-              </Link>
-              <Link
-                to="/#process"
-                onClick={() => handleAnchorClick('/#process')}
-                className="block text-muted-foreground hover:text-primary transition-colors"
-              >
-                How It Works
-              </Link>
-              <Link
-                to="/case-studies"
-                className="block text-muted-foreground hover:text-primary transition-colors"
-              >
-                Case Studies
-              </Link>
-              <Link
-                to="/#faq"
-                onClick={() => handleAnchorClick('/#faq')}
-                className="block text-muted-foreground hover:text-primary transition-colors"
-              >
-                FAQ
-              </Link>
-            </div>
+          {/* Navigation Links */}
+          <div className="flex items-center gap-6 text-sm">
+            <Link
+              to="/sanctuary"
+              className="text-muted-foreground hover:text-primary transition-colors"
+            >
+              Sanctuary
+            </Link>
+            <a
+              href="https://instagram.com/null.username__"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-muted-foreground hover:text-primary transition-colors"
+              aria-label="Instagram"
+            >
+              <Instagram size={20} />
+            </a>
+            <a
+              href="mailto:gustavoapm00@gmail.com"
+              className="text-muted-foreground hover:text-primary transition-colors"
+              aria-label="Email"
+            >
+              <Mail size={20} />
+            </a>
           </div>
 
-          {/* Contact */}
-          <div>
-            <h4 className="font-medium text-sm uppercase tracking-wider mb-4">Contact</h4>
-            <div className="space-y-2 text-sm">
-              <a
-                href="mailto:contact@aerelion.systems"
-                className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
-              >
-                <Mail size={16} />
-                contact@aerelion.systems
-              </a>
-              <a
-                href="https://instagram.com/aerelion.systems"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
-              >
-                <Instagram size={16} />
-                @aerelion.systems
-              </a>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-8 border-t border-border/30">
           {/* Legal Links */}
           <div className="flex items-center gap-4 text-xs text-muted-foreground/70">
             <Link
-              to="/privacy"
+              to="/intellectual-property"
               className="hover:text-muted-foreground transition-colors"
             >
-              Privacy Policy
+              IP & Use
             </Link>
             <span className="text-muted-foreground/30">·</span>
             <Link
-              to="/terms"
+              to="/confidentiality"
               className="hover:text-muted-foreground transition-colors"
             >
-              Terms
+              Confidentiality
+            </Link>
+            <span className="text-muted-foreground/30">·</span>
+            <Link
+              to="/disclaimer"
+              className="hover:text-muted-foreground transition-colors"
+            >
+              Disclaimer
             </Link>
           </div>
 
-          {/* Copyright */}
-          <div className="text-sm text-muted-foreground">
-            © {currentYear} AERELION Systems. All rights reserved.
+          {/* Copyright & Admin */}
+          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <span>© AERELION {currentYear}</span>
+            <a
+              href="/auth"
+              className="hover:text-primary transition-colors"
+            >
+              Admin
+            </a>
           </div>
         </div>
+
+        <p className="text-center text-xs text-muted-foreground/60 mt-8">
+          This site shares personal experience, not medical or financial advice.
+        </p>
       </div>
     </footer>
   );
