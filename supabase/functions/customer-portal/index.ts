@@ -7,8 +7,17 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const logStep = (step: string, details?: any) => {
-  const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
+// Log without exposing PII
+const logStep = (step: string, details?: Record<string, unknown>) => {
+  // Filter out sensitive fields
+  const safeDetails = details ? { ...details } : undefined;
+  if (safeDetails) {
+    delete safeDetails.email;
+    if (safeDetails.userId && typeof safeDetails.userId === 'string') {
+      safeDetails.userId = safeDetails.userId.substring(0, 8) + '...';
+    }
+  }
+  const detailsStr = safeDetails ? ` - ${JSON.stringify(safeDetails)}` : '';
   console.log(`[CUSTOMER-PORTAL] ${step}${detailsStr}`);
 };
 
@@ -22,7 +31,6 @@ serve(async (req) => {
 
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
-    logStep("Stripe key verified");
 
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
@@ -32,14 +40,13 @@ serve(async (req) => {
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("No authorization header provided");
-    logStep("Authorization header found");
 
     const token = authHeader.replace("Bearer ", "");
     const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
     if (userError) throw new Error(`Authentication error: ${userError.message}`);
     const user = userData.user;
     if (!user?.email) throw new Error("User not authenticated or email not available");
-    logStep("User authenticated", { userId: user.id, email: user.email });
+    logStep("User authenticated", { userId: user.id });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
@@ -54,7 +61,7 @@ serve(async (req) => {
       customer: customerId,
       return_url: `${origin}/admin`,
     });
-    logStep("Customer portal session created", { sessionId: portalSession.id, url: portalSession.url });
+    logStep("Customer portal session created", { sessionId: portalSession.id });
 
     return new Response(JSON.stringify({ url: portalSession.url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

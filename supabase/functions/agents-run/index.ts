@@ -7,6 +7,45 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+// In-memory rate limiter (per isolate)
+// Note: Edge functions may spawn multiple isolates, so this is best-effort
+// For production, consider using Redis or database-backed rate limiting
+const rateLimiter = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT_MAX = 10; // Max requests per window
+const RATE_LIMIT_WINDOW_MS = 60_000; // 1 minute window
+
+function checkRateLimit(userId: string): { allowed: boolean; remaining: number; resetIn: number } {
+  const now = Date.now();
+  const userLimit = rateLimiter.get(userId);
+  
+  // Clean up expired entries periodically
+  if (rateLimiter.size > 1000) {
+    for (const [key, value] of rateLimiter) {
+      if (value.resetAt < now) rateLimiter.delete(key);
+    }
+  }
+  
+  if (!userLimit || userLimit.resetAt < now) {
+    rateLimiter.set(userId, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return { allowed: true, remaining: RATE_LIMIT_MAX - 1, resetIn: RATE_LIMIT_WINDOW_MS };
+  }
+  
+  if (userLimit.count >= RATE_LIMIT_MAX) {
+    return { allowed: false, remaining: 0, resetIn: userLimit.resetAt - now };
+  }
+  
+  userLimit.count++;
+  return { allowed: true, remaining: RATE_LIMIT_MAX - userLimit.count, resetIn: userLimit.resetAt - now };
+}
+
+// Mask sensitive data for logging
+function maskEmail(email: string): string {
+  const [local, domain] = email.split('@');
+  if (!domain) return '***@***';
+  const maskedLocal = local.length > 2 ? local[0] + '***' + local[local.length - 1] : '***';
+  return `${maskedLocal}@${domain}`;
+}
+
 serve(async (req) => {
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
@@ -26,13 +65,21 @@ serve(async (req) => {
       );
     }
 
+    // Validate agent_key format (alphanumeric, underscores, hyphens only)
+    if (!/^[a-zA-Z0-9_-]{1,64}$/.test(agent_key)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid agent_key format" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // 2. Validate environment configuration
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
 
     if (!supabaseUrl || !supabaseServiceKey) {
-      console.error("Missing required environment variables: SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
+      console.error("[agents-run] Missing required environment variables");
       return new Response(
         JSON.stringify({ error: "Server configuration error" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -40,7 +87,7 @@ serve(async (req) => {
     }
 
     if (!lovableApiKey) {
-      console.error("LOVABLE_API_KEY is not configured");
+      console.error("[agents-run] LOVABLE_API_KEY is not configured");
       return new Response(
         JSON.stringify({ error: "AI service not configured" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -70,7 +117,32 @@ serve(async (req) => {
       );
     }
 
-    // 4. Get user's org
+    // 4. Rate limiting check
+    const rateCheck = checkRateLimit(user.id);
+    if (!rateCheck.allowed) {
+      console.log(`[agents-run] Rate limit exceeded for user ${user.id.substring(0, 8)}...`);
+      return new Response(
+        JSON.stringify({ 
+          error: "Rate limit exceeded. Please try again later.",
+          retry_after_ms: rateCheck.resetIn
+        }),
+        { 
+          status: 429, 
+          headers: { 
+            ...corsHeaders, 
+            "Content-Type": "application/json",
+            "Retry-After": Math.ceil(rateCheck.resetIn / 1000).toString(),
+            "X-RateLimit-Remaining": "0",
+            "X-RateLimit-Reset": Math.ceil(Date.now() / 1000 + rateCheck.resetIn / 1000).toString()
+          } 
+        }
+      );
+    }
+
+    // Log without PII
+    console.log(`[agents-run] Request from user ${user.id.substring(0, 8)}... for agent: ${agent_key}`);
+
+    // 5. Get user's org
     const { data: orgMembership, error: orgError } = await supabase
       .from("org_members")
       .select("org_id")
@@ -86,7 +158,7 @@ serve(async (req) => {
 
     const orgId = orgMembership.org_id;
 
-    // 5. Verify subscription status
+    // 6. Verify subscription status
     const { data: subscription, error: subError } = await supabase
       .from("org_subscriptions")
       .select("*, plans(*)")
@@ -95,7 +167,7 @@ serve(async (req) => {
 
     if (subError || !subscription) {
       return new Response(
-        JSON.stringify({ error: "No active subscription", hint: "Please select a plan at /pricing/ecom" }),
+        JSON.stringify({ error: "No active subscription", hint: "Please select a plan at /pricing" }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -107,7 +179,7 @@ serve(async (req) => {
       );
     }
 
-    // 6. Check entitlement
+    // 7. Check entitlement
     const { data: entitlement, error: entError } = await supabase
       .from("plan_entitlements")
       .select("*")
@@ -123,7 +195,7 @@ serve(async (req) => {
       );
     }
 
-    // 7. Check usage limits
+    // 8. Check usage limits
     const plan = subscription.plans as any;
     if (subscription.runs_used_this_period >= plan.monthly_run_limit) {
       return new Response(
@@ -136,7 +208,7 @@ serve(async (req) => {
       );
     }
 
-    // 8. Load agent template
+    // 9. Load agent template
     const { data: agent, error: agentError } = await supabase
       .from("agent_catalog")
       .select("*")
@@ -151,14 +223,27 @@ serve(async (req) => {
       );
     }
 
-    // 9. Insert run record
+    // 10. Validate and sanitize input
+    const sanitizedInput: Record<string, string> = {};
+    const inputData = input_json || {};
+    
+    // Limit input size and sanitize values
+    for (const [key, value] of Object.entries(inputData)) {
+      // Skip invalid keys
+      if (typeof key !== 'string' || key.length > 64) continue;
+      // Limit value length
+      const strValue = String(value || "").substring(0, 10000);
+      sanitizedInput[key] = strValue;
+    }
+
+    // 11. Insert run record
     const { data: run, error: insertError } = await supabase
       .from("agent_runs")
       .insert({
         org_id: orgId,
         agent_key,
         status: "running",
-        input_json: input_json || {},
+        input_json: sanitizedInput,
         idempotency_key: idempotency_key || null,
       })
       .select()
@@ -187,26 +272,25 @@ serve(async (req) => {
           );
         }
       }
-      console.error("Insert error:", insertError);
+      console.error("[agents-run] Insert error:", insertError.message);
       return new Response(
-        JSON.stringify({ error: "Failed to create run", details: insertError.message }),
+        JSON.stringify({ error: "Failed to create run" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     runId = run.id;
 
-    // 10. Render user prompt template
+    // 12. Render user prompt template
     let userPrompt = agent.user_prompt_template;
-    const inputData = input_json || {};
-    for (const [key, value] of Object.entries(inputData)) {
-      userPrompt = userPrompt.replace(new RegExp(`\\{\\{${key}\\}\\}`, "g"), String(value || ""));
+    for (const [key, value] of Object.entries(sanitizedInput)) {
+      userPrompt = userPrompt.replace(new RegExp(`\\{\\{${key}\\}\\}`, "g"), value);
     }
     // Remove any remaining placeholders
     userPrompt = userPrompt.replace(/\{\{\w+\}\}/g, "[not provided]");
 
-    // 11. Call Lovable AI
-    console.log(`[agents-run] Calling Lovable AI for agent ${agent_key}, run ${runId}`);
+    // 13. Call Lovable AI
+    console.log(`[agents-run] Calling AI for run ${runId?.substring(0, 8) ?? 'unknown'}...`);
 
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -236,7 +320,7 @@ serve(async (req) => {
 
     if (!aiResponse.ok) {
       const errorBody = await aiResponse.text();
-      console.error(`[agents-run] Lovable AI error: ${aiResponse.status} ${errorBody}`);
+      console.error(`[agents-run] AI error: ${aiResponse.status}`);
 
       // Handle rate limiting
       if (aiResponse.status === 429) {
@@ -265,7 +349,7 @@ serve(async (req) => {
 
       await supabase
         .from("agent_runs")
-        .update({ status: "failed", error: `AI error: ${aiResponse.status} ${errorBody.substring(0, 500)}` })
+        .update({ status: "failed", error: `AI error: ${aiResponse.status}` })
         .eq("id", runId);
 
       return new Response(
@@ -291,7 +375,7 @@ serve(async (req) => {
       outputText = aiData.choices?.[0]?.message?.content || "";
     }
 
-    // 12. Update run with result and increment usage
+    // 14. Update run with result and increment usage
     await supabase
       .from("agent_runs")
       .update({ 
@@ -308,7 +392,7 @@ serve(async (req) => {
       })
       .eq("org_id", orgId);
 
-    console.log(`[agents-run] Successfully completed run ${runId}`);
+    console.log(`[agents-run] Completed run ${runId?.substring(0, 8) ?? 'unknown'}...`);
 
     return new Response(
       JSON.stringify({ 
@@ -317,14 +401,20 @@ serve(async (req) => {
         output_text: outputText,
         output_json: outputJson,
       }),
-      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { 
+        status: 200, 
+        headers: { 
+          ...corsHeaders, 
+          "Content-Type": "application/json",
+          "X-RateLimit-Remaining": rateCheck.remaining.toString()
+        } 
+      }
     );
 
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    const errorStack = error instanceof Error ? error.stack : undefined;
     
-    console.error("[agents-run] Unhandled error:", errorMessage, errorStack);
+    console.error("[agents-run] Error:", errorMessage);
 
     // Update run status if we have a runId
     if (runId) {

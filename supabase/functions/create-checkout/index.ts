@@ -7,8 +7,17 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const logStep = (step: string, details?: any) => {
-  const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
+// Log without exposing PII
+const logStep = (step: string, details?: Record<string, unknown>) => {
+  // Filter out sensitive fields
+  const safeDetails = details ? { ...details } : undefined;
+  if (safeDetails) {
+    delete safeDetails.email;
+    if (safeDetails.userId && typeof safeDetails.userId === 'string') {
+      safeDetails.userId = safeDetails.userId.substring(0, 8) + '...';
+    }
+  }
+  const detailsStr = safeDetails ? ` - ${JSON.stringify(safeDetails)}` : '';
   console.log(`[CREATE-CHECKOUT] ${step}${detailsStr}`);
 };
 
@@ -27,6 +36,11 @@ serve(async (req) => {
 
     const { priceId } = await req.json();
     if (!priceId) throw new Error("Price ID is required");
+    
+    // Validate priceId format (Stripe price IDs start with "price_")
+    if (typeof priceId !== 'string' || !priceId.startsWith('price_')) {
+      throw new Error("Invalid price ID format");
+    }
     logStep("Price ID received", { priceId });
 
     const authHeader = req.headers.get("Authorization")!;
@@ -34,7 +48,7 @@ serve(async (req) => {
     const { data } = await supabaseClient.auth.getUser(token);
     const user = data.user;
     if (!user?.email) throw new Error("User not authenticated or email not available");
-    logStep("User authenticated", { userId: user.id, email: user.email });
+    logStep("User authenticated", { userId: user.id });
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", { apiVersion: "2025-08-27.basil" });
     
@@ -62,7 +76,7 @@ serve(async (req) => {
       cancel_url: `${origin}/pricing?checkout=cancelled`,
     });
 
-    logStep("Checkout session created", { sessionId: session.id, url: session.url });
+    logStep("Checkout session created", { sessionId: session.id });
 
     return new Response(JSON.stringify({ url: session.url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
