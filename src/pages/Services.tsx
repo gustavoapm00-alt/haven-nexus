@@ -43,7 +43,7 @@ const offers: Offer[] = [
     timeline: 'Day 1–2 Audit • Day 3–10 Build • Day 11–14 Launch',
     pricing: 'Starting at $1,500 • Optional monthly support',
     primaryCta: { label: 'Book a Free Automation Audit', href: '/contact' },
-    secondaryCta: { label: 'See What We Automate', href: '#what-we-automate' }
+    secondaryCta: { label: 'See What We Automate', href: '/services#what-we-automate' }
   },
   {
     icon: Settings,
@@ -188,12 +188,43 @@ const Services = () => {
                       )}
                       {offer.secondaryCta && (
                         <Button asChild variant="ghost" className="w-full">
-                          <Link to={offer.secondaryCta.href}>
+                          <a href={offer.secondaryCta.href}>
                             {offer.secondaryCta.label}
-                          </Link>
+                          </a>
                         </Button>
                       )}
                     </div>
+                  </div>
+                </ScrollReveal>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* What We Automate Section */}
+        <section id="what-we-automate" className="section-padding bg-card/20">
+          <div className="container-main">
+            <ScrollReveal>
+              <div className="text-center mb-12">
+                <span className="tag-chip mb-4">What We Automate</span>
+                <h2 className="font-display text-4xl md:text-5xl mb-4">
+                  COMMON <span className="text-gradient">WORKFLOWS</span>
+                </h2>
+              </div>
+            </ScrollReveal>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[
+                { title: 'Lead Intake', desc: 'Forms → CRM → instant routing to the right person' },
+                { title: 'Follow-Up Sequences', desc: 'Email/SMS drips that run on autopilot' },
+                { title: 'Task Assignment', desc: 'Auto-create tasks in ClickUp, Trello, Asana' },
+                { title: 'Data Sync', desc: 'Keep your tools in sync without copy-paste' },
+                { title: 'Reporting Dashboards', desc: 'Real-time visibility into your pipeline' },
+                { title: 'Client Onboarding', desc: 'Automated welcome flows and checklist delivery' }
+              ].map((item, idx) => (
+                <ScrollReveal key={idx} delay={idx * 0.05}>
+                  <div className="card-glass p-6 rounded-lg">
+                    <h3 className="font-display text-lg mb-2 text-primary">{item.title}</h3>
+                    <p className="text-sm text-muted-foreground">{item.desc}</p>
                   </div>
                 </ScrollReveal>
               ))}
