@@ -4,12 +4,12 @@ import { Menu, X, User } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
 const navLinks = [
-  { name: 'Home', href: '/' },
-  { name: 'Services', href: '/services' },
-  { name: 'Pricing', href: '/pricing' },
-  { name: 'About', href: '/about' },
-  { name: 'Sanctuary', href: '/sanctuary' },
-  { name: 'Contact', href: '/contact' },
+  { name: 'Offer', href: '/#offer' },
+  { name: 'Process', href: '/#process' },
+  { name: 'Case Studies', href: '/#case-studies' },
+  { name: 'Coming Soon', href: '/#coming-soon' },
+  { name: 'FAQ', href: '/#faq' },
+  { name: 'Contact', href: '/#contact' },
 ];
 
 const Navbar = forwardRef<HTMLElement>((_, ref) => {
@@ -26,12 +26,31 @@ const Navbar = forwardRef<HTMLElement>((_, ref) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleLinkClick = () => {
+  const handleLinkClick = (href: string) => {
     setIsMobileMenuOpen(false);
+    
+    // Handle anchor links
+    if (href.startsWith('/#')) {
+      const targetId = href.replace('/#', '');
+      
+      // If we're on the home page, scroll to section
+      if (location.pathname === '/') {
+        const element = document.getElementById(targetId);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
+      // If we're not on home page, navigation will handle it
+    }
   };
 
-  const isActive = (href: string) => {
-    return location.pathname === href;
+  const scrollToContact = () => {
+    setIsMobileMenuOpen(false);
+    if (location.pathname === '/') {
+      document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      window.location.href = '/#contact';
+    }
   };
 
   return (
@@ -45,27 +64,24 @@ const Navbar = forwardRef<HTMLElement>((_, ref) => {
     >
       <div className="container-main section-padding !py-4 flex items-center justify-between">
         <Link to="/" className="font-display text-2xl tracking-wide text-foreground">
-          AERLION
+          AERELION
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden lg:flex items-center gap-6">
           {navLinks.map((link) => (
             <Link
               key={link.name}
               to={link.href}
-              className={`text-sm font-medium transition-colors duration-300 uppercase tracking-wider ${
-                isActive(link.href)
-                  ? 'text-primary'
-                  : 'text-muted-foreground hover:text-primary'
-              }`}
+              onClick={() => handleLinkClick(link.href)}
+              className="text-sm font-medium transition-colors duration-300 uppercase tracking-wider text-muted-foreground hover:text-primary"
             >
               {link.name}
             </Link>
           ))}
-          <Link to="/pricing" className="btn-primary !py-2 !px-4 text-xs">
-            Start Free Trial
-          </Link>
+          <button onClick={scrollToContact} className="btn-primary !py-2 !px-4 text-xs">
+            Book a Free Audit
+          </button>
           {!isLoading && (
             <Link 
               to={user ? "/admin" : "/auth"} 
@@ -79,7 +95,7 @@ const Navbar = forwardRef<HTMLElement>((_, ref) => {
 
         {/* Mobile Menu Button */}
         <button
-          className="md:hidden text-foreground p-2"
+          className="lg:hidden text-foreground p-2"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           aria-label="Toggle menu"
         >
@@ -89,7 +105,7 @@ const Navbar = forwardRef<HTMLElement>((_, ref) => {
 
       {/* Mobile Menu */}
       <div
-        className={`md:hidden absolute top-full left-0 right-0 bg-background/95 backdrop-blur-md border-b border-border transition-all duration-300 ${
+        className={`lg:hidden absolute top-full left-0 right-0 bg-background/95 backdrop-blur-md border-b border-border transition-all duration-300 ${
           isMobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
         }`}
       >
@@ -98,28 +114,23 @@ const Navbar = forwardRef<HTMLElement>((_, ref) => {
             <Link
               key={link.name}
               to={link.href}
-              onClick={handleLinkClick}
-              className={`px-6 py-3 text-sm font-medium transition-colors duration-300 uppercase tracking-wider ${
-                isActive(link.href)
-                  ? 'text-primary bg-secondary/50'
-                  : 'text-muted-foreground hover:text-primary hover:bg-secondary/50'
-              }`}
+              onClick={() => handleLinkClick(link.href)}
+              className="px-6 py-3 text-sm font-medium transition-colors duration-300 uppercase tracking-wider text-muted-foreground hover:text-primary hover:bg-secondary/50"
             >
               {link.name}
             </Link>
           ))}
           <div className="px-6 py-3 space-y-2">
-            <Link 
-              to="/pricing" 
-              onClick={handleLinkClick}
+            <button 
+              onClick={scrollToContact}
               className="btn-primary !py-2 !px-4 text-xs w-full justify-center"
             >
-              Start Free Trial
-            </Link>
+              Book a Free Audit
+            </button>
             {!isLoading && (
               <Link 
                 to={user ? "/admin" : "/auth"} 
-                onClick={handleLinkClick}
+                onClick={() => setIsMobileMenuOpen(false)}
                 className="flex items-center justify-center gap-2 py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
               >
                 <User className="w-4 h-4" />
