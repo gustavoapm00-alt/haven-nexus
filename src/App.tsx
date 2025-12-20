@@ -2,16 +2,19 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { useEffect } from "react";
 import { AuthProvider } from "@/hooks/useAuth";
 import { SubscriptionProvider } from "@/hooks/useSubscription";
 
 import Index from "./pages/Index";
-import Services from "./pages/Services";
+import Capabilities from "./pages/Capabilities";
 import Pricing from "./pages/Pricing";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
+import GetStarted from "./pages/GetStarted";
+import Reliability from "./pages/Reliability";
+import Proof from "./pages/Proof";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import Refund from "./pages/Refund";
@@ -23,7 +26,6 @@ import Admin from "./pages/Admin";
 import ResetPassword from "./pages/ResetPassword";
 import Sanctuary from "./pages/Sanctuary";
 import Dashboard from "./pages/Dashboard";
-// EcomPricing removed - consolidated into Pricing.tsx
 import AgentRun from "./pages/agents/AgentRun";
 import StudioAgents from "./pages/studio/StudioAgents";
 import StudioPlans from "./pages/studio/StudioPlans";
@@ -54,10 +56,15 @@ const App = () => (
           <SubscriptionProvider>
             <Routes>
               <Route path="/" element={<Index />} />
-              <Route path="/services" element={<Services />} />
+              <Route path="/capabilities" element={<Capabilities />} />
+              {/* Legacy /services redirect */}
+              <Route path="/services" element={<Navigate to="/capabilities" replace />} />
               <Route path="/pricing" element={<Pricing />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
+              <Route path="/get-started" element={<GetStarted />} />
+              <Route path="/reliability" element={<Reliability />} />
+              <Route path="/proof" element={<Proof />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/refund" element={<Refund />} />
@@ -69,7 +76,6 @@ const App = () => (
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/sanctuary" element={<Sanctuary />} />
               <Route path="/dashboard" element={<Dashboard />} />
-              {/* Legacy /pricing/ecom route removed - consolidated into /pricing */}
               <Route path="/agents/:agentKey" element={<AgentRun />} />
               {/* Admin Studio Routes */}
               <Route path="/studio/agents" element={<StudioAgents />} />
