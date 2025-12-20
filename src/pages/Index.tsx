@@ -5,39 +5,32 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ScrollReveal from '@/components/ScrollReveal';
 import SEO from '@/components/SEO';
-
-const features = [
-  {
-    icon: Bot,
-    title: 'Custom AI Agents',
-    description: 'Intelligent automation that handles customer service, lead qualification, and routine tasks 24/7.'
-  },
-  {
-    icon: Workflow,
-    title: 'Automated Workflows',
-    description: 'Streamline operations with smart processes that connect your tools and eliminate manual work.'
-  },
-  {
-    icon: ShoppingBag,
-    title: 'E-Commerce Solutions',
-    description: 'Complete Shopify builds with AI-powered inventory, pricing, and customer engagement systems.'
-  }
-];
-
-const benefits = [
-  { icon: Clock, text: 'Save 20+ hours per week' },
-  { icon: Shield, text: 'Enterprise-grade security' },
-  { icon: Zap, text: 'Deploy in days, not months' }
-];
-
+const features = [{
+  icon: Bot,
+  title: 'Custom AI Agents',
+  description: 'Intelligent automation that handles customer service, lead qualification, and routine tasks 24/7.'
+}, {
+  icon: Workflow,
+  title: 'Automated Workflows',
+  description: 'Streamline operations with smart processes that connect your tools and eliminate manual work.'
+}, {
+  icon: ShoppingBag,
+  title: 'E-Commerce Solutions',
+  description: 'Complete Shopify builds with AI-powered inventory, pricing, and customer engagement systems.'
+}];
+const benefits = [{
+  icon: Clock,
+  text: 'Save 20+ hours per week'
+}, {
+  icon: Shield,
+  text: 'Enterprise-grade security'
+}, {
+  icon: Zap,
+  text: 'Deploy in days, not months'
+}];
 const Index = () => {
-  return (
-    <div className="min-h-screen bg-background">
-      <SEO 
-        canonicalUrl="/"
-        description="Aerlion Systems builds intelligent automation solutions that handle repetitive tasks so you can focus on growth. AI agents, workflows, and e-commerce solutions."
-        keywords="AI automation, business automation, AI agents, workflow automation, e-commerce automation, Shopify development"
-      />
+  return <div className="min-h-screen bg-background">
+      <SEO canonicalUrl="/" description="Aerlion Systems builds intelligent automation solutions that handle repetitive tasks so you can focus on growth. AI agents, workflows, and e-commerce solutions." keywords="AI automation, business automation, AI agents, workflow automation, e-commerce automation, Shopify development" />
       <Navbar />
       
       <main>
@@ -51,40 +44,53 @@ const Index = () => {
 
           <div className="container-main relative z-10">
             <div className="max-w-4xl">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-              >
+              <motion.div initial={{
+              opacity: 0,
+              y: 20
+            }} animate={{
+              opacity: 1,
+              y: 0
+            }} transition={{
+              duration: 0.6
+            }}>
                 <span className="tag-chip mb-6">AI-Powered Automation Platform</span>
               </motion.div>
 
-              <motion.h1
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.1 }}
-                className="font-display text-5xl md:text-6xl lg:text-7xl mb-6"
-              >
+              <motion.h1 initial={{
+              opacity: 0,
+              y: 20
+            }} animate={{
+              opacity: 1,
+              y: 0
+            }} transition={{
+              duration: 0.6,
+              delay: 0.1
+            }} className="font-display text-5xl md:text-6xl lg:text-7xl mb-6">
                 AUTOMATE YOUR BUSINESS.{' '}
                 <span className="text-gradient">SCALE WITHOUT LIMITS.</span>
               </motion.h1>
 
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="text-xl text-muted-foreground mb-10 max-w-2xl"
-              >
-                Aerlion Systems builds intelligent automation solutions that handle 
-                your repetitive tasks, so you can focus on growth.
-              </motion.p>
+              <motion.p initial={{
+              opacity: 0,
+              y: 20
+            }} animate={{
+              opacity: 1,
+              y: 0
+            }} transition={{
+              duration: 0.6,
+              delay: 0.2
+            }} className="text-xl text-muted-foreground mb-10 max-w-2xl">Aerelion Systems builds intelligent automation solutions that handle your repetitive tasks, so you can focus on growth.</motion.p>
 
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.3 }}
-                className="flex flex-wrap gap-4"
-              >
+              <motion.div initial={{
+              opacity: 0,
+              y: 20
+            }} animate={{
+              opacity: 1,
+              y: 0
+            }} transition={{
+              duration: 0.6,
+              delay: 0.3
+            }} className="flex flex-wrap gap-4">
                 <Link to="/pricing" className="btn-primary">
                   Start Free Trial
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -94,18 +100,20 @@ const Index = () => {
                 </Link>
               </motion.div>
 
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-                className="flex flex-wrap gap-6 mt-12"
-              >
-                {benefits.map((benefit, index) => (
-                  <div key={index} className="flex items-center gap-2 text-muted-foreground">
+              <motion.div initial={{
+              opacity: 0,
+              y: 20
+            }} animate={{
+              opacity: 1,
+              y: 0
+            }} transition={{
+              duration: 0.6,
+              delay: 0.4
+            }} className="flex flex-wrap gap-6 mt-12">
+                {benefits.map((benefit, index) => <div key={index} className="flex items-center gap-2 text-muted-foreground">
                     <benefit.icon className="h-4 w-4 text-primary" />
                     <span className="text-sm">{benefit.text}</span>
-                  </div>
-                ))}
+                  </div>)}
               </motion.div>
             </div>
           </div>
@@ -181,15 +189,13 @@ const Index = () => {
             </ScrollReveal>
 
             <div className="grid md:grid-cols-3 gap-8">
-              {features.map((feature, index) => (
-                <ScrollReveal key={index} delay={index * 0.1}>
+              {features.map((feature, index) => <ScrollReveal key={index} delay={index * 0.1}>
                   <div className="card-glass p-8 rounded-lg h-full">
                     <feature.icon className="h-12 w-12 text-primary mb-6" />
                     <h3 className="font-display text-2xl mb-4">{feature.title}</h3>
                     <p className="text-muted-foreground">{feature.description}</p>
                   </div>
-                </ScrollReveal>
-              ))}
+                </ScrollReveal>)}
             </div>
 
             <ScrollReveal delay={0.3}>
@@ -231,8 +237,6 @@ const Index = () => {
       </main>
 
       <Footer />
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
