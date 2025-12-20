@@ -5,11 +5,11 @@ import { useAuth } from '@/hooks/useAuth';
 
 const navLinks = [
   { name: 'Home', href: '/' },
-  { name: 'Services', href: '/services' },
-  { name: 'Pricing', href: '/pricing' },
+  { name: 'Capabilities', href: '/capabilities' },
+  { name: 'Reliability', href: '/reliability' },
+  { name: 'Proof', href: '/proof' },
   { name: 'About', href: '/about' },
   { name: 'Sanctuary', href: '/sanctuary' },
-  { name: 'Contact', href: '/contact' },
 ];
 
 const Navbar = forwardRef<HTMLElement>((_, ref) => {
@@ -63,8 +63,8 @@ const Navbar = forwardRef<HTMLElement>((_, ref) => {
               {link.name}
             </Link>
           ))}
-          <Link to="/pricing" className="btn-primary !py-2 !px-4 text-xs">
-            Start Free Trial
+          <Link to="/get-started" className="btn-primary !py-2 !px-4 text-xs">
+            Get Started
           </Link>
           {!isLoading && (
             <Link 
@@ -110,11 +110,11 @@ const Navbar = forwardRef<HTMLElement>((_, ref) => {
           ))}
           <div className="px-6 py-3 space-y-2">
             <Link 
-              to="/pricing" 
+              to="/get-started" 
               onClick={handleLinkClick}
               className="btn-primary !py-2 !px-4 text-xs w-full justify-center"
             >
-              Start Free Trial
+              Get Started
             </Link>
             {!isLoading && (
               <Link 
