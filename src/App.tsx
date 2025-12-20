@@ -23,7 +23,7 @@ import Admin from "./pages/Admin";
 import ResetPassword from "./pages/ResetPassword";
 import Sanctuary from "./pages/Sanctuary";
 import Dashboard from "./pages/Dashboard";
-import EcomPricing from "./pages/pricing/EcomPricing";
+// EcomPricing removed - consolidated into Pricing.tsx
 import AgentRun from "./pages/agents/AgentRun";
 import StudioAgents from "./pages/studio/StudioAgents";
 import StudioPlans from "./pages/studio/StudioPlans";
@@ -69,7 +69,7 @@ const App = () => (
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/sanctuary" element={<Sanctuary />} />
               <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/pricing/ecom" element={<EcomPricing />} />
+              {/* Legacy /pricing/ecom route removed - consolidated into /pricing */}
               <Route path="/agents/:agentKey" element={<AgentRun />} />
               {/* Admin Studio Routes */}
               <Route path="/studio/agents" element={<StudioAgents />} />
