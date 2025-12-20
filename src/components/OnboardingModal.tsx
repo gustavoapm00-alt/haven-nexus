@@ -19,9 +19,9 @@ const steps = [
   {
     id: 'agents',
     icon: Bot,
-    title: 'Agent Registry',
-    description: 'Register and manage your AI agents here. Connect to Relevance AI or configure custom workflows.',
-    highlight: 'Your agents, your rules.',
+    title: 'AI Agents',
+    description: 'Access prebuilt AI agents for your business. Run them with custom inputs and get instant results.',
+    highlight: 'Powerful AI at your fingertips.',
   },
   {
     id: 'run',
