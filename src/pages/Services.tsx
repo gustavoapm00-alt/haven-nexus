@@ -43,7 +43,7 @@ const offers: Offer[] = [
     timeline: 'Day 1–2 Audit • Day 3–10 Build • Day 11–14 Launch',
     pricing: 'Starting at $1,500 • Optional monthly support',
     primaryCta: { label: 'Book a Free Automation Audit', href: '/contact' },
-    secondaryCta: { label: 'See What We Automate', href: '/services#what-we-automate' }
+    secondaryCta: { label: 'See What We Automate', href: '#what-we-automate' }
   },
   {
     icon: Settings,
