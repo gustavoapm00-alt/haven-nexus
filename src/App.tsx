@@ -8,7 +8,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { SubscriptionProvider } from "@/hooks/useSubscription";
 
 // Access gate - set to true to lock site
-const SITE_LOCKED = true;
+const SITE_LOCKED = false;
 
 import RequestAccess from "./pages/RequestAccess";
 import Index from "./pages/Index";
