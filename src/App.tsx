@@ -7,6 +7,10 @@ import { useEffect } from "react";
 import { AuthProvider } from "@/hooks/useAuth";
 import { SubscriptionProvider } from "@/hooks/useSubscription";
 
+// Access gate - set to true to lock site
+const SITE_LOCKED = true;
+
+import RequestAccess from "./pages/RequestAccess";
 import Index from "./pages/Index";
 import Capabilities from "./pages/Capabilities";
 import Pricing from "./pages/Pricing";
@@ -44,6 +48,52 @@ const ScrollToTop = () => {
   return null;
 };
 
+// Locked site shows only request access page (except auth/admin routes)
+const LockedApp = () => (
+  <Routes>
+    <Route path="/" element={<RequestAccess />} />
+    <Route path="/auth" element={<Auth />} />
+    <Route path="/admin" element={<Admin />} />
+    <Route path="/reset-password" element={<ResetPassword />} />
+    <Route path="/dashboard" element={<Dashboard />} />
+    <Route path="/agents/:agentKey" element={<AgentRun />} />
+    <Route path="/studio/agents" element={<StudioAgents />} />
+    <Route path="/studio/plans" element={<StudioPlans />} />
+    <Route path="/studio/entitlements" element={<StudioEntitlements />} />
+    <Route path="*" element={<RequestAccess />} />
+  </Routes>
+);
+
+const UnlockedApp = () => (
+  <Routes>
+    <Route path="/" element={<Index />} />
+    <Route path="/capabilities" element={<Capabilities />} />
+    <Route path="/services" element={<Navigate to="/capabilities" replace />} />
+    <Route path="/pricing" element={<Pricing />} />
+    <Route path="/about" element={<About />} />
+    <Route path="/contact" element={<Contact />} />
+    <Route path="/get-started" element={<GetStarted />} />
+    <Route path="/reliability" element={<Reliability />} />
+    <Route path="/proof" element={<Proof />} />
+    <Route path="/terms" element={<Terms />} />
+    <Route path="/privacy" element={<Privacy />} />
+    <Route path="/refund" element={<Refund />} />
+    <Route path="/intellectual-property" element={<IntellectualProperty />} />
+    <Route path="/confidentiality" element={<Confidentiality />} />
+    <Route path="/disclaimer" element={<Disclaimer />} />
+    <Route path="/auth" element={<Auth />} />
+    <Route path="/admin" element={<Admin />} />
+    <Route path="/reset-password" element={<ResetPassword />} />
+    <Route path="/sanctuary" element={<Sanctuary />} />
+    <Route path="/dashboard" element={<Dashboard />} />
+    <Route path="/agents/:agentKey" element={<AgentRun />} />
+    <Route path="/studio/agents" element={<StudioAgents />} />
+    <Route path="/studio/plans" element={<StudioPlans />} />
+    <Route path="/studio/entitlements" element={<StudioEntitlements />} />
+    <Route path="*" element={<NotFound />} />
+  </Routes>
+);
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -54,36 +104,7 @@ const App = () => (
         <ScrollToTop />
         <AuthProvider>
           <SubscriptionProvider>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/capabilities" element={<Capabilities />} />
-              {/* Legacy /services redirect */}
-              <Route path="/services" element={<Navigate to="/capabilities" replace />} />
-              <Route path="/pricing" element={<Pricing />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/get-started" element={<GetStarted />} />
-              <Route path="/reliability" element={<Reliability />} />
-              <Route path="/proof" element={<Proof />} />
-              <Route path="/terms" element={<Terms />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/refund" element={<Refund />} />
-              <Route path="/intellectual-property" element={<IntellectualProperty />} />
-              <Route path="/confidentiality" element={<Confidentiality />} />
-              <Route path="/disclaimer" element={<Disclaimer />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/admin" element={<Admin />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              <Route path="/sanctuary" element={<Sanctuary />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/agents/:agentKey" element={<AgentRun />} />
-              {/* Admin Studio Routes */}
-              <Route path="/studio/agents" element={<StudioAgents />} />
-              <Route path="/studio/plans" element={<StudioPlans />} />
-              <Route path="/studio/entitlements" element={<StudioEntitlements />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            {SITE_LOCKED ? <LockedApp /> : <UnlockedApp />}
           </SubscriptionProvider>
         </AuthProvider>
       </BrowserRouter>
