@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRight, Workflow, Eye, FileText, Layers, CircuitBoard, Search, Compass } from 'lucide-react';
+import { ArrowRight, Workflow, Eye, FileText, Layers, CircuitBoard, Compass, Search } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ScrollReveal from '@/components/ScrollReveal';
@@ -38,8 +38,8 @@ const entryModes = [
   {
     icon: Compass,
     title: 'Guided System Deployment',
-    subtitle: 'Primary Engagement',
-    description: 'We design and deploy operational systems for you. Assessment, architecture, implementation, and handoff—all handled.',
+    subtitle: 'Primary Entry Mode',
+    description: 'We act as your system architect and deployer. Assessment, architecture, implementation, dashboards, and handoff—all handled.',
     whoFor: 'Operators overwhelmed by manual work who want relief and systems that run without them.',
     cta: { label: 'Request Deployment', href: '/get-started?mode=deployment' },
     highlight: true
@@ -75,7 +75,7 @@ const Index = () => {
       <Navbar />
       
       <main>
-        {/* Hero Section */}
+        {/* Hero Section - Targeting Overloaded Operator */}
         <section className="relative min-h-screen flex items-center section-padding pt-32">
           {/* Background Effects */}
           <div className="absolute inset-0 overflow-hidden">
@@ -144,7 +144,7 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Problem Recognition Section */}
+        {/* Problem Recognition Section - Mental Overload Focus */}
         <section className="section-padding bg-card/30">
           <div className="container-main">
             <ScrollReveal>
@@ -155,19 +155,23 @@ const Index = () => {
                   </h2>
                   <p className="text-muted-foreground mb-4">
                     You're competent—but you're overwhelmed. The business works because you hold it together. 
-                    Leads slip. Tasks pile up. You're always reacting.
+                    Mental notes everywhere. Leads slipping. Tasks piling up. You're always reacting, never building.
                   </p>
                   <ul className="space-y-3 text-muted-foreground">
                     <li className="flex items-start gap-3">
-                      <span className="w-1.5 h-1.5 rounded-full bg-destructive mt-2" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-destructive mt-2 shrink-0" />
+                      Mental overload and decision fatigue draining your focus
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="w-1.5 h-1.5 rounded-full bg-destructive mt-2 shrink-0" />
+                      Repetitive manual work you do every day despite knowing better
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="w-1.5 h-1.5 rounded-full bg-destructive mt-2 shrink-0" />
                       Jumping between tools with no single source of truth
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="w-1.5 h-1.5 rounded-full bg-destructive mt-2" />
-                      Manual follow-ups and decision fatigue draining your focus
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <span className="w-1.5 h-1.5 rounded-full bg-destructive mt-2" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-destructive mt-2 shrink-0" />
                       Fear that growth will only create more chaos
                     </li>
                   </ul>
@@ -176,20 +180,24 @@ const Index = () => {
                   <h3 className="font-display text-2xl mb-4 text-gradient">SYSTEMS OVER HUSTLE</h3>
                   <p className="text-muted-foreground mb-4">
                     We design and deploy automation systems that remove repetitive work, 
-                    offload routine decisions, and give you operational clarity.
+                    offload routine decisions, and give you operational clarity—so you can stop reacting and start building.
                   </p>
                   <ul className="space-y-3 text-muted-foreground">
                     <li className="flex items-start gap-3">
-                      <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
                       Workflows that run operations without your constant input
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
                       AI routing that handles routine classification and decisions
                     </li>
                     <li className="flex items-start gap-3">
-                      <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
                       Dashboards that show you what's happening, when it matters
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
+                      Documentation that removes dependency on memory
                     </li>
                   </ul>
                 </div>
@@ -198,7 +206,7 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Capabilities Section */}
+        {/* Capabilities Section - 5 Pillars */}
         <section className="section-padding">
           <div className="container-main">
             <ScrollReveal>
@@ -207,7 +215,7 @@ const Index = () => {
                   WHAT WE <span className="text-gradient">BUILD</span>
                 </h2>
                 <p className="text-muted-foreground max-w-2xl mx-auto">
-                  Capabilities designed to reduce operational friction—not add complexity.
+                  Five capabilities designed to reduce operational friction—not add complexity.
                 </p>
               </div>
             </ScrollReveal>
@@ -235,7 +243,7 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Entry Modes Section */}
+        {/* Entry Modes Section - Clear Hierarchy */}
         <section className="section-padding bg-card/30">
           <div className="container-main">
             <ScrollReveal>
@@ -284,7 +292,7 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Boundaries Section */}
+        {/* Boundaries Section - What We DON'T Do */}
         <section className="section-padding">
           <div className="container-main max-w-4xl">
             <ScrollReveal>
@@ -300,7 +308,13 @@ const Index = () => {
                 <div className="card-glass p-6 rounded-lg">
                   <p className="text-muted-foreground">
                     <span className="text-foreground font-medium">We don't promise autonomous businesses.</span>{' '}
-                    Systems reduce work—they don't replace leadership.
+                    Systems reduce work—they don't replace leadership or decision-making.
+                  </p>
+                </div>
+                <div className="card-glass p-6 rounded-lg">
+                  <p className="text-muted-foreground">
+                    <span className="text-foreground font-medium">We don't guarantee revenue outcomes.</span>{' '}
+                    We build reliable systems—results depend on how they're used.
                   </p>
                 </div>
                 <div className="card-glass p-6 rounded-lg">
@@ -311,14 +325,8 @@ const Index = () => {
                 </div>
                 <div className="card-glass p-6 rounded-lg">
                   <p className="text-muted-foreground">
-                    <span className="text-foreground font-medium">We don't chase trends.</span>{' '}
+                    <span className="text-foreground font-medium">We don't sell quick hacks.</span>{' '}
                     Every capability exists to serve a real operational need.
-                  </p>
-                </div>
-                <div className="card-glass p-6 rounded-lg">
-                  <p className="text-muted-foreground">
-                    <span className="text-foreground font-medium">We don't guarantee outcomes.</span>{' '}
-                    We build reliable systems—results depend on how they're used.
                   </p>
                 </div>
               </div>

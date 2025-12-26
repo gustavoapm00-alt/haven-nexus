@@ -1,10 +1,11 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Workflow, Eye, FileText, Layers, CircuitBoard, Scale, Shield, Compass, Search } from 'lucide-react';
+import { ArrowRight, Workflow, Eye, FileText, Layers, CircuitBoard, Compass, Search } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ScrollReveal from '@/components/ScrollReveal';
 import SEO, { schemas } from '@/components/SEO';
 
+// 5 Pillars aligned with SSOT
 const capabilities = [
   {
     icon: Workflow,
@@ -21,8 +22,15 @@ const capabilities = [
     outcome: 'Routine decisions handled automatically; operator focuses on high-level work'
   },
   {
+    icon: Layers,
+    title: 'Tool Orchestration',
+    problem: 'Tool overload and fragmentation',
+    capability: 'Tool integration and orchestration',
+    outcome: 'Tools work together instead of against each other'
+  },
+  {
     icon: Eye,
-    title: 'Operational Dashboards',
+    title: 'Operational Visibility',
     problem: 'No visibility into operations',
     capability: 'Centralized operational dashboards',
     outcome: 'Operator can see what\'s happening at any moment'
@@ -33,34 +41,6 @@ const capabilities = [
     problem: 'Business runs on memory',
     capability: 'Systemized processes enforced by automation + documentation',
     outcome: 'Business operates on systems instead of memory'
-  },
-  {
-    icon: Layers,
-    title: 'Tool Orchestration',
-    problem: 'Tool overload and fragmentation',
-    capability: 'Tool integration and orchestration',
-    outcome: 'Tools work together instead of against each other'
-  },
-  {
-    icon: Scale,
-    title: 'Scalable Systems',
-    problem: 'Fear of scaling',
-    capability: 'Scalable systems absorbing volume',
-    outcome: 'Operations scale without added stress or complexity'
-  },
-  {
-    icon: Shield,
-    title: 'Observable Automation',
-    problem: 'Lack of trust in automation',
-    capability: 'Controlled, observable automation with logging and human-in-loop where needed',
-    outcome: 'Trust increases because actions are visible and verifiable'
-  },
-  {
-    icon: Compass,
-    title: 'End-to-End Structure',
-    problem: 'Feeling out of control',
-    capability: 'End-to-end operational structure (systems + dashboards + automation)',
-    outcome: 'Operator feels control and calm again'
   }
 ];
 
@@ -134,8 +114,8 @@ const Capabilities = () => {
     <div className="min-h-screen bg-background">
       <SEO 
         title="Capabilities"
-        description="AERELION builds automated workflows, AI routing, operational dashboards, and documented processes. See how we reduce operational friction."
-        keywords="automation capabilities, workflow automation, AI routing, operational dashboards, system deployment"
+        description="AERELION builds automated workflows, AI routing, tool orchestration, operational dashboards, and documented processes. See how we reduce operational friction."
+        keywords="automation capabilities, workflow automation, AI routing, operational dashboards, system deployment, tool orchestration"
         canonicalUrl="/capabilities"
         structuredData={schemas.breadcrumb([
           { name: 'Home', url: '/' },
@@ -155,26 +135,26 @@ const Capabilities = () => {
                   CAPABILITIES
                 </h1>
                 <p className="text-xl text-muted-foreground">
-                  We build systems that run operations. Not tools. Not tasks.
+                  We build systems that run operations. Not tools. Not tasks. Systems.
                 </p>
               </div>
             </ScrollReveal>
           </div>
         </section>
 
-        {/* Capability Map */}
+        {/* 5 Pillars - Capability Map */}
         <section className="section-padding pt-0">
           <div className="container-main">
             <ScrollReveal>
               <div className="mb-12">
-                <h2 className="font-display text-3xl mb-4">Problem → Capability → Outcome</h2>
+                <h2 className="font-display text-3xl mb-4">The 5 Pillars: Problem → Capability → Outcome</h2>
                 <p className="text-muted-foreground">
                   Every AERELION capability exists to reduce manual work, decision fatigue, and operational chaos.
                 </p>
               </div>
             </ScrollReveal>
 
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {capabilities.map((cap, index) => (
                 <ScrollReveal key={index} delay={index * 0.05}>
                   <div className="card-glass p-6 rounded-lg h-full">
