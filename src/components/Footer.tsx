@@ -45,7 +45,7 @@ const Footer = forwardRef<HTMLElement>((_, ref) => {
           {/* Social Links */}
           <div className="flex items-center gap-4">
             <a
-              href="https://instagram.com/aerlion.systems"
+              href="https://instagram.com/aerelion.systems"
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-primary transition-colors"
@@ -54,7 +54,7 @@ const Footer = forwardRef<HTMLElement>((_, ref) => {
               <Instagram size={20} />
             </a>
             <a
-              href="mailto:contact@aerlion.systems"
+              href="mailto:contact@aerelion.systems"
               className="text-muted-foreground hover:text-primary transition-colors"
               aria-label="Email"
             >

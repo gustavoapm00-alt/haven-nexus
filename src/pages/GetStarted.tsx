@@ -138,7 +138,7 @@ const GetStarted = () => {
     if (!formData.acknowledgement) {
       toast({
         title: "Acknowledgement Required",
-        description: "Please confirm that you understand AERELION builds operational systems (not quick fixes or outcome guarantees).",
+        description: "Please confirm that you understand AERELION builds operational systems (not quick hacks, not outcome guarantees).",
         variant: "destructive"
       });
       return;
@@ -471,7 +471,7 @@ ${formData.additionalContext || 'None provided'}`
                         className="mt-1 h-4 w-4 rounded border-border text-primary focus:ring-primary"
                       />
                       <span className="text-sm text-muted-foreground">
-                        I understand AERELION builds operational systems (not quick fixes, not outcome guarantees). *
+                        I understand AERELION builds operational systems (not quick hacks, not outcome guarantees). *
                       </span>
                     </label>
                   </div>

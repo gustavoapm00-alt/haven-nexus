@@ -20,7 +20,7 @@ const proofTypes = [
   },
   {
     icon: Network,
-    title: 'System Maps',
+    title: 'System Tool Maps',
     description: 'Visual maps showing tool connections, triggers, and routing logic deployed for clients.',
     status: 'Available upon request'
   },
@@ -37,19 +37,19 @@ const placeholderCases = [
     industry: 'Professional Services',
     problem: 'Lead intake was manual, follow-ups were inconsistent, and the founder was the bottleneck for every new opportunity.',
     systemChange: 'Deployed automated lead intake → CRM routing → follow-up sequences with visibility dashboard.',
-    outcome: 'Operational difference: Leads no longer slip. Founder sees pipeline status without checking email. Follow-ups happen on schedule.'
+    outcome: 'Leads no longer slip. Founder sees pipeline status without checking email. Follow-ups happen on schedule.'
   },
   {
     industry: 'E-Commerce Operations',
     problem: 'Order fulfillment relied on memory and spreadsheets. Customer status inquiries required manual lookup.',
     systemChange: 'Deployed order status automation → customer notification sequences → support dashboard.',
-    outcome: 'Operational difference: Customer inquiries reduced. Team has real-time visibility into order status without digging through systems.'
+    outcome: 'Customer inquiries reduced. Team has real-time visibility into order status without digging through systems.'
   },
   {
     industry: 'Service Business',
     problem: 'Onboarding new clients required manual emails, document requests, and task creation across multiple tools.',
     systemChange: 'Deployed client onboarding workflow → automated document collection → task generation → progress tracking.',
-    outcome: 'Operational difference: New clients receive consistent experience. Nothing falls through the cracks. Progress is visible to the team.'
+    outcome: 'New clients receive consistent experience. Nothing falls through the cracks. Progress is visible to the team.'
   }
 ];
 
@@ -58,8 +58,8 @@ const Proof = () => {
     <div className="min-h-screen bg-background">
       <SEO 
         title="Proof"
-        description="See how AERELION builds operational systems. Workflow diagrams, dashboard screenshots, system maps, and case narratives."
-        keywords="automation case studies, workflow automation examples, system deployment proof"
+        description="See how AERELION builds operational systems. Workflow diagrams, dashboard screenshots, system maps, and case narratives—no revenue claims."
+        keywords="automation case studies, workflow automation examples, system deployment proof, operational systems"
         canonicalUrl="/proof"
         structuredData={schemas.breadcrumb([
           { name: 'Home', url: '/' },
@@ -144,7 +144,7 @@ const Proof = () => {
                         <p className="text-muted-foreground text-sm">{caseItem.systemChange}</p>
                       </div>
                       <div>
-                        <h4 className="font-medium text-sm uppercase tracking-wider text-green-500 mb-2">Outcome</h4>
+                        <h4 className="font-medium text-sm uppercase tracking-wider text-green-500 mb-2">Operational Difference</h4>
                         <p className="text-muted-foreground text-sm">{caseItem.outcome}</p>
                       </div>
                     </div>
@@ -184,6 +184,10 @@ const Proof = () => {
                   <li className="flex items-start gap-3">
                     <span className="text-muted-foreground/50">—</span>
                     Outcome guarantees or success promises
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="text-muted-foreground/50">—</span>
+                    "Autopilot your business" messaging
                   </li>
                 </ul>
                 <p className="mt-6 text-sm text-muted-foreground/70 italic text-center">

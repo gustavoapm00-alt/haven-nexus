@@ -45,7 +45,7 @@ const Navbar = forwardRef<HTMLElement>((_, ref) => {
     >
       <div className="container-main section-padding !py-4 flex items-center justify-between">
         <Link to="/" className="font-display text-2xl tracking-wide text-foreground">
-          AERLION
+          AERELION
         </Link>
 
         {/* Desktop Navigation */}
