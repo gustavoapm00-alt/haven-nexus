@@ -115,6 +115,66 @@ export type Database = {
           },
         ]
       }
+      audits: {
+        Row: {
+          absence_test_48h: string
+          breakdown_first: string
+          consent_ack: boolean
+          created_at: string
+          decision_maker: boolean
+          email: string
+          error_message: string | null
+          id: string
+          n8n_request_id: string | null
+          n8n_status: string
+          name: string
+          notes: string | null
+          operational_volume: string
+          primary_friction: string
+          processing_ms: number | null
+          status: string
+          tool_entropy: string
+        }
+        Insert: {
+          absence_test_48h: string
+          breakdown_first: string
+          consent_ack?: boolean
+          created_at?: string
+          decision_maker: boolean
+          email: string
+          error_message?: string | null
+          id?: string
+          n8n_request_id?: string | null
+          n8n_status?: string
+          name: string
+          notes?: string | null
+          operational_volume: string
+          primary_friction: string
+          processing_ms?: number | null
+          status?: string
+          tool_entropy: string
+        }
+        Update: {
+          absence_test_48h?: string
+          breakdown_first?: string
+          consent_ack?: boolean
+          created_at?: string
+          decision_maker?: boolean
+          email?: string
+          error_message?: string | null
+          id?: string
+          n8n_request_id?: string | null
+          n8n_status?: string
+          name?: string
+          notes?: string | null
+          operational_volume?: string
+          primary_friction?: string
+          processing_ms?: number | null
+          status?: string
+          tool_entropy?: string
+        }
+        Relationships: []
+      }
       contact_submissions: {
         Row: {
           created_at: string
@@ -138,6 +198,131 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      deployment_requests: {
+        Row: {
+          audit_id: string | null
+          contact_method: string
+          created_at: string
+          diagnosis_id: string | null
+          email: string
+          id: string
+          name: string
+          notes: string | null
+          preferred_involvement: string
+          status: string
+          timeline: string
+          tools_stack: string | null
+        }
+        Insert: {
+          audit_id?: string | null
+          contact_method: string
+          created_at?: string
+          diagnosis_id?: string | null
+          email: string
+          id?: string
+          name: string
+          notes?: string | null
+          preferred_involvement: string
+          status?: string
+          timeline: string
+          tools_stack?: string | null
+        }
+        Update: {
+          audit_id?: string | null
+          contact_method?: string
+          created_at?: string
+          diagnosis_id?: string | null
+          email?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          preferred_involvement?: string
+          status?: string
+          timeline?: string
+          tools_stack?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deployment_requests_audit_id_fkey"
+            columns: ["audit_id"]
+            isOneToOne: false
+            referencedRelation: "audits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deployment_requests_diagnosis_id_fkey"
+            columns: ["diagnosis_id"]
+            isOneToOne: false
+            referencedRelation: "diagnoses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      diagnoses: {
+        Row: {
+          audit_id: string
+          confidence: number
+          created_at: string
+          disclaimer: string
+          id: string
+          leak_hours_high: number
+          leak_hours_low: number
+          next_step: string
+          plain_language_cause: string
+          primary_failure_mode: string
+          raw_signals: Json | null
+          readiness_level: string
+          recommended_systems: Json
+          recovered_hours_high: number
+          recovered_hours_low: number
+          what_is_happening: string
+        }
+        Insert: {
+          audit_id: string
+          confidence?: number
+          created_at?: string
+          disclaimer?: string
+          id?: string
+          leak_hours_high: number
+          leak_hours_low: number
+          next_step?: string
+          plain_language_cause: string
+          primary_failure_mode: string
+          raw_signals?: Json | null
+          readiness_level?: string
+          recommended_systems?: Json
+          recovered_hours_high: number
+          recovered_hours_low: number
+          what_is_happening: string
+        }
+        Update: {
+          audit_id?: string
+          confidence?: number
+          created_at?: string
+          disclaimer?: string
+          id?: string
+          leak_hours_high?: number
+          leak_hours_low?: number
+          next_step?: string
+          plain_language_cause?: string
+          primary_failure_mode?: string
+          raw_signals?: Json | null
+          readiness_level?: string
+          recommended_systems?: Json
+          recovered_hours_high?: number
+          recovered_hours_low?: number
+          what_is_happening?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diagnoses_audit_id_fkey"
+            columns: ["audit_id"]
+            isOneToOne: true
+            referencedRelation: "audits"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       email_signups: {
         Row: {

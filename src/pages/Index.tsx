@@ -41,7 +41,7 @@ const entryModes = [
     subtitle: 'Primary Entry Mode',
     description: 'We act as your system architect and deployer. Assessment, architecture, implementation, dashboards, and handoff—all handled.',
     whoFor: 'Operators overwhelmed by manual work who want relief and systems that run without them.',
-    cta: { label: 'Request Deployment', href: '/get-started?mode=deployment' },
+    cta: { label: 'Run a System Audit', href: '/system-audit' },
     highlight: true
   },
   {
@@ -50,7 +50,7 @@ const entryModes = [
     subtitle: 'Clarity First',
     description: 'Not sure what\'s broken? We review your current workflows, identify friction points, and deliver a clear diagnosis with recommendations.',
     whoFor: 'Operators who need clarity before committing to a full deployment.',
-    cta: { label: 'Request Audit', href: '/get-started?mode=audit' },
+    cta: { label: 'Run a System Audit', href: '/system-audit' },
     highlight: false
   },
   {
@@ -118,12 +118,12 @@ const Index = () => {
                 transition={{ duration: 0.6, delay: 0.3 }} 
                 className="flex flex-wrap gap-4"
               >
-                <Link to="/get-started?mode=deployment" className="btn-primary">
-                  Request System Deployment
+                <Link to="/system-audit" className="btn-primary">
+                  Run a System Audit
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
-                <Link to="/get-started?mode=audit" className="btn-secondary">
-                  Request Audit
+                <Link to="/capabilities" className="btn-secondary">
+                  View Capabilities
                 </Link>
               </motion.div>
 
@@ -346,12 +346,12 @@ const Index = () => {
                   Tell us where operations feel stuck. We'll help you find the right path forward.
                 </p>
                 <div className="flex flex-wrap justify-center gap-4">
-                  <Link to="/get-started?mode=deployment" className="btn-primary">
-                    Request System Deployment
+                  <Link to="/system-audit" className="btn-primary">
+                    Run a System Audit
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
-                  <Link to="/get-started?mode=audit" className="btn-secondary">
-                    Request Audit
+                  <Link to="/capabilities" className="btn-secondary">
+                    View Capabilities
                   </Link>
                 </div>
                 <p className="mt-6 text-sm text-muted-foreground">
