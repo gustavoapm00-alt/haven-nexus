@@ -594,7 +594,50 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      relevance_agents_safe: {
+        Row: {
+          agent_key: string | null
+          created_at: string | null
+          id: string | null
+          is_enabled: boolean | null
+          name: string | null
+          org_id: string | null
+          outbound_secret: string | null
+          trigger_url: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          agent_key?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_enabled?: boolean | null
+          name?: string | null
+          org_id?: string | null
+          outbound_secret?: never
+          trigger_url?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          agent_key?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_enabled?: boolean | null
+          name?: string | null
+          org_id?: string | null
+          outbound_secret?: never
+          trigger_url?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "relevance_agents_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       has_role: {
@@ -602,6 +645,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_org_admin_or_owner: {
+        Args: { _org_id: string; _user_id: string }
         Returns: boolean
       }
       is_org_member: {
