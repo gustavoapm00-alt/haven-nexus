@@ -1,5 +1,7 @@
 // Tenant and Agent types for Hosted Agents flow
 
+export type SetupStep = "provisioning" | "connect" | "deploy" | "live";
+
 export interface AgentPackRecommendation {
   agent_name: string;
   agent_slug: string;
@@ -44,5 +46,3 @@ export interface RunAgentResponse {
   run_id: string;
   status: "queued" | "running" | "success" | "failed";
 }
-
-export type SetupStep = "provisioning" | "connect" | "deploy" | "live";
