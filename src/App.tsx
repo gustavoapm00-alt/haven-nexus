@@ -35,6 +35,9 @@ import StudioAgents from "./pages/studio/StudioAgents";
 import StudioPlans from "./pages/studio/StudioPlans";
 import StudioEntitlements from "./pages/studio/StudioEntitlements";
 import NotFound from "./pages/NotFound";
+import SystemAudit from "./pages/SystemAudit";
+import SystemAuditResult from "./pages/SystemAuditResult";
+import RequestDeployment from "./pages/RequestDeployment";
 
 const queryClient = new QueryClient();
 
@@ -73,6 +76,9 @@ const UnlockedApp = () => (
     <Route path="/about" element={<About />} />
     <Route path="/contact" element={<Contact />} />
     <Route path="/get-started" element={<GetStarted />} />
+    <Route path="/system-audit" element={<SystemAudit />} />
+    <Route path="/system-audit/result" element={<SystemAuditResult />} />
+    <Route path="/request-deployment" element={<RequestDeployment />} />
     <Route path="/reliability" element={<Reliability />} />
     <Route path="/proof" element={<Proof />} />
     <Route path="/terms" element={<Terms />} />

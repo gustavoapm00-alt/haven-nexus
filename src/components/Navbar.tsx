@@ -63,8 +63,8 @@ const Navbar = forwardRef<HTMLElement>((_, ref) => {
               {link.name}
             </Link>
           ))}
-          <Link to="/get-started" className="btn-primary !py-2 !px-4 text-xs">
-            Get Started
+          <Link to="/system-audit" className="btn-primary !py-2 !px-4 text-xs">
+            Run a System Audit
           </Link>
           {!isLoading && (
             <Link 
@@ -110,11 +110,11 @@ const Navbar = forwardRef<HTMLElement>((_, ref) => {
           ))}
           <div className="px-6 py-3 space-y-2">
             <Link 
-              to="/get-started" 
+              to="/system-audit" 
               onClick={handleLinkClick}
               className="btn-primary !py-2 !px-4 text-xs w-full justify-center"
             >
-              Get Started
+              Run a System Audit
             </Link>
             {!isLoading && (
               <Link 

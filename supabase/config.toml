@@ -11,3 +11,15 @@ verify_jwt = true
 
 [functions.agents-run]
 verify_jwt = true
+
+[functions.audit-submit]
+verify_jwt = false
+
+[functions.audit-result]
+verify_jwt = false
+
+[functions.deployment-request]
+verify_jwt = false
+
+[functions.audit-email]
+verify_jwt = false
