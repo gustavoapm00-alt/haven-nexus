@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { ActivateAgentsModal } from "@/components/ActivateAgentsModal";
 import {
   Loader2,
   Clock,
@@ -22,6 +23,7 @@ import {
   Zap,
   Settings,
   TrendingUp,
+  Cpu,
 } from "lucide-react";
 import type { DiagnosisData, AuditData, AgentPack } from "@/types/audit";
 
@@ -38,6 +40,7 @@ export default function SystemAuditResult() {
   const [emailPrompt, setEmailPrompt] = useState(false);
   const [emailInput, setEmailInput] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [activateModalOpen, setActivateModalOpen] = useState(false);
 
   useEffect(() => {
     if (!auditId) {
@@ -447,15 +450,35 @@ export default function SystemAuditResult() {
             transition={{ delay: 0.45 }}
             className="space-y-6"
           >
-            <div className="p-8 rounded-xl border border-primary/30 bg-primary/5 text-center">
-              <h2 className="text-xl font-semibold mb-3">Ready to move forward?</h2>
+            {/* Primary CTA: Activate Agents */}
+            {diagnosis.recommended_agents && diagnosis.recommended_agents.length > 0 && (
+              <div className="p-8 rounded-xl border border-primary/50 bg-gradient-to-br from-primary/10 to-primary/5 text-center">
+                <Cpu className="w-10 h-10 mx-auto text-primary mb-4" />
+                <h2 className="text-xl font-semibold mb-3">Activate Your Agents</h2>
+                <p className="text-muted-foreground mb-6 max-w-lg mx-auto">
+                  Provision your private agent engine and start automating today.
+                </p>
+                <Button 
+                  size="lg" 
+                  className="min-w-[240px]"
+                  onClick={() => setActivateModalOpen(true)}
+                >
+                  <Cpu className="w-4 h-4 mr-2" />
+                  Activate Agents
+                </Button>
+              </div>
+            )}
+
+            {/* Secondary CTA: Request Deployment */}
+            <div className="p-8 rounded-xl border border-border/50 bg-card/30 text-center">
+              <h2 className="text-lg font-semibold mb-3">Prefer a managed deployment?</h2>
               <p className="text-muted-foreground mb-6 max-w-lg mx-auto">
                 We review your diagnosis and confirm fit before any build begins.
               </p>
               <Link
                 to={`/request-deployment?audit=${audit.id}&diagnosis=${diagnosis.id}&name=${encodeURIComponent(audit.name || "")}&email=${encodeURIComponent(audit.email || "")}`}
               >
-                <Button size="lg" className="min-w-[240px]">
+                <Button size="lg" variant="outline" className="min-w-[240px]">
                   Request Deployment
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
@@ -521,6 +544,15 @@ export default function SystemAuditResult() {
       </main>
 
       <Footer />
+
+      {/* Activate Agents Modal */}
+      <ActivateAgentsModal
+        open={activateModalOpen}
+        onOpenChange={setActivateModalOpen}
+        auditId={auditId || ""}
+        defaultName={audit?.name}
+        defaultEmail={audit?.email}
+      />
     </div>
   );
 }
