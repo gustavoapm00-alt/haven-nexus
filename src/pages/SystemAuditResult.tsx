@@ -5,25 +5,16 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { ActivateAgentsModal } from "@/components/ActivateAgentsModal";
 import {
   Loader2,
-  Clock,
   AlertTriangle,
-  CheckCircle,
   ArrowRight,
   Mail,
   RefreshCw,
-  Shield,
-  Zap,
-  Settings,
-  TrendingUp,
-  Cpu,
+  Bot,
 } from "lucide-react";
 import type { DiagnosisData, AuditData, AgentPack } from "@/types/audit";
 
@@ -37,10 +28,7 @@ export default function SystemAuditResult() {
   const [audit, setAudit] = useState<AuditData | null>(null);
   const [diagnosis, setDiagnosis] = useState<DiagnosisData | null>(null);
   const [emailSending, setEmailSending] = useState(false);
-  const [emailPrompt, setEmailPrompt] = useState(false);
-  const [emailInput, setEmailInput] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [activateModalOpen, setActivateModalOpen] = useState(false);
 
   useEffect(() => {
     if (!auditId) {
@@ -93,25 +81,16 @@ export default function SystemAuditResult() {
   }, [auditId, navigate]);
 
   const handleEmailResults = async () => {
-    const emailToUse = audit?.email || emailInput;
-    
-    if (!emailToUse) {
-      setEmailPrompt(true);
-      return;
-    }
-
-    if (!auditId) return;
+    if (!audit?.email || !auditId) return;
 
     setEmailSending(true);
     try {
       const { error } = await supabase.functions.invoke("audit-email", {
-        body: { audit_id: auditId, email: emailToUse },
+        body: { audit_id: auditId, email: audit.email },
       });
 
       if (error) throw error;
-
-      toast.success("Diagnosis link sent to your email.");
-      setEmailPrompt(false);
+      toast.success("Plan sent to your email.");
     } catch (err: any) {
       console.error("Email error:", err);
       toast.error("Failed to send email. Please try again.");
@@ -126,28 +105,31 @@ export default function SystemAuditResult() {
     window.location.reload();
   };
 
+  // Loading state
   if (loading) {
     return (
       <div className="min-h-screen bg-background text-foreground">
-        <SEO title="Generating Diagnosis | AERELION Labs" />
+        <SEO title="Generating Your Plan | AERELION" />
         <Navbar />
         <main className="pt-32 pb-24">
-          <div className="container mx-auto px-6 max-w-2xl text-center">
+          <div className="container mx-auto px-6 max-w-xl text-center">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="space-y-6"
+              className="space-y-8"
             >
-              <Loader2 className="w-12 h-12 mx-auto animate-spin text-primary" />
-              <h2 className="text-2xl font-semibold">
-                {polling ? "Generating your diagnosis..." : "Loading..."}
-              </h2>
-              <p className="text-muted-foreground">
-                Analyzing operational signals and mapping system recommendations.
-              </p>
-              <div className="max-w-xs mx-auto">
-                <Progress value={polling ? 60 : 20} className="h-1" />
+              <div className="w-16 h-16 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
               </div>
+              <div className="space-y-3">
+                <h2 className="text-2xl font-semibold tracking-tight">
+                  Building your system plan
+                </h2>
+                <p className="text-muted-foreground text-lg">
+                  Analyzing patterns and designing your agent engine.
+                </p>
+              </div>
+              <Progress value={polling ? 60 : 20} className="h-1 max-w-xs mx-auto" />
             </motion.div>
           </div>
         </main>
@@ -156,14 +138,15 @@ export default function SystemAuditResult() {
     );
   }
 
+  // Error state
   if (error) {
     return (
       <div className="min-h-screen bg-background text-foreground">
-        <SEO title="Error | AERELION Labs" />
+        <SEO title="Error | AERELION" />
         <Navbar />
         <main className="pt-32 pb-24">
-          <div className="container mx-auto px-6 max-w-2xl text-center">
-            <AlertTriangle className="w-12 h-12 mx-auto text-destructive mb-4" />
+          <div className="container mx-auto px-6 max-w-xl text-center">
+            <AlertTriangle className="w-12 h-12 mx-auto text-destructive mb-6" />
             <h2 className="text-2xl font-semibold mb-4">Something went wrong</h2>
             <p className="text-muted-foreground mb-8">{error}</p>
             <div className="flex gap-4 justify-center">
@@ -172,7 +155,7 @@ export default function SystemAuditResult() {
                 Retry
               </Button>
               <Button onClick={() => navigate("/system-audit")}>
-                Run New Audit
+                Start Over
               </Button>
             </div>
           </div>
@@ -182,17 +165,18 @@ export default function SystemAuditResult() {
     );
   }
 
+  // Not found state
   if (!diagnosis || !audit) {
     return (
       <div className="min-h-screen bg-background text-foreground">
-        <SEO title="Not Found | AERELION Labs" />
+        <SEO title="Not Found | AERELION" />
         <Navbar />
         <main className="pt-32 pb-24">
-          <div className="container mx-auto px-6 max-w-2xl text-center">
-            <AlertTriangle className="w-12 h-12 mx-auto text-destructive mb-4" />
-            <h2 className="text-2xl font-semibold mb-4">Diagnosis Not Found</h2>
+          <div className="container mx-auto px-6 max-w-xl text-center">
+            <AlertTriangle className="w-12 h-12 mx-auto text-destructive mb-6" />
+            <h2 className="text-2xl font-semibold mb-4">Plan Not Found</h2>
             <p className="text-muted-foreground mb-8">
-              We couldn't find this audit result. The link may be invalid or expired.
+              This link may be invalid or expired.
             </p>
             <Button onClick={() => navigate("/system-audit")}>
               Run a New Audit
@@ -204,355 +188,150 @@ export default function SystemAuditResult() {
     );
   }
 
-  const readinessBadge = {
-    low: { color: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30", label: "Low Readiness" },
-    medium: { color: "bg-blue-500/20 text-blue-400 border-blue-500/30", label: "Medium Readiness" },
-    high: { color: "bg-green-500/20 text-green-400 border-green-500/30", label: "High Readiness" },
-  };
-
-  const badge = readinessBadge[diagnosis.readiness_level] || readinessBadge.medium;
+  const agents = diagnosis.recommended_agents || [];
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SEO
-        title="Your System Diagnosis | AERELION Labs"
-        description="Your operational diagnosis and recommended system path."
+        title="Your System Plan | AERELION"
+        description="Your personalized automation plan based on your business operations."
       />
       <Navbar />
 
-      <main className="pt-28 pb-24">
-        <div className="container mx-auto px-6 max-w-4xl">
-          {/* Header */}
-          <motion.div
+      <main className="pt-32 pb-24">
+        <div className="container mx-auto px-6 max-w-3xl">
+          
+          {/* SECTION 1: Header */}
+          <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-12"
+            className="text-center mb-20"
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
-              <CheckCircle className="w-4 h-4" />
-              Diagnosis Complete
-            </div>
-            
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight mb-4">
-              {diagnosis.primary_failure_mode}
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
+              Your System Plan
             </h1>
-            
-            <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${badge.color}`}>
-              {badge.label}
-            </div>
-            
-            {audit.name && (
-              <p className="text-muted-foreground mt-4">
-                For {audit.name} • {new Date(audit.created_at).toLocaleDateString()}
-              </p>
-            )}
-          </motion.div>
+            <p className="text-lg text-muted-foreground">
+              Based on your business and how you spend your time.
+            </p>
+          </motion.section>
 
-          {/* Stats Row */}
-          <motion.div
+          {/* SECTION 2: The Leak */}
+          <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="grid md:grid-cols-2 gap-6 mb-8"
+            className="mb-20"
           >
-            {/* Leak Hours */}
-            <div className="p-6 rounded-xl border border-destructive/30 bg-destructive/5">
-              <div className="flex items-start gap-4">
-                <Clock className="w-6 h-6 text-destructive flex-shrink-0 mt-1" />
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Estimated Time Leaking</p>
-                  <p className="text-3xl font-bold text-destructive">
-                    {diagnosis.leak_hours_low}–{diagnosis.leak_hours_high} <span className="text-lg font-normal">hrs/week</span>
-                  </p>
-                </div>
-              </div>
+            <div className="text-center">
+              <p className="text-6xl md:text-7xl font-bold tracking-tight mb-6">
+                <span className="text-destructive">
+                  {diagnosis.leak_hours_low}–{diagnosis.leak_hours_high}
+                </span>
+                <span className="text-2xl md:text-3xl font-normal text-muted-foreground ml-3">
+                  hrs/week
+                </span>
+              </p>
+              <p className="text-lg text-muted-foreground max-w-lg mx-auto">
+                This isn't because you're inefficient. It's because your system breaks under scale.
+              </p>
             </div>
+          </motion.section>
 
-            {/* Recovered Hours */}
-            <div className="p-6 rounded-xl border border-green-500/30 bg-green-500/5">
-              <div className="flex items-start gap-4">
-                <TrendingUp className="w-6 h-6 text-green-500 flex-shrink-0 mt-1" />
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Estimated Time Recovered</p>
-                  <p className="text-3xl font-bold text-green-500">
-                    {diagnosis.recovered_hours_low}–{diagnosis.recovered_hours_high} <span className="text-lg font-normal">hrs/week</span>
-                  </p>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Plain Language Cause */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-            className="p-6 rounded-xl border border-border/50 bg-card/30 mb-8"
-          >
-            <h2 className="text-lg font-semibold mb-3">Plain-Language Cause</h2>
-            <p className="text-foreground leading-relaxed">{diagnosis.plain_language_cause}</p>
-          </motion.div>
-
-          {/* What Is Happening */}
-          <motion.div
+          {/* SECTION 3: Root Cause */}
+          <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="p-6 rounded-xl border border-border/50 bg-card/30 mb-8"
+            className="mb-20"
           >
-            <h2 className="text-lg font-semibold mb-3">What Is Happening</h2>
-            <p className="text-foreground leading-relaxed">{diagnosis.what_is_happening}</p>
-          </motion.div>
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
+              What's actually happening
+            </h2>
+            <p className="text-xl leading-relaxed text-foreground">
+              {diagnosis.plain_language_cause}
+            </p>
+          </motion.section>
 
-          {/* Recommended Systems */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25 }}
-            className="mb-8"
-          >
-            <h2 className="text-lg font-semibold mb-4">Recommended Systems</h2>
-            <div className="grid md:grid-cols-2 gap-4">
-              {diagnosis.recommended_systems.map((system, index) => {
-                const isReliability = system.name.toLowerCase().includes("reliability");
-                return (
-                  <div
-                    key={index}
-                    className={`p-5 rounded-xl border ${
-                      isReliability
-                        ? "border-primary/50 bg-primary/5"
-                        : "border-border/50 bg-card/30"
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                        isReliability ? "bg-primary/20" : "bg-muted"
-                      }`}>
-                        {isReliability ? (
-                          <Shield className="w-5 h-5 text-primary" />
-                        ) : index === 0 ? (
-                          <Zap className="w-5 h-5 text-muted-foreground" />
-                        ) : (
-                          <Settings className="w-5 h-5 text-muted-foreground" />
-                        )}
-                      </div>
-                      <div>
-                        <h3 className="font-semibold mb-1">{system.name}</h3>
-                        <p className="text-sm text-muted-foreground">{system.description}</p>
-                      </div>
-                    </div>
-                    {isReliability && (
-                      <Badge variant="outline" className="mt-3 text-xs">
-                        Core Infrastructure
-                      </Badge>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </motion.div>
-
-          {/* Recommended Agent Pack */}
-          {diagnosis.recommended_agents && diagnosis.recommended_agents.length > 0 && (
-            <motion.div
+          {/* SECTION 4: Your Agent Engine */}
+          {agents.length > 0 && (
+            <motion.section
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="mb-8"
+              className="mb-24"
             >
-              <h2 className="text-lg font-semibold mb-4">Recommended Agent Pack</h2>
+              <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-6">
+                Your Agent Engine
+              </h2>
               <div className="grid gap-4">
-                {diagnosis.recommended_agents.map((agent: AgentPack, index: number) => (
-                  <div
+                {agents.slice(0, 5).map((agent: AgentPack, index: number) => (
+                  <motion.div
                     key={index}
-                    className="p-5 rounded-xl border border-border/50 bg-card/30"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.35 + index * 0.05 }}
+                    className="p-6 rounded-xl border border-border/50 bg-card/30 hover:bg-card/50 transition-colors"
                   >
-                    <div className="flex justify-between items-start mb-3">
-                      <h3 className="font-semibold">{agent.agent_name}</h3>
-                      <Badge
-                        variant="outline"
-                        className={
-                          agent.deployment_complexity === "low"
-                            ? "border-green-500/50 text-green-400"
-                            : agent.deployment_complexity === "medium"
-                            ? "border-yellow-500/50 text-yellow-400"
-                            : "border-red-500/50 text-red-400"
-                        }
-                      >
-                        {agent.deployment_complexity} complexity
-                      </Badge>
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-start gap-4">
+                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                          <Bot className="w-5 h-5 text-primary" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-lg mb-1">
+                            {agent.agent_name}
+                          </h3>
+                          <p className="text-muted-foreground">
+                            {agent.purpose}
+                          </p>
+                        </div>
+                      </div>
+                      <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-1 rounded-full whitespace-nowrap">
+                        Runs automatically
+                      </span>
                     </div>
-                    <p className="text-sm text-muted-foreground mb-4">{agent.purpose}</p>
-                    <div className="grid md:grid-cols-3 gap-4 text-sm">
-                      <div>
-                        <p className="font-medium mb-1">Inputs</p>
-                        <ul className="text-muted-foreground space-y-0.5">
-                          {agent.inputs.map((input, i) => (
-                            <li key={i}>• {input}</li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div>
-                        <p className="font-medium mb-1">Automations</p>
-                        <ul className="text-muted-foreground space-y-0.5">
-                          {agent.automations.map((auto, i) => (
-                            <li key={i}>• {auto}</li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div>
-                        <p className="font-medium mb-1">Success Metric</p>
-                        <p className="text-muted-foreground">{agent.success_metric}</p>
-                      </div>
-                    </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
-            </motion.div>
+            </motion.section>
           )}
 
-          {/* Equation */}
-          {diagnosis.equation && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.35 }}
-              className="p-6 rounded-xl border border-border/50 bg-muted/30 mb-8"
+          {/* SECTION 5: ONE CTA */}
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="text-center"
+          >
+            <Link
+              to={`/agents/activate?audit=${auditId}&name=${encodeURIComponent(audit.name || "")}&email=${encodeURIComponent(audit.email || "")}`}
             >
-              <h2 className="text-lg font-semibold mb-3">Equation</h2>
-              <pre className="font-mono text-sm bg-background/50 p-4 rounded-lg overflow-x-auto whitespace-pre-wrap">
-                {diagnosis.equation}
-              </pre>
-            </motion.div>
-          )}
-
-          {/* Confidence Meter */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="p-6 rounded-xl border border-border/50 bg-card/30 mb-8"
-          >
-            <div className="flex justify-between items-center mb-3">
-              <h2 className="text-lg font-semibold">Confidence</h2>
-              <span className="text-2xl font-bold">{diagnosis.confidence}%</span>
-            </div>
-            <Progress value={diagnosis.confidence} className="h-2" />
-            <p className="text-xs text-muted-foreground mt-2">
-              Confidence is based on signal clarity. Higher values indicate stronger pattern match.
-            </p>
-          </motion.div>
-
-          {/* CTAs */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.45 }}
-            className="space-y-6"
-          >
-            {/* Primary CTA: Activate Agents */}
-            {diagnosis.recommended_agents && diagnosis.recommended_agents.length > 0 && (
-              <div className="p-8 rounded-xl border border-primary/50 bg-gradient-to-br from-primary/10 to-primary/5 text-center">
-                <Cpu className="w-10 h-10 mx-auto text-primary mb-4" />
-                <h2 className="text-xl font-semibold mb-3">Activate Your Agents</h2>
-                <p className="text-muted-foreground mb-6 max-w-lg mx-auto">
-                  Provision your private agent engine and start automating today.
-                </p>
-                <Button 
-                  size="lg" 
-                  className="min-w-[240px]"
-                  onClick={() => setActivateModalOpen(true)}
-                >
-                  <Cpu className="w-4 h-4 mr-2" />
-                  Activate Agents
-                </Button>
-              </div>
-            )}
-
-            {/* Secondary CTA: Request Deployment */}
-            <div className="p-8 rounded-xl border border-border/50 bg-card/30 text-center">
-              <h2 className="text-lg font-semibold mb-3">Prefer a managed deployment?</h2>
-              <p className="text-muted-foreground mb-6 max-w-lg mx-auto">
-                We review your diagnosis and confirm fit before any build begins.
-              </p>
-              <Link
-                to={`/request-deployment?audit=${audit.id}&diagnosis=${diagnosis.id}&name=${encodeURIComponent(audit.name || "")}&email=${encodeURIComponent(audit.email || "")}`}
-              >
-                <Button size="lg" variant="outline" className="min-w-[240px]">
-                  Request Deployment
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
-              </Link>
-            </div>
-
-            {/* Email Prompt */}
-            {emailPrompt && !audit.email && (
-              <div className="p-6 rounded-xl border border-border/50 bg-card/30">
-                <p className="text-sm text-muted-foreground mb-3">
-                  Enter your email to receive this diagnosis:
-                </p>
-                <div className="flex gap-3">
-                  <Input
-                    type="email"
-                    value={emailInput}
-                    onChange={(e) => setEmailInput(e.target.value)}
-                    placeholder="you@company.com"
-                    className="flex-1"
-                  />
-                  <Button onClick={handleEmailResults} disabled={emailSending || !emailInput}>
-                    {emailSending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Send"}
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {/* Secondary CTAs */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button
-                variant="outline"
+              <Button size="lg" className="text-lg px-10 py-6 h-auto">
+                Activate My Agent Engine
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+            </Link>
+            
+            <div className="mt-6">
+              <button
                 onClick={handleEmailResults}
                 disabled={emailSending}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-2"
               >
                 {emailSending ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
-                  <Mail className="w-4 h-4 mr-2" />
+                  <Mail className="w-4 h-4" />
                 )}
-                Email me this
-              </Button>
-              <Link to="/system-audit">
-                <Button variant="ghost">
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                  Run another audit
-                </Button>
-              </Link>
+                Email me this plan
+              </button>
             </div>
-          </motion.div>
+          </motion.section>
 
-          {/* Disclaimer */}
-          {diagnosis.disclaimer && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              className="mt-12 p-4 rounded-lg bg-muted/30 text-center"
-            >
-              <p className="text-xs text-muted-foreground">{diagnosis.disclaimer}</p>
-            </motion.div>
-          )}
         </div>
       </main>
 
       <Footer />
-
-      {/* Activate Agents Modal */}
-      <ActivateAgentsModal
-        open={activateModalOpen}
-        onOpenChange={setActivateModalOpen}
-        auditId={auditId || ""}
-        defaultName={audit?.name}
-        defaultEmail={audit?.email}
-      />
     </div>
   );
 }
