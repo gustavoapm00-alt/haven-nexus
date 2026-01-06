@@ -10,8 +10,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Loader2, Cpu, ArrowRight } from "lucide-react";
+import { Loader2, Cpu, ArrowRight, Zap, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
+
+const N8N_WEBHOOK_URL = "https://aerelionlabs.app.n8n.cloud/webhook/api/activate-agents";
 
 interface ActivateAgentsModalProps {
   open: boolean;
@@ -32,11 +34,65 @@ export function ActivateAgentsModal({
   const [name, setName] = useState(defaultName);
   const [email, setEmail] = useState(defaultEmail);
   const [submitting, setSubmitting] = useState(false);
+  const [testing, setTesting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [apiResponse, setApiResponse] = useState<any>(null);
+
+  const callActivateApi = async () => {
+    const payload = {
+      audit_id: auditId,
+      name: name.trim(),
+      email: email.trim(),
+    };
+
+    console.log("[ActivateAgents] Request:", {
+      url: N8N_WEBHOOK_URL,
+      payload,
+    });
+
+    const response = await fetch(N8N_WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    const result = await response.json();
+
+    console.log("[ActivateAgents] Response:", {
+      status: response.status,
+      ok: response.ok,
+      body: result,
+    });
+
+    return { response, result };
+  };
+
+  const handleTestConnection = async () => {
+    setError(null);
+    setApiResponse(null);
+    setTesting(true);
+
+    try {
+      const { response, result } = await callActivateApi();
+      setApiResponse(result);
+
+      if (!response.ok) {
+        setError(result.error || result.message || `Error ${response.status}`);
+      } else {
+        toast.success("Connection test successful!");
+      }
+    } catch (err: any) {
+      console.error("[ActivateAgents] Test error:", err);
+      setError(err.message || "Network error. Check console.");
+    } finally {
+      setTesting(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setApiResponse(null);
 
     if (!name.trim() || !email.trim()) {
       setError("Name and email are required.");
@@ -51,29 +107,23 @@ export function ActivateAgentsModal({
     setSubmitting(true);
 
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/activate-agents`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ audit_id: auditId, email, name }),
-        }
-      );
-
-      const result = await response.json();
+      const { response, result } = await callActivateApi();
+      setApiResponse(result);
 
       if (!response.ok) {
-        throw new Error(result.error || "Failed to activate agents");
+        setError(result.error || result.message || `Error ${response.status}`);
+        return;
       }
 
       // Store tenant_id in localStorage scoped to audit_id
-      localStorage.setItem(`tenant_${auditId}`, result.tenant_id);
+      if (result.tenant_id) {
+        localStorage.setItem(`tenant_${auditId}`, result.tenant_id);
+      }
 
       toast.success("Agent engine provisioning started!");
-      onOpenChange(false);
-      navigate(`/agents/setup?tenant_id=${result.tenant_id}&audit_id=${auditId}`);
+      // Keep modal open to show response for debugging
     } catch (err: any) {
-      console.error("Activation error:", err);
+      console.error("[ActivateAgents] Submit error:", err);
       setError(err.message || "Something went wrong. Please try again.");
     } finally {
       setSubmitting(false);
@@ -135,24 +185,66 @@ export function ActivateAgentsModal({
             )}
           </AnimatePresence>
 
-          <Button
-            type="submit"
-            className="w-full"
-            size="lg"
-            disabled={submitting}
-          >
-            {submitting ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Provisioning...
-              </>
-            ) : (
-              <>
-                Provision My Agent Engine
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </>
+          <AnimatePresence>
+            {apiResponse && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="p-3 rounded-lg bg-primary/10 border border-primary/30 text-xs font-mono overflow-auto max-h-40"
+              >
+                <div className="flex items-center gap-2 mb-2 text-primary text-sm font-sans">
+                  <CheckCircle className="w-4 h-4" />
+                  API Response
+                </div>
+                <pre className="text-muted-foreground whitespace-pre-wrap">
+                  {JSON.stringify(apiResponse, null, 2)}
+                </pre>
+              </motion.div>
             )}
-          </Button>
+          </AnimatePresence>
+
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleTestConnection}
+              disabled={testing || submitting}
+              className="flex-shrink-0"
+            >
+              {testing ? (
+                <>
+                  <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                  Testing...
+                </>
+              ) : (
+                <>
+                  <Zap className="w-3 h-3 mr-1" />
+                  Test Connection
+                </>
+              )}
+            </Button>
+
+            <Button
+              type="submit"
+              className="flex-1"
+              size="lg"
+              disabled={submitting || testing}
+            >
+              {submitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Provisioning...
+                </>
+              ) : (
+                <>
+                  Provision My Agent Engine
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </>
+              )}
+            </Button>
+          </div>
 
           <p className="text-xs text-center text-muted-foreground">
             Your credentials are isolated to your workspace.
