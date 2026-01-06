@@ -8,34 +8,44 @@ import ScrollReveal from "@/components/ScrollReveal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, CheckCircle } from "lucide-react";
 
-const involvementOptions = [
-  { value: "done_for_you", label: "Done for you", desc: "AERELION handles design and deployment" },
-  { value: "collaborative", label: "Collaborative", desc: "Work together on implementation" },
-  { value: "not_sure", label: "Not sure yet", desc: "Let's discuss what makes sense" },
+const toolOptions = [
+  { value: "notion", label: "Notion" },
+  { value: "slack", label: "Slack" },
+  { value: "hubspot", label: "HubSpot" },
+  { value: "airtable", label: "Airtable" },
+  { value: "google_sheets", label: "Google Sheets" },
+  { value: "zapier", label: "Zapier" },
+  { value: "make", label: "Make (Integromat)" },
+  { value: "salesforce", label: "Salesforce" },
+  { value: "stripe", label: "Stripe" },
+  { value: "other", label: "Other" },
 ];
 
 const timelineOptions = [
-  { value: "this_month", label: "This month", desc: "Ready to start immediately" },
-  { value: "next_month", label: "Next month", desc: "Planning ahead" },
+  { value: "this_week", label: "This week", desc: "Ready to start immediately" },
+  { value: "this_month", label: "This month", desc: "Ready to begin soon" },
+  { value: "next_quarter", label: "Next quarter", desc: "Planning ahead" },
   { value: "exploring", label: "Exploring", desc: "No fixed timeline" },
 ];
 
-const contactOptions = [
-  { value: "email", label: "Email", desc: "Prefer written communication" },
-  { value: "phone", label: "Phone", desc: "Let's talk directly" },
-  { value: "schedule_link", label: "Schedule a call", desc: "Book a time that works" },
+const budgetOptions = [
+  { value: "under_5k", label: "Under $5,000", desc: "Starter project scope" },
+  { value: "5k_15k", label: "$5,000 – $15,000", desc: "Standard system build" },
+  { value: "15k_plus", label: "$15,000+", desc: "Complex or multi-system" },
+  { value: "not_sure", label: "Not sure yet", desc: "Let's discuss" },
 ];
 
 export default function RequestDeployment() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  
-  const auditId = searchParams.get("audit");
-  const diagnosisId = searchParams.get("diagnosis");
+
+  const auditId = searchParams.get("audit") || "";
+  const diagnosisId = searchParams.get("diagnosis") || "";
   const prefillName = searchParams.get("name") || "";
   const prefillEmail = searchParams.get("email") || "";
 
@@ -44,14 +54,11 @@ export default function RequestDeployment() {
   const [formData, setFormData] = useState({
     name: prefillName,
     email: prefillEmail,
-    preferred_involvement: "",
+    preferred_tools: [] as string[],
     timeline: "",
-    tools_stack: "",
-    contact_method: "",
+    budget_comfort: "",
     notes: "",
   });
-
-  // Honeypot
   const [honeypot, setHoneypot] = useState("");
 
   useEffect(() => {
@@ -61,6 +68,15 @@ export default function RequestDeployment() {
       email: prefillEmail,
     }));
   }, [prefillName, prefillEmail]);
+
+  const toggleTool = (tool: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      preferred_tools: prev.preferred_tools.includes(tool)
+        ? prev.preferred_tools.filter((t) => t !== tool)
+        : [...prev.preferred_tools, tool],
+    }));
+  };
 
   const handleSelectOption = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -74,13 +90,8 @@ export default function RequestDeployment() {
       return;
     }
 
-    if (!formData.name || !formData.email) {
-      toast.error("Please enter your name and email");
-      return;
-    }
-
-    if (!formData.preferred_involvement) {
-      toast.error("Please select your preferred involvement");
+    if (!formData.email) {
+      toast.error("Please enter your email");
       return;
     }
 
@@ -89,19 +100,26 @@ export default function RequestDeployment() {
       return;
     }
 
-    if (!formData.contact_method) {
-      toast.error("Please select a contact method");
+    if (!formData.budget_comfort) {
+      toast.error("Please select a budget range");
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke("deployment-request", {
+      const { error } = await supabase.functions.invoke("deployment-request", {
         body: {
-          audit_id: auditId,
-          diagnosis_id: diagnosisId,
-          ...formData,
+          audit_id: auditId || null,
+          diagnosis_id: diagnosisId || null,
+          name: formData.name,
+          email: formData.email,
+          preferred_involvement: "done_for_you",
+          preferred_tools: formData.preferred_tools,
+          timeline: formData.timeline,
+          budget_comfort: formData.budget_comfort,
+          contact_method: "email",
+          notes: formData.notes,
         },
       });
 
@@ -125,7 +143,7 @@ export default function RequestDeployment() {
   }: {
     selected: boolean;
     label: string;
-    desc: string;
+    desc?: string;
     onClick: () => void;
   }) => (
     <button
@@ -134,18 +152,18 @@ export default function RequestDeployment() {
       className={`w-full text-left p-4 rounded-lg border transition-all duration-200 ${
         selected
           ? "border-primary bg-primary/10 text-foreground"
-          : "border-border/50 bg-background/50 hover:border-primary/50 text-muted-foreground hover:text-foreground"
+          : "border-border/50 bg-card/50 hover:border-primary/50 text-muted-foreground hover:text-foreground"
       }`}
     >
       <div className="font-medium">{label}</div>
-      <div className="text-sm opacity-70 mt-1">{desc}</div>
+      {desc && <div className="text-sm opacity-70 mt-1">{desc}</div>}
     </button>
   );
 
   if (submitted) {
     return (
       <div className="min-h-screen bg-background text-foreground">
-        <SEO title="Request Received | AERELION Systems" />
+        <SEO title="Request Received | AERELION Labs" />
         <Navbar />
         <main className="pt-32 pb-24">
           <div className="container mx-auto px-6 max-w-2xl text-center">
@@ -159,7 +177,7 @@ export default function RequestDeployment() {
               </div>
               <h1 className="text-3xl font-bold">Deployment Request Received</h1>
               <p className="text-muted-foreground max-w-md mx-auto">
-                We'll review your audit and diagnosis, then confirm whether AERELION is the right fit for your operational needs.
+                We'll review your diagnosis and confirm whether AERELION is the right fit for your operational needs.
               </p>
               <p className="text-muted-foreground text-sm">
                 If we're not the right fit, we'll tell you. If we are, we'll confirm constraints and map the first build.
@@ -180,29 +198,29 @@ export default function RequestDeployment() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SEO
-        title="Request System Deployment | AERELION Systems"
-        description="Confirm fit and request deployment of your recommended systems."
+        title="Request Deployment | AERELION Labs"
+        description="Submit your deployment request and we'll confirm fit."
       />
       <Navbar />
 
-      <main className="pt-32 pb-24">
+      <main className="pt-28 pb-24">
         <div className="container mx-auto px-6 max-w-2xl">
           <ScrollReveal>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-center mb-12"
+              className="text-center mb-10"
             >
-              <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
-                REQUEST SYSTEM DEPLOYMENT
+              <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">
+                Request Deployment
               </h1>
-              <p className="text-lg text-muted-foreground max-w-xl mx-auto">
+              <p className="text-muted-foreground text-lg">
                 This is not checkout. This is fit confirmation.
               </p>
             </motion.div>
           </ScrollReveal>
 
-          <form onSubmit={handleSubmit} className="space-y-8">
+          <form onSubmit={handleSubmit} className="space-y-6">
             {/* Honeypot */}
             <input
               type="text"
@@ -214,22 +232,34 @@ export default function RequestDeployment() {
               autoComplete="off"
             />
 
-            {/* Name & Email */}
+            {/* Audit ID (read-only) */}
+            {auditId && (
+              <ScrollReveal delay={0.05}>
+                <div className="p-4 rounded-lg border border-border/50 bg-muted/30">
+                  <p className="text-xs text-muted-foreground">
+                    Audit ID: <span className="font-mono">{auditId}</span>
+                  </p>
+                </div>
+              </ScrollReveal>
+            )}
+
+            {/* Contact Info */}
             <ScrollReveal delay={0.1}>
-              <div className="space-y-4 p-6 rounded-xl border border-border/50 bg-card/30">
+              <div className="p-6 rounded-xl border border-border/50 bg-card/30 space-y-4">
                 <h3 className="text-lg font-semibold">Contact Information</h3>
                 <div className="grid gap-4 md:grid-cols-2">
                   <div>
-                    <label className="block text-sm font-medium mb-2">Name *</label>
+                    <label className="block text-sm font-medium mb-2">Name</label>
                     <Input
                       value={formData.name}
                       onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
                       placeholder="Your name"
-                      required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-2">Email *</label>
+                    <label className="block text-sm font-medium mb-2">
+                      Email <span className="text-destructive">*</span>
+                    </label>
                     <Input
                       type="email"
                       value={formData.email}
@@ -242,21 +272,26 @@ export default function RequestDeployment() {
               </div>
             </ScrollReveal>
 
-            {/* Preferred Involvement */}
+            {/* Preferred Tools */}
             <ScrollReveal delay={0.15}>
-              <div className="space-y-4 p-6 rounded-xl border border-border/50 bg-card/30">
-                <h3 className="text-lg font-semibold">
-                  How would you prefer to be involved?
-                </h3>
-                <div className="grid gap-3">
-                  {involvementOptions.map((opt) => (
-                    <OptionButton
-                      key={opt.value}
-                      selected={formData.preferred_involvement === opt.value}
-                      label={opt.label}
-                      desc={opt.desc}
-                      onClick={() => handleSelectOption("preferred_involvement", opt.value)}
-                    />
+              <div className="p-6 rounded-xl border border-border/50 bg-card/30 space-y-4">
+                <h3 className="text-lg font-semibold">Tools to Connect (select all that apply)</h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {toolOptions.map((tool) => (
+                    <label
+                      key={tool.value}
+                      className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                        formData.preferred_tools.includes(tool.value)
+                          ? "border-primary bg-primary/10"
+                          : "border-border/50 bg-card/50 hover:border-primary/50"
+                      }`}
+                    >
+                      <Checkbox
+                        checked={formData.preferred_tools.includes(tool.value)}
+                        onCheckedChange={() => toggleTool(tool.value)}
+                      />
+                      <span className="text-sm">{tool.label}</span>
+                    </label>
                   ))}
                 </div>
               </div>
@@ -264,11 +299,11 @@ export default function RequestDeployment() {
 
             {/* Timeline */}
             <ScrollReveal delay={0.2}>
-              <div className="space-y-4 p-6 rounded-xl border border-border/50 bg-card/30">
+              <div className="p-6 rounded-xl border border-border/50 bg-card/30 space-y-4">
                 <h3 className="text-lg font-semibold">
-                  When are you looking to start?
+                  Desired Timeline <span className="text-destructive">*</span>
                 </h3>
-                <div className="grid gap-3 md:grid-cols-3">
+                <div className="grid gap-3 md:grid-cols-2">
                   {timelineOptions.map((opt) => (
                     <OptionButton
                       key={opt.value}
@@ -282,35 +317,20 @@ export default function RequestDeployment() {
               </div>
             </ScrollReveal>
 
-            {/* Tools Stack */}
+            {/* Budget */}
             <ScrollReveal delay={0.25}>
-              <div className="space-y-4 p-6 rounded-xl border border-border/50 bg-card/30">
+              <div className="p-6 rounded-xl border border-border/50 bg-card/30 space-y-4">
                 <h3 className="text-lg font-semibold">
-                  What tools do you currently use? (optional)
+                  Budget Comfort <span className="text-destructive">*</span>
                 </h3>
-                <Textarea
-                  value={formData.tools_stack}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, tools_stack: e.target.value }))}
-                  placeholder="e.g., Notion, Slack, HubSpot, Airtable..."
-                  rows={3}
-                />
-              </div>
-            </ScrollReveal>
-
-            {/* Contact Method */}
-            <ScrollReveal delay={0.3}>
-              <div className="space-y-4 p-6 rounded-xl border border-border/50 bg-card/30">
-                <h3 className="text-lg font-semibold">
-                  How would you prefer we reach you?
-                </h3>
-                <div className="grid gap-3 md:grid-cols-3">
-                  {contactOptions.map((opt) => (
+                <div className="grid gap-3 md:grid-cols-2">
+                  {budgetOptions.map((opt) => (
                     <OptionButton
                       key={opt.value}
-                      selected={formData.contact_method === opt.value}
+                      selected={formData.budget_comfort === opt.value}
                       label={opt.label}
                       desc={opt.desc}
-                      onClick={() => handleSelectOption("contact_method", opt.value)}
+                      onClick={() => handleSelectOption("budget_comfort", opt.value)}
                     />
                   ))}
                 </div>
@@ -318,28 +338,26 @@ export default function RequestDeployment() {
             </ScrollReveal>
 
             {/* Notes */}
-            <ScrollReveal delay={0.35}>
-              <div className="space-y-4 p-6 rounded-xl border border-border/50 bg-card/30">
-                <h3 className="text-lg font-semibold">
-                  Anything else we should know? (optional)
-                </h3>
+            <ScrollReveal delay={0.3}>
+              <div className="p-6 rounded-xl border border-border/50 bg-card/30 space-y-4">
+                <h3 className="text-lg font-semibold">Additional Context (optional)</h3>
                 <Textarea
                   value={formData.notes}
                   onChange={(e) => setFormData((prev) => ({ ...prev, notes: e.target.value }))}
-                  placeholder="Constraints, context, questions..."
+                  placeholder="Constraints, questions, or anything else..."
                   rows={4}
                 />
               </div>
             </ScrollReveal>
 
             {/* Submit */}
-            <ScrollReveal delay={0.4}>
+            <ScrollReveal delay={0.35}>
               <div className="text-center space-y-4">
                 <Button
                   type="submit"
                   size="lg"
                   disabled={isSubmitting}
-                  className="min-w-[280px]"
+                  className="min-w-[260px]"
                 >
                   {isSubmitting ? (
                     <>
@@ -351,7 +369,7 @@ export default function RequestDeployment() {
                   )}
                 </Button>
                 <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                  If we're not the right fit, we'll tell you. If we are, we'll confirm constraints and map the first build.
+                  We'll review your request and respond within 1–2 business days.
                 </p>
               </div>
             </ScrollReveal>

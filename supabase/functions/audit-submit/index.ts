@@ -185,10 +185,11 @@ Deno.serve(async (req) => {
 
     console.log("Audit submission received:", { email: body.email, friction: body.primary_friction });
 
-    // Validate required fields
+    // Validate required fields - website_url and primary_friction are required
+    // name and email are optional
     const requiredFields = [
-      "name", "email", "primary_friction", "breakdown_first",
-      "tool_entropy", "absence_test_48h", "operational_volume", "decision_maker"
+      "primary_friction", "breakdown_first",
+      "tool_entropy", "absence_test_48h", "operational_volume"
     ];
     
     for (const field of requiredFields) {
@@ -215,16 +216,16 @@ Deno.serve(async (req) => {
     const { data: audit, error: auditError } = await supabase
       .from("audits")
       .insert({
-        name: body.name,
-        email: body.email,
+        name: body.name || "Anonymous",
+        email: body.email || "",
         primary_friction: body.primary_friction,
         breakdown_first: body.breakdown_first,
         tool_entropy: body.tool_entropy,
         absence_test_48h: body.absence_test_48h,
         operational_volume: body.operational_volume,
-        decision_maker: body.decision_maker,
+        decision_maker: body.decision_maker ?? false,
         notes: body.notes || null,
-        consent_ack: true,
+        consent_ack: body.consent_ack ?? true,
         status: "processing",
         n8n_status: "queued",
         n8n_request_id: n8nRequestId,
