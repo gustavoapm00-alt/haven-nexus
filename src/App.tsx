@@ -31,6 +31,9 @@ import ResetPassword from "./pages/ResetPassword";
 import Sanctuary from "./pages/Sanctuary";
 import Dashboard from "./pages/Dashboard";
 import AgentRun from "./pages/agents/AgentRun";
+import AgentSetup from "./pages/agents/AgentSetup";
+import AgentDashboard from "./pages/agents/AgentDashboard";
+import AgentActivity from "./pages/agents/AgentActivity";
 import StudioAgents from "./pages/studio/StudioAgents";
 import StudioPlans from "./pages/studio/StudioPlans";
 import StudioEntitlements from "./pages/studio/StudioEntitlements";
@@ -92,6 +95,9 @@ const UnlockedApp = () => (
     <Route path="/reset-password" element={<ResetPassword />} />
     <Route path="/sanctuary" element={<Sanctuary />} />
     <Route path="/dashboard" element={<Dashboard />} />
+    <Route path="/agents/setup" element={<AgentSetup />} />
+    <Route path="/agents/dashboard" element={<AgentDashboard />} />
+    <Route path="/agents/activity" element={<AgentActivity />} />
     <Route path="/agents/:agentKey" element={<AgentRun />} />
     <Route path="/studio/agents" element={<StudioAgents />} />
     <Route path="/studio/plans" element={<StudioPlans />} />
