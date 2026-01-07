@@ -31,20 +31,16 @@ import ResetPassword from "./pages/ResetPassword";
 import Sanctuary from "./pages/Sanctuary";
 import Dashboard from "./pages/Dashboard";
 import AgentRun from "./pages/agents/AgentRun";
+import AgentSetup from "./pages/agents/AgentSetup";
+import AgentDashboard from "./pages/agents/AgentDashboard";
 import AgentActivity from "./pages/agents/AgentActivity";
 import StudioAgents from "./pages/studio/StudioAgents";
 import StudioPlans from "./pages/studio/StudioPlans";
 import StudioEntitlements from "./pages/studio/StudioEntitlements";
 import NotFound from "./pages/NotFound";
+import SystemAudit from "./pages/SystemAudit";
 import SystemAuditResult from "./pages/SystemAuditResult";
 import RequestDeployment from "./pages/RequestDeployment";
-// New onboarding flow
-import Start from "./pages/onboarding/Start";
-import Questions from "./pages/onboarding/Questions";
-import Diagnosis from "./pages/onboarding/Diagnosis";
-import Architecture from "./pages/onboarding/Architecture";
-import Activate from "./pages/onboarding/Activate";
-import OnboardingDashboard from "./pages/onboarding/Dashboard";
 
 const queryClient = new QueryClient();
 
@@ -83,15 +79,7 @@ const UnlockedApp = () => (
     <Route path="/about" element={<About />} />
     <Route path="/contact" element={<Contact />} />
     <Route path="/get-started" element={<GetStarted />} />
-    {/* New onboarding flow */}
-    <Route path="/start" element={<Start />} />
-    <Route path="/analysis/questions" element={<Questions />} />
-    <Route path="/analysis/diagnosis" element={<Diagnosis />} />
-    <Route path="/analysis/architecture" element={<Architecture />} />
-    <Route path="/activate" element={<Activate />} />
-    <Route path="/dashboard" element={<OnboardingDashboard />} />
-    {/* Legacy routes - redirect to new flow */}
-    <Route path="/system-audit" element={<Navigate to="/start" replace />} />
+    <Route path="/system-audit" element={<SystemAudit />} />
     <Route path="/system-audit/result" element={<SystemAuditResult />} />
     <Route path="/request-deployment" element={<RequestDeployment />} />
     <Route path="/reliability" element={<Reliability />} />
@@ -106,6 +94,9 @@ const UnlockedApp = () => (
     <Route path="/admin" element={<Admin />} />
     <Route path="/reset-password" element={<ResetPassword />} />
     <Route path="/sanctuary" element={<Sanctuary />} />
+    <Route path="/dashboard" element={<Dashboard />} />
+    <Route path="/agents/setup" element={<AgentSetup />} />
+    <Route path="/agents/dashboard" element={<AgentDashboard />} />
     <Route path="/agents/activity" element={<AgentActivity />} />
     <Route path="/agents/:agentKey" element={<AgentRun />} />
     <Route path="/studio/agents" element={<StudioAgents />} />
