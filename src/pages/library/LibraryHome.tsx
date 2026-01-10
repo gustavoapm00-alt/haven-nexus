@@ -9,7 +9,7 @@ import IntegrationIcons from '@/components/library/IntegrationIcons';
 import EmailCaptureForm from '@/components/library/EmailCaptureForm';
 import { useAgents } from '@/hooks/useAgents';
 import { useBundles } from '@/hooks/useBundles';
-import { SEO } from '@/components/SEO';
+import SEO from '@/components/SEO';
 import { format } from 'date-fns';
 
 const LibraryHome = () => {
@@ -35,7 +35,7 @@ const LibraryHome = () => {
       <SEO
         title="Operational Automation Library"
         description="Deploy proven automation workflows to reduce manual load, increase reliability, and restore operator capacity. Pre-engineered for healthcare, construction, logistics, and professional services."
-        keywords={['automation', 'n8n workflows', 'operational automation', 'business automation', 'workflow automation']}
+        keywords="automation, n8n workflows, operational automation, business automation, workflow automation"
       />
       
       <div className="min-h-screen bg-background">

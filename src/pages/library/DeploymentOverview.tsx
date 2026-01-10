@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import LibraryNavbar from '@/components/library/LibraryNavbar';
 import LibraryFooter from '@/components/library/LibraryFooter';
 import IntegrationIcons from '@/components/library/IntegrationIcons';
-import { SEO } from '@/components/SEO';
+import SEO from '@/components/SEO';
 
 const DeploymentOverview = () => {
   const deploymentSteps = [
@@ -30,7 +30,7 @@ const DeploymentOverview = () => {
       <SEO
         title="Deployment Overview"
         description="Learn how AERELION automation agents are deployed. Customer-controlled execution with no centralized data processing."
-        keywords={['deployment', 'n8n', 'automation deployment', 'workflow deployment']}
+        keywords="deployment, n8n, automation deployment, workflow deployment"
       />
 
       <div className="min-h-screen bg-background">

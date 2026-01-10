@@ -42,6 +42,18 @@ import SystemAudit from "./pages/SystemAudit";
 import SystemAuditResult from "./pages/SystemAuditResult";
 import RequestDeployment from "./pages/RequestDeployment";
 
+// Library pages
+import LibraryHome from "./pages/library/LibraryHome";
+import AgentLibrary from "./pages/library/AgentLibrary";
+import AgentDetail from "./pages/library/AgentDetail";
+import BundleLibrary from "./pages/library/BundleLibrary";
+import BundleDetail from "./pages/library/BundleDetail";
+import DeploymentOverview from "./pages/library/DeploymentOverview";
+import SecurityPractices from "./pages/library/SecurityPractices";
+import Documentation from "./pages/library/Documentation";
+import InstallationAssistance from "./pages/library/InstallationAssistance";
+import LibraryContact from "./pages/library/LibraryContact";
+
 const queryClient = new QueryClient();
 
 const ScrollToTop = () => {
@@ -72,12 +84,24 @@ const LockedApp = () => (
 
 const UnlockedApp = () => (
   <Routes>
-    <Route path="/" element={<Index />} />
+    {/* Library/Marketplace Routes (new primary site) */}
+    <Route path="/" element={<LibraryHome />} />
+    <Route path="/agents" element={<AgentLibrary />} />
+    <Route path="/agents/:slug" element={<AgentDetail />} />
+    <Route path="/bundles" element={<BundleLibrary />} />
+    <Route path="/bundles/:slug" element={<BundleDetail />} />
+    <Route path="/deployment" element={<DeploymentOverview />} />
+    <Route path="/security" element={<SecurityPractices />} />
+    <Route path="/docs" element={<Documentation />} />
+    <Route path="/install" element={<InstallationAssistance />} />
+    <Route path="/contact" element={<LibraryContact />} />
+
+    {/* Legacy routes (redirects or preserved for existing links) */}
+    <Route path="/old-home" element={<Index />} />
     <Route path="/capabilities" element={<Capabilities />} />
     <Route path="/services" element={<Navigate to="/capabilities" replace />} />
     <Route path="/pricing" element={<Pricing />} />
     <Route path="/about" element={<About />} />
-    <Route path="/contact" element={<Contact />} />
     <Route path="/get-started" element={<GetStarted />} />
     <Route path="/system-audit" element={<SystemAudit />} />
     <Route path="/system-audit/result" element={<SystemAuditResult />} />
@@ -98,7 +122,7 @@ const UnlockedApp = () => (
     <Route path="/agents/setup" element={<AgentSetup />} />
     <Route path="/agents/dashboard" element={<AgentDashboard />} />
     <Route path="/agents/activity" element={<AgentActivity />} />
-    <Route path="/agents/:agentKey" element={<AgentRun />} />
+    <Route path="/agents/run/:agentKey" element={<AgentRun />} />
     <Route path="/studio/agents" element={<StudioAgents />} />
     <Route path="/studio/plans" element={<StudioPlans />} />
     <Route path="/studio/entitlements" element={<StudioEntitlements />} />

@@ -7,7 +7,7 @@ import LibraryNavbar from '@/components/library/LibraryNavbar';
 import LibraryFooter from '@/components/library/LibraryFooter';
 import BundleCard from '@/components/library/BundleCard';
 import { useBundles } from '@/hooks/useBundles';
-import { SEO } from '@/components/SEO';
+import SEO from '@/components/SEO';
 
 const BundleLibrary = () => {
   const { bundles, loading } = useBundles();
@@ -50,7 +50,7 @@ const BundleLibrary = () => {
       <SEO
         title="System Bundles"
         description="Curated sets of automation agents designed to address common operational bottlenecks. Save with bundled pricing."
-        keywords={['automation bundles', 'workflow bundles', 'business automation', 'n8n workflows']}
+        keywords="automation bundles, workflow bundles, business automation, n8n workflows"
       />
 
       <div className="min-h-screen bg-background">

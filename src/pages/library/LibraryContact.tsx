@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import LibraryNavbar from '@/components/library/LibraryNavbar';
 import LibraryFooter from '@/components/library/LibraryFooter';
-import { SEO } from '@/components/SEO';
+import SEO from '@/components/SEO';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -61,7 +61,7 @@ const LibraryContact = () => {
       <SEO
         title="Contact"
         description="Get in touch with AERELION Systems. Questions about automation agents, bundles, or deployment? We're here to help."
-        keywords={['contact', 'support', 'help', 'questions']}
+        keywords="contact, support, help, questions"
       />
 
       <div className="min-h-screen bg-background">

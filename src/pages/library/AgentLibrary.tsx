@@ -7,7 +7,7 @@ import LibraryNavbar from '@/components/library/LibraryNavbar';
 import LibraryFooter from '@/components/library/LibraryFooter';
 import AgentCard from '@/components/library/AgentCard';
 import { useAgents } from '@/hooks/useAgents';
-import { SEO } from '@/components/SEO';
+import SEO from '@/components/SEO';
 
 const AgentLibrary = () => {
   const { agents, loading } = useAgents();
@@ -62,7 +62,7 @@ const AgentLibrary = () => {
       <SEO
         title="Automation Agents"
         description="Browse our library of pre-engineered automation agents. Modular workflows designed to eliminate repeatable operational tasks."
-        keywords={['automation agents', 'n8n workflows', 'business automation', 'workflow templates']}
+        keywords="automation agents, n8n workflows, business automation, workflow templates"
       />
 
       <div className="min-h-screen bg-background">

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import LibraryNavbar from '@/components/library/LibraryNavbar';
 import LibraryFooter from '@/components/library/LibraryFooter';
-import { SEO } from '@/components/SEO';
+import SEO from '@/components/SEO';
 
 const Documentation = () => {
   const docSections = [
@@ -54,7 +54,7 @@ const Documentation = () => {
       <SEO
         title="Documentation"
         description="Comprehensive guides for deploying and configuring AERELION automation agents."
-        keywords={['documentation', 'guides', 'n8n', 'automation setup', 'deployment guide']}
+        keywords="documentation, guides, n8n, automation setup, deployment guide"
       />
 
       <div className="min-h-screen bg-background">

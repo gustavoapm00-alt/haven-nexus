@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import LibraryNavbar from '@/components/library/LibraryNavbar';
 import LibraryFooter from '@/components/library/LibraryFooter';
 import { useBundle } from '@/hooks/useBundles';
-import { SEO } from '@/components/SEO';
+import SEO from '@/components/SEO';
 
 const BundleDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -64,7 +64,7 @@ const BundleDetail = () => {
       <SEO
         title={bundle.name}
         description={bundle.objective}
-        keywords={[...bundle.sectors, 'automation bundle', 'workflow bundle']}
+        keywords={[...bundle.sectors, 'automation bundle', 'workflow bundle'].join(', ')}
       />
 
       <div className="min-h-screen bg-background">
