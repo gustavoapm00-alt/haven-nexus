@@ -54,6 +54,7 @@ import SecurityPractices from "./pages/library/SecurityPractices";
 import Documentation from "./pages/library/Documentation";
 import InstallationAssistance from "./pages/library/InstallationAssistance";
 import LibraryContact from "./pages/library/LibraryContact";
+import PurchaseSuccess from "./pages/library/PurchaseSuccess";
 
 const queryClient = new QueryClient();
 
@@ -96,6 +97,7 @@ const UnlockedApp = () => (
     <Route path="/docs" element={<Documentation />} />
     <Route path="/install" element={<InstallationAssistance />} />
     <Route path="/contact" element={<LibraryContact />} />
+    <Route path="/purchase-success" element={<PurchaseSuccess />} />
 
     {/* Legacy routes (redirects or preserved for existing links) */}
     <Route path="/old-home" element={<Index />} />

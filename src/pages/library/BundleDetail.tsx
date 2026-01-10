@@ -1,14 +1,27 @@
-import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, Check, Download, Package } from 'lucide-react';
+import { useParams, Link, useSearchParams } from 'react-router-dom';
+import { useEffect } from 'react';
+import { ArrowLeft, ArrowRight, Download, Package, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import LibraryNavbar from '@/components/library/LibraryNavbar';
 import LibraryFooter from '@/components/library/LibraryFooter';
 import { useBundle } from '@/hooks/useBundles';
+import { usePurchase } from '@/hooks/usePurchase';
+import { useAuth } from '@/hooks/useAuth';
 import SEO from '@/components/SEO';
+import { toast } from 'sonner';
 
 const BundleDetail = () => {
   const { slug } = useParams<{ slug: string }>();
+  const [searchParams] = useSearchParams();
   const { bundle, loading, error } = useBundle(slug || '');
+  const { initiateCheckout, loading: checkoutLoading, isAuthenticated } = usePurchase();
+  const { isLoading: authLoading } = useAuth();
+
+  useEffect(() => {
+    if (searchParams.get('canceled') === 'true') {
+      toast.info('Purchase canceled', { description: 'You can complete your purchase anytime.' });
+    }
+  }, [searchParams]);
 
   const formatPrice = (cents: number) => `$${(cents / 100).toFixed(0)}`;
 
@@ -193,9 +206,18 @@ const BundleDetail = () => {
                     </p>
                   </div>
 
-                  <Button className="w-full mb-3" size="lg">
-                    <Download className="w-4 h-4 mr-2" />
-                    Purchase & Download
+                  <Button 
+                    className="w-full mb-3" 
+                    size="lg"
+                    onClick={() => initiateCheckout('bundle', bundle.id)}
+                    disabled={checkoutLoading || authLoading}
+                  >
+                    {checkoutLoading ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Download className="w-4 h-4 mr-2" />
+                    )}
+                    {!isAuthenticated ? 'Sign In to Purchase' : 'Purchase & Download'}
                   </Button>
 
                   <Link
