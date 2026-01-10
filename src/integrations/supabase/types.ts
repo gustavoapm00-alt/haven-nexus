@@ -175,6 +175,132 @@ export type Database = {
         }
         Relationships: []
       }
+      automation_agents: {
+        Row: {
+          capacity_recovered_max: number
+          capacity_recovered_min: number
+          created_at: string
+          description: string
+          featured: boolean
+          how_it_works: string[]
+          id: string
+          important_notes: string[]
+          includes: string[]
+          name: string
+          price_cents: number
+          published_at: string | null
+          requirements: string[]
+          sectors: string[]
+          setup_time_max: number
+          setup_time_min: number
+          short_outcome: string
+          slug: string
+          status: string
+          systems: string[]
+          updated_at: string
+          workflow_file_url: string | null
+        }
+        Insert: {
+          capacity_recovered_max?: number
+          capacity_recovered_min?: number
+          created_at?: string
+          description: string
+          featured?: boolean
+          how_it_works?: string[]
+          id?: string
+          important_notes?: string[]
+          includes?: string[]
+          name: string
+          price_cents?: number
+          published_at?: string | null
+          requirements?: string[]
+          sectors?: string[]
+          setup_time_max?: number
+          setup_time_min?: number
+          short_outcome: string
+          slug: string
+          status?: string
+          systems?: string[]
+          updated_at?: string
+          workflow_file_url?: string | null
+        }
+        Update: {
+          capacity_recovered_max?: number
+          capacity_recovered_min?: number
+          created_at?: string
+          description?: string
+          featured?: boolean
+          how_it_works?: string[]
+          id?: string
+          important_notes?: string[]
+          includes?: string[]
+          name?: string
+          price_cents?: number
+          published_at?: string | null
+          requirements?: string[]
+          sectors?: string[]
+          setup_time_max?: number
+          setup_time_min?: number
+          short_outcome?: string
+          slug?: string
+          status?: string
+          systems?: string[]
+          updated_at?: string
+          workflow_file_url?: string | null
+        }
+        Relationships: []
+      }
+      automation_bundles: {
+        Row: {
+          bundle_price_cents: number
+          created_at: string
+          description: string
+          featured: boolean
+          id: string
+          included_agent_ids: string[]
+          individual_value_cents: number
+          name: string
+          objective: string
+          published_at: string | null
+          sectors: string[]
+          slug: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          bundle_price_cents?: number
+          created_at?: string
+          description: string
+          featured?: boolean
+          id?: string
+          included_agent_ids?: string[]
+          individual_value_cents?: number
+          name: string
+          objective: string
+          published_at?: string | null
+          sectors?: string[]
+          slug: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          bundle_price_cents?: number
+          created_at?: string
+          description?: string
+          featured?: boolean
+          id?: string
+          included_agent_ids?: string[]
+          individual_value_cents?: number
+          name?: string
+          objective?: string
+          published_at?: string | null
+          sectors?: string[]
+          slug?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       contact_submissions: {
         Row: {
           created_at: string
@@ -342,6 +468,60 @@ export type Database = {
           email?: string
           id?: string
           source?: string | null
+        }
+        Relationships: []
+      }
+      email_updates: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          source_page: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          source_page?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          source_page?: string | null
+        }
+        Relationships: []
+      }
+      installation_requests: {
+        Row: {
+          company: string | null
+          created_at: string
+          email: string
+          id: string
+          name: string
+          notes: string | null
+          preferred_systems: string | null
+          purchased_item: string | null
+        }
+        Insert: {
+          company?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          notes?: string | null
+          preferred_systems?: string | null
+          purchased_item?: string | null
+        }
+        Update: {
+          company?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          preferred_systems?: string | null
+          purchased_item?: string | null
         }
         Relationships: []
       }
@@ -524,6 +704,39 @@ export type Database = {
           display_name?: string | null
           id?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      purchases: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          email: string
+          id: string
+          item_id: string
+          item_type: string
+          status: string
+          stripe_session_id: string | null
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          email: string
+          id?: string
+          item_id: string
+          item_type: string
+          status?: string
+          stripe_session_id?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          email?: string
+          id?: string
+          item_id?: string
+          item_type?: string
+          status?: string
+          stripe_session_id?: string | null
         }
         Relationships: []
       }
