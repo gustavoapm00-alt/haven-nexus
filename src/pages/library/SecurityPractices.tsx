@@ -1,7 +1,7 @@
 import { Shield, Lock, Eye, Users, Database } from 'lucide-react';
 import LibraryNavbar from '@/components/library/LibraryNavbar';
 import LibraryFooter from '@/components/library/LibraryFooter';
-import { SEO } from '@/components/SEO';
+import SEO from '@/components/SEO';
 
 const SecurityPractices = () => {
   const practices = [
@@ -37,7 +37,7 @@ const SecurityPractices = () => {
       <SEO
         title="Security & Data Practices"
         description="Learn about AERELION's security practices, data handling, and commitment to customer-controlled execution."
-        keywords={['security', 'data practices', 'privacy', 'customer control', 'data protection']}
+        keywords="security, data practices, privacy, customer control, data protection"
       />
 
       <div className="min-h-screen bg-background">

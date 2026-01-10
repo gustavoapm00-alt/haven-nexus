@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import LibraryNavbar from '@/components/library/LibraryNavbar';
 import LibraryFooter from '@/components/library/LibraryFooter';
-import { SEO } from '@/components/SEO';
+import SEO from '@/components/SEO';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -85,7 +85,7 @@ const InstallationAssistance = () => {
       <SEO
         title="Installation Assistance"
         description="Get hands-on help deploying automation agents. Installation, bundle setup, and customization services available."
-        keywords={['installation', 'deployment help', 'automation setup', 'n8n installation']}
+        keywords="installation, deployment help, automation setup, n8n installation"
       />
 
       <div className="min-h-screen bg-background">

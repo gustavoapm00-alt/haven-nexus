@@ -11,7 +11,7 @@ import LibraryNavbar from '@/components/library/LibraryNavbar';
 import LibraryFooter from '@/components/library/LibraryFooter';
 import SystemIcon from '@/components/library/SystemIcon';
 import { useAgent } from '@/hooks/useAgents';
-import { SEO } from '@/components/SEO';
+import SEO from '@/components/SEO';
 
 const AgentDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -76,7 +76,7 @@ const AgentDetail = () => {
       <SEO
         title={agent.name}
         description={agent.short_outcome}
-        keywords={[...agent.sectors, ...agent.systems, 'automation agent']}
+        keywords={[...agent.sectors, ...agent.systems, 'automation agent'].join(', ')}
       />
 
       <div className="min-h-screen bg-background">
