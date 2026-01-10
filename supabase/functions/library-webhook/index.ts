@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { checkRateLimit, getClientIp, rateLimitResponse } from "../_shared/rate-limiter.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -23,6 +24,19 @@ serve(async (req) => {
   );
 
   try {
+    // Rate limiting for webhook endpoint (higher threshold)
+    const clientIp = getClientIp(req);
+    const rateLimitResult = await checkRateLimit(
+      { functionName: "library-webhook", maxRequests: 120, windowSeconds: 60 },
+      null, // No user for webhooks
+      clientIp
+    );
+
+    if (!rateLimitResult.allowed) {
+      console.warn("Rate limit exceeded for webhook from IP:", clientIp);
+      return rateLimitResponse(rateLimitResult.retryAfterSeconds || 60);
+    }
+
     const signature = req.headers.get("stripe-signature");
     const body = await req.text();
     
@@ -59,10 +73,12 @@ serve(async (req) => {
       );
     }
 
+    // Log event type and session ID for observability
     console.log("Processing webhook event:", event.type);
 
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
+      console.log("Processing checkout session:", session.id);
       
       if (session.payment_status === "paid") {
         const metadata = session.metadata;

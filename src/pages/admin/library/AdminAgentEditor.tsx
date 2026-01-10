@@ -60,22 +60,26 @@ const initialFormData: AgentFormData = {
   guide_file_path: null,
 };
 
-const AdminAgentEditor = () => {
+interface AdminAgentEditorProps {
+  mode: 'create' | 'edit';
+}
+
+const AdminAgentEditor = ({ mode }: AdminAgentEditorProps) => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const isNew = id === 'new';
+  const isCreate = mode === 'create';
 
   const [formData, setFormData] = useState<AgentFormData>(initialFormData);
-  const [loading, setLoading] = useState(!isNew);
+  const [loading, setLoading] = useState(!isCreate);
   const [saving, setSaving] = useState(false);
   const [uploadingWorkflow, setUploadingWorkflow] = useState(false);
   const [uploadingGuide, setUploadingGuide] = useState(false);
 
   useEffect(() => {
-    if (!isNew && id) {
+    if (!isCreate && id) {
       fetchAgent(id);
     }
-  }, [id, isNew]);
+  }, [id, isCreate]);
 
   const fetchAgent = async (agentId: string) => {
     const { data, error } = await supabase
@@ -127,7 +131,7 @@ const AdminAgentEditor = () => {
     setFormData((prev) => ({
       ...prev,
       name,
-      slug: isNew ? generateSlug(name) : prev.slug,
+      slug: isCreate ? generateSlug(name) : prev.slug,
     }));
   };
 
@@ -203,7 +207,7 @@ const AdminAgentEditor = () => {
         published_at: formData.status === 'published' ? new Date().toISOString() : null,
       };
 
-      if (isNew) {
+      if (isCreate) {
         const { error } = await supabase.from('automation_agents').insert(saveData);
         if (error) throw error;
         toast.success('Agent created successfully');
@@ -249,7 +253,7 @@ const AdminAgentEditor = () => {
                 </Link>
               </Button>
               <h1 className="font-display text-xl">
-                {isNew ? 'New Agent' : 'Edit Agent'}
+                {isCreate ? 'New Agent' : 'Edit Agent'}
               </h1>
             </div>
             <Button onClick={handleSave} disabled={saving}>
@@ -258,7 +262,7 @@ const AdminAgentEditor = () => {
               ) : (
                 <Check className="w-4 h-4 mr-2" />
               )}
-              {isNew ? 'Create' : 'Save'}
+              {isCreate ? 'Create' : 'Save'}
             </Button>
           </div>
         </header>
