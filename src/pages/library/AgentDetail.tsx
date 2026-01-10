@@ -1,5 +1,6 @@
-import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Clock, TrendingUp, Check, HelpCircle, Download } from 'lucide-react';
+import { useParams, Link, useSearchParams } from 'react-router-dom';
+import { useEffect } from 'react';
+import { ArrowLeft, Clock, TrendingUp, Check, Download, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Accordion,
@@ -11,11 +12,23 @@ import LibraryNavbar from '@/components/library/LibraryNavbar';
 import LibraryFooter from '@/components/library/LibraryFooter';
 import SystemIcon from '@/components/library/SystemIcon';
 import { useAgent } from '@/hooks/useAgents';
+import { usePurchase } from '@/hooks/usePurchase';
+import { useAuth } from '@/hooks/useAuth';
 import SEO from '@/components/SEO';
+import { toast } from 'sonner';
 
 const AgentDetail = () => {
   const { slug } = useParams<{ slug: string }>();
+  const [searchParams] = useSearchParams();
   const { agent, loading, error } = useAgent(slug || '');
+  const { initiateCheckout, loading: checkoutLoading, isAuthenticated } = usePurchase();
+  const { isLoading: authLoading } = useAuth();
+
+  useEffect(() => {
+    if (searchParams.get('canceled') === 'true') {
+      toast.info('Purchase canceled', { description: 'You can complete your purchase anytime.' });
+    }
+  }, [searchParams]);
 
   const formatPrice = (cents: number) => `$${(cents / 100).toFixed(0)}`;
 
@@ -263,9 +276,18 @@ const AgentDetail = () => {
                     {formatPrice(agent.price_cents)}
                   </p>
 
-                  <Button className="w-full mb-3" size="lg">
-                    <Download className="w-4 h-4 mr-2" />
-                    Purchase & Download
+                  <Button 
+                    className="w-full mb-3" 
+                    size="lg"
+                    onClick={() => initiateCheckout('agent', agent.id)}
+                    disabled={checkoutLoading || authLoading}
+                  >
+                    {checkoutLoading ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Download className="w-4 h-4 mr-2" />
+                    )}
+                    {!isAuthenticated ? 'Sign In to Purchase' : 'Purchase & Download'}
                   </Button>
 
                   <Link

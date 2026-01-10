@@ -182,6 +182,7 @@ export type Database = {
           created_at: string
           description: string
           featured: boolean
+          guide_file_path: string | null
           how_it_works: string[]
           id: string
           important_notes: string[]
@@ -198,6 +199,7 @@ export type Database = {
           status: string
           systems: string[]
           updated_at: string
+          workflow_file_path: string | null
           workflow_file_url: string | null
         }
         Insert: {
@@ -206,6 +208,7 @@ export type Database = {
           created_at?: string
           description: string
           featured?: boolean
+          guide_file_path?: string | null
           how_it_works?: string[]
           id?: string
           important_notes?: string[]
@@ -222,6 +225,7 @@ export type Database = {
           status?: string
           systems?: string[]
           updated_at?: string
+          workflow_file_path?: string | null
           workflow_file_url?: string | null
         }
         Update: {
@@ -230,6 +234,7 @@ export type Database = {
           created_at?: string
           description?: string
           featured?: boolean
+          guide_file_path?: string | null
           how_it_works?: string[]
           id?: string
           important_notes?: string[]
@@ -246,6 +251,7 @@ export type Database = {
           status?: string
           systems?: string[]
           updated_at?: string
+          workflow_file_path?: string | null
           workflow_file_url?: string | null
         }
         Relationships: []
@@ -253,6 +259,7 @@ export type Database = {
       automation_bundles: {
         Row: {
           bundle_price_cents: number
+          bundle_zip_path: string | null
           created_at: string
           description: string
           featured: boolean
@@ -269,6 +276,7 @@ export type Database = {
         }
         Insert: {
           bundle_price_cents?: number
+          bundle_zip_path?: string | null
           created_at?: string
           description: string
           featured?: boolean
@@ -285,6 +293,7 @@ export type Database = {
         }
         Update: {
           bundle_price_cents?: number
+          bundle_zip_path?: string | null
           created_at?: string
           description?: string
           featured?: boolean
@@ -711,32 +720,65 @@ export type Database = {
         Row: {
           amount_cents: number
           created_at: string
+          download_count: number | null
           email: string
           id: string
           item_id: string
           item_type: string
+          last_download_at: string | null
           status: string
+          stripe_payment_intent: string | null
           stripe_session_id: string | null
+          user_id: string | null
         }
         Insert: {
           amount_cents: number
           created_at?: string
+          download_count?: number | null
           email: string
           id?: string
           item_id: string
           item_type: string
+          last_download_at?: string | null
           status?: string
+          stripe_payment_intent?: string | null
           stripe_session_id?: string | null
+          user_id?: string | null
         }
         Update: {
           amount_cents?: number
           created_at?: string
+          download_count?: number | null
           email?: string
           id?: string
           item_id?: string
           item_type?: string
+          last_download_at?: string | null
           status?: string
+          stripe_payment_intent?: string | null
           stripe_session_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      rate_limits: {
+        Row: {
+          action_type: string
+          created_at: string
+          id: string
+          identifier: string
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          id?: string
+          identifier: string
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          id?: string
+          identifier?: string
         }
         Relationships: []
       }
@@ -853,6 +895,15 @@ export type Database = {
       }
     }
     Functions: {
+      check_rate_limit: {
+        Args: {
+          p_action_type: string
+          p_cooldown_seconds?: number
+          p_identifier: string
+        }
+        Returns: boolean
+      }
+      cleanup_rate_limits: { Args: never; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
