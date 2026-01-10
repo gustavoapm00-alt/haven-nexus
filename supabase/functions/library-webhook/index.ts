@@ -8,6 +8,51 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, stripe-signature",
 };
 
+// Helper to send purchase confirmation email
+async function sendPurchaseEmail(
+  email: string,
+  itemType: string,
+  itemId: string,
+  itemName: string,
+  amountCents: number,
+  sessionId: string
+): Promise<void> {
+  const supabaseUrl = Deno.env.get("SUPABASE_URL");
+  const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
+  
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.warn("Cannot send email: missing Supabase config");
+    return;
+  }
+
+  try {
+    const response = await fetch(`${supabaseUrl}/functions/v1/purchase-email`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${supabaseAnonKey}`,
+      },
+      body: JSON.stringify({
+        email,
+        item_type: itemType,
+        item_id: itemId,
+        item_name: itemName,
+        amount_cents: amountCents,
+        session_id: sessionId,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Failed to send purchase email:", errorText);
+    } else {
+      console.log("✅ Purchase confirmation email triggered for:", email);
+    }
+  } catch (err) {
+    console.error("Error triggering purchase email:", err);
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -127,6 +172,31 @@ serve(async (req) => {
         }
 
         console.log(`✅ Purchase recorded for ${customerEmail}: ${metadata.item_type} ${metadata.item_id}`);
+
+        // Fetch item name for the email
+        let itemName = metadata.item_name || "";
+        if (!itemName) {
+          const tableName = metadata.item_type === "agent" ? "automation_agents" : "automation_bundles";
+          const { data: item } = await supabaseAdmin
+            .from(tableName)
+            .select("name")
+            .eq("id", metadata.item_id)
+            .single();
+          
+          if (item) {
+            itemName = item.name;
+          }
+        }
+
+        // Send purchase confirmation email (async, don't block webhook response)
+        sendPurchaseEmail(
+          customerEmail,
+          metadata.item_type,
+          metadata.item_id,
+          itemName || "Your Purchase",
+          session.amount_total || 0,
+          session.id
+        ).catch(err => console.error("Email send failed:", err));
       }
     }
 
