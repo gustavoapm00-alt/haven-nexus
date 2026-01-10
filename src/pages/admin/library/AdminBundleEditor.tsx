@@ -51,10 +51,14 @@ const initialFormData: BundleFormData = {
   bundle_zip_path: null,
 };
 
-const AdminBundleEditor = () => {
+interface AdminBundleEditorProps {
+  mode: 'create' | 'edit';
+}
+
+const AdminBundleEditor = ({ mode }: AdminBundleEditorProps) => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const isNew = id === 'new';
+  const isCreate = mode === 'create';
 
   const [formData, setFormData] = useState<BundleFormData>(initialFormData);
   const [agents, setAgents] = useState<Agent[]>([]);
@@ -64,12 +68,12 @@ const AdminBundleEditor = () => {
 
   useEffect(() => {
     fetchAgents();
-    if (!isNew && id) {
+    if (!isCreate && id) {
       fetchBundle(id);
     } else {
       setLoading(false);
     }
-  }, [id, isNew]);
+  }, [id, isCreate]);
 
   const fetchAgents = async () => {
     const { data, error } = await supabase
@@ -124,7 +128,7 @@ const AdminBundleEditor = () => {
     setFormData((prev) => ({
       ...prev,
       name,
-      slug: isNew ? generateSlug(name) : prev.slug,
+      slug: isCreate ? generateSlug(name) : prev.slug,
     }));
   };
 
@@ -132,7 +136,7 @@ const AdminBundleEditor = () => {
     setFormData((prev) => ({
       ...prev,
       included_agent_ids: prev.included_agent_ids.includes(agentId)
-        ? prev.included_agent_ids.filter((id) => id !== agentId)
+        ? prev.included_agent_ids.filter((aid) => aid !== agentId)
         : [...prev.included_agent_ids, agentId],
     }));
   };
@@ -187,7 +191,7 @@ const AdminBundleEditor = () => {
         published_at: formData.status === 'published' ? new Date().toISOString() : null,
       };
 
-      if (isNew) {
+      if (isCreate) {
         const { error } = await supabase.from('automation_bundles').insert(saveData);
         if (error) throw error;
         toast.success('Bundle created successfully');
@@ -233,7 +237,7 @@ const AdminBundleEditor = () => {
                 </Link>
               </Button>
               <h1 className="font-display text-xl">
-                {isNew ? 'New Bundle' : 'Edit Bundle'}
+                {isCreate ? 'New Bundle' : 'Edit Bundle'}
               </h1>
             </div>
             <Button onClick={handleSave} disabled={saving}>
@@ -242,7 +246,7 @@ const AdminBundleEditor = () => {
               ) : (
                 <Check className="w-4 h-4 mr-2" />
               )}
-              {isNew ? 'Create' : 'Save'}
+              {isCreate ? 'Create' : 'Save'}
             </Button>
           </div>
         </header>

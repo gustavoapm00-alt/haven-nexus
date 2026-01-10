@@ -57,6 +57,7 @@ import LibraryContact from "./pages/library/LibraryContact";
 import PurchaseSuccess from "./pages/library/PurchaseSuccess";
 
 // Admin Library pages
+import AdminLibraryHome from "./pages/admin/library/AdminLibraryHome";
 import AdminAgentsList from "./pages/admin/library/AdminAgentsList";
 import AdminAgentEditor from "./pages/admin/library/AdminAgentEditor";
 import AdminBundlesList from "./pages/admin/library/AdminBundlesList";
@@ -125,12 +126,13 @@ const UnlockedApp = () => (
     <Route path="/disclaimer" element={<Disclaimer />} />
     <Route path="/auth" element={<Auth />} />
     <Route path="/admin" element={<Admin />} />
+    <Route path="/admin/library" element={<AdminLibraryHome />} />
     <Route path="/admin/library/agents" element={<AdminAgentsList />} />
-    <Route path="/admin/library/agents/new" element={<AdminAgentEditor />} />
-    <Route path="/admin/library/agents/:id" element={<AdminAgentEditor />} />
+    <Route path="/admin/library/agents/new" element={<AdminAgentEditor mode="create" />} />
+    <Route path="/admin/library/agents/:id" element={<AdminAgentEditor mode="edit" />} />
     <Route path="/admin/library/bundles" element={<AdminBundlesList />} />
-    <Route path="/admin/library/bundles/new" element={<AdminBundleEditor />} />
-    <Route path="/admin/library/bundles/:id" element={<AdminBundleEditor />} />
+    <Route path="/admin/library/bundles/new" element={<AdminBundleEditor mode="create" />} />
+    <Route path="/admin/library/bundles/:id" element={<AdminBundleEditor mode="edit" />} />
     <Route path="/reset-password" element={<ResetPassword />} />
     <Route path="/sanctuary" element={<Sanctuary />} />
     <Route path="/dashboard" element={<Dashboard />} />

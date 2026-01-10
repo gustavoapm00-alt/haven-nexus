@@ -1,12 +1,21 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { CheckCircle, Download, Loader2, AlertCircle, ArrowLeft, FileText, Package } from 'lucide-react';
+import { 
+  CheckCircle, Download, Loader2, AlertCircle, ArrowLeft, 
+  FileText, Package, RefreshCw, ChevronDown, ChevronUp, Copy, Check 
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import LibraryNavbar from '@/components/library/LibraryNavbar';
 import LibraryFooter from '@/components/library/LibraryFooter';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import SEO from '@/components/SEO';
+import { toast } from 'sonner';
 
 interface DownloadLink {
   name: string;
@@ -24,6 +33,16 @@ interface PurchaseDetails {
   email: string;
 }
 
+interface DiagnosticsState {
+  sessionId: string | null;
+  sessionVerified: boolean;
+  purchaseFound: boolean;
+  purchaseStatus: 'paid' | 'unpaid' | 'unknown';
+  downloadsGenerated: boolean;
+  downloadCount: number;
+  error: string | null;
+}
+
 const PurchaseSuccess = () => {
   const [searchParams] = useSearchParams();
   const { user, isLoading: authLoading } = useAuth();
@@ -32,10 +51,23 @@ const PurchaseSuccess = () => {
   const [purchase, setPurchase] = useState<PurchaseDetails | null>(null);
   const [downloads, setDownloads] = useState<DownloadLink[]>([]);
   const [downloadLoading, setDownloadLoading] = useState(false);
+  const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [diagnostics, setDiagnostics] = useState<DiagnosticsState>({
+    sessionId: null,
+    sessionVerified: false,
+    purchaseFound: false,
+    purchaseStatus: 'unknown',
+    downloadsGenerated: false,
+    downloadCount: 0,
+    error: null,
+  });
 
   const sessionId = searchParams.get('session_id');
 
   useEffect(() => {
+    setDiagnostics(prev => ({ ...prev, sessionId }));
+    
     if (authLoading) return;
     
     if (!user) {
@@ -45,7 +77,7 @@ const PurchaseSuccess = () => {
     }
 
     if (!sessionId) {
-      setError('No session ID provided.');
+      setError('No session ID provided. Please check your email for the purchase confirmation link.');
       setLoading(false);
       return;
     }
@@ -54,6 +86,9 @@ const PurchaseSuccess = () => {
   }, [sessionId, user, authLoading]);
 
   const verifyPurchase = async () => {
+    setLoading(true);
+    setDiagnostics(prev => ({ ...prev, error: null }));
+    
     try {
       const { data, error: verifyError } = await supabase.functions.invoke('verify-purchase', {
         body: { session_id: sessionId },
@@ -67,13 +102,27 @@ const PurchaseSuccess = () => {
         throw new Error(data.error);
       }
 
+      setDiagnostics(prev => ({
+        ...prev,
+        sessionVerified: true,
+        purchaseFound: true,
+        purchaseStatus: 'paid',
+      }));
+
       setPurchase(data);
+      setError(null);
       
       // Automatically fetch download links
-      fetchDownloads(data.item_type, data.item_id);
+      await fetchDownloads(data.item_type, data.item_id);
     } catch (err) {
       console.error('Verify purchase error:', err);
-      setError(err instanceof Error ? err.message : 'Failed to verify purchase');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to verify purchase';
+      setError(errorMessage);
+      setDiagnostics(prev => ({
+        ...prev,
+        sessionVerified: false,
+        error: errorMessage,
+      }));
     } finally {
       setLoading(false);
     }
@@ -95,15 +144,75 @@ const PurchaseSuccess = () => {
       }
 
       setDownloads(data.downloads || []);
+      setDiagnostics(prev => ({
+        ...prev,
+        downloadsGenerated: (data.downloads?.length || 0) > 0,
+        downloadCount: prev.downloadCount + 1,
+      }));
+      
+      toast.success('Download links refreshed');
     } catch (err) {
       console.error('Fetch downloads error:', err);
-      // Don't set main error - downloads might just not be ready yet
+      toast.error('Failed to generate download links');
+      setDiagnostics(prev => ({
+        ...prev,
+        downloadsGenerated: false,
+      }));
     } finally {
       setDownloadLoading(false);
     }
   };
 
+  const handleRefreshDownloads = () => {
+    if (purchase) {
+      fetchDownloads(purchase.item_type, purchase.item_id);
+    }
+  };
+
+  const handleCopySessionId = () => {
+    if (sessionId) {
+      navigator.clipboard.writeText(sessionId);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
   const formatPrice = (cents: number) => `$${(cents / 100).toFixed(2)}`;
+  
+  const maskSessionId = (id: string | null) => {
+    if (!id) return 'N/A';
+    if (id.length <= 8) return id;
+    return `${id.slice(0, 4)}...${id.slice(-4)}`;
+  };
+
+  // Not logged in state
+  if (!authLoading && !user) {
+    const returnUrl = `/purchase-success?session_id=${sessionId}`;
+    return (
+      <div className="min-h-screen bg-background">
+        <LibraryNavbar />
+        <div className="section-padding">
+          <div className="container-main max-w-2xl text-center">
+            <div className="card-enterprise p-10">
+              <AlertCircle className="w-16 h-16 text-yellow-500 mx-auto mb-6" />
+              <h1 className="text-2xl font-semibold text-foreground mb-4">
+                Sign In Required
+              </h1>
+              <p className="text-muted-foreground mb-6">
+                Please sign in to access your purchase and download your files.
+              </p>
+              <Button asChild>
+                <Link to={`/auth?redirect=${encodeURIComponent(returnUrl)}`}>
+                  Sign In to Continue
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+        <LibraryFooter />
+      </div>
+    );
+  }
 
   if (authLoading || loading) {
     return (
@@ -125,8 +234,8 @@ const PurchaseSuccess = () => {
       <div className="min-h-screen bg-background">
         <LibraryNavbar />
         <div className="section-padding">
-          <div className="container-main max-w-2xl text-center">
-            <div className="card-enterprise p-10">
+          <div className="container-main max-w-2xl">
+            <div className="card-enterprise p-10 text-center mb-6">
               <AlertCircle className="w-16 h-16 text-destructive mx-auto mb-6" />
               <h1 className="text-2xl font-semibold text-foreground mb-4">
                 Something Went Wrong
@@ -144,6 +253,52 @@ const PurchaseSuccess = () => {
                 </Button>
               </div>
             </div>
+
+            {/* Diagnostics Panel */}
+            <Collapsible open={diagnosticsOpen} onOpenChange={setDiagnosticsOpen}>
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" className="w-full justify-between text-muted-foreground">
+                  Technical Details
+                  {diagnosticsOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="mt-4 p-4 bg-muted/50 rounded-lg font-mono text-xs space-y-2">
+                  <div className="flex justify-between">
+                    <span>Session ID:</span>
+                    <div className="flex items-center gap-2">
+                      <span>{maskSessionId(diagnostics.sessionId)}</span>
+                      {diagnostics.sessionId && (
+                        <button onClick={handleCopySessionId} className="text-primary hover:text-primary/80">
+                          {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Session Verified:</span>
+                    <span className={diagnostics.sessionVerified ? 'text-green-500' : 'text-red-500'}>
+                      {diagnostics.sessionVerified ? 'Yes' : 'No'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Purchase Found:</span>
+                    <span className={diagnostics.purchaseFound ? 'text-green-500' : 'text-red-500'}>
+                      {diagnostics.purchaseFound ? 'Yes' : 'No'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Purchase Status:</span>
+                    <span>{diagnostics.purchaseStatus}</span>
+                  </div>
+                  {diagnostics.error && (
+                    <div className="pt-2 border-t border-border">
+                      <span className="text-red-500">Error: {diagnostics.error}</span>
+                    </div>
+                  )}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
           </div>
         </div>
         <LibraryFooter />
@@ -203,12 +358,23 @@ const PurchaseSuccess = () => {
 
             {/* Download Section */}
             <div className="card-enterprise p-6 mb-8">
-              <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                <Download className="w-5 h-5" />
-                Your Downloads
-              </h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                  <Download className="w-5 h-5" />
+                  Your Downloads
+                </h3>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={handleRefreshDownloads}
+                  disabled={downloadLoading}
+                >
+                  <RefreshCw className={`w-4 h-4 mr-2 ${downloadLoading ? 'animate-spin' : ''}`} />
+                  Refresh
+                </Button>
+              </div>
 
-              {downloadLoading ? (
+              {downloadLoading && downloads.length === 0 ? (
                 <div className="flex items-center gap-3 text-muted-foreground py-4">
                   <Loader2 className="w-5 h-5 animate-spin" />
                   <span>Preparing your download links...</span>
@@ -232,7 +398,7 @@ const PurchaseSuccess = () => {
                     </a>
                   ))}
                   <p className="text-sm text-muted-foreground mt-4">
-                    Download links expire in 1 hour. You can always access your purchases from your account.
+                    Download links expire in 1 hour. Click "Refresh" to generate new links.
                   </p>
                 </div>
               ) : (
@@ -242,14 +408,62 @@ const PurchaseSuccess = () => {
                   </p>
                   <Button 
                     variant="outline" 
-                    onClick={() => purchase && fetchDownloads(purchase.item_type, purchase.item_id)}
+                    onClick={handleRefreshDownloads}
+                    disabled={downloadLoading}
                   >
-                    <Loader2 className="w-4 h-4 mr-2" />
+                    <RefreshCw className={`w-4 h-4 mr-2 ${downloadLoading ? 'animate-spin' : ''}`} />
                     Refresh Downloads
                   </Button>
                 </div>
               )}
             </div>
+
+            {/* Diagnostics Panel */}
+            <Collapsible open={diagnosticsOpen} onOpenChange={setDiagnosticsOpen} className="mb-8">
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" className="w-full justify-between text-muted-foreground">
+                  Diagnostics
+                  {diagnosticsOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="mt-4 p-4 bg-muted/50 rounded-lg font-mono text-xs space-y-2">
+                  <div className="flex justify-between">
+                    <span>Session ID:</span>
+                    <div className="flex items-center gap-2">
+                      <span>{maskSessionId(diagnostics.sessionId)}</span>
+                      {diagnostics.sessionId && (
+                        <button onClick={handleCopySessionId} className="text-primary hover:text-primary/80">
+                          {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Session Verified:</span>
+                    <span className="text-green-500">Yes</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Purchase Found:</span>
+                    <span className="text-green-500">Yes</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Purchase Status:</span>
+                    <span className="text-green-500">paid</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Downloads Generated:</span>
+                    <span className={diagnostics.downloadsGenerated ? 'text-green-500' : 'text-yellow-500'}>
+                      {diagnostics.downloadsGenerated ? 'Yes' : 'Pending'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Download Count (this session):</span>
+                    <span>{diagnostics.downloadCount}</span>
+                  </div>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
 
             {/* Next Steps */}
             <div className="card-enterprise p-6 bg-muted/30">

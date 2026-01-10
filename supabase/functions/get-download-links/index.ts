@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { checkRateLimit, getClientIp, rateLimitResponse } from "../_shared/rate-limiter.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -45,6 +46,18 @@ serve(async (req) => {
     
     if (authError || !user?.email) {
       throw new Error("User not authenticated");
+    }
+
+    // Rate limiting
+    const clientIp = getClientIp(req);
+    const rateLimitResult = await checkRateLimit(
+      { functionName: "get-download-links", maxRequests: 15, windowSeconds: 60 },
+      user.id,
+      clientIp
+    );
+
+    if (!rateLimitResult.allowed) {
+      return rateLimitResponse(rateLimitResult.retryAfterSeconds || 60);
     }
 
     const { item_type, item_id }: DownloadRequest = await req.json();
@@ -193,7 +206,7 @@ serve(async (req) => {
 
     // Update download count if purchase exists
     if (purchase) {
-      const currentCount = (purchase as { download_count?: number | null }).download_count ?? 0;
+      const currentCount = purchase.download_count ?? 0;
       await supabaseAdmin
         .from("purchases")
         .update({

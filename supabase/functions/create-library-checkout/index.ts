@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { checkRateLimit, getClientIp, rateLimitResponse } from "../_shared/rate-limiter.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -34,6 +35,18 @@ serve(async (req) => {
     
     if (authError || !user?.email) {
       throw new Error("User not authenticated or email not available. Please sign in to purchase.");
+    }
+
+    // Rate limiting
+    const clientIp = getClientIp(req);
+    const rateLimitResult = await checkRateLimit(
+      { functionName: "create-library-checkout", maxRequests: 10, windowSeconds: 60 },
+      user.id,
+      clientIp
+    );
+
+    if (!rateLimitResult.allowed) {
+      return rateLimitResponse(rateLimitResult.retryAfterSeconds || 60);
     }
 
     const { item_type, item_id }: CheckoutRequest = await req.json();
