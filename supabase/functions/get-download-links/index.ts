@@ -56,7 +56,7 @@ serve(async (req) => {
     // Check if user has a valid purchase
     const { data: purchase, error: purchaseError } = await supabaseClient
       .from("purchases")
-      .select("id, status")
+      .select("id, status, download_count")
       .eq("email", user.email)
       .eq("item_id", item_id)
       .eq("item_type", item_type)
@@ -193,10 +193,11 @@ serve(async (req) => {
 
     // Update download count if purchase exists
     if (purchase) {
+      const currentCount = (purchase as { download_count?: number | null }).download_count ?? 0;
       await supabaseAdmin
         .from("purchases")
         .update({
-          download_count: (purchase as any).download_count + 1 || 1,
+          download_count: currentCount + 1,
           last_download_at: new Date().toISOString(),
         })
         .eq("id", purchase.id);

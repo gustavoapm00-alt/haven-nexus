@@ -56,6 +56,12 @@ import InstallationAssistance from "./pages/library/InstallationAssistance";
 import LibraryContact from "./pages/library/LibraryContact";
 import PurchaseSuccess from "./pages/library/PurchaseSuccess";
 
+// Admin Library pages
+import AdminAgentsList from "./pages/admin/library/AdminAgentsList";
+import AdminAgentEditor from "./pages/admin/library/AdminAgentEditor";
+import AdminBundlesList from "./pages/admin/library/AdminBundlesList";
+import AdminBundleEditor from "./pages/admin/library/AdminBundleEditor";
+
 const queryClient = new QueryClient();
 
 const ScrollToTop = () => {
@@ -119,6 +125,12 @@ const UnlockedApp = () => (
     <Route path="/disclaimer" element={<Disclaimer />} />
     <Route path="/auth" element={<Auth />} />
     <Route path="/admin" element={<Admin />} />
+    <Route path="/admin/library/agents" element={<AdminAgentsList />} />
+    <Route path="/admin/library/agents/new" element={<AdminAgentEditor />} />
+    <Route path="/admin/library/agents/:id" element={<AdminAgentEditor />} />
+    <Route path="/admin/library/bundles" element={<AdminBundlesList />} />
+    <Route path="/admin/library/bundles/new" element={<AdminBundleEditor />} />
+    <Route path="/admin/library/bundles/:id" element={<AdminBundleEditor />} />
     <Route path="/reset-password" element={<ResetPassword />} />
     <Route path="/sanctuary" element={<Sanctuary />} />
     <Route path="/dashboard" element={<Dashboard />} />

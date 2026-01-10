@@ -13,7 +13,7 @@ serve(async (req) => {
   }
 
   const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
-    apiVersion: "2025-08-27.basil",
+    apiVersion: "2024-12-18.acacia",
   });
 
   // Use service role for admin operations
@@ -26,15 +26,15 @@ serve(async (req) => {
     const signature = req.headers.get("stripe-signature");
     const body = await req.text();
     
-    // For now, we'll verify the event manually since webhook secrets 
-    // aren't always set up. In production, you should use webhook secret.
     let event: Stripe.Event;
     
     const webhookSecret = Deno.env.get("STRIPE_LIBRARY_WEBHOOK_SECRET");
+    const allowInsecure = Deno.env.get("ALLOW_INSECURE_STRIPE_WEBHOOK") === "true";
     
     if (webhookSecret && signature) {
       try {
         event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+        console.log("✅ Webhook signature verified successfully");
       } catch (err) {
         const errMessage = err instanceof Error ? err.message : "Unknown error";
         console.error("Webhook signature verification failed:", errMessage);
@@ -43,10 +43,20 @@ serve(async (req) => {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-    } else {
-      // Parse event without signature verification (development mode)
+    } else if (allowInsecure) {
+      // Development mode only - allow unsigned parsing
       event = JSON.parse(body);
-      console.warn("⚠️ Processing webhook without signature verification");
+      console.warn("⚠️ DEV MODE: Processing webhook without signature verification");
+    } else {
+      // Production: require signature verification
+      console.error("Webhook signature verification not configured");
+      return new Response(
+        JSON.stringify({ error: "Webhook signature verification is not configured." }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
     }
 
     console.log("Processing webhook event:", event.type);
