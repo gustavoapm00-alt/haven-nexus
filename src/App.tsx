@@ -55,6 +55,7 @@ import Documentation from "./pages/library/Documentation";
 import InstallationAssistance from "./pages/library/InstallationAssistance";
 import LibraryContact from "./pages/library/LibraryContact";
 import PurchaseSuccess from "./pages/library/PurchaseSuccess";
+import PurchaseHistory from "./pages/library/PurchaseHistory";
 
 // Admin Library pages
 import AdminLibraryHome from "./pages/admin/library/AdminLibraryHome";
@@ -105,6 +106,7 @@ const UnlockedApp = () => (
     <Route path="/install" element={<InstallationAssistance />} />
     <Route path="/contact" element={<LibraryContact />} />
     <Route path="/purchase-success" element={<PurchaseSuccess />} />
+    <Route path="/purchases" element={<PurchaseHistory />} />
 
     {/* Legacy routes (redirects or preserved for existing links) */}
     <Route path="/old-home" element={<Index />} />

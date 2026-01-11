@@ -12,7 +12,7 @@ interface Tab {
 const tabs: Tab[] = [
   { id: 'agents', label: 'Agents', action: 'scroll', target: 'featured-agents' },
   { id: 'bundles', label: 'Bundles', action: 'scroll', target: 'bundles-section' },
-  { id: 'purchases', label: 'My Purchases', action: 'navigate', target: '/library/purchases' },
+  { id: 'purchases', label: 'My Purchases', action: 'navigate', target: '/purchases' },
 ];
 
 const SegmentedNav = () => {
