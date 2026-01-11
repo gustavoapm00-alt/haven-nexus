@@ -52,12 +52,27 @@ const LibraryHome = () => {
           <WhatYouGet />
         </SectionBand>
 
-        {/* Featured Agents - Dark Band */}
-        <SectionBand variant="ink" id="featured-agents">
-          <div className="text-center mb-10">
+        {/* Featured Agents - Dark Band with Parallax */}
+        <SectionBand variant="ink" id="featured-agents" enableParallax>
+          <motion.div 
+            className="text-center mb-10"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+          >
+            <motion.span 
+              className="inline-block text-xs font-semibold tracking-widest text-primary/80 uppercase mb-3"
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+            >
+              Control Desk
+            </motion.span>
             <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">Featured Automation Agents</h2>
             <p className="text-white/60">Pre-engineered workflows ready for deployment</p>
-          </div>
+          </motion.div>
           {agentsLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[...Array(6)].map((_, i) => (
@@ -69,10 +84,18 @@ const LibraryHome = () => {
               {featuredAgents.map((agent, index) => (
                 <motion.div
                   key={agent.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.05 }}
+                  initial={{ opacity: 0, y: 40, scale: 0.95 }}
+                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ 
+                    delay: index * 0.08,
+                    duration: 0.5,
+                    ease: [0.25, 0.46, 0.45, 0.94]
+                  }}
+                  whileHover={{ 
+                    y: -4,
+                    transition: { duration: 0.2 }
+                  }}
                 >
                   <AgentCard
                     slug={agent.slug}
@@ -91,14 +114,20 @@ const LibraryHome = () => {
               ))}
             </div>
           )}
-          <div className="text-center mt-10">
-            <Button asChild size="lg" className="bg-white text-foreground hover:bg-white/90">
+          <motion.div 
+            className="text-center mt-10"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.4 }}
+          >
+            <Button asChild size="lg" className="bg-white text-foreground hover:bg-white/90 glow-accent">
               <Link to="/agents">
                 View Full Agent Library
                 <ArrowRight className="ml-2 w-4 h-4" />
               </Link>
             </Button>
-          </div>
+          </motion.div>
         </SectionBand>
 
         {/* How It Works */}
