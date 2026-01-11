@@ -180,7 +180,7 @@ serve(async (req: Request): Promise<Response> => {
     console.log("Purchase confirmation email sent:", emailResponse);
 
     return new Response(
-      JSON.stringify({ success: true, id: emailResponse.id }),
+      JSON.stringify({ success: true, data: emailResponse }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error: unknown) {

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, Package } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface BundleCardProps {
   slug: string;
@@ -27,47 +28,66 @@ const BundleCard = ({
   const savingsPercent = Math.round(
     ((individualValueCents - bundlePriceCents) / individualValueCents) * 100
   );
+  
+  const savingsDollars = (individualValueCents - bundlePriceCents) / 100;
 
   return (
-    <div className="card-enterprise p-6 flex flex-col h-full">
+    <motion.div
+      whileHover={{ y: -4 }}
+      transition={{ duration: 0.2 }}
+      className="card-panel p-6 flex flex-col h-full"
+    >
       {/* Header */}
       <div className="flex-1">
-        <div className="flex items-start justify-between mb-3">
-          <div className="p-2 bg-primary/10 rounded-md">
-            <Package className="w-5 h-5 text-primary" />
+        <div className="flex items-start justify-between mb-4">
+          <div className="relative">
+            <div className="p-2.5 bg-primary/10 rounded-lg">
+              <Package className="w-5 h-5 text-primary" />
+            </div>
+            {/* Orbital ring */}
+            <div className="absolute -inset-1 border border-primary/10 rounded-lg" />
           </div>
-          <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-1 rounded">
-            Save {savingsPercent}%
-          </span>
+          <div className="flex flex-col items-end gap-1">
+            <span className="text-xs font-semibold text-primary bg-primary/10 px-2.5 py-1 rounded-full">
+              Save {savingsPercent}%
+            </span>
+            <span className="text-xs text-muted-foreground">
+              You save ${savingsDollars.toFixed(0)}
+            </span>
+          </div>
         </div>
 
-        <h3 className="font-semibold text-base text-foreground leading-snug mb-2">
+        <h3 className="font-semibold text-lg text-foreground leading-snug mb-2">
           {name}
         </h3>
-        <p className="text-sm text-muted-foreground mb-4">
-          {objective}
-        </p>
+        
+        {objective && (
+          <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+            {objective}
+          </p>
+        )}
 
         {/* Included Agents */}
         <div className="mb-4">
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
-            Includes
+            Includes {includedAgentNames.length} agents
           </p>
-          <ul className="space-y-1">
-            {includedAgentNames.slice(0, 4).map((agentName) => (
-              <li key={agentName} className="text-sm text-foreground">
-                • {agentName}
+          <ul className="space-y-1.5">
+            {includedAgentNames.slice(0, 3).map((agentName) => (
+              <li key={agentName} className="text-sm text-foreground flex items-start gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 flex-shrink-0" />
+                <span className="line-clamp-1">{agentName}</span>
               </li>
             ))}
-            {includedAgentNames.length > 4 && (
-              <li className="text-sm text-muted-foreground">
-                + {includedAgentNames.length - 4} more
+            {includedAgentNames.length > 3 && (
+              <li className="text-sm text-muted-foreground pl-3.5">
+                + {includedAgentNames.length - 3} more
               </li>
             )}
           </ul>
         </div>
 
-        {/* Use Cases */}
+        {/* Sectors */}
         <div className="flex flex-wrap gap-1.5">
           {sectors.slice(0, 3).map((sector) => (
             <span key={sector} className="tag-sector">
@@ -83,7 +103,7 @@ const BundleCard = ({
           <span className="text-sm text-muted-foreground line-through">
             {formatPrice(individualValueCents)}
           </span>
-          <span className="font-semibold text-lg text-foreground">
+          <span className="font-bold text-xl text-foreground">
             {formatPrice(bundlePriceCents)}
           </span>
         </div>
@@ -95,7 +115,7 @@ const BundleCard = ({
           <ArrowRight className="w-4 h-4" />
         </Link>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

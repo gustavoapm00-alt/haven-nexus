@@ -1,32 +1,26 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Check, Download, Shield, FileJson, BookOpen, Lock, HelpCircle } from 'lucide-react';
+import { ArrowRight, Shield, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import LibraryNavbar from '@/components/library/LibraryNavbar';
 import LibraryFooter from '@/components/library/LibraryFooter';
+import LibraryHero from '@/components/library/LibraryHero';
+import SegmentedNav from '@/components/library/SegmentedNav';
+import TrustStrip from '@/components/library/TrustStrip';
+import SectionBand from '@/components/library/SectionBand';
+import WhatYouGet from '@/components/library/WhatYouGet';
+import HowItWorks from '@/components/library/HowItWorks';
 import AgentCard from '@/components/library/AgentCard';
 import BundleCard from '@/components/library/BundleCard';
-import IntegrationIcons from '@/components/library/IntegrationIcons';
 import EmailCaptureForm from '@/components/library/EmailCaptureForm';
 import { useAgents } from '@/hooks/useAgents';
 import { useBundles } from '@/hooks/useBundles';
 import SEO from '@/components/SEO';
+import { motion } from 'framer-motion';
 
 const LibraryHome = () => {
   const { agents: featuredAgents, loading: agentsLoading } = useAgents({ featured: true, limit: 6 });
   const { bundles: featuredBundles, loading: bundlesLoading } = useBundles({ featured: true, limit: 3 });
-
-  const whatYouGet = [
-    { icon: FileJson, title: 'Workflow File', description: 'Import-ready n8n JSON workflows built for practical use.' },
-    { icon: BookOpen, title: 'Deployment Guide', description: 'Step-by-step setup with required credentials and configuration notes.' },
-    { icon: Lock, title: 'Secure Delivery', description: 'Private downloads with time-limited links and account access.' },
-  ];
-
-  const howItWorks = [
-    { step: 1, title: 'Choose an agent or bundle' },
-    { step: 2, title: 'Purchase access' },
-    { step: 3, title: 'Download workflow + guide' },
-    { step: 4, title: 'Deploy and configure' },
-  ];
 
   const faqItems = [
     { q: 'What tools are supported?', a: 'Designed for n8n and common tools; each guide lists requirements.' },
@@ -45,69 +39,42 @@ const LibraryHome = () => {
       
       <div className="min-h-screen bg-background">
         <LibraryNavbar />
+        <SegmentedNav />
 
-        {/* Hero Section */}
-        <section className="section-padding !pt-20 !pb-16">
-          <div className="container-main text-center max-w-3xl mx-auto">
-            <p className="text-sm font-medium text-primary mb-4 tracking-wider uppercase">AERELION Library</p>
-            <h1 className="text-4xl md:text-5xl font-semibold text-foreground tracking-tight mb-6">
-              Automation workflows you can deploy in hours, not weeks.
-            </h1>
-            <p className="text-lg text-muted-foreground leading-relaxed mb-8">
-              Browse proven n8n workflow packs and system bundles built for real operational outcomes. Purchase, download, and follow a clear deployment guide.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
-              <Button asChild size="lg">
-                <Link to="/agents">
-                  Browse Agents
-                  <ArrowRight className="ml-2 w-4 h-4" />
-                </Link>
-              </Button>
-              <Button asChild variant="outline" size="lg">
-                <Link to="/bundles">View Bundles</Link>
-              </Button>
-            </div>
-            <IntegrationIcons />
+        {/* Hero */}
+        <LibraryHero />
+
+        {/* Trust Strip */}
+        <TrustStrip />
+
+        {/* What You Get */}
+        <SectionBand variant="light">
+          <WhatYouGet />
+        </SectionBand>
+
+        {/* Featured Agents - Dark Band */}
+        <SectionBand variant="ink" id="featured-agents">
+          <div className="text-center mb-10">
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">Featured Automation Agents</h2>
+            <p className="text-white/60">Pre-engineered workflows ready for deployment</p>
           </div>
-        </section>
-
-        {/* What You Get Section */}
-        <section className="section-padding bg-muted/30">
-          <div className="container-main">
-            <div className="text-center mb-10">
-              <h2 className="text-2xl font-semibold text-foreground mb-3">What You Get</h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {whatYouGet.map((item) => (
-                <div key={item.title} className="text-center">
-                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                    <item.icon className="w-6 h-6 text-primary" />
-                  </div>
-                  <h3 className="font-medium text-foreground mb-2">{item.title}</h3>
-                  <p className="text-sm text-muted-foreground">{item.description}</p>
-                </div>
+          {agentsLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="card-panel-dark p-6 h-64 animate-pulse bg-white/5" />
               ))}
             </div>
-          </div>
-        </section>
-
-        {/* Featured Agents Section */}
-        <section className="section-padding">
-          <div className="container-main">
-            <div className="text-center mb-10">
-              <h2 className="text-2xl font-semibold text-foreground mb-3">Featured Automation Agents</h2>
-            </div>
-            {agentsLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[...Array(6)].map((_, i) => (
-                  <div key={i} className="card-enterprise p-6 h-64 animate-pulse bg-muted" />
-                ))}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {featuredAgents.map((agent) => (
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {featuredAgents.map((agent, index) => (
+                <motion.div
+                  key={agent.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.05 }}
+                >
                   <AgentCard
-                    key={agent.id}
                     slug={agent.slug}
                     name={agent.name}
                     shortOutcome={agent.short_outcome}
@@ -118,57 +85,50 @@ const LibraryHome = () => {
                     capacityRecoveredMin={agent.capacity_recovered_min}
                     capacityRecoveredMax={agent.capacity_recovered_max}
                     priceCents={agent.price_cents}
+                    variant="dark"
                   />
-                ))}
-              </div>
-            )}
-            <div className="text-center mt-10">
-              <Button asChild variant="outline">
-                <Link to="/agents">
-                  View Full Agent Library
-                  <ArrowRight className="ml-2 w-4 h-4" />
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </section>
-
-        {/* How It Works Section */}
-        <section className="section-padding bg-muted/30">
-          <div className="container-main">
-            <div className="text-center mb-10">
-              <h2 className="text-2xl font-semibold text-foreground mb-3">How It Works</h2>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {howItWorks.map((step) => (
-                <div key={step.step} className="text-center">
-                  <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center mx-auto mb-4 font-semibold">
-                    {step.step}
-                  </div>
-                  <p className="text-sm text-foreground">{step.title}</p>
-                </div>
+                </motion.div>
               ))}
             </div>
+          )}
+          <div className="text-center mt-10">
+            <Button asChild size="lg" className="bg-white text-foreground hover:bg-white/90">
+              <Link to="/agents">
+                View Full Agent Library
+                <ArrowRight className="ml-2 w-4 h-4" />
+              </Link>
+            </Button>
           </div>
-        </section>
+        </SectionBand>
 
-        {/* System Bundles Section */}
-        <section className="section-padding">
-          <div className="container-main">
-            <div className="text-center mb-10">
-              <h2 className="text-2xl font-semibold text-foreground mb-3">System Bundles</h2>
+        {/* How It Works */}
+        <SectionBand variant="muted">
+          <HowItWorks />
+        </SectionBand>
+
+        {/* System Bundles */}
+        <SectionBand variant="light" id="bundles-section">
+          <div className="text-center mb-10">
+            <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3">System Bundles</h2>
+            <p className="text-muted-foreground">Curated agent packs with bundle savings</p>
+          </div>
+          {bundlesLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="card-panel p-6 h-72 animate-pulse bg-muted" />
+              ))}
             </div>
-            {bundlesLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {[...Array(3)].map((_, i) => (
-                  <div key={i} className="card-enterprise p-6 h-72 animate-pulse bg-muted" />
-                ))}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {featuredBundles.map((bundle) => (
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {featuredBundles.map((bundle, index) => (
+                <motion.div
+                  key={bundle.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                >
                   <BundleCard
-                    key={bundle.id}
                     slug={bundle.slug}
                     name={bundle.name}
                     objective={bundle.objective}
@@ -177,27 +137,33 @@ const LibraryHome = () => {
                     individualValueCents={bundle.individual_value_cents}
                     bundlePriceCents={bundle.bundle_price_cents}
                   />
-                ))}
-              </div>
-            )}
-          </div>
-        </section>
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </SectionBand>
 
-        {/* Who It's For Section */}
-        <section className="section-padding bg-muted/30">
-          <div className="container-main max-w-3xl mx-auto text-center">
-            <h2 className="text-2xl font-semibold text-foreground mb-4">Who It's For</h2>
-            <p className="text-muted-foreground">
+        {/* Who It's For */}
+        <SectionBand variant="muted">
+          <div className="max-w-3xl mx-auto text-center">
+            <h2 className="text-2xl font-bold text-foreground mb-4">Who It's For</h2>
+            <p className="text-muted-foreground text-lg">
               Operators, founders, and teams who want repeatable systems for lead intake, sales ops, customer support, ecommerce ops, reporting, KPI visibility, and creator workflows.
             </p>
           </div>
-        </section>
+        </SectionBand>
 
         {/* Trust Section */}
-        <section className="section-padding">
-          <div className="container-main max-w-3xl mx-auto text-center">
-            <Shield className="w-10 h-10 text-primary mx-auto mb-4" />
-            <h2 className="text-2xl font-semibold text-foreground mb-4">Built for Transparency</h2>
+        <SectionBand variant="light">
+          <div className="max-w-3xl mx-auto text-center">
+            <div className="relative w-14 h-14 mx-auto mb-6">
+              <div className="absolute inset-0 border border-primary/10 rounded-full" />
+              <div className="absolute -inset-2 border border-dashed border-primary/5 rounded-full" />
+              <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
+                <Shield className="w-6 h-6 text-primary" />
+              </div>
+            </div>
+            <h2 className="text-2xl font-bold text-foreground mb-4">Built for Transparency</h2>
             <p className="text-muted-foreground mb-6">
               Built to be understandable, maintainable, and adjustable. If you need installation support, you can request assistance.
             </p>
@@ -205,37 +171,41 @@ const LibraryHome = () => {
               <Link to="/install">Request Installation Assistance</Link>
             </Button>
           </div>
-        </section>
+        </SectionBand>
 
         {/* FAQ Section */}
-        <section className="section-padding bg-muted/30">
-          <div className="container-main max-w-2xl mx-auto">
+        <SectionBand variant="muted">
+          <div className="max-w-2xl mx-auto">
             <div className="text-center mb-10">
               <HelpCircle className="w-8 h-8 text-primary mx-auto mb-4" />
-              <h2 className="text-2xl font-semibold text-foreground">Frequently Asked Questions</h2>
+              <h2 className="text-2xl font-bold text-foreground">Frequently Asked Questions</h2>
             </div>
-            <div className="space-y-6">
+            <Accordion type="single" collapsible className="space-y-3">
               {faqItems.map((item, i) => (
-                <div key={i} className="card-enterprise p-5">
-                  <h3 className="font-medium text-foreground mb-2">{item.q}</h3>
-                  <p className="text-sm text-muted-foreground">{item.a}</p>
-                </div>
+                <AccordionItem key={i} value={`item-${i}`} className="card-panel px-5 border-none">
+                  <AccordionTrigger className="text-left font-medium hover:no-underline">
+                    {item.q}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground">
+                    {item.a}
+                  </AccordionContent>
+                </AccordionItem>
               ))}
-            </div>
+            </Accordion>
           </div>
-        </section>
+        </SectionBand>
 
-        {/* Email Capture Section */}
-        <section className="section-padding">
-          <div className="container-main text-center max-w-xl mx-auto">
-            <h2 className="text-xl font-semibold text-foreground mb-4">Get Update Notifications</h2>
+        {/* Email Capture */}
+        <SectionBand variant="light">
+          <div className="text-center max-w-xl mx-auto">
+            <h2 className="text-xl font-bold text-foreground mb-4">Get Update Notifications</h2>
             <EmailCaptureForm 
               sourcePage="homepage" 
               buttonText="Subscribe"
               placeholder="Enter your email"
             />
           </div>
-        </section>
+        </SectionBand>
 
         <LibraryFooter />
       </div>
