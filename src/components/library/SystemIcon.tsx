@@ -14,10 +14,12 @@ import {
 interface SystemIconProps {
   name: string;
   size?: 'sm' | 'md';
+  variant?: 'light' | 'dark';
 }
 
-const SystemIcon = ({ name, size = 'sm' }: SystemIconProps) => {
+const SystemIcon = ({ name, size = 'sm', variant = 'light' }: SystemIconProps) => {
   const iconSize = size === 'sm' ? 'w-3.5 h-3.5' : 'w-4 h-4';
+  const isDark = variant === 'dark';
   
   const getIcon = () => {
     const lowerName = name.toLowerCase();
@@ -57,7 +59,7 @@ const SystemIcon = ({ name, size = 'sm' }: SystemIconProps) => {
   };
 
   return (
-    <div className="system-badge">
+    <div className={`system-badge ${isDark ? 'bg-white/10 text-white/70' : ''}`}>
       {getIcon()}
       <span>{name}</span>
     </div>
