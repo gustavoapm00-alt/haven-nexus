@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { 
   CheckCircle, Download, Loader2, AlertCircle, ArrowLeft, 
-  FileText, Package, RefreshCw, ChevronDown, ChevronUp, Copy, Check 
+  FileText, Package, RefreshCw, ChevronDown, ChevronUp, Copy, Check,
+  Bug
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -41,6 +42,15 @@ interface DiagnosticsState {
   downloadsGenerated: boolean;
   downloadCount: number;
   error: string | null;
+  webhookReceived: boolean;
+  lastPurchase: {
+    id: string;
+    item_type: string;
+    item_id: string;
+    created_at: string;
+    status: string;
+  } | null;
+  retryCount: number;
 }
 
 const PurchaseSuccess = () => {
@@ -53,6 +63,7 @@ const PurchaseSuccess = () => {
   const [downloadLoading, setDownloadLoading] = useState(false);
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [noFilesMessage, setNoFilesMessage] = useState<string | null>(null);
   const [diagnostics, setDiagnostics] = useState<DiagnosticsState>({
     sessionId: null,
     sessionVerified: false,
@@ -61,9 +72,13 @@ const PurchaseSuccess = () => {
     downloadsGenerated: false,
     downloadCount: 0,
     error: null,
+    webhookReceived: false,
+    lastPurchase: null,
+    retryCount: 0,
   });
 
   const sessionId = searchParams.get('session_id');
+  const debugMode = searchParams.get('debug') === '1' || import.meta.env.DEV;
 
   useEffect(() => {
     setDiagnostics(prev => ({ ...prev, sessionId }));
@@ -85,9 +100,30 @@ const PurchaseSuccess = () => {
     verifyPurchase();
   }, [sessionId, user, authLoading]);
 
-  const verifyPurchase = async () => {
+  // Check for webhook receipt by querying purchase directly
+  const checkWebhookReceipt = useCallback(async () => {
+    if (!user?.email || !sessionId) return false;
+    
+    const { data } = await supabase
+      .from('purchases')
+      .select('id, item_type, item_id, created_at, status')
+      .eq('stripe_session_id', sessionId)
+      .single();
+    
+    if (data) {
+      setDiagnostics(prev => ({
+        ...prev,
+        webhookReceived: true,
+        lastPurchase: data,
+      }));
+      return true;
+    }
+    return false;
+  }, [user?.email, sessionId]);
+
+  const verifyPurchase = async (retryCount = 0) => {
     setLoading(true);
-    setDiagnostics(prev => ({ ...prev, error: null }));
+    setDiagnostics(prev => ({ ...prev, error: null, retryCount }));
     
     try {
       const { data, error: verifyError } = await supabase.functions.invoke('verify-purchase', {
@@ -99,8 +135,17 @@ const PurchaseSuccess = () => {
       }
 
       if (data.error) {
+        // If webhook hasn't fired yet, retry up to 3 times with backoff
+        if (data.error.includes('not found') && retryCount < 3) {
+          setDiagnostics(prev => ({ ...prev, retryCount: retryCount + 1 }));
+          await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)));
+          return verifyPurchase(retryCount + 1);
+        }
         throw new Error(data.error);
       }
+
+      // Check webhook receipt status
+      await checkWebhookReceipt();
 
       setDiagnostics(prev => ({
         ...prev,
@@ -130,6 +175,7 @@ const PurchaseSuccess = () => {
 
   const fetchDownloads = async (itemType: string, itemId: string) => {
     setDownloadLoading(true);
+    setNoFilesMessage(null);
     try {
       const { data, error: downloadError } = await supabase.functions.invoke('get-download-links', {
         body: { item_type: itemType, item_id: itemId },
@@ -144,13 +190,21 @@ const PurchaseSuccess = () => {
       }
 
       setDownloads(data.downloads || []);
+      
+      // Check if no files are available yet
+      if (!data.files_available && data.message) {
+        setNoFilesMessage(data.message);
+      }
+      
       setDiagnostics(prev => ({
         ...prev,
         downloadsGenerated: (data.downloads?.length || 0) > 0,
         downloadCount: prev.downloadCount + 1,
       }));
       
-      toast.success('Download links refreshed');
+      if (data.downloads?.length > 0) {
+        toast.success('Download links ready');
+      }
     } catch (err) {
       console.error('Fetch downloads error:', err);
       toast.error('Failed to generate download links');
@@ -404,7 +458,7 @@ const PurchaseSuccess = () => {
               ) : (
                 <div className="text-center py-6">
                   <p className="text-muted-foreground mb-4">
-                    Files are being prepared. They will be available shortly.
+                    {noFilesMessage || 'Files are being prepared. They will be available shortly.'}
                   </p>
                   <Button 
                     variant="outline" 
@@ -418,52 +472,113 @@ const PurchaseSuccess = () => {
               )}
             </div>
 
-            {/* Diagnostics Panel */}
-            <Collapsible open={diagnosticsOpen} onOpenChange={setDiagnosticsOpen} className="mb-8">
-              <CollapsibleTrigger asChild>
-                <Button variant="ghost" className="w-full justify-between text-muted-foreground">
-                  Diagnostics
-                  {diagnosticsOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                </Button>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <div className="mt-4 p-4 bg-muted/50 rounded-lg font-mono text-xs space-y-2">
-                  <div className="flex justify-between">
-                    <span>Session ID:</span>
-                    <div className="flex items-center gap-2">
-                      <span>{maskSessionId(diagnostics.sessionId)}</span>
-                      {diagnostics.sessionId && (
-                        <button onClick={handleCopySessionId} className="text-primary hover:text-primary/80">
-                          {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Session Verified:</span>
-                    <span className="text-green-500">Yes</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Purchase Found:</span>
-                    <span className="text-green-500">Yes</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Purchase Status:</span>
-                    <span className="text-green-500">paid</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Downloads Generated:</span>
-                    <span className={diagnostics.downloadsGenerated ? 'text-green-500' : 'text-yellow-500'}>
-                      {diagnostics.downloadsGenerated ? 'Yes' : 'Pending'}
+            {/* Debug Diagnostics Panel - shows in debug mode or dev */}
+            {debugMode && (
+              <Collapsible open={diagnosticsOpen} onOpenChange={setDiagnosticsOpen} className="mb-8">
+                <CollapsibleTrigger asChild>
+                  <Button variant="ghost" className="w-full justify-between text-muted-foreground">
+                    <span className="flex items-center gap-2">
+                      <Bug className="w-4 h-4" />
+                      Debug Diagnostics
                     </span>
+                    {diagnosticsOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="mt-4 p-4 bg-muted/50 rounded-lg font-mono text-xs space-y-2 border border-primary/20">
+                    <div className="text-primary text-[10px] uppercase tracking-wide mb-3">Purchase Flow Diagnostics</div>
+                    
+                    <div className="flex justify-between">
+                      <span>Session ID:</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-foreground">{diagnostics.sessionId || 'N/A'}</span>
+                        {diagnostics.sessionId && (
+                          <button onClick={handleCopySessionId} className="text-primary hover:text-primary/80">
+                            {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-between">
+                      <span>Session Verified:</span>
+                      <span className={diagnostics.sessionVerified ? 'text-green-500' : 'text-red-500'}>
+                        {diagnostics.sessionVerified ? 'Yes' : 'No'}
+                      </span>
+                    </div>
+                    
+                    <div className="flex justify-between">
+                      <span>Webhook Received:</span>
+                      <span className={diagnostics.webhookReceived ? 'text-green-500' : 'text-yellow-500'}>
+                        {diagnostics.webhookReceived ? 'Yes' : 'Pending/Unknown'}
+                      </span>
+                    </div>
+                    
+                    <div className="flex justify-between">
+                      <span>Purchase Found:</span>
+                      <span className={diagnostics.purchaseFound ? 'text-green-500' : 'text-red-500'}>
+                        {diagnostics.purchaseFound ? 'Yes' : 'No'}
+                      </span>
+                    </div>
+                    
+                    <div className="flex justify-between">
+                      <span>Purchase Status:</span>
+                      <span className={diagnostics.purchaseStatus === 'paid' ? 'text-green-500' : 'text-yellow-500'}>
+                        {diagnostics.purchaseStatus}
+                      </span>
+                    </div>
+                    
+                    <div className="flex justify-between">
+                      <span>Downloads Available:</span>
+                      <span className={diagnostics.downloadsGenerated ? 'text-green-500' : 'text-yellow-500'}>
+                        {diagnostics.downloadsGenerated ? `Yes (${downloads.length} files)` : 'No files yet'}
+                      </span>
+                    </div>
+                    
+                    <div className="flex justify-between">
+                      <span>Retry Count:</span>
+                      <span>{diagnostics.retryCount}</span>
+                    </div>
+                    
+                    {diagnostics.lastPurchase && (
+                      <div className="pt-2 mt-2 border-t border-border">
+                        <div className="text-primary text-[10px] uppercase tracking-wide mb-2">Last Purchase Record</div>
+                        <div className="space-y-1">
+                          <div className="flex justify-between">
+                            <span>ID:</span>
+                            <span className="text-foreground truncate max-w-[200px]">{diagnostics.lastPurchase.id}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Type:</span>
+                            <span className="text-foreground">{diagnostics.lastPurchase.item_type}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Item ID:</span>
+                            <span className="text-foreground truncate max-w-[200px]">{diagnostics.lastPurchase.item_id}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Created:</span>
+                            <span className="text-foreground">{diagnostics.lastPurchase.created_at}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Status:</span>
+                            <span className={diagnostics.lastPurchase.status === 'paid' ? 'text-green-500' : 'text-yellow-500'}>
+                              {diagnostics.lastPurchase.status}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {diagnostics.error && (
+                      <div className="pt-2 mt-2 border-t border-destructive/30">
+                        <span className="text-red-500">Error: {diagnostics.error}</span>
+                      </div>
+                    )}
                   </div>
-                  <div className="flex justify-between">
-                    <span>Download Count (this session):</span>
-                    <span>{diagnostics.downloadCount}</span>
-                  </div>
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
+                </CollapsibleContent>
+              </Collapsible>
+            )}
 
             {/* Next Steps */}
             <div className="card-enterprise p-6 bg-muted/30">

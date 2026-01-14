@@ -138,6 +138,8 @@ serve(async (req) => {
 
     const downloads: DownloadLink[] = [];
     const expiresIn = 3600; // 1 hour
+    let itemName = "";
+    let filesUploaded = false;
 
     if (item_type === "agent") {
       // Get agent details and files
@@ -327,11 +329,19 @@ serve(async (req) => {
         .eq("id", purchaseId);
     }
 
+    // Determine if files were actually uploaded or not
+    const filesAvailable = downloads.length > 0;
+    
     return new Response(
       JSON.stringify({ 
         downloads,
         item_type,
         item_id,
+        item_name: itemName || undefined,
+        files_available: filesAvailable,
+        message: filesAvailable 
+          ? undefined 
+          : "No files have been uploaded for this item yet. Files will be available once uploaded by the admin.",
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
