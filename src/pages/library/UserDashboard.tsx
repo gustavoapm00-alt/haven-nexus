@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
@@ -13,25 +13,10 @@ import LibraryFooter from '@/components/library/LibraryFooter';
 import SectionBand from '@/components/library/SectionBand';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useEntitlements } from '@/hooks/useEntitlements';
 import SEO from '@/components/SEO';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-
-interface Purchase {
-  id: string;
-  item_type: 'agent' | 'bundle';
-  item_id: string;
-  amount_cents: number;
-  status: string;
-  created_at: string;
-  download_count: number | null;
-  last_download_at: string | null;
-}
-
-interface PurchaseWithDetails extends Purchase {
-  item_name: string;
-  item_slug: string;
-}
 
 interface DownloadLink {
   name: string;
@@ -43,82 +28,21 @@ interface DownloadLink {
 const UserDashboard = () => {
   const { user, isLoading: authLoading, signOut } = useAuth();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [purchases, setPurchases] = useState<PurchaseWithDetails[]>([]);
+  const { loading, purchases, entitledAgents, stats } = useEntitlements();
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [downloads, setDownloads] = useState<Record<string, DownloadLink[]>>({});
 
-  useEffect(() => {
-    if (authLoading) return;
-    if (!user) {
-      navigate('/auth?redirect=/dashboard');
-      return;
-    }
-    fetchPurchases();
-  }, [user, authLoading, navigate]);
+  // Redirect to auth if not logged in
+  if (!authLoading && !user) {
+    navigate('/auth?redirect=/dashboard');
+    return null;
+  }
 
-  const fetchPurchases = async () => {
-    if (!user?.email) return;
-
-    setLoading(true);
-    try {
-      const { data: purchaseData, error: purchaseError } = await supabase
-        .from('purchases')
-        .select('*')
-        .eq('email', user.email)
-        .eq('status', 'paid')
-        .order('created_at', { ascending: false });
-
-      if (purchaseError) throw purchaseError;
-
-      if (!purchaseData || purchaseData.length === 0) {
-        setPurchases([]);
-        setLoading(false);
-        return;
-      }
-
-      const agentIds = purchaseData.filter(p => p.item_type === 'agent').map(p => p.item_id);
-      const bundleIds = purchaseData.filter(p => p.item_type === 'bundle').map(p => p.item_id);
-
-      const [agentsRes, bundlesRes] = await Promise.all([
-        agentIds.length > 0 
-          ? supabase.from('automation_agents').select('id, name, slug').in('id', agentIds)
-          : { data: [], error: null },
-        bundleIds.length > 0 
-          ? supabase.from('automation_bundles').select('id, name, slug').in('id', bundleIds)
-          : { data: [], error: null },
-      ]);
-
-      const agentMap = new Map((agentsRes.data || []).map(a => [a.id, a]));
-      const bundleMap = new Map((bundlesRes.data || []).map(b => [b.id, b]));
-
-      const enrichedPurchases: PurchaseWithDetails[] = purchaseData.map(purchase => {
-        const item = purchase.item_type === 'agent' 
-          ? agentMap.get(purchase.item_id)
-          : bundleMap.get(purchase.item_id);
-
-        return {
-          ...purchase,
-          item_type: purchase.item_type as 'agent' | 'bundle',
-          item_name: item?.name || 'Unknown Item',
-          item_slug: item?.slug || '',
-        };
-      });
-
-      setPurchases(enrichedPurchases);
-    } catch (err) {
-      console.error('Error fetching purchases:', err);
-      toast.error('Failed to load purchases');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchDownloads = async (purchase: PurchaseWithDetails) => {
-    setDownloadingId(purchase.id);
+  const fetchDownloads = async (itemType: 'agent' | 'bundle', itemId: string, purchaseId: string) => {
+    setDownloadingId(purchaseId);
     try {
       const { data, error } = await supabase.functions.invoke('get-download-links', {
-        body: { item_type: purchase.item_type, item_id: purchase.item_id },
+        body: { item_type: itemType, item_id: itemId },
       });
 
       if (error) throw new Error(error.message);
@@ -126,7 +50,7 @@ const UserDashboard = () => {
 
       setDownloads(prev => ({
         ...prev,
-        [purchase.id]: data.downloads || [],
+        [purchaseId]: data.downloads || [],
       }));
 
       toast.success('Download links ready');
@@ -144,10 +68,6 @@ const UserDashboard = () => {
   };
 
   const formatPrice = (cents: number) => `$${(cents / 100).toFixed(2)}`;
-
-  const totalSpent = purchases.reduce((sum, p) => sum + p.amount_cents, 0);
-  const agentCount = purchases.filter(p => p.item_type === 'agent').length;
-  const bundleCount = purchases.filter(p => p.item_type === 'bundle').length;
 
   if (authLoading || loading) {
     return (
@@ -211,10 +131,10 @@ const UserDashboard = () => {
         <SectionBand variant="light">
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
             {[
-              { label: 'Total Purchases', value: purchases.length, icon: ShoppingBag },
-              { label: 'Agents Owned', value: agentCount, icon: FileText },
-              { label: 'Bundles Owned', value: bundleCount, icon: Package },
-              { label: 'Total Invested', value: formatPrice(totalSpent), icon: Clock },
+              { label: 'Total Purchases', value: stats.totalPurchases, icon: ShoppingBag },
+              { label: 'Agents Owned', value: stats.uniqueAgentsOwned, icon: FileText },
+              { label: 'Bundles Owned', value: stats.bundlePurchases, icon: Package },
+              { label: 'Total Invested', value: formatPrice(stats.totalSpentCents), icon: Clock },
             ].map((stat, i) => (
               <motion.div
                 key={stat.label}
@@ -421,7 +341,7 @@ const UserDashboard = () => {
                             </Button>
                             <Button
                               size="sm"
-                              onClick={() => fetchDownloads(purchase)}
+                              onClick={() => fetchDownloads(purchase.item_type, purchase.item_id, purchase.id)}
                               disabled={downloadingId === purchase.id}
                             >
                               {downloadingId === purchase.id ? (
@@ -451,7 +371,7 @@ const UserDashboard = () => {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => fetchDownloads(purchase)}
+                                onClick={() => fetchDownloads(purchase.item_type, purchase.item_id, purchase.id)}
                                 disabled={downloadingId === purchase.id}
                               >
                                 <RefreshCw className={`w-3 h-3 mr-1 ${downloadingId === purchase.id ? 'animate-spin' : ''}`} />
@@ -484,6 +404,44 @@ const UserDashboard = () => {
                   </motion.div>
                 ))}
               </div>
+            )}
+
+            {/* Entitled Agents from Bundles */}
+            {entitledAgents.filter(a => a.source === 'bundle').length > 0 && (
+              <motion.div
+                className="mt-8"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+              >
+                <h3 className="text-lg font-semibold text-foreground mb-4">
+                  Agents from Your Bundles
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  You have access to these agents through your bundle purchases.
+                </p>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {entitledAgents.filter(a => a.source === 'bundle').map((agent) => (
+                    <Card key={agent.id} className="card-panel">
+                      <CardContent className="p-4">
+                        <Link to={`/agents/${agent.slug}`} className="block group">
+                          <h4 className="font-medium text-foreground group-hover:text-primary transition-colors mb-1">
+                            {agent.name}
+                          </h4>
+                          <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+                            {agent.short_outcome}
+                          </p>
+                          {agent.source_name && (
+                            <span className="text-xs text-primary bg-primary/10 px-2 py-1 rounded">
+                              via {agent.source_name}
+                            </span>
+                          )}
+                        </Link>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </motion.div>
             )}
           </motion.div>
         </SectionBand>

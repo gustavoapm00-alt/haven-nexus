@@ -66,17 +66,7 @@ serve(async (req) => {
       throw new Error("item_type and item_id are required");
     }
 
-    // Check if user has a valid purchase
-    const { data: purchase, error: purchaseError } = await supabaseClient
-      .from("purchases")
-      .select("id, status, download_count")
-      .eq("email", user.email)
-      .eq("item_id", item_id)
-      .eq("item_type", item_type)
-      .eq("status", "paid")
-      .single();
-
-    // Also check if user is admin (they get free access)
+    // Check if user is admin (they get free access)
     const { data: adminRole } = await supabaseClient
       .from("user_roles")
       .select("role")
@@ -84,7 +74,65 @@ serve(async (req) => {
       .eq("role", "admin")
       .single();
 
-    if (!purchase && !adminRole) {
+    let hasAccess = !!adminRole;
+    let purchaseId: string | null = null;
+    let purchaseDownloadCount = 0;
+
+    if (!hasAccess) {
+      // Check for direct purchase
+      const { data: directPurchase } = await supabaseClient
+        .from("purchases")
+        .select("id, status, download_count")
+        .eq("email", user.email)
+        .eq("item_id", item_id)
+        .eq("item_type", item_type)
+        .eq("status", "paid")
+        .single();
+
+      if (directPurchase) {
+        hasAccess = true;
+        purchaseId = directPurchase.id;
+        purchaseDownloadCount = directPurchase.download_count ?? 0;
+      }
+    }
+
+    // For agents, also check if user purchased a bundle containing this agent
+    if (!hasAccess && item_type === "agent") {
+      // Get all user's bundle purchases
+      const { data: bundlePurchases } = await supabaseClient
+        .from("purchases")
+        .select("id, item_id, download_count")
+        .eq("email", user.email)
+        .eq("item_type", "bundle")
+        .eq("status", "paid");
+
+      if (bundlePurchases && bundlePurchases.length > 0) {
+        // Check if any of these bundles contain the requested agent
+        const bundleIds = bundlePurchases.map(p => p.item_id);
+        
+        const { data: bundles } = await supabaseClient
+          .from("automation_bundles")
+          .select("id, included_agent_ids")
+          .in("id", bundleIds);
+
+        if (bundles) {
+          for (const bundle of bundles) {
+            if (bundle.included_agent_ids && bundle.included_agent_ids.includes(item_id)) {
+              hasAccess = true;
+              // Find the corresponding purchase
+              const bundlePurchase = bundlePurchases.find(p => p.item_id === bundle.id);
+              if (bundlePurchase) {
+                purchaseId = bundlePurchase.id;
+                purchaseDownloadCount = bundlePurchase.download_count ?? 0;
+              }
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    if (!hasAccess) {
       throw new Error("No valid purchase found for this item");
     }
 
@@ -92,10 +140,10 @@ serve(async (req) => {
     const expiresIn = 3600; // 1 hour
 
     if (item_type === "agent") {
-      // Get agent file paths
+      // Get agent details and files
       const { data: agent, error } = await supabaseClient
         .from("automation_agents")
-        .select("name, workflow_file_path, guide_file_path")
+        .select("id, name, slug, current_version, workflow_file_path, guide_file_path")
         .eq("id", item_id)
         .single();
 
@@ -103,34 +151,66 @@ serve(async (req) => {
         throw new Error("Agent not found");
       }
 
-      // Generate signed URLs for each file
-      if (agent.workflow_file_path) {
-        const { data: workflowUrl, error: workflowError } = await supabaseAdmin.storage
-          .from("agent-files")
-          .createSignedUrl(agent.workflow_file_path, expiresIn);
+      const version = agent.current_version || 'v1';
 
-        if (workflowUrl && !workflowError) {
-          downloads.push({
-            name: `${agent.name} - Workflow.json`,
-            type: "workflow",
-            url: workflowUrl.signedUrl,
-            expires_in: expiresIn,
-          });
+      // Try to get files from agent_files table first (versioned)
+      const { data: agentFiles } = await supabaseClient
+        .from("agent_files")
+        .select("file_type, storage_path")
+        .eq("agent_id", item_id)
+        .eq("version", version);
+
+      if (agentFiles && agentFiles.length > 0) {
+        // Use versioned files
+        for (const file of agentFiles) {
+          const { data: signedUrl, error: signError } = await supabaseAdmin.storage
+            .from("agent-files")
+            .createSignedUrl(file.storage_path, expiresIn);
+
+          if (signedUrl && !signError) {
+            const typeLabel = file.file_type === 'workflow' ? 'Workflow.json' 
+              : file.file_type === 'deployment_guide' ? 'Deployment Guide.pdf'
+              : file.file_type === 'requirements' ? 'Requirements.md'
+              : 'Prompt Template.md';
+            
+            downloads.push({
+              name: `${agent.name} - ${typeLabel}`,
+              type: file.file_type === 'workflow' ? 'workflow' : 'guide',
+              url: signedUrl.signedUrl,
+              expires_in: expiresIn,
+            });
+          }
         }
-      }
+      } else {
+        // Fallback to legacy file paths on the agent record
+        if (agent.workflow_file_path) {
+          const { data: workflowUrl, error: workflowError } = await supabaseAdmin.storage
+            .from("agent-files")
+            .createSignedUrl(agent.workflow_file_path, expiresIn);
 
-      if (agent.guide_file_path) {
-        const { data: guideUrl, error: guideError } = await supabaseAdmin.storage
-          .from("agent-files")
-          .createSignedUrl(agent.guide_file_path, expiresIn);
+          if (workflowUrl && !workflowError) {
+            downloads.push({
+              name: `${agent.name} - Workflow.json`,
+              type: "workflow",
+              url: workflowUrl.signedUrl,
+              expires_in: expiresIn,
+            });
+          }
+        }
 
-        if (guideUrl && !guideError) {
-          downloads.push({
-            name: `${agent.name} - Deployment Guide.pdf`,
-            type: "guide",
-            url: guideUrl.signedUrl,
-            expires_in: expiresIn,
-          });
+        if (agent.guide_file_path) {
+          const { data: guideUrl, error: guideError } = await supabaseAdmin.storage
+            .from("agent-files")
+            .createSignedUrl(agent.guide_file_path, expiresIn);
+
+          if (guideUrl && !guideError) {
+            downloads.push({
+              name: `${agent.name} - Deployment Guide.pdf`,
+              type: "guide",
+              url: guideUrl.signedUrl,
+              expires_in: expiresIn,
+            });
+          }
         }
       }
     } else if (item_type === "bundle") {
@@ -165,38 +245,70 @@ serve(async (req) => {
       if (bundle.included_agent_ids && bundle.included_agent_ids.length > 0) {
         const { data: agents, error: agentsError } = await supabaseClient
           .from("automation_agents")
-          .select("id, name, workflow_file_path, guide_file_path")
+          .select("id, name, slug, current_version, workflow_file_path, guide_file_path")
           .in("id", bundle.included_agent_ids);
 
         if (agents && !agentsError) {
           for (const agent of agents) {
-            if (agent.workflow_file_path) {
-              const { data: workflowUrl } = await supabaseAdmin.storage
-                .from("agent-files")
-                .createSignedUrl(agent.workflow_file_path, expiresIn);
+            const version = agent.current_version || 'v1';
+            
+            // Try versioned files first
+            const { data: agentFiles } = await supabaseClient
+              .from("agent_files")
+              .select("file_type, storage_path")
+              .eq("agent_id", agent.id)
+              .eq("version", version);
 
-              if (workflowUrl) {
-                downloads.push({
-                  name: `${agent.name} - Workflow.json`,
-                  type: "workflow",
-                  url: workflowUrl.signedUrl,
-                  expires_in: expiresIn,
-                });
+            if (agentFiles && agentFiles.length > 0) {
+              for (const file of agentFiles) {
+                const { data: signedUrl } = await supabaseAdmin.storage
+                  .from("agent-files")
+                  .createSignedUrl(file.storage_path, expiresIn);
+
+                if (signedUrl) {
+                  const typeLabel = file.file_type === 'workflow' ? 'Workflow.json' 
+                    : file.file_type === 'deployment_guide' ? 'Deployment Guide.pdf'
+                    : file.file_type === 'requirements' ? 'Requirements.md'
+                    : 'Prompt Template.md';
+                  
+                  downloads.push({
+                    name: `${agent.name} - ${typeLabel}`,
+                    type: file.file_type === 'workflow' ? 'workflow' : 'guide',
+                    url: signedUrl.signedUrl,
+                    expires_in: expiresIn,
+                  });
+                }
               }
-            }
+            } else {
+              // Fallback to legacy paths
+              if (agent.workflow_file_path) {
+                const { data: workflowUrl } = await supabaseAdmin.storage
+                  .from("agent-files")
+                  .createSignedUrl(agent.workflow_file_path, expiresIn);
 
-            if (agent.guide_file_path) {
-              const { data: guideUrl } = await supabaseAdmin.storage
-                .from("agent-files")
-                .createSignedUrl(agent.guide_file_path, expiresIn);
+                if (workflowUrl) {
+                  downloads.push({
+                    name: `${agent.name} - Workflow.json`,
+                    type: "workflow",
+                    url: workflowUrl.signedUrl,
+                    expires_in: expiresIn,
+                  });
+                }
+              }
 
-              if (guideUrl) {
-                downloads.push({
-                  name: `${agent.name} - Deployment Guide.pdf`,
-                  type: "guide",
-                  url: guideUrl.signedUrl,
-                  expires_in: expiresIn,
-                });
+              if (agent.guide_file_path) {
+                const { data: guideUrl } = await supabaseAdmin.storage
+                  .from("agent-files")
+                  .createSignedUrl(agent.guide_file_path, expiresIn);
+
+                if (guideUrl) {
+                  downloads.push({
+                    name: `${agent.name} - Deployment Guide.pdf`,
+                    type: "guide",
+                    url: guideUrl.signedUrl,
+                    expires_in: expiresIn,
+                  });
+                }
               }
             }
           }
@@ -204,16 +316,15 @@ serve(async (req) => {
       }
     }
 
-    // Update download count if purchase exists
-    if (purchase) {
-      const currentCount = purchase.download_count ?? 0;
+    // Update download count if we have a purchase to track
+    if (purchaseId) {
       await supabaseAdmin
         .from("purchases")
         .update({
-          download_count: currentCount + 1,
+          download_count: purchaseDownloadCount + 1,
           last_download_at: new Date().toISOString(),
         })
-        .eq("id", purchase.id);
+        .eq("id", purchaseId);
     }
 
     return new Response(
