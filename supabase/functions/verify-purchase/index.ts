@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { PURCHASE_SUCCESS_STATUS } from "../_shared/purchase-constants.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -89,7 +90,7 @@ serve(async (req) => {
           item_type: metadata.item_type,
           item_id: metadata.item_id,
           amount_cents: session.amount_total || 0,
-          status: "paid",
+          status: PURCHASE_SUCCESS_STATUS,
           stripe_session_id: session.id,
           stripe_payment_intent: typeof session.payment_intent === "string" 
             ? session.payment_intent 

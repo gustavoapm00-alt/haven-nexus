@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import { checkRateLimit, getClientIp, rateLimitResponse } from "../_shared/rate-limiter.ts";
+import { SUCCESS_STATUSES } from "../_shared/purchase-constants.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -86,13 +87,13 @@ serve(async (req) => {
         .eq("email", user.email)
         .eq("item_id", item_id)
         .eq("item_type", item_type)
-        .eq("status", "paid")
-        .single();
+        .in("status", SUCCESS_STATUSES)
+        .limit(1);
 
-      if (directPurchase) {
+      if (directPurchase && directPurchase.length > 0) {
         hasAccess = true;
-        purchaseId = directPurchase.id;
-        purchaseDownloadCount = directPurchase.download_count ?? 0;
+        purchaseId = directPurchase[0].id;
+        purchaseDownloadCount = directPurchase[0].download_count ?? 0;
       }
     }
 
@@ -104,7 +105,7 @@ serve(async (req) => {
         .select("id, item_id, download_count")
         .eq("email", user.email)
         .eq("item_type", "bundle")
-        .eq("status", "paid");
+        .in("status", SUCCESS_STATUSES);
 
       if (bundlePurchases && bundlePurchases.length > 0) {
         // Check if any of these bundles contain the requested agent

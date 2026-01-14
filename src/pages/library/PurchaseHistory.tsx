@@ -14,6 +14,7 @@ import { useAuth } from '@/hooks/useAuth';
 import SEO from '@/components/SEO';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { SUCCESS_STATUSES } from '@/lib/purchase-constants';
 
 interface Purchase {
   id: string;
@@ -64,7 +65,7 @@ const PurchaseHistory = () => {
         .from('purchases')
         .select('*')
         .eq('email', user.email)
-        .eq('status', 'paid')
+        .in('status', SUCCESS_STATUSES)
         .order('created_at', { ascending: false });
 
       if (purchaseError) throw purchaseError;

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { SUCCESS_STATUSES } from '@/lib/purchase-constants';
 
 interface Purchase {
   id: string;
@@ -80,7 +81,7 @@ export const useEntitlements = () => {
           .from('purchases')
           .select('*')
           .eq('user_id', user.id)
-          .eq('status', 'completed')
+          .in('status', SUCCESS_STATUSES)
           .order('created_at', { ascending: false });
         
         if (!error && data && data.length > 0) {
@@ -94,7 +95,7 @@ export const useEntitlements = () => {
           .from('purchases')
           .select('*')
           .eq('email', user.email)
-          .eq('status', 'completed')
+          .in('status', SUCCESS_STATUSES)
           .order('created_at', { ascending: false });
         
         if (!error && data) {
