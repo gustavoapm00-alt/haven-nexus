@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { ShoppingBag, User } from 'lucide-react';
+import { User } from 'lucide-react';
 
 const LibraryNavbar = () => {
   const location = useLocation();
@@ -49,19 +49,6 @@ const LibraryNavbar = () => {
             >
               Contact
             </Link>
-            {user && (
-              <Link
-                to="/purchases"
-                className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${
-                  isActive('/purchases')
-                    ? 'text-foreground'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <ShoppingBag className="w-4 h-4" />
-                <span className="hidden sm:inline">My Purchases</span>
-              </Link>
-            )}
             {isAdmin && (
               <Link
                 to="/admin"

@@ -56,6 +56,7 @@ import InstallationAssistance from "./pages/library/InstallationAssistance";
 import LibraryContact from "./pages/library/LibraryContact";
 import PurchaseSuccess from "./pages/library/PurchaseSuccess";
 import PurchaseHistory from "./pages/library/PurchaseHistory";
+import UserDashboard from "./pages/library/UserDashboard";
 
 // Admin Library pages
 import AdminLibraryHome from "./pages/admin/library/AdminLibraryHome";
@@ -107,6 +108,7 @@ const UnlockedApp = () => (
     <Route path="/contact" element={<LibraryContact />} />
     <Route path="/purchase-success" element={<PurchaseSuccess />} />
     <Route path="/purchases" element={<PurchaseHistory />} />
+    <Route path="/dashboard" element={<UserDashboard />} />
 
     {/* Legacy routes (redirects or preserved for existing links) */}
     <Route path="/old-home" element={<Index />} />
@@ -137,7 +139,7 @@ const UnlockedApp = () => (
     <Route path="/admin/library/bundles/:id" element={<AdminBundleEditor mode="edit" />} />
     <Route path="/reset-password" element={<ResetPassword />} />
     <Route path="/sanctuary" element={<Sanctuary />} />
-    <Route path="/dashboard" element={<Dashboard />} />
+    <Route path="/old-dashboard" element={<Dashboard />} />
     <Route path="/agents/setup" element={<AgentSetup />} />
     <Route path="/agents/dashboard" element={<AgentDashboard />} />
     <Route path="/agents/activity" element={<AgentActivity />} />
