@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import { checkRateLimit, getClientIp, rateLimitResponse } from "../_shared/rate-limiter.ts";
 import { SUCCESS_STATUSES } from "../_shared/purchase-constants.ts";
+import { CANONICAL_FILE_TYPES, getFileTypeLabel } from "../_shared/file-types.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -15,7 +16,7 @@ interface DownloadRequest {
 
 interface DownloadLink {
   name: string;
-  type: "workflow" | "guide";
+  type: string;
   url: string;
   expires_in: number;
 }
@@ -140,7 +141,6 @@ serve(async (req) => {
     const downloads: DownloadLink[] = [];
     const expiresIn = 3600; // 1 hour
     let itemName = "";
-    let filesUploaded = false;
 
     if (item_type === "agent") {
       // Get agent details and files
@@ -154,6 +154,7 @@ serve(async (req) => {
         throw new Error("Agent not found");
       }
 
+      itemName = agent.name;
       const version = agent.current_version || 'v1';
 
       // Try to get files from agent_files table first (versioned)
@@ -164,21 +165,16 @@ serve(async (req) => {
         .eq("version", version);
 
       if (agentFiles && agentFiles.length > 0) {
-        // Use versioned files
+        // Use versioned files - canonical file types
         for (const file of agentFiles) {
           const { data: signedUrl, error: signError } = await supabaseAdmin.storage
             .from("agent-files")
             .createSignedUrl(file.storage_path, expiresIn);
 
           if (signedUrl && !signError) {
-            const typeLabel = file.file_type === 'workflow' ? 'Workflow.json' 
-              : file.file_type === 'deployment_guide' ? 'Deployment Guide.pdf'
-              : file.file_type === 'requirements' ? 'Requirements.md'
-              : 'Prompt Template.md';
-            
             downloads.push({
-              name: `${agent.name} - ${typeLabel}`,
-              type: file.file_type === 'workflow' ? 'workflow' : 'guide',
+              name: `${agent.name} - ${getFileTypeLabel(file.file_type)}`,
+              type: file.file_type,
               url: signedUrl.signedUrl,
               expires_in: expiresIn,
             });
@@ -193,8 +189,8 @@ serve(async (req) => {
 
           if (workflowUrl && !workflowError) {
             downloads.push({
-              name: `${agent.name} - Workflow.json`,
-              type: "workflow",
+              name: `${agent.name} - ${getFileTypeLabel(CANONICAL_FILE_TYPES.workflow)}`,
+              type: CANONICAL_FILE_TYPES.workflow,
               url: workflowUrl.signedUrl,
               expires_in: expiresIn,
             });
@@ -208,8 +204,8 @@ serve(async (req) => {
 
           if (guideUrl && !guideError) {
             downloads.push({
-              name: `${agent.name} - Deployment Guide.pdf`,
-              type: "guide",
+              name: `${agent.name} - ${getFileTypeLabel(CANONICAL_FILE_TYPES.deployment_guide)}`,
+              type: CANONICAL_FILE_TYPES.deployment_guide,
               url: guideUrl.signedUrl,
               expires_in: expiresIn,
             });
@@ -228,6 +224,8 @@ serve(async (req) => {
         throw new Error("Bundle not found");
       }
 
+      itemName = bundle.name;
+
       // If there's a bundle zip, use that
       if (bundle.bundle_zip_path) {
         const { data: zipUrl, error: zipError } = await supabaseAdmin.storage
@@ -237,7 +235,7 @@ serve(async (req) => {
         if (zipUrl && !zipError) {
           downloads.push({
             name: `${bundle.name} - Complete Bundle.zip`,
-            type: "workflow",
+            type: CANONICAL_FILE_TYPES.workflow,
             url: zipUrl.signedUrl,
             expires_in: expiresIn,
           });
@@ -269,14 +267,9 @@ serve(async (req) => {
                   .createSignedUrl(file.storage_path, expiresIn);
 
                 if (signedUrl) {
-                  const typeLabel = file.file_type === 'workflow' ? 'Workflow.json' 
-                    : file.file_type === 'deployment_guide' ? 'Deployment Guide.pdf'
-                    : file.file_type === 'requirements' ? 'Requirements.md'
-                    : 'Prompt Template.md';
-                  
                   downloads.push({
-                    name: `${agent.name} - ${typeLabel}`,
-                    type: file.file_type === 'workflow' ? 'workflow' : 'guide',
+                    name: `${agent.name} - ${getFileTypeLabel(file.file_type)}`,
+                    type: file.file_type,
                     url: signedUrl.signedUrl,
                     expires_in: expiresIn,
                   });
@@ -291,8 +284,8 @@ serve(async (req) => {
 
                 if (workflowUrl) {
                   downloads.push({
-                    name: `${agent.name} - Workflow.json`,
-                    type: "workflow",
+                    name: `${agent.name} - ${getFileTypeLabel(CANONICAL_FILE_TYPES.workflow)}`,
+                    type: CANONICAL_FILE_TYPES.workflow,
                     url: workflowUrl.signedUrl,
                     expires_in: expiresIn,
                   });
@@ -306,8 +299,8 @@ serve(async (req) => {
 
                 if (guideUrl) {
                   downloads.push({
-                    name: `${agent.name} - Deployment Guide.pdf`,
-                    type: "guide",
+                    name: `${agent.name} - ${getFileTypeLabel(CANONICAL_FILE_TYPES.deployment_guide)}`,
+                    type: CANONICAL_FILE_TYPES.deployment_guide,
                     url: guideUrl.signedUrl,
                     expires_in: expiresIn,
                   });
