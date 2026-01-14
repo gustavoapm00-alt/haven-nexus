@@ -58,6 +58,11 @@ import PurchaseSuccess from "./pages/library/PurchaseSuccess";
 import PurchaseHistory from "./pages/library/PurchaseHistory";
 import UserDashboard from "./pages/library/UserDashboard";
 
+// Client Portal pages
+import ClientAuth from "./pages/portal/ClientAuth";
+import ClientOnboarding from "./pages/portal/ClientOnboarding";
+import ClientDashboard from "./pages/portal/ClientDashboard";
+
 // Admin Library pages
 import AdminLibraryHome from "./pages/admin/library/AdminLibraryHome";
 import AdminAgentsList from "./pages/admin/library/AdminAgentsList";
@@ -111,6 +116,11 @@ const UnlockedApp = () => (
     <Route path="/purchase-success" element={<PurchaseSuccess />} />
     <Route path="/purchases" element={<PurchaseHistory />} />
     <Route path="/dashboard" element={<UserDashboard />} />
+
+    {/* Client Portal routes */}
+    <Route path="/portal/auth" element={<ClientAuth />} />
+    <Route path="/portal/onboarding" element={<ClientOnboarding />} />
+    <Route path="/portal/dashboard" element={<ClientDashboard />} />
 
     {/* Legacy routes (redirects or preserved for existing links) */}
     <Route path="/old-home" element={<Index />} />

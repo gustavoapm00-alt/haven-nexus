@@ -351,6 +351,36 @@ export type Database = {
         }
         Relationships: []
       }
+      client_integrations: {
+        Row: {
+          config: Json | null
+          created_at: string | null
+          id: string
+          provider: string
+          status: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          config?: Json | null
+          created_at?: string | null
+          id?: string
+          provider: string
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          config?: Json | null
+          created_at?: string | null
+          id?: string
+          provider?: string
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       contact_submissions: {
         Row: {
           created_at: string
