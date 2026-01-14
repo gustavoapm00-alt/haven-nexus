@@ -49,22 +49,58 @@ export const useEntitlements = () => {
   });
 
   const fetchEntitlements = useCallback(async () => {
-    if (!user?.email) {
+    if (!user?.id && !user?.email) {
       setLoading(false);
       return;
     }
 
     setLoading(true);
     try {
-      // Fetch all purchases
-      const { data: purchaseData, error: purchaseError } = await supabase
-        .from('purchases')
-        .select('*')
-        .eq('email', user.email)
-        .eq('status', 'paid')
-        .order('created_at', { ascending: false });
+      // Fetch all purchases - prioritize user_id, fallback to email
+      type RawPurchase = {
+        id: string;
+        item_type: string;
+        item_id: string;
+        amount_cents: number;
+        status: string;
+        created_at: string;
+        download_count: number | null;
+        last_download_at: string | null;
+        email: string;
+        user_id: string | null;
+        stripe_session_id: string | null;
+        stripe_payment_intent: string | null;
+      };
+      
+      let purchaseData: RawPurchase[] | null = null;
 
-      if (purchaseError) throw purchaseError;
+      // First try by user_id (most reliable)
+      if (user?.id) {
+        const { data, error } = await supabase
+          .from('purchases')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('status', 'paid')
+          .order('created_at', { ascending: false });
+        
+        if (!error && data && data.length > 0) {
+          purchaseData = data as RawPurchase[];
+        }
+      }
+
+      // Fallback to email if user_id query returned nothing
+      if ((!purchaseData || purchaseData.length === 0) && user?.email) {
+        const { data, error } = await supabase
+          .from('purchases')
+          .select('*')
+          .eq('email', user.email)
+          .eq('status', 'paid')
+          .order('created_at', { ascending: false });
+        
+        if (!error && data) {
+          purchaseData = data as RawPurchase[];
+        }
+      }
 
       if (!purchaseData || purchaseData.length === 0) {
         setPurchases([]);
@@ -196,7 +232,7 @@ export const useEntitlements = () => {
     } finally {
       setLoading(false);
     }
-  }, [user?.email]);
+  }, [user?.id, user?.email]);
 
   useEffect(() => {
     if (authLoading) return;
