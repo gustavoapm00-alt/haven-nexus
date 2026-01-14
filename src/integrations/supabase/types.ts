@@ -56,6 +56,44 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_files: {
+        Row: {
+          agent_id: string
+          created_at: string
+          file_type: string
+          id: string
+          storage_path: string
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          agent_id: string
+          created_at?: string
+          file_type: string
+          id?: string
+          storage_path: string
+          updated_at?: string
+          version?: string
+        }
+        Update: {
+          agent_id?: string
+          created_at?: string
+          file_type?: string
+          id?: string
+          storage_path?: string
+          updated_at?: string
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_files_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "automation_agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agent_runs: {
         Row: {
           agent_key: string | null
@@ -180,6 +218,7 @@ export type Database = {
           capacity_recovered_max: number
           capacity_recovered_min: number
           created_at: string
+          current_version: string | null
           description: string
           featured: boolean
           guide_file_path: string | null
@@ -206,6 +245,7 @@ export type Database = {
           capacity_recovered_max?: number
           capacity_recovered_min?: number
           created_at?: string
+          current_version?: string | null
           description: string
           featured?: boolean
           guide_file_path?: string | null
@@ -232,6 +272,7 @@ export type Database = {
           capacity_recovered_max?: number
           capacity_recovered_min?: number
           created_at?: string
+          current_version?: string | null
           description?: string
           featured?: boolean
           guide_file_path?: string | null
