@@ -80,7 +80,7 @@ export const useEntitlements = () => {
           .from('purchases')
           .select('*')
           .eq('user_id', user.id)
-          .eq('status', 'paid')
+          .eq('status', 'completed')
           .order('created_at', { ascending: false });
         
         if (!error && data && data.length > 0) {
@@ -94,7 +94,7 @@ export const useEntitlements = () => {
           .from('purchases')
           .select('*')
           .eq('email', user.email)
-          .eq('status', 'paid')
+          .eq('status', 'completed')
           .order('created_at', { ascending: false });
         
         if (!error && data) {
