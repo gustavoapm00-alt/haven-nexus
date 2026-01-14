@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { SUCCESS_STATUSES } from '@/lib/purchase-constants';
 
 interface UsePurchaseOptions {
   onSuccess?: () => void;
@@ -73,10 +74,10 @@ export const usePurchase = (options?: UsePurchaseOptions) => {
         .eq('email', user.email)
         .eq('item_id', itemId)
         .eq('item_type', itemType)
-        .eq('status', 'paid')
-        .single();
+        .in('status', SUCCESS_STATUSES)
+        .limit(1);
 
-      return !!data && !error;
+      return !!data && data.length > 0 && !error;
     } catch {
       return false;
     }

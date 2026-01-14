@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import { checkRateLimit, getClientIp, rateLimitResponse } from "../_shared/rate-limiter.ts";
+import { SUCCESS_STATUSES } from "../_shared/purchase-constants.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -101,10 +102,10 @@ serve(async (req) => {
       .eq("email", user.email)
       .eq("item_id", item_id)
       .eq("item_type", item_type)
-      .eq("status", "paid")
-      .single();
+      .in("status", SUCCESS_STATUSES)
+      .limit(1);
 
-    if (existingPurchase) {
+    if (existingPurchase && existingPurchase.length > 0) {
       throw new Error("You have already purchased this item. Check your downloads.");
     }
 
