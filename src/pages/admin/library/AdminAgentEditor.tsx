@@ -16,6 +16,14 @@ import {
 } from '@/components/ui/select';
 import { ArrowLeft, Loader2, Upload, Check, FileJson, FileText } from 'lucide-react';
 
+interface AgentFile {
+  id: string;
+  agent_id: string;
+  version: string;
+  file_type: 'workflow' | 'guide';
+  storage_path: string;
+}
+
 interface AgentFormData {
   name: string;
   slug: string;
@@ -36,6 +44,7 @@ interface AgentFormData {
   featured: boolean;
   workflow_file_path: string | null;
   guide_file_path: string | null;
+  current_version: string;
 }
 
 const initialFormData: AgentFormData = {
@@ -58,6 +67,7 @@ const initialFormData: AgentFormData = {
   featured: false,
   workflow_file_path: null,
   guide_file_path: null,
+  current_version: 'v1',
 };
 
 interface AdminAgentEditorProps {
@@ -114,6 +124,7 @@ const AdminAgentEditor = ({ mode }: AdminAgentEditorProps) => {
       featured: data.featured || false,
       workflow_file_path: data.workflow_file_path || null,
       guide_file_path: data.guide_file_path || null,
+      current_version: data.current_version || 'v1',
     });
     setLoading(false);
   };
@@ -142,7 +153,8 @@ const AdminAgentEditor = ({ mode }: AdminAgentEditorProps) => {
 
   const handleFileUpload = async (
     file: File,
-    type: 'workflow' | 'guide'
+    type: 'workflow' | 'guide',
+    agentId?: string
   ) => {
     const setUploading = type === 'workflow' ? setUploadingWorkflow : setUploadingGuide;
     setUploading(true);
@@ -151,7 +163,8 @@ const AdminAgentEditor = ({ mode }: AdminAgentEditorProps) => {
       const fileExt = file.name.split('.').pop();
       const fileName = `${crypto.randomUUID()}.${fileExt}`;
       const folder = type === 'workflow' ? 'workflows' : 'guides';
-      const filePath = `${folder}/${formData.slug || 'temp'}/${fileName}`;
+      const version = formData.current_version || 'v1';
+      const filePath = `${folder}/${formData.slug || 'temp'}/${version}/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from('agent-files')
@@ -159,6 +172,36 @@ const AdminAgentEditor = ({ mode }: AdminAgentEditorProps) => {
 
       if (uploadError) {
         throw uploadError;
+      }
+
+      // If we have an agent ID (editing mode), also upsert agent_files row
+      if (agentId || id) {
+        const targetAgentId = agentId || id;
+        
+        // Check if a record exists for this agent/version/type
+        const { data: existingFile } = await supabase
+          .from('agent_files')
+          .select('id')
+          .eq('agent_id', targetAgentId)
+          .eq('version', version)
+          .eq('file_type', type)
+          .maybeSingle();
+
+        if (existingFile) {
+          // Update existing
+          await supabase
+            .from('agent_files')
+            .update({ storage_path: filePath, updated_at: new Date().toISOString() })
+            .eq('id', existingFile.id);
+        } else {
+          // Insert new
+          await supabase.from('agent_files').insert({
+            agent_id: targetAgentId,
+            version,
+            file_type: type,
+            storage_path: filePath,
+          });
+        }
       }
 
       setFormData((prev) => ({
@@ -178,6 +221,12 @@ const AdminAgentEditor = ({ mode }: AdminAgentEditorProps) => {
   const handleSave = async () => {
     if (!formData.name || !formData.slug) {
       toast.error('Name and slug are required');
+      return;
+    }
+
+    // Publish validation: require workflow file for publishing
+    if (formData.status === 'published' && !formData.workflow_file_path) {
+      toast.error('Cannot publish without a workflow file. Upload the workflow JSON first.');
       return;
     }
 
@@ -204,12 +253,20 @@ const AdminAgentEditor = ({ mode }: AdminAgentEditorProps) => {
         featured: formData.featured,
         workflow_file_path: formData.workflow_file_path,
         guide_file_path: formData.guide_file_path,
+        current_version: formData.current_version,
         published_at: formData.status === 'published' ? new Date().toISOString() : null,
       };
 
+      let savedAgentId = id;
+
       if (isCreate) {
-        const { error } = await supabase.from('automation_agents').insert(saveData);
+        const { data, error } = await supabase
+          .from('automation_agents')
+          .insert(saveData)
+          .select('id')
+          .single();
         if (error) throw error;
+        savedAgentId = data.id;
         toast.success('Agent created successfully');
       } else {
         const { error } = await supabase
@@ -218,6 +275,59 @@ const AdminAgentEditor = ({ mode }: AdminAgentEditorProps) => {
           .eq('id', id);
         if (error) throw error;
         toast.success('Agent updated successfully');
+      }
+
+      // Upsert agent_files records for workflow and guide if they exist
+      if (savedAgentId) {
+        const version = formData.current_version || 'v1';
+        
+        if (formData.workflow_file_path) {
+          const { data: existingWorkflow } = await supabase
+            .from('agent_files')
+            .select('id')
+            .eq('agent_id', savedAgentId)
+            .eq('version', version)
+            .eq('file_type', 'workflow')
+            .maybeSingle();
+
+          if (existingWorkflow) {
+            await supabase
+              .from('agent_files')
+              .update({ storage_path: formData.workflow_file_path, updated_at: new Date().toISOString() })
+              .eq('id', existingWorkflow.id);
+          } else {
+            await supabase.from('agent_files').insert({
+              agent_id: savedAgentId,
+              version,
+              file_type: 'workflow',
+              storage_path: formData.workflow_file_path,
+            });
+          }
+        }
+
+        if (formData.guide_file_path) {
+          const { data: existingGuide } = await supabase
+            .from('agent_files')
+            .select('id')
+            .eq('agent_id', savedAgentId)
+            .eq('version', version)
+            .eq('file_type', 'guide')
+            .maybeSingle();
+
+          if (existingGuide) {
+            await supabase
+              .from('agent_files')
+              .update({ storage_path: formData.guide_file_path, updated_at: new Date().toISOString() })
+              .eq('id', existingGuide.id);
+          } else {
+            await supabase.from('agent_files').insert({
+              agent_id: savedAgentId,
+              version,
+              file_type: 'guide',
+              storage_path: formData.guide_file_path,
+            });
+          }
+        }
       }
 
       navigate('/admin/library/agents');
@@ -294,7 +404,7 @@ const AdminAgentEditor = ({ mode }: AdminAgentEditorProps) => {
                 </div>
               </div>
 
-              <div className="grid gap-4 md:grid-cols-3">
+              <div className="grid gap-4 md:grid-cols-4">
                 <div className="space-y-2">
                   <Label htmlFor="status">Status</Label>
                   <Select
@@ -309,6 +419,18 @@ const AdminAgentEditor = ({ mode }: AdminAgentEditorProps) => {
                       <SelectItem value="published">Published</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="version">Version</Label>
+                  <Input
+                    id="version"
+                    value={formData.current_version}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, current_version: e.target.value }))
+                    }
+                    placeholder="v1"
+                    className="font-mono"
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="price">Price (USD)</Label>
@@ -487,7 +609,17 @@ const AdminAgentEditor = ({ mode }: AdminAgentEditorProps) => {
 
             {/* File Uploads */}
             <section className="space-y-4">
-              <h2 className="text-lg font-semibold">Files</h2>
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold">Files</h2>
+                {!formData.workflow_file_path && (
+                  <span className="text-sm text-amber-500">
+                    ⚠ Workflow required to publish
+                  </span>
+                )}
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Files will be saved to version: <code className="font-mono bg-muted px-1 rounded">{formData.current_version}</code>
+              </p>
               <div className="grid gap-6 md:grid-cols-2">
                 <div className="space-y-3">
                   <Label>Workflow JSON</Label>
