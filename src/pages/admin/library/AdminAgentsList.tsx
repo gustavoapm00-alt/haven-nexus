@@ -117,12 +117,19 @@ const AdminAgentsList = () => {
               </Button>
               <h1 className="font-display text-xl">Automation Agents</h1>
             </div>
-            <Button asChild>
-              <Link to="/admin/library/agents/new">
-                <Plus className="w-4 h-4 mr-2" />
-                New Agent
-              </Link>
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" asChild>
+                <Link to="/admin/library/agents/import">
+                  Import JSON
+                </Link>
+              </Button>
+              <Button asChild>
+                <Link to="/admin/library/agents/new">
+                  <Plus className="w-4 h-4 mr-2" />
+                  New Agent
+                </Link>
+              </Button>
+            </div>
           </div>
         </header>
 
