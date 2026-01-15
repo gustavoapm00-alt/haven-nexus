@@ -25,9 +25,9 @@ const BundleDetail = () => {
 
   const formatPrice = (cents: number) => `$${(cents / 100).toFixed(0)}`;
 
-  const deploymentSteps = [
+  const setupSteps = [
     'Select a workflow pack from the bundle',
-    'Download files and review documentation',
+    'Download files and review setup documentation',
     'Import into your n8n instance and configure',
   ];
 
@@ -77,7 +77,7 @@ const BundleDetail = () => {
       <SEO
         title={bundle.name}
         description={bundle.objective}
-        keywords={[...bundle.sectors, 'automation bundle', 'workflow bundle'].join(', ')}
+        keywords={[...bundle.sectors, 'n8n bundle', 'workflow bundle', 'workflow packs'].join(', ')}
       />
 
       <div className="min-h-screen bg-background">
@@ -125,16 +125,16 @@ const BundleDetail = () => {
                   </p>
                 </section>
 
-                {/* Included Agents */}
+                {/* Included Packs */}
                 <section>
                   <h2 className="text-lg font-semibold text-foreground mb-4">
-                    Included Agents
+                    Included Workflow Packs
                   </h2>
                   <div className="space-y-3">
                     {bundle.included_agents.map((agent) => (
                       <Link
                         key={agent.id}
-                        to={`/agents/${agent.slug}`}
+                        to={`/packs/${agent.slug}`}
                         className="block card-enterprise p-4 hover:border-primary/30"
                       >
                         <div className="flex items-center justify-between">
@@ -167,13 +167,13 @@ const BundleDetail = () => {
                   </div>
                 </section>
 
-                {/* Deployment */}
+                {/* How to Import */}
                 <section>
                   <h2 className="text-lg font-semibold text-foreground mb-4">
-                    Deployment
+                    How to Import
                   </h2>
                   <ol className="space-y-3">
-                    {deploymentSteps.map((step, index) => (
+                    {setupSteps.map((step, index) => (
                       <li key={index} className="flex gap-4">
                         <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground text-sm flex items-center justify-center">
                           {index + 1}
@@ -224,7 +224,7 @@ const BundleDetail = () => {
                     to="/install"
                     className="block text-center text-sm text-muted-foreground hover:text-foreground"
                   >
-                    Need help installing?
+                    Need help importing?
                   </Link>
                 </div>
               </div>

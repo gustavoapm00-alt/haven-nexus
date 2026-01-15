@@ -298,7 +298,7 @@ export default function AdminMonitoring() {
               <div className="text-center py-12 text-muted-foreground">
                 <CheckCircle className="w-12 h-12 mx-auto mb-3 opacity-50" />
                 <p>No logs found</p>
-                <p className="text-sm">Logs will appear here in real-time</p>
+                <p className="text-sm">Logs will appear here as activity occurs</p>
               </div>
             )}
 

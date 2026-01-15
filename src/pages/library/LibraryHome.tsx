@@ -68,10 +68,10 @@ const LibraryHome = () => {
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
             >
-              Control Desk
+              Workflow Library
             </motion.span>
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">Featured Automation Agents</h2>
-            <p className="text-white/60">Pre-engineered workflows ready for deployment</p>
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">Featured Workflow Packs</h2>
+            <p className="text-white/60">Pre-built n8n workflows ready to download and import</p>
           </motion.div>
           {agentsLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -122,8 +122,8 @@ const LibraryHome = () => {
             transition={{ delay: 0.4 }}
           >
             <Button asChild size="lg" className="bg-white text-foreground hover:bg-white/90 glow-accent">
-              <Link to="/agents">
-                View Full Agent Library
+              <Link to="/packs">
+                View All Workflow Packs
                 <ArrowRight className="ml-2 w-4 h-4" />
               </Link>
             </Button>

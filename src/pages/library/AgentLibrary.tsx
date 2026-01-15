@@ -60,9 +60,9 @@ const AgentLibrary = () => {
   return (
     <>
       <SEO
-        title="Automation Agents"
-        description="Browse our library of pre-engineered automation agents. Modular workflows designed to eliminate repeatable operational tasks."
-        keywords="automation agents, n8n workflows, business automation, workflow templates"
+        title="Workflow Packs"
+        description="Browse our library of pre-built n8n workflow packs. Modular automation files designed for instant download and import."
+        keywords="n8n workflows, workflow templates, automation templates, workflow packs"
       />
 
       <div className="min-h-screen bg-background">
@@ -72,10 +72,10 @@ const AgentLibrary = () => {
           <div className="container-main">
             <div className="mb-8">
               <h1 className="text-3xl font-semibold text-foreground mb-3">
-                Automation Agents
+                Workflow Packs
               </h1>
               <p className="text-muted-foreground">
-                Modular workflows engineered to eliminate repeatable operational tasks.
+                Pre-built n8n workflow files ready to download and import into your own instance.
               </p>
             </div>
 
@@ -85,7 +85,7 @@ const AgentLibrary = () => {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
                   type="text"
-                  placeholder="Search agents..."
+                  placeholder="Search packs..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
@@ -129,7 +129,7 @@ const AgentLibrary = () => {
 
             {/* Results count */}
             <p className="text-sm text-muted-foreground mb-6">
-              {filteredAgents.length} agent{filteredAgents.length !== 1 ? 's' : ''} found
+              {filteredAgents.length} pack{filteredAgents.length !== 1 ? 's' : ''} found
             </p>
 
             {/* Agent Grid */}
@@ -142,7 +142,7 @@ const AgentLibrary = () => {
             ) : filteredAgents.length === 0 ? (
               <div className="text-center py-16">
                 <Filter className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="font-medium text-foreground mb-2">No agents found</h3>
+                <h3 className="font-medium text-foreground mb-2">No packs found</h3>
                 <p className="text-sm text-muted-foreground mb-4">
                   Try adjusting your filters or search query.
                 </p>

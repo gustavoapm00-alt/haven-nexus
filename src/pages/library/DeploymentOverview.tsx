@@ -7,16 +7,16 @@ import IntegrationIcons from '@/components/library/IntegrationIcons';
 import SEO from '@/components/SEO';
 
 const DeploymentOverview = () => {
-  const deploymentSteps = [
+  const setupSteps = [
     {
       step: 1,
-      title: 'Select a pre-engineered automation agent',
-      description: 'Browse the agent library and choose the workflow that matches your operational need.',
+      title: 'Browse and purchase a workflow pack',
+      description: 'Explore the pack library and select the workflow that matches your operational need.',
     },
     {
       step: 2,
-      title: 'Download and connect approved systems',
-      description: 'Import the workflow file into your n8n instance and configure credentials for required systems.',
+      title: 'Download your workflow files',
+      description: 'After purchase, instantly download the n8n JSON file and documentation.',
     },
     {
       step: 3,
@@ -28,9 +28,9 @@ const DeploymentOverview = () => {
   return (
     <>
       <SEO
-        title="Deployment Overview"
-        description="Learn how AERELION automation agents are deployed. Customer-controlled execution with no centralized data processing."
-        keywords="deployment, n8n, automation deployment, workflow deployment"
+        title="How to Import Workflow Packs"
+        description="Learn how to download and import AERELION workflow packs into your own n8n instance. Customer-controlled with no centralized processing."
+        keywords="n8n import, workflow import, n8n setup, workflow setup"
       />
 
       <div className="min-h-screen bg-background">
@@ -39,15 +39,15 @@ const DeploymentOverview = () => {
         <section className="section-padding !pt-12">
           <div className="container-main max-w-3xl">
             <h1 className="text-3xl font-semibold text-foreground mb-4">
-              Deployment Overview
+              How to Import Workflow Packs
             </h1>
             <p className="text-lg text-muted-foreground leading-relaxed mb-12">
-              AERELION agents are distributed as downloadable workflows designed to run inside customer-controlled automation infrastructure. Each deployment includes documentation, requirements, and recommended configuration.
+              AERELION workflow packs are downloadable n8n files designed to run inside your own automation infrastructure. Each pack includes documentation, requirements, and configuration templates.
             </p>
 
-            {/* Deployment Steps */}
+            {/* Setup Steps */}
             <div className="space-y-8 mb-16">
-              {deploymentSteps.map((step) => (
+              {setupSteps.map((step) => (
                 <div key={step.step} className="flex gap-6">
                   <div className="flex-shrink-0">
                     <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-semibold">
@@ -98,7 +98,7 @@ const DeploymentOverview = () => {
                 Typical Setup Time
               </h2>
               <p className="text-muted-foreground">
-                Most agents can be deployed in 15–45 minutes depending on the number of system integrations required. Each agent page displays its estimated setup time.
+                Most workflow packs can be imported and configured in 15–45 minutes depending on the number of system integrations required. Each pack page displays its estimated setup time.
               </p>
             </div>
 
@@ -108,7 +108,7 @@ const DeploymentOverview = () => {
                 Supported Systems
               </h2>
               <p className="text-muted-foreground mb-6">
-                Integrations depend on the selected agent. Common systems include:
+                Integrations depend on the selected pack. Common systems include:
               </p>
               <IntegrationIcons />
             </div>
@@ -116,7 +116,7 @@ const DeploymentOverview = () => {
             {/* CTA */}
             <div className="text-center">
               <Button asChild size="lg">
-                <Link to="/agents">Browse Automation Agents</Link>
+                <Link to="/packs">Browse Workflow Packs</Link>
               </Button>
             </div>
           </div>
