@@ -7,13 +7,13 @@ const SecurityPractices = () => {
   const practices = [
     {
       icon: Lock,
-      title: 'Customer-Controlled Execution',
-      description: 'All automation agents execute entirely within the customer\'s own automation environment. AERELION does not run workflows on behalf of customers or access customer systems remotely.',
+      title: 'Customer-Controlled Workflows',
+      description: 'All workflow packs are designed for import into your own n8n instance. AERELION does not host, run, or access your workflows or systems remotely.',
     },
     {
       icon: Database,
-      title: 'No Centralized Data Ingestion',
-      description: 'AERELION does not store, process, or retain operational data that flows through deployed agents. Data remains within the customer\'s infrastructure at all times.',
+      title: 'No Centralized Data Processing',
+      description: 'AERELION does not store, process, or retain any operational data from your workflows. All data remains within your infrastructure at all times.',
     },
     {
       icon: Eye,

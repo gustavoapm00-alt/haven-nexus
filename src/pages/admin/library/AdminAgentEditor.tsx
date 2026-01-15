@@ -751,7 +751,7 @@ const AdminAgentEditor = ({ mode }: AdminAgentEditorProps) => {
                   <Textarea
                     value={formData.how_it_works.join('\n')}
                     onChange={(e) => handleArrayFieldChange('how_it_works', e.target.value)}
-                    placeholder="Webhook receives new lead data&#10;Rules engine evaluates lead attributes&#10;Lead routed to destination"
+                    placeholder="Import workflow JSON into n8n&#10;Configure system credentials&#10;Activate trigger and test"
                     rows={4}
                   />
                 </div>

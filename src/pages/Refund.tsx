@@ -9,7 +9,7 @@ const Refund = () => {
     <div className="min-h-screen bg-background">
       <SEO 
         title="Refund Policy"
-        description="Refund Policy for Aerlion Systems. Learn about our free trial, subscription refunds, and refund process for AI automation services."
+        description="Refund Policy for AERELION. Learn about our digital product refund terms for workflow packs and bundles."
         canonicalUrl="/refund"
         structuredData={schemas.breadcrumb([
           { name: 'Home', url: '/' },
@@ -51,15 +51,15 @@ const Refund = () => {
                 </section>
 
                 <section>
-                  <h2 className="font-display text-2xl mb-4">3. Custom Development Projects</h2>
+                  <h2 className="font-display text-2xl mb-4">3. Digital Products</h2>
                   <p className="text-muted-foreground">
-                    Custom development projects follow the payment terms outlined in individual 
-                    service agreements. Generally:
+                    Workflow packs and bundles are digital products delivered immediately upon purchase. 
+                    Due to the nature of digital delivery:
                   </p>
                   <ul className="list-disc list-inside text-muted-foreground space-y-2 mt-4">
-                    <li>Deposits are non-refundable once work has commenced</li>
-                    <li>Milestone payments are due upon completion of each project phase</li>
-                    <li>Final payments are due upon project delivery</li>
+                    <li>All sales of downloadable workflow packs are final</li>
+                    <li>Refunds are not available once files have been downloaded</li>
+                    <li>We recommend reviewing product details before purchase</li>
                   </ul>
                 </section>
 
@@ -100,10 +100,9 @@ const Refund = () => {
                   <h2 className="font-display text-2xl mb-4">7. Non-Refundable Items</h2>
                   <p className="text-muted-foreground mb-4">The following are not eligible for refunds:</p>
                   <ul className="list-disc list-inside text-muted-foreground space-y-2">
-                    <li>Services already rendered and accepted</li>
-                    <li>Custom development work that has been completed</li>
+                    <li>Downloaded digital products (workflow packs, bundles)</li>
+                    <li>Installation assistance services already rendered</li>
                     <li>Third-party costs incurred on your behalf</li>
-                    <li>Setup and onboarding fees</li>
                   </ul>
                 </section>
 

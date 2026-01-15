@@ -8,8 +8,8 @@ import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { SubscriptionProvider } from "@/hooks/useSubscription";
 
-// Access gate - set to true to lock site for public (admins bypass)
-const SITE_LOCKED = true;
+// Access gate - set to false to allow public marketplace browsing
+const SITE_LOCKED = false;
 
 import RequestAccess from "./pages/RequestAccess";
 import Terms from "./pages/Terms";
