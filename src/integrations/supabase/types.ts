@@ -106,7 +106,7 @@ export type Database = {
           org_id: string
           output_json: Json | null
           output_text: string | null
-          relevance_agent_id: string
+          relevance_agent_id: string | null
           relevance_trace_id: string | null
           status: string
           updated_at: string
@@ -122,7 +122,7 @@ export type Database = {
           org_id: string
           output_json?: Json | null
           output_text?: string | null
-          relevance_agent_id: string
+          relevance_agent_id?: string | null
           relevance_trace_id?: string | null
           status?: string
           updated_at?: string
@@ -138,7 +138,7 @@ export type Database = {
           org_id?: string
           output_json?: Json | null
           output_text?: string | null
-          relevance_agent_id?: string
+          relevance_agent_id?: string | null
           relevance_trace_id?: string | null
           status?: string
           updated_at?: string
