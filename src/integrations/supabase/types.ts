@@ -351,6 +351,48 @@ export type Database = {
         }
         Relationships: []
       }
+      client_billing: {
+        Row: {
+          created_at: string | null
+          current_price_id: string | null
+          current_product_id: string | null
+          email_notifications_enabled: boolean | null
+          renewal_reminders_enabled: boolean | null
+          status: string | null
+          stripe_customer_id: string | null
+          subscription_end: string | null
+          subscription_id: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          current_price_id?: string | null
+          current_product_id?: string | null
+          email_notifications_enabled?: boolean | null
+          renewal_reminders_enabled?: boolean | null
+          status?: string | null
+          stripe_customer_id?: string | null
+          subscription_end?: string | null
+          subscription_id?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          current_price_id?: string | null
+          current_product_id?: string | null
+          email_notifications_enabled?: boolean | null
+          renewal_reminders_enabled?: boolean | null
+          status?: string | null
+          stripe_customer_id?: string | null
+          subscription_end?: string | null
+          subscription_id?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       client_integrations: {
         Row: {
           config: Json | null
@@ -377,6 +419,72 @@ export type Database = {
           provider?: string
           status?: string | null
           updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      client_notifications: {
+        Row: {
+          body: string
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          read: boolean | null
+          severity: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          read?: boolean | null
+          severity?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          read?: boolean | null
+          severity?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      client_usage_events: {
+        Row: {
+          created_at: string | null
+          event_type: string
+          id: string
+          item_id: string | null
+          item_type: string | null
+          metadata: Json | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          event_type: string
+          id?: string
+          item_id?: string | null
+          item_type?: string | null
+          metadata?: Json | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          event_type?: string
+          id?: string
+          item_id?: string | null
+          item_type?: string | null
+          metadata?: Json | null
           user_id?: string
         }
         Relationships: []
@@ -996,6 +1104,7 @@ export type Database = {
         Returns: boolean
       }
       cleanup_rate_limits: { Args: never; Returns: undefined }
+      get_usage_analytics: { Args: { p_user_id: string }; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

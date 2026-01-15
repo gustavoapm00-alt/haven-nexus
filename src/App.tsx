@@ -62,6 +62,9 @@ import UserDashboard from "./pages/library/UserDashboard";
 import ClientAuth from "./pages/portal/ClientAuth";
 import ClientOnboarding from "./pages/portal/ClientOnboarding";
 import ClientDashboard from "./pages/portal/ClientDashboard";
+import PortalBilling from "./pages/portal/PortalBilling";
+import PortalAnalytics from "./pages/portal/PortalAnalytics";
+import PortalNotifications from "./pages/portal/PortalNotifications";
 import PortalRouteGuard from "./components/portal/PortalRouteGuard";
 
 // Admin Library pages
@@ -128,6 +131,21 @@ const UnlockedApp = () => (
     <Route path="/portal/dashboard" element={
       <PortalRouteGuard>
         <ClientDashboard />
+      </PortalRouteGuard>
+    } />
+    <Route path="/portal/billing" element={
+      <PortalRouteGuard>
+        <PortalBilling />
+      </PortalRouteGuard>
+    } />
+    <Route path="/portal/analytics" element={
+      <PortalRouteGuard>
+        <PortalAnalytics />
+      </PortalRouteGuard>
+    } />
+    <Route path="/portal/notifications" element={
+      <PortalRouteGuard>
+        <PortalNotifications />
       </PortalRouteGuard>
     } />
 
