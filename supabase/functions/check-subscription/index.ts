@@ -1,23 +1,11 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { createLogger, getClientIP } from "../_shared/edge-logger.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
-
-// Log without exposing PII
-const logStep = (step: string, details?: Record<string, unknown>) => {
-  const safeDetails = details ? { ...details } : undefined;
-  if (safeDetails) {
-    delete safeDetails.email;
-    if (safeDetails.userId && typeof safeDetails.userId === 'string') {
-      safeDetails.userId = safeDetails.userId.substring(0, 8) + '...';
-    }
-  }
-  const detailsStr = safeDetails ? ` - ${JSON.stringify(safeDetails)}` : '';
-  console.log(`[CHECK-SUBSCRIPTION] ${step}${detailsStr}`);
 };
 
 // Retry helper with exponential backoff and jitter
@@ -44,7 +32,6 @@ async function withRetry<T>(
       const jitter = baseDelay * (0.8 + Math.random() * 0.4);
       const delay = Math.round(jitter);
       
-      logStep(`Retry attempt ${attempt + 1}/${maxRetries} after ${delay}ms`);
       await new Promise(resolve => setTimeout(resolve, delay));
     }
   }
@@ -81,6 +68,8 @@ function defaultShouldRetry(error: unknown): boolean {
 }
 
 serve(async (req) => {
+  const logger = createLogger('check-subscription', req);
+  
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -88,12 +77,13 @@ serve(async (req) => {
   const checkedAt = new Date().toISOString();
 
   try {
-    logStep("Function started");
+    logger.debug("Function started");
 
     // Check Stripe key
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) {
-      logStep("ERROR: STRIPE_SECRET_KEY not set");
+      logger.error("STRIPE_SECRET_KEY not configured");
+      await logger.logResponse(500, "Server configuration error", { missing: "STRIPE_SECRET_KEY" });
       return new Response(JSON.stringify({
         subscribed: false,
         status: "unknown",
@@ -111,7 +101,8 @@ serve(async (req) => {
     // Validate Authorization header
     const authHeader = req.headers.get("Authorization");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      logStep("Missing or malformed auth token");
+      logger.warn("Missing or malformed auth header");
+      await logger.logResponse(401, "Missing auth token");
       return new Response(JSON.stringify({ error: "Missing auth token" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 401,
@@ -122,7 +113,8 @@ serve(async (req) => {
 
     // Guard against accidental "Bearer undefined" etc.
     if (!token || token === "undefined" || token === "null") {
-      logStep("Missing or malformed auth token");
+      logger.warn("Empty or invalid token value");
+      await logger.logResponse(401, "Missing auth token", { tokenValue: "empty_or_invalid" });
       return new Response(JSON.stringify({ error: "Missing auth token" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 401,
@@ -130,8 +122,6 @@ serve(async (req) => {
     }
 
     // Create a Supabase client for edge runtime and validate via getUser(token).
-    // Note: some supabase-js versions do not bind auth to global headers for getUser(),
-    // so we pass the JWT explicitly for reliability.
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_ANON_KEY") ?? "",
@@ -151,7 +141,8 @@ serve(async (req) => {
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
 
     if (userError) {
-      logStep("User auth error", { error: userError.message, tokenLength: token.length });
+      logger.error("JWT validation failed", { error: userError.message });
+      await logger.logResponse(401, "Invalid token", { authError: userError.message });
       return new Response(JSON.stringify({ error: "Invalid token" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 401,
@@ -159,14 +150,16 @@ serve(async (req) => {
     }
 
     if (!user?.email) {
-      logStep("No user email available", { tokenLength: token.length });
+      logger.warn("User has no email");
+      await logger.logResponse(401, "Invalid token - no email");
       return new Response(JSON.stringify({ error: "Invalid token" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 401,
       });
     }
 
-    logStep("User authenticated", { userId: user.id });
+    logger.setUserId(user.id);
+    logger.debug("User authenticated", { userId: user.id });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
     
@@ -177,7 +170,7 @@ serve(async (req) => {
     );
     
     if (customers.data.length === 0) {
-      logStep("No Stripe customer found, returning inactive");
+      await logger.logResponse(200, "No Stripe customer found - inactive");
       return new Response(JSON.stringify({
         subscribed: false,
         status: "inactive",
@@ -192,7 +185,6 @@ serve(async (req) => {
     }
 
     const customerId = customers.data[0].id;
-    logStep("Found Stripe customer", { customerId });
 
     // Fetch subscriptions with retry
     const subscriptions = await withRetry(
@@ -214,10 +206,11 @@ serve(async (req) => {
       subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
       productId = subscription.items.data[0].price.product as string;
       priceId = subscription.items.data[0].price.id;
-      logStep("Active subscription found", { subscriptionId: subscription.id, productId, priceId });
-    } else {
-      logStep("No active subscription found");
     }
+
+    await logger.logResponse(200, hasActiveSub ? "Active subscription" : "Inactive subscription", {
+      subscribed: hasActiveSub,
+    });
 
     return new Response(JSON.stringify({
       subscribed: hasActiveSub,
@@ -232,7 +225,8 @@ serve(async (req) => {
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    logStep("ERROR", { message: errorMessage });
+    logger.error("Unhandled error", { message: errorMessage });
+    await logger.logResponse(200, "Unknown status due to error", { error: errorMessage });
     
     // Return 200 with unknown status for consistency
     return new Response(JSON.stringify({
