@@ -10,17 +10,17 @@ const Documentation = () => {
     {
       icon: Download,
       title: 'Getting Started',
-      description: 'New to AERELION agents? Start here.',
+      description: 'New to AERELION workflow packs? Start here.',
       links: [
-        { label: 'What is an automation agent?', href: '#' },
+        { label: 'What is a workflow pack?', href: '#' },
         { label: 'System requirements', href: '#' },
-        { label: 'Your first deployment', href: '#' },
+        { label: 'Your first import', href: '#' },
       ],
     },
     {
       icon: Settings,
-      title: 'Deployment Guides',
-      description: 'Step-by-step deployment instructions.',
+      title: 'Import & Setup Guides',
+      description: 'Step-by-step instructions for n8n.',
       links: [
         { label: 'n8n setup and configuration', href: '#' },
         { label: 'Importing workflow files', href: '#' },
@@ -34,7 +34,7 @@ const Documentation = () => {
       links: [
         { label: 'Google Workspace integration', href: '#' },
         { label: 'Slack setup', href: '#' },
-        { label: 'Stripe webhooks', href: '#' },
+        { label: 'Payment provider setup', href: '#' },
       ],
     },
     {
@@ -53,8 +53,8 @@ const Documentation = () => {
     <>
       <SEO
         title="Documentation"
-        description="Comprehensive guides for deploying and configuring AERELION automation agents."
-        keywords="documentation, guides, n8n, automation setup, deployment guide"
+        description="Comprehensive guides for importing and configuring AERELION workflow packs in n8n."
+        keywords="documentation, guides, n8n, workflow setup, import guide"
       />
 
       <div className="min-h-screen bg-background">
@@ -70,7 +70,7 @@ const Documentation = () => {
             </div>
             
             <p className="text-lg text-muted-foreground leading-relaxed mb-12">
-              Comprehensive guides for deploying and configuring automation agents. Each agent purchase includes specific documentation, but these general guides cover common setup tasks.
+              Comprehensive guides for importing and configuring workflow packs. Each purchase includes specific documentation, but these general guides cover common setup tasks.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
@@ -101,7 +101,7 @@ const Documentation = () => {
             <div className="text-center p-8 bg-muted/50 rounded-lg border border-border">
               <h3 className="font-semibold text-foreground mb-2">Need hands-on help?</h3>
               <p className="text-sm text-muted-foreground mb-4">
-                Our installation assistance service can help you deploy and configure agents.
+                Our installation assistance service can help you import and configure workflow packs.
               </p>
               <Button asChild variant="outline">
                 <Link to="/install">View Installation Options</Link>

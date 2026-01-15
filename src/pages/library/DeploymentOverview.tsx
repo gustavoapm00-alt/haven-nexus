@@ -20,8 +20,8 @@ const DeploymentOverview = () => {
     },
     {
       step: 3,
-      title: 'Automation executes within your environment',
-      description: 'The agent runs entirely on your infrastructure with full visibility into logic and data flow.',
+      title: 'Import and configure in your n8n instance',
+      description: 'The workflow runs entirely on your infrastructure with full visibility into logic and data flow.',
     },
   ];
 

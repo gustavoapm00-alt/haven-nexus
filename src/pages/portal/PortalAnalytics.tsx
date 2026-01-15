@@ -22,8 +22,8 @@ const chartConfig = {
     label: "Installs",
     color: "hsl(var(--accent))",
   },
-  runs: {
-    label: "Runs",
+  activity: {
+    label: "Activity",
     color: "hsl(var(--muted-foreground))",
   },
 };
@@ -113,7 +113,7 @@ function RecentActivityTable({ events }: { events: Array<{ id: string; event_typ
   const eventIcons: Record<string, typeof Download> = {
     download: Download,
     install: Zap,
-    run: Activity,
+    activity: Activity,
     login: Clock,
   };
 
@@ -219,9 +219,9 @@ export default function PortalAnalytics() {
             />
             <StatCard
               icon={Activity}
-              label="Agent Runs"
-              value={data?.lifetime.runs || 0}
-              subValue={`${data?.last30d.runs || 0} this month`}
+              label="Total Activity"
+              value={(data?.lifetime.downloads || 0) + (data?.lifetime.installs || 0)}
+              subValue="Downloads + Installs"
             />
             <StatCard
               icon={Clock}

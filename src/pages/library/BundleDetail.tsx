@@ -26,9 +26,9 @@ const BundleDetail = () => {
   const formatPrice = (cents: number) => `$${(cents / 100).toFixed(0)}`;
 
   const deploymentSteps = [
-    'Select a pre-engineered automation agent from the bundle',
-    'Download and connect approved systems',
-    'Automation executes within your environment',
+    'Select a workflow pack from the bundle',
+    'Download files and review documentation',
+    'Import into your n8n instance and configure',
   ];
 
   if (loading) {
