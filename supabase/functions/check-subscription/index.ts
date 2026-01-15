@@ -118,39 +118,54 @@ serve(async (req) => {
       });
     }
 
-    const token = authHeader.replace("Bearer ", "");
-    
-    // Create a Supabase client with service role for admin operations
-    const supabaseAdmin = createClient(
+    const token = authHeader.slice("Bearer ".length).trim();
+
+    // Guard against accidental "Bearer undefined" etc.
+    if (!token || token === "undefined" || token === "null") {
+      logStep("Missing or malformed auth token");
+      return new Response(JSON.stringify({ error: "Missing auth token" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 401,
+      });
+    }
+
+    // Create a Supabase client for edge runtime and validate via getUser(token).
+    // Note: some supabase-js versions do not bind auth to global headers for getUser(),
+    // so we pass the JWT explicitly for reliability.
+    const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
       {
         auth: {
           persistSession: false,
           autoRefreshToken: false,
         },
+        global: {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
       }
     );
 
-    // Validate the user's JWT token directly by passing it to getUser
-    const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(token);
-    
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
+
     if (userError) {
-      logStep("User auth error", { error: userError.message });
+      logStep("User auth error", { error: userError.message, tokenLength: token.length });
       return new Response(JSON.stringify({ error: "Invalid token" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 401,
       });
     }
-    
+
     if (!user?.email) {
-      logStep("No user email available");
+      logStep("No user email available", { tokenLength: token.length });
       return new Response(JSON.stringify({ error: "Invalid token" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 401,
       });
     }
-    
+
     logStep("User authenticated", { userId: user.id });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
