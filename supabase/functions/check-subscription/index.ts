@@ -120,14 +120,11 @@ serve(async (req) => {
 
     const token = authHeader.replace("Bearer ", "");
     
-    // Create a Supabase client bound to the user's token
-    const supabaseClient = createClient(
+    // Create a Supabase client with service role for admin operations
+    const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
       {
-        global: {
-          headers: { Authorization: `Bearer ${token}` },
-        },
         auth: {
           persistSession: false,
           autoRefreshToken: false,
@@ -135,8 +132,8 @@ serve(async (req) => {
       }
     );
 
-    // Validate the user via getUser() - no session needed
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+    // Validate the user's JWT token directly by passing it to getUser
+    const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(token);
     
     if (userError) {
       logStep("User auth error", { error: userError.message });
