@@ -117,9 +117,20 @@ serve(async (req) => {
       );
     }
 
-    // 4. Rate limiting check
+    // 4. Check if user is admin (bypass subscription/entitlement checks)
+    const { data: adminRole } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("role", "admin")
+      .maybeSingle();
+
+    const isAdmin = !!adminRole;
+
+    // 5. Rate limiting check (admins get higher limits)
     const rateCheck = checkRateLimit(user.id);
-    if (!rateCheck.allowed) {
+    const adminRateLimit = 100; // Admins get 100 requests per minute
+    if (!rateCheck.allowed && !isAdmin) {
       console.log(`[agents-run] Rate limit exceeded for user ${user.id.substring(0, 8)}...`);
       return new Response(
         JSON.stringify({ 
@@ -140,72 +151,120 @@ serve(async (req) => {
     }
 
     // Log without PII
-    console.log(`[agents-run] Request from user ${user.id.substring(0, 8)}... for agent: ${agent_key}`);
+    console.log(`[agents-run] Request from ${isAdmin ? 'ADMIN' : 'user'} ${user.id.substring(0, 8)}... for agent: ${agent_key}`);
 
-    // 5. Get user's org
-    const { data: orgMembership, error: orgError } = await supabase
-      .from("org_members")
-      .select("org_id")
-      .eq("user_id", user.id)
-      .single();
+    let orgId: string | null = null;
+    let subscription: any = null;
 
-    if (orgError || !orgMembership) {
-      return new Response(
-        JSON.stringify({ error: "User not in any organization" }),
-        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+    // 6. Admins bypass org/subscription checks
+    if (isAdmin) {
+      console.log(`[agents-run] Admin bypass enabled for ${user.id.substring(0, 8)}...`);
+      
+      // Try to get org for tracking, but don't require it
+      const { data: orgMembership } = await supabase
+        .from("org_members")
+        .select("org_id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      
+      orgId = orgMembership?.org_id || null;
+      
+      // Create a virtual admin org if needed
+      if (!orgId) {
+        // Use a consistent admin org or create one
+        const { data: adminOrg } = await supabase
+          .from("orgs")
+          .select("id")
+          .eq("name", "Admin")
+          .maybeSingle();
+        
+        if (adminOrg) {
+          orgId = adminOrg.id;
+        } else {
+          // Create admin org
+          const { data: newOrg } = await supabase
+            .from("orgs")
+            .insert({ name: "Admin" })
+            .select()
+            .single();
+          
+          if (newOrg) {
+            orgId = newOrg.id;
+            // Add admin to org
+            await supabase
+              .from("org_members")
+              .insert({ org_id: orgId, user_id: user.id, role: "owner" });
+          }
+        }
+      }
+    } else {
+      // Non-admin: require org membership
+      const { data: orgMembership, error: orgError } = await supabase
+        .from("org_members")
+        .select("org_id")
+        .eq("user_id", user.id)
+        .single();
 
-    const orgId = orgMembership.org_id;
+      if (orgError || !orgMembership) {
+        return new Response(
+          JSON.stringify({ error: "User not in any organization" }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
 
-    // 6. Verify subscription status
-    const { data: subscription, error: subError } = await supabase
-      .from("org_subscriptions")
-      .select("*, plans(*)")
-      .eq("org_id", orgId)
-      .single();
+      orgId = orgMembership.org_id;
 
-    if (subError || !subscription) {
-      return new Response(
-        JSON.stringify({ error: "No active subscription", hint: "Please select a plan at /pricing" }),
-        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+      // 7. Verify subscription status (non-admins only)
+      const { data: sub, error: subError } = await supabase
+        .from("org_subscriptions")
+        .select("*, plans(*)")
+        .eq("org_id", orgId)
+        .single();
 
-    if (!["active", "trialing"].includes(subscription.status)) {
-      return new Response(
-        JSON.stringify({ error: "Subscription not active", status: subscription.status }),
-        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+      if (subError || !sub) {
+        return new Response(
+          JSON.stringify({ error: "No active subscription", hint: "Please select a plan at /pricing" }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
 
-    // 7. Check entitlement
-    const { data: entitlement, error: entError } = await supabase
-      .from("plan_entitlements")
-      .select("*")
-      .eq("plan_id", subscription.plan_id)
-      .eq("agent_key", agent_key)
-      .eq("included", true)
-      .single();
+      if (!["active", "trialing"].includes(sub.status)) {
+        return new Response(
+          JSON.stringify({ error: "Subscription not active", status: sub.status }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
 
-    if (entError || !entitlement) {
-      return new Response(
-        JSON.stringify({ error: "Agent not included in your plan", agent_key }),
-        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+      subscription = sub;
 
-    // 8. Check usage limits
-    const plan = subscription.plans as any;
-    if (subscription.runs_used_this_period >= plan.monthly_run_limit) {
-      return new Response(
-        JSON.stringify({ 
-          error: "Monthly run limit reached", 
-          used: subscription.runs_used_this_period,
-          limit: plan.monthly_run_limit
-        }),
-        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      // 8. Check entitlement (non-admins only)
+      const { data: entitlement, error: entError } = await supabase
+        .from("plan_entitlements")
+        .select("*")
+        .eq("plan_id", subscription.plan_id)
+        .eq("agent_key", agent_key)
+        .eq("included", true)
+        .single();
+
+      if (entError || !entitlement) {
+        return new Response(
+          JSON.stringify({ error: "Agent not included in your plan", agent_key }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // 9. Check usage limits (non-admins only)
+      const plan = subscription.plans as any;
+      if (subscription.runs_used_this_period >= plan.monthly_run_limit) {
+        return new Response(
+          JSON.stringify({ 
+            error: "Monthly run limit reached", 
+            used: subscription.runs_used_this_period,
+            limit: plan.monthly_run_limit
+          }),
+          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
     }
 
     // 9. Load agent template
@@ -385,12 +444,15 @@ serve(async (req) => {
       })
       .eq("id", runId);
 
-    await supabase
-      .from("org_subscriptions")
-      .update({ 
-        runs_used_this_period: subscription.runs_used_this_period + 1,
-      })
-      .eq("org_id", orgId);
+    // Only update usage for non-admins with subscriptions
+    if (subscription && orgId) {
+      await supabase
+        .from("org_subscriptions")
+        .update({ 
+          runs_used_this_period: subscription.runs_used_this_period + 1,
+        })
+        .eq("org_id", orgId);
+    }
 
     console.log(`[agents-run] Completed run ${runId?.substring(0, 8) ?? 'unknown'}...`);
 
