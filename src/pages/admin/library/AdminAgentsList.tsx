@@ -68,7 +68,7 @@ const AdminAgentsList = () => {
     const { data, error } = await query;
 
     if (error) {
-      toast.error('Failed to fetch agents');
+      toast.error('Failed to fetch workflow packs');
       console.error(error);
     } else {
       setAgents(data || []);
@@ -83,7 +83,7 @@ const AdminAgentsList = () => {
       .eq('id', id);
 
     if (error) {
-      toast.error('Failed to delete agent');
+      toast.error('Failed to delete workflow pack');
       console.error(error);
     } else {
       toast.success(`Deleted "${name}"`);
@@ -115,7 +115,7 @@ const AdminAgentsList = () => {
                   Admin
                 </Link>
               </Button>
-              <h1 className="font-display text-xl">Automation Agents</h1>
+              <h1 className="font-display text-xl">Workflow Packs</h1>
             </div>
             <div className="flex items-center gap-2">
               <Button variant="outline" asChild>
@@ -126,7 +126,7 @@ const AdminAgentsList = () => {
               <Button asChild>
                 <Link to="/admin/library/agents/new">
                   <Plus className="w-4 h-4 mr-2" />
-                  New Agent
+                  New Pack
                 </Link>
               </Button>
             </div>
@@ -137,7 +137,7 @@ const AdminAgentsList = () => {
           {/* Filters */}
           <div className="flex items-center gap-4 mb-6">
             <Input
-              placeholder="Search agents..."
+              placeholder="Search packs..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="max-w-xs"
@@ -165,7 +165,7 @@ const AdminAgentsList = () => {
               </div>
             ) : filteredAgents.length === 0 ? (
               <div className="p-12 text-center text-muted-foreground">
-                No agents found
+                No packs found
               </div>
             ) : (
               <Table>
@@ -214,7 +214,7 @@ const AdminAgentsList = () => {
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogHeader>
-                                <AlertDialogTitle>Delete Agent</AlertDialogTitle>
+                                <AlertDialogTitle>Delete Workflow Pack</AlertDialogTitle>
                                 <AlertDialogDescription>
                                   Are you sure you want to delete "{agent.name}"? This action cannot be undone.
                                 </AlertDialogDescription>

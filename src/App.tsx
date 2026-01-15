@@ -87,7 +87,8 @@ const UnlockedApp = () => (
     <Route path="/packs/:slug" element={<AgentDetail />} />
     <Route path="/bundles" element={<BundleLibrary />} />
     <Route path="/bundles/:slug" element={<BundleDetail />} />
-    <Route path="/deployment" element={<DeploymentOverview />} />
+    <Route path="/how-it-works" element={<DeploymentOverview />} />
+    <Route path="/deployment" element={<Navigate to="/how-it-works" replace />} />
     <Route path="/security" element={<SecurityPractices />} />
     <Route path="/docs" element={<Documentation />} />
     <Route path="/install" element={<InstallationAssistance />} />
@@ -126,13 +127,14 @@ const UnlockedApp = () => (
 
     {/* Legacy redirects - redirect to marketplace equivalents */}
     <Route path="/pricing" element={<Navigate to="/bundles" replace />} />
-    <Route path="/capabilities" element={<Navigate to="/deployment" replace />} />
+    <Route path="/capabilities" element={<Navigate to="/how-it-works" replace />} />
     <Route path="/get-started" element={<Navigate to="/packs" replace />} />
     <Route path="/services" element={<Navigate to="/packs" replace />} />
     <Route path="/old-home" element={<Navigate to="/" replace />} />
     <Route path="/about" element={<Navigate to="/" replace />} />
     <Route path="/reliability" element={<Navigate to="/security" replace />} />
-    <Route path="/proof" element={<Navigate to="/deployment" replace />} />
+    <Route path="/proof" element={<Navigate to="/how-it-works" replace />} />
+    <Route path="/portal/analytics" element={<Navigate to="/portal/activity" replace />} />
     
     {/* Legal pages */}
     <Route path="/terms" element={<Terms />} />
