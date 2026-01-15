@@ -7,10 +7,11 @@ import { toast } from '@/hooks/use-toast';
 import { 
   Loader2, LayoutDashboard, Bot, Puzzle, CreditCard, HelpCircle,
   LogOut, User, ChevronRight, CheckCircle, AlertCircle, Download,
-  ExternalLink, BookOpen, Upload, Settings, Menu, X
+  ExternalLink, BookOpen, Upload, Menu, X, Settings
 } from 'lucide-react';
 import PortalBackground from '@/components/portal/PortalBackground';
 import { GlassCard } from '@/components/portal/GlassCard';
+import { SubscriptionBadge } from '@/components/portal/SubscriptionBadge';
 
 interface Purchase {
   id: string;
@@ -237,22 +238,28 @@ const ClientDashboard = () => {
                 {activeSection === 'support' && 'Support'}
               </h2>
             </div>
-            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${
-              profile?.onboarding_complete 
-                ? 'bg-primary/10 text-primary' 
-                : 'bg-yellow-500/10 text-yellow-600'
-            }`}>
-              {profile?.onboarding_complete ? (
-                <>
-                  <CheckCircle className="w-3 h-3" />
-                  Setup Complete
-                </>
-              ) : (
-                <>
-                  <AlertCircle className="w-3 h-3" />
-                  Setup Incomplete
-                </>
-              )}
+            <div className="flex items-center gap-3">
+              {/* Subscription Badge */}
+              <SubscriptionBadge />
+              
+              {/* Setup Status */}
+              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${
+                profile?.onboarding_complete 
+                  ? 'bg-primary/10 text-primary' 
+                  : 'bg-yellow-500/10 text-yellow-600'
+              }`}>
+                {profile?.onboarding_complete ? (
+                  <>
+                    <CheckCircle className="w-3 h-3" />
+                    Setup Complete
+                  </>
+                ) : (
+                  <>
+                    <AlertCircle className="w-3 h-3" />
+                    Setup Incomplete
+                  </>
+                )}
+              </div>
             </div>
           </div>
 
