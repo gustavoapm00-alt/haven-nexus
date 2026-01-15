@@ -18,12 +18,12 @@ const SecurityPractices = () => {
     {
       icon: Eye,
       title: 'Workflow Transparency',
-      description: 'Every agent is delivered as a complete, inspectable workflow file. Customers have full visibility into the logic, data handling, and system connections before and after deployment.',
+      description: 'Every workflow pack is delivered as a complete, inspectable JSON file. Customers have full visibility into the logic, data handling, and system connections before and after import.',
     },
     {
       icon: Users,
       title: 'Access Control',
-      description: 'Agent publishing and library management is restricted to authorized administrators. Public access is limited to viewing published agents and completing purchases.',
+      description: 'Workflow pack publishing and library management is restricted to authorized administrators. Public access is limited to viewing published packs and completing purchases.',
     },
     {
       icon: Shield,
@@ -80,7 +80,7 @@ const SecurityPractices = () => {
             <div className="mt-16 p-6 bg-muted/50 rounded-lg border border-border">
               <h3 className="font-semibold text-foreground mb-3">Summary</h3>
               <p className="text-muted-foreground text-sm leading-relaxed">
-                AERELION delivers pre-engineered automation workflows that customers deploy and operate independently. We do not access customer systems, process operational data, or maintain ongoing connections to deployed agents. Customers retain full control over their automation infrastructure.
+                AERELION delivers pre-engineered workflow packs that customers download and import into their own n8n instance. We do not access customer systems, process operational data, or maintain ongoing connections. Customers retain full control over their automation infrastructure.
               </p>
             </div>
           </div>

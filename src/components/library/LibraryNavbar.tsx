@@ -11,7 +11,7 @@ const LibraryNavbar = () => {
   const navLinks = [
     { name: 'Workflow Packs', href: '/packs' },
     { name: 'System Bundles', href: '/bundles' },
-    { name: 'Deployment Overview', href: '/deployment' },
+    { name: 'How It Works', href: '/how-it-works' },
     { name: 'Documentation', href: '/docs' },
   ];
 

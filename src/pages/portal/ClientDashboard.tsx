@@ -234,7 +234,7 @@ const ClientDashboard = () => {
             <div>
               <h2 className="text-2xl font-semibold">
                 {activeSection === 'overview' && 'Dashboard'}
-                {activeSection === 'agents' && 'My Agents'}
+                {activeSection === 'downloads' && 'My Downloads'}
                 {activeSection === 'integrations' && 'Integrations'}
                 {activeSection === 'billing' && 'Billing'}
                 {activeSection === 'support' && 'Support'}
@@ -421,8 +421,8 @@ const ClientDashboard = () => {
             </div>
           )}
 
-          {/* My Agents Section */}
-          {activeSection === 'agents' && (
+          {/* My Downloads Section */}
+          {activeSection === 'downloads' && (
             <div className="space-y-6">
               {isLoadingPurchases ? (
                 <div className="flex items-center justify-center py-16">
