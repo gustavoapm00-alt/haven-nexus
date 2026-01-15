@@ -5,7 +5,6 @@ import { useAuth } from '@/hooks/useAuth';
 export interface UsageStats {
   downloads: number;
   installs: number;
-  runs: number;
   logins: number;
 }
 
@@ -13,7 +12,6 @@ export interface DailyDataPoint {
   date: string;
   downloads: number;
   installs: number;
-  runs: number;
 }
 
 export interface RecentEvent {
