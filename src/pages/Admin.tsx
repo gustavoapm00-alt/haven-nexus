@@ -139,7 +139,7 @@ const Admin = () => {
               </div>
             </Link>
             <Link 
-              to="/agents" 
+              to="/packs" 
               className="group card-glass p-6 rounded-xl border-2 border-transparent hover:border-primary/50 transition-all"
             >
               <div className="flex items-center gap-4">
@@ -148,7 +148,7 @@ const Admin = () => {
                 </div>
                 <div>
                   <h3 className="font-display text-lg group-hover:text-primary transition-colors">Browse Packs</h3>
-                  <p className="text-muted-foreground text-sm">Explore workflow templates</p>
+                  <p className="text-muted-foreground text-sm">Explore workflow packs</p>
                 </div>
               </div>
             </Link>

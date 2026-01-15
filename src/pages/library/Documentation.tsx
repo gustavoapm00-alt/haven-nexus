@@ -42,9 +42,9 @@ const Documentation = () => {
       title: 'Troubleshooting',
       description: 'Common issues and solutions.',
       links: [
-        { label: 'Connection failures', href: '#' },
-        { label: 'Trigger not firing', href: '#' },
-        { label: 'Error handling', href: '#' },
+        { label: 'Credential configuration issues', href: '#' },
+        { label: 'File import errors', href: '#' },
+        { label: 'Node compatibility', href: '#' },
       ],
     },
   ];

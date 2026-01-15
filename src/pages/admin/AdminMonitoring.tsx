@@ -154,8 +154,8 @@ export default function AdminMonitoring() {
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Backend Monitoring</h1>
-            <p className="text-muted-foreground mt-1">Marketplace function logs and error tracking</p>
+            <h1 className="text-3xl font-bold text-foreground">Backend Logs</h1>
+            <p className="text-muted-foreground mt-1">Marketplace backend function logs</p>
           </div>
           <div className="flex items-center gap-2">
             <Button 
@@ -282,7 +282,7 @@ export default function AdminMonitoring() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Activity className="w-5 h-5" />
-              Live Logs
+              Recent Logs
               {isLoading && <RefreshCw className="w-4 h-4 animate-spin text-muted-foreground" />}
             </CardTitle>
           </CardHeader>
