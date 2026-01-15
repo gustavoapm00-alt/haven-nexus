@@ -38,3 +38,12 @@ verify_jwt = true
 
 [functions.purchase-email]
 verify_jwt = false
+
+[functions.billing-portal-session]
+verify_jwt = false
+
+[functions.stripe-portal-webhook]
+verify_jwt = false
+
+[functions.get-usage-analytics]
+verify_jwt = false

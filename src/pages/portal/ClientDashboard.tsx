@@ -12,6 +12,7 @@ import {
 import PortalBackground from '@/components/portal/PortalBackground';
 import { GlassCard } from '@/components/portal/GlassCard';
 import { SubscriptionBadge } from '@/components/portal/SubscriptionBadge';
+import { NotificationBell } from '@/components/portal/NotificationBell';
 
 interface Purchase {
   id: string;
@@ -36,7 +37,8 @@ const NAV_ITEMS = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard },
   { id: 'agents', label: 'My Agents', icon: Bot },
   { id: 'integrations', label: 'Integrations', icon: Puzzle },
-  { id: 'billing', label: 'Billing', icon: CreditCard },
+  { id: 'billing', label: 'Billing', icon: CreditCard, href: '/portal/billing' },
+  { id: 'analytics', label: 'Analytics', icon: Bot, href: '/portal/analytics' },
   { id: 'support', label: 'Support', icon: HelpCircle },
 ];
 
@@ -239,6 +241,8 @@ const ClientDashboard = () => {
               </h2>
             </div>
             <div className="flex items-center gap-3">
+              {/* Notification Bell */}
+              <NotificationBell />
               {/* Subscription Badge */}
               <SubscriptionBadge />
               
