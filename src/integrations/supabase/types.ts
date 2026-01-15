@@ -638,6 +638,45 @@ export type Database = {
           },
         ]
       }
+      edge_function_logs: {
+        Row: {
+          created_at: string
+          details: Json | null
+          duration_ms: number | null
+          function_name: string
+          id: string
+          ip_address: string | null
+          level: string
+          message: string
+          status_code: number | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          details?: Json | null
+          duration_ms?: number | null
+          function_name: string
+          id?: string
+          ip_address?: string | null
+          level?: string
+          message: string
+          status_code?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          details?: Json | null
+          duration_ms?: number | null
+          function_name?: string
+          id?: string
+          ip_address?: string | null
+          level?: string
+          message?: string
+          status_code?: number | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       email_signups: {
         Row: {
           created_at: string
@@ -1103,6 +1142,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      cleanup_old_edge_logs: { Args: never; Returns: undefined }
       cleanup_rate_limits: { Args: never; Returns: undefined }
       get_usage_analytics: { Args: { p_user_id: string }; Returns: Json }
       has_role: {
