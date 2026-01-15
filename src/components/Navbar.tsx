@@ -1,22 +1,20 @@
 import { useState, useEffect, forwardRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, User } from 'lucide-react';
+import { Menu, X, User, ShoppingBag } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
 const navLinks = [
   { name: 'Home', href: '/' },
-  { name: 'Capabilities', href: '/capabilities' },
-  { name: 'Reliability', href: '/reliability' },
-  { name: 'Proof', href: '/proof' },
-  { name: 'About', href: '/about' },
-  { name: 'Sanctuary', href: '/sanctuary' },
+  { name: 'Workflow Packs', href: '/agents' },
+  { name: 'Bundles', href: '/bundles' },
+  { name: 'How It Works', href: '/deployment' },
 ];
 
 const Navbar = forwardRef<HTMLElement>((_, ref) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
-  const { user, isLoading } = useAuth();
+  const { user, isAdmin, isLoading } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -31,7 +29,7 @@ const Navbar = forwardRef<HTMLElement>((_, ref) => {
   };
 
   const isActive = (href: string) => {
-    return location.pathname === href;
+    return location.pathname === href || location.pathname.startsWith(href + '/');
   };
 
   return (
@@ -54,7 +52,7 @@ const Navbar = forwardRef<HTMLElement>((_, ref) => {
             <Link
               key={link.name}
               to={link.href}
-              className={`text-sm font-medium transition-colors duration-300 uppercase tracking-wider ${
+              className={`text-sm font-medium transition-colors duration-300 ${
                 isActive(link.href)
                   ? 'text-primary'
                   : 'text-muted-foreground hover:text-primary'
@@ -63,17 +61,28 @@ const Navbar = forwardRef<HTMLElement>((_, ref) => {
               {link.name}
             </Link>
           ))}
-          <Link to="/system-audit" className="btn-primary !py-2 !px-4 text-xs">
-            Run a System Audit
+          <Link to="/agents" className="btn-primary !py-2 !px-4 text-xs">
+            <ShoppingBag className="w-3.5 h-3.5 mr-1.5" />
+            Browse Packs
           </Link>
           {!isLoading && (
-            <Link 
-              to={user ? "/admin" : "/auth"} 
-              className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-            >
-              <User className="w-4 h-4" />
-              {user ? "Admin" : "Login"}
-            </Link>
+            <>
+              {isAdmin && (
+                <Link 
+                  to="/admin" 
+                  className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+                >
+                  Admin
+                </Link>
+              )}
+              <Link 
+                to={user ? "/portal/dashboard" : "/portal/auth"} 
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+              >
+                <User className="w-4 h-4" />
+                {user ? "Portal" : "Sign In"}
+              </Link>
+            </>
           )}
         </div>
 
@@ -99,7 +108,7 @@ const Navbar = forwardRef<HTMLElement>((_, ref) => {
               key={link.name}
               to={link.href}
               onClick={handleLinkClick}
-              className={`px-6 py-3 text-sm font-medium transition-colors duration-300 uppercase tracking-wider ${
+              className={`px-6 py-3 text-sm font-medium transition-colors duration-300 ${
                 isActive(link.href)
                   ? 'text-primary bg-secondary/50'
                   : 'text-muted-foreground hover:text-primary hover:bg-secondary/50'
@@ -110,20 +119,21 @@ const Navbar = forwardRef<HTMLElement>((_, ref) => {
           ))}
           <div className="px-6 py-3 space-y-2">
             <Link 
-              to="/system-audit" 
+              to="/agents" 
               onClick={handleLinkClick}
               className="btn-primary !py-2 !px-4 text-xs w-full justify-center"
             >
-              Run a System Audit
+              <ShoppingBag className="w-3.5 h-3.5 mr-1.5" />
+              Browse Packs
             </Link>
             {!isLoading && (
               <Link 
-                to={user ? "/admin" : "/auth"} 
+                to={user ? "/portal/dashboard" : "/portal/auth"} 
                 onClick={handleLinkClick}
                 className="flex items-center justify-center gap-2 py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
               >
                 <User className="w-4 h-4" />
-                {user ? "Admin" : "Login"}
+                {user ? "Portal" : "Sign In"}
               </Link>
             )}
           </div>

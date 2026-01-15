@@ -17,28 +17,28 @@ const Footer = forwardRef<HTMLElement>((_, ref) => {
           {/* Navigation Links */}
           <div className="flex items-center gap-6 text-sm">
             <Link
-              to="/capabilities"
+              to="/agents"
               className="text-muted-foreground hover:text-primary transition-colors"
             >
-              Capabilities
+              Workflow Packs
             </Link>
             <Link
-              to="/reliability"
+              to="/bundles"
               className="text-muted-foreground hover:text-primary transition-colors"
             >
-              Reliability
+              Bundles
             </Link>
             <Link
-              to="/proof"
+              to="/deployment"
               className="text-muted-foreground hover:text-primary transition-colors"
             >
-              Proof
+              How It Works
             </Link>
             <Link
-              to="/about"
+              to="/docs"
               className="text-muted-foreground hover:text-primary transition-colors"
             >
-              About
+              Documentation
             </Link>
           </div>
 
@@ -66,24 +66,31 @@ const Footer = forwardRef<HTMLElement>((_, ref) => {
         {/* Legal Links */}
         <div className="flex flex-wrap items-center justify-center gap-4 mt-8 text-xs text-muted-foreground/70">
           <Link
-            to="/intellectual-property"
+            to="/terms"
             className="hover:text-muted-foreground transition-colors"
           >
-            IP & Use
+            Terms
           </Link>
           <span className="text-muted-foreground/30">·</span>
           <Link
-            to="/confidentiality"
+            to="/privacy"
             className="hover:text-muted-foreground transition-colors"
           >
-            Confidentiality
+            Privacy
           </Link>
           <span className="text-muted-foreground/30">·</span>
           <Link
-            to="/disclaimer"
+            to="/refund"
             className="hover:text-muted-foreground transition-colors"
           >
-            Disclaimer
+            Refund Policy
+          </Link>
+          <span className="text-muted-foreground/30">·</span>
+          <Link
+            to="/security"
+            className="hover:text-muted-foreground transition-colors"
+          >
+            Security
           </Link>
           <span className="text-muted-foreground/30">·</span>
           <Link
@@ -100,7 +107,7 @@ const Footer = forwardRef<HTMLElement>((_, ref) => {
         </div>
 
         <p className="text-center text-xs text-muted-foreground/60 mt-4">
-          AERELION builds operational systems. We do not promise revenue outcomes or autonomous businesses.
+          AERELION provides downloadable automation templates for n8n. Files are delivered digitally for import into your own infrastructure.
         </p>
       </div>
     </footer>

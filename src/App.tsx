@@ -12,27 +12,16 @@ import { SubscriptionProvider } from "@/hooks/useSubscription";
 const SITE_LOCKED = true;
 
 import RequestAccess from "./pages/RequestAccess";
-import Index from "./pages/Index";
-import Capabilities from "./pages/Capabilities";
-import Pricing from "./pages/Pricing";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
-import GetStarted from "./pages/GetStarted";
-import Reliability from "./pages/Reliability";
-import Proof from "./pages/Proof";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import Refund from "./pages/Refund";
-import IntellectualProperty from "./pages/IntellectualProperty";
-import Confidentiality from "./pages/Confidentiality";
-import Disclaimer from "./pages/Disclaimer";
 import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
 import ResetPassword from "./pages/ResetPassword";
 import Sanctuary from "./pages/Sanctuary";
 import NotFound from "./pages/NotFound";
 
-// Library pages
+// Library/Marketplace pages (primary site)
 import LibraryHome from "./pages/library/LibraryHome";
 import AgentLibrary from "./pages/library/AgentLibrary";
 import AgentDetail from "./pages/library/AgentDetail";
@@ -56,7 +45,7 @@ import PortalAnalytics from "./pages/portal/PortalAnalytics";
 import PortalNotifications from "./pages/portal/PortalNotifications";
 import PortalRouteGuard from "./components/portal/PortalRouteGuard";
 
-// Admin Library pages
+// Admin pages
 import AdminLibraryHome from "./pages/admin/library/AdminLibraryHome";
 import AdminAgentsList from "./pages/admin/library/AdminAgentsList";
 import AdminAgentEditor from "./pages/admin/library/AdminAgentEditor";
@@ -64,7 +53,6 @@ import AdminAgentImport from "./pages/admin/library/AdminAgentImport";
 import AdminBundlesList from "./pages/admin/library/AdminBundlesList";
 import AdminBundleEditor from "./pages/admin/library/AdminBundleEditor";
 import AdminSetup from "./pages/admin/AdminSetup";
-import AdminMonitoring from "./pages/admin/AdminMonitoring";
 import AdminActivity from "./pages/admin/AdminActivity";
 
 const queryClient = new QueryClient();
@@ -92,7 +80,7 @@ const LockedApp = () => (
 
 const UnlockedApp = () => (
   <Routes>
-    {/* Library/Marketplace Routes (primary site) */}
+    {/* Marketplace Routes (primary site) */}
     <Route path="/" element={<LibraryHome />} />
     <Route path="/agents" element={<AgentLibrary />} />
     <Route path="/agents/:slug" element={<AgentDetail />} />
@@ -135,21 +123,20 @@ const UnlockedApp = () => (
       </PortalRouteGuard>
     } />
 
-    {/* Marketing and legal pages */}
-    <Route path="/old-home" element={<Index />} />
-    <Route path="/capabilities" element={<Capabilities />} />
-    <Route path="/services" element={<Navigate to="/capabilities" replace />} />
-    <Route path="/pricing" element={<Pricing />} />
-    <Route path="/about" element={<About />} />
-    <Route path="/get-started" element={<GetStarted />} />
-    <Route path="/reliability" element={<Reliability />} />
-    <Route path="/proof" element={<Proof />} />
+    {/* Legacy redirects - redirect to marketplace equivalents */}
+    <Route path="/pricing" element={<Navigate to="/bundles" replace />} />
+    <Route path="/capabilities" element={<Navigate to="/deployment" replace />} />
+    <Route path="/get-started" element={<Navigate to="/agents" replace />} />
+    <Route path="/services" element={<Navigate to="/agents" replace />} />
+    <Route path="/old-home" element={<Navigate to="/" replace />} />
+    <Route path="/about" element={<Navigate to="/" replace />} />
+    <Route path="/reliability" element={<Navigate to="/security" replace />} />
+    <Route path="/proof" element={<Navigate to="/deployment" replace />} />
+    
+    {/* Legal pages */}
     <Route path="/terms" element={<Terms />} />
     <Route path="/privacy" element={<Privacy />} />
     <Route path="/refund" element={<Refund />} />
-    <Route path="/intellectual-property" element={<IntellectualProperty />} />
-    <Route path="/confidentiality" element={<Confidentiality />} />
-    <Route path="/disclaimer" element={<Disclaimer />} />
     <Route path="/auth" element={<Auth />} />
     <Route path="/sanctuary" element={<Sanctuary />} />
     <Route path="/reset-password" element={<ResetPassword />} />
@@ -165,7 +152,6 @@ const UnlockedApp = () => (
     <Route path="/admin/library/bundles/new" element={<AdminBundleEditor mode="create" />} />
     <Route path="/admin/library/bundles/:id" element={<AdminBundleEditor mode="edit" />} />
     <Route path="/admin/setup" element={<AdminSetup />} />
-    <Route path="/admin/monitoring" element={<AdminMonitoring />} />
     <Route path="/admin/activity" element={<AdminActivity />} />
 
     <Route path="*" element={<NotFound />} />

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Bot, Play, Crown, ArrowRight, Sparkles, CheckCircle } from 'lucide-react';
+import { X, Package, Download, FileJson, ArrowRight, Sparkles, CheckCircle } from 'lucide-react';
 
 interface OnboardingModalProps {
   isOpen: boolean;
@@ -13,29 +13,29 @@ const steps = [
     id: 'welcome',
     icon: Sparkles,
     title: 'Welcome to AERELION',
-    description: 'Your AI-powered automation platform is ready. Let us show you around.',
-    highlight: 'Start your journey with intelligent automation.',
+    description: 'Your marketplace for pre-engineered automation workflow packs. Download, import, and deploy.',
+    highlight: 'Professional n8n workflows ready to use.',
   },
   {
-    id: 'agents',
-    icon: Bot,
-    title: 'AI Agents',
-    description: 'Access prebuilt AI agents for your business. Run them with custom inputs and get instant results.',
-    highlight: 'Powerful AI at your fingertips.',
+    id: 'browse',
+    icon: Package,
+    title: 'Browse Workflow Packs',
+    description: 'Explore our library of automation templates. Each pack includes workflow JSON files and deployment documentation.',
+    highlight: 'Find the right automation for your stack.',
   },
   {
-    id: 'run',
-    icon: Play,
-    title: 'Run Agents',
-    description: 'Execute your agents with custom inputs, track runs in real-time, and view detailed outputs.',
-    highlight: 'Test and deploy with confidence.',
+    id: 'download',
+    icon: Download,
+    title: 'Download & Import',
+    description: 'After purchase, download your workflow files instantly. Import them into your own n8n instance.',
+    highlight: 'Instant delivery, lifetime access.',
   },
   {
-    id: 'subscription',
-    icon: Crown,
-    title: 'Manage Your Plan',
-    description: 'Upgrade, downgrade, or manage your billing anytime from your dashboard.',
-    highlight: 'Flexible plans that grow with you.',
+    id: 'deploy',
+    icon: FileJson,
+    title: 'Deploy in Your Environment',
+    description: 'Follow the included deployment guide to configure and run workflows in your own infrastructure.',
+    highlight: 'You own and control your automations.',
   },
 ];
 
@@ -166,7 +166,7 @@ export const OnboardingModal = ({ isOpen, onClose, userName }: OnboardingModalPr
               >
                 {isLastStep ? (
                   <>
-                    Get Started
+                    Browse Packs
                     <Sparkles className="w-4 h-4" />
                   </>
                 ) : (
