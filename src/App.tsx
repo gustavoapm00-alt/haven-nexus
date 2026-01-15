@@ -62,6 +62,7 @@ import UserDashboard from "./pages/library/UserDashboard";
 import ClientAuth from "./pages/portal/ClientAuth";
 import ClientOnboarding from "./pages/portal/ClientOnboarding";
 import ClientDashboard from "./pages/portal/ClientDashboard";
+import PortalRouteGuard from "./components/portal/PortalRouteGuard";
 
 // Admin Library pages
 import AdminLibraryHome from "./pages/admin/library/AdminLibraryHome";
@@ -119,8 +120,16 @@ const UnlockedApp = () => (
 
     {/* Client Portal routes */}
     <Route path="/portal/auth" element={<ClientAuth />} />
-    <Route path="/portal/onboarding" element={<ClientOnboarding />} />
-    <Route path="/portal/dashboard" element={<ClientDashboard />} />
+    <Route path="/portal/onboarding" element={
+      <PortalRouteGuard>
+        <ClientOnboarding />
+      </PortalRouteGuard>
+    } />
+    <Route path="/portal/dashboard" element={
+      <PortalRouteGuard>
+        <ClientDashboard />
+      </PortalRouteGuard>
+    } />
 
     {/* Legacy routes (redirects or preserved for existing links) */}
     <Route path="/old-home" element={<Index />} />
