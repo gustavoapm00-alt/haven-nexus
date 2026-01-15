@@ -24,7 +24,7 @@ import { format, formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 const FUNCTION_OPTIONS = [
-  { value: '', label: 'All Functions' },
+  { value: 'all', label: 'All Functions' },
   { value: 'check-subscription', label: 'check-subscription' },
   { value: 'billing-portal-session', label: 'billing-portal-session' },
   { value: 'stripe-portal-webhook', label: 'stripe-portal-webhook' },
@@ -35,7 +35,7 @@ const FUNCTION_OPTIONS = [
 ];
 
 const LEVEL_OPTIONS = [
-  { value: '', label: 'All Levels' },
+  { value: 'all', label: 'All Levels' },
   { value: 'error', label: 'Error' },
   { value: 'warn', label: 'Warning' },
   { value: 'info', label: 'Info' },
@@ -138,13 +138,13 @@ function LogRow({ log }: { log: EdgeFunctionLog }) {
 }
 
 export default function AdminMonitoring() {
-  const [functionName, setFunctionName] = useState('');
-  const [level, setLevel] = useState('');
+  const [functionName, setFunctionName] = useState('all');
+  const [level, setLevel] = useState('all');
   const [search, setSearch] = useState('');
 
   const { logs, stats, isLoading, error, refresh, clearLogs } = useEdgeFunctionLogs({
-    functionName: functionName || undefined,
-    level: (level as LogLevel) || undefined,
+    functionName: functionName !== 'all' ? functionName : undefined,
+    level: level !== 'all' ? (level as LogLevel) : undefined,
     search: search || undefined,
     limit: 200,
   });
