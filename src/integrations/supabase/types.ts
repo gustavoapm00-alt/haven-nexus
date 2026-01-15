@@ -766,23 +766,44 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          company_name: string | null
           created_at: string
           display_name: string | null
+          email: string | null
+          full_name: string | null
+          goals: string[] | null
           id: string
+          onboarding_complete: boolean | null
+          primary_goal: string | null
+          timezone: string | null
           updated_at: string
         }
         Insert: {
           avatar_url?: string | null
+          company_name?: string | null
           created_at?: string
           display_name?: string | null
+          email?: string | null
+          full_name?: string | null
+          goals?: string[] | null
           id: string
+          onboarding_complete?: boolean | null
+          primary_goal?: string | null
+          timezone?: string | null
           updated_at?: string
         }
         Update: {
           avatar_url?: string | null
+          company_name?: string | null
           created_at?: string
           display_name?: string | null
+          email?: string | null
+          full_name?: string | null
+          goals?: string[] | null
           id?: string
+          onboarding_complete?: boolean | null
+          primary_goal?: string | null
+          timezone?: string | null
           updated_at?: string
         }
         Relationships: []
