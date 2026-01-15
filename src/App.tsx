@@ -76,6 +76,7 @@ import AdminBundlesList from "./pages/admin/library/AdminBundlesList";
 import AdminBundleEditor from "./pages/admin/library/AdminBundleEditor";
 import AdminSetup from "./pages/admin/AdminSetup";
 import AdminMonitoring from "./pages/admin/AdminMonitoring";
+import AdminAgentRuns from "./pages/admin/AdminAgentRuns";
 
 const queryClient = new QueryClient();
 
@@ -180,6 +181,7 @@ const UnlockedApp = () => (
     <Route path="/admin/library/bundles/:id" element={<AdminBundleEditor mode="edit" />} />
     <Route path="/admin/setup" element={<AdminSetup />} />
     <Route path="/admin/monitoring" element={<AdminMonitoring />} />
+    <Route path="/admin/agent-runs" element={<AdminAgentRuns />} />
     <Route path="/reset-password" element={<ResetPassword />} />
     <Route path="/sanctuary" element={<Sanctuary />} />
     <Route path="/old-dashboard" element={<Dashboard />} />

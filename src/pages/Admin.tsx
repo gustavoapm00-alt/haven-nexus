@@ -8,7 +8,7 @@ import { toast as sonnerToast } from 'sonner';
 import { 
   Loader2, LogOut, Mail, MessageSquare, Trash2, RefreshCw, 
   CreditCard, Crown, ArrowRight, Bot, Zap, Settings,
-  LayoutDashboard
+  LayoutDashboard, Activity, Monitor
 } from 'lucide-react';
 import { STRIPE_TIERS } from '@/lib/stripe-config';
 import { OnboardingModal, useOnboarding } from '@/components/OnboardingModal';
@@ -266,7 +266,7 @@ const Admin = () => {
             </div>
           </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             <Link 
               to="/admin/library" 
               className="group card-glass p-6 rounded-xl border-2 border-transparent hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5"
@@ -338,6 +338,36 @@ const Admin = () => {
                 <div>
                   <h3 className="font-display text-xl mb-1 group-hover:text-primary transition-colors">Admin Setup</h3>
                   <p className="text-muted-foreground text-sm">View access diagnostic</p>
+                </div>
+              </div>
+            </Link>
+
+            <Link 
+              to="/admin/agent-runs" 
+              className="group card-glass p-6 rounded-xl border-2 border-transparent hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5"
+            >
+              <div className="flex items-start gap-4">
+                <div className="p-4 bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl group-hover:scale-105 transition-all">
+                  <Activity className="w-8 h-8 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-display text-xl mb-1 group-hover:text-primary transition-colors">Agent Command Center</h3>
+                  <p className="text-muted-foreground text-sm">Run & monitor all agents</p>
+                </div>
+              </div>
+            </Link>
+
+            <Link 
+              to="/admin/monitoring" 
+              className="group card-glass p-6 rounded-xl border-2 border-transparent hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5"
+            >
+              <div className="flex items-start gap-4">
+                <div className="p-4 bg-primary/10 rounded-xl group-hover:bg-primary/20 group-hover:scale-105 transition-all">
+                  <Monitor className="w-8 h-8 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-display text-xl mb-1 group-hover:text-primary transition-colors">Edge Function Logs</h3>
+                  <p className="text-muted-foreground text-sm">Monitor backend services</p>
                 </div>
               </div>
             </Link>
