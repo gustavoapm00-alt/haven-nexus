@@ -21,16 +21,16 @@ const LibraryHero = () => {
                 AERELION LIBRARY
               </p>
               <h1 className="text-4xl md:text-5xl lg:text-[3.25rem] font-bold text-foreground tracking-tight mb-6 leading-[1.1]">
-                Automation workflows you can deploy in hours, not weeks.
+                Workflow packs you can import in hours, not weeks.
               </h1>
               <p className="text-lg text-muted-foreground leading-relaxed mb-8 max-w-xl mx-auto lg:mx-0">
-                Browse proven n8n workflow packs and system bundles built for real operational outcomes. Purchase, download, and follow a clear deployment guide.
+                Browse proven n8n workflow packs and bundles built for real operational outcomes. Purchase, download, and import into your own n8n instance.
               </p>
               
               <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-4">
                 <Button asChild size="lg" className="glow-accent">
-                  <Link to="/agents">
-                    Browse Agents
+                  <Link to="/packs">
+                    Browse Packs
                     <ArrowRight className="ml-2 w-4 h-4" />
                   </Link>
                 </Button>
@@ -40,7 +40,7 @@ const LibraryHero = () => {
               </div>
               
               <p className="text-sm text-muted-foreground">
-                Includes workflow JSON + deployment guide + secure delivery.
+                Includes n8n workflow JSON + setup guide + instant download.
               </p>
               
               <div className="mt-10">
@@ -66,32 +66,32 @@ const LibraryHero = () => {
                     <div className="w-3 h-3 rounded-full bg-destructive/60" />
                     <div className="w-3 h-3 rounded-full bg-yellow-500/60" />
                     <div className="w-3 h-3 rounded-full bg-green-500/60" />
-                    <span className="ml-2 text-xs text-muted-foreground font-medium">Control Desk</span>
+                    <span className="ml-2 text-xs text-muted-foreground font-medium">Pack Library</span>
                   </div>
                   
                   <div className="grid grid-cols-3 gap-4 mb-6">
                     <MiniStatCard 
                       icon={<Zap className="w-4 h-4 text-primary" />}
-                      label="Active Systems"
+                      label="Packs Available"
                       value="12"
                     />
                     <MiniStatCard 
                       icon={<Clock className="w-4 h-4 text-primary" />}
-                      label="Setup Time"
+                      label="Avg Setup"
                       value="15 min"
                     />
                     <MiniStatCard 
                       icon={<TrendingUp className="w-4 h-4 text-primary" />}
-                      label="Weekly Capacity"
+                      label="Hours Saved"
                       value="+28 hrs"
                     />
                   </div>
                   
-                  {/* Mini agent cards */}
+                  {/* Mini pack preview */}
                   <div className="space-y-3">
-                    <MiniAgentRow name="Lead Intake Router" status="active" />
-                    <MiniAgentRow name="CRM Enrichment Layer" status="active" />
-                    <MiniAgentRow name="Weekly KPI Digest" status="scheduled" />
+                    <MiniPackRow name="Lead Intake Router" status="popular" />
+                    <MiniPackRow name="CRM Enrichment Layer" status="popular" />
+                    <MiniPackRow name="Weekly KPI Digest" status="new" />
                   </div>
                 </div>
               </div>
@@ -111,13 +111,13 @@ const MiniStatCard = ({ icon, label, value }: { icon: React.ReactNode; label: st
   </div>
 );
 
-const MiniAgentRow = ({ name, status }: { name: string; status: 'active' | 'scheduled' }) => (
+const MiniPackRow = ({ name, status }: { name: string; status: 'popular' | 'new' }) => (
   <div className="flex items-center justify-between bg-background border border-border rounded-lg px-3 py-2">
     <span className="text-sm text-foreground font-medium truncate">{name}</span>
     <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
-      status === 'active' 
-        ? 'bg-green-500/10 text-green-600' 
-        : 'bg-yellow-500/10 text-yellow-600'
+      status === 'popular' 
+        ? 'bg-primary/10 text-primary' 
+        : 'bg-green-500/10 text-green-600'
     }`}>
       {status}
     </span>

@@ -70,12 +70,12 @@ const AgentDetail = () => {
         <LibraryNavbar />
         <div className="section-padding">
           <div className="container-main max-w-4xl text-center">
-            <h1 className="text-2xl font-semibold text-foreground mb-4">Agent Not Found</h1>
+            <h1 className="text-2xl font-semibold text-foreground mb-4">Workflow Pack Not Found</h1>
             <p className="text-muted-foreground mb-6">
-              The agent you're looking for doesn't exist or has been removed.
+              The workflow pack you're looking for doesn't exist or has been removed.
             </p>
             <Button asChild>
-              <Link to="/agents">Browse All Agents</Link>
+              <Link to="/packs">Browse All Packs</Link>
             </Button>
           </div>
         </div>
@@ -89,7 +89,7 @@ const AgentDetail = () => {
       <SEO
         title={agent.name}
         description={agent.short_outcome}
-        keywords={[...agent.sectors, ...agent.systems, 'automation agent'].join(', ')}
+        keywords={[...agent.sectors, ...agent.systems, 'n8n workflow', 'workflow pack'].join(', ')}
       />
 
       <div className="min-h-screen bg-background">
@@ -99,11 +99,11 @@ const AgentDetail = () => {
           <div className="container-main max-w-4xl">
             {/* Back Link */}
             <Link
-              to="/agents"
+              to="/packs"
               className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8"
             >
               <ArrowLeft className="w-4 h-4" />
-              Back to Agents
+              Back to Workflow Packs
             </Link>
 
             {/* Header */}
@@ -119,10 +119,10 @@ const AgentDetail = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
               {/* Main Content */}
               <div className="lg:col-span-2 space-y-10">
-                {/* What This Agent Does */}
+                {/* What This Workflow Does */}
                 <section>
                   <h2 className="text-lg font-semibold text-foreground mb-4">
-                    What This Agent Does
+                    What This Workflow Does
                   </h2>
                   <p className="text-muted-foreground leading-relaxed">
                     {agent.description}
@@ -155,10 +155,10 @@ const AgentDetail = () => {
                   </div>
                 </section>
 
-                {/* Deployment Profile */}
+                {/* Setup Profile */}
                 <section>
                   <h2 className="text-lg font-semibold text-foreground mb-4">
-                    Deployment Profile
+                    Setup Profile
                   </h2>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="card-enterprise p-4">
@@ -217,7 +217,7 @@ const AgentDetail = () => {
                 {/* Requirements */}
                 <section>
                   <h2 className="text-lg font-semibold text-foreground mb-4">
-                    Requirements Before Installing
+                    Requirements Before Importing
                   </h2>
                   <ul className="space-y-2">
                     {agent.requirements.map((req, index) => (

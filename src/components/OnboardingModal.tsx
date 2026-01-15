@@ -31,11 +31,11 @@ const steps = [
     highlight: 'Instant delivery, lifetime access.',
   },
   {
-    id: 'deploy',
+    id: 'configure',
     icon: FileJson,
-    title: 'Deploy in Your Environment',
-    description: 'Follow the included deployment guide to configure and run workflows in your own infrastructure.',
-    highlight: 'You own and control your automations.',
+    title: 'Configure in Your n8n',
+    description: 'Follow the included setup guide to import and configure workflows in your own n8n instance.',
+    highlight: 'You own and control your workflows.',
   },
 ];
 

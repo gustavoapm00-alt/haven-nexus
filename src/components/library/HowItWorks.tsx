@@ -1,10 +1,10 @@
 import { motion } from 'framer-motion';
 
 const steps = [
-  { step: 1, title: 'Choose an agent or bundle', description: 'Browse our library of pre-engineered workflows' },
+  { step: 1, title: 'Choose a pack or bundle', description: 'Browse our library of n8n workflow files' },
   { step: 2, title: 'Purchase access', description: 'Secure checkout with instant delivery' },
-  { step: 3, title: 'Download workflow + guide', description: 'Get your JSON file and deployment PDF' },
-  { step: 4, title: 'Deploy and configure', description: 'Follow the checklist to go live' },
+  { step: 3, title: 'Download your files', description: 'Get the JSON workflow and setup guide' },
+  { step: 4, title: 'Import and configure', description: 'Follow the guide in your own n8n' },
 ];
 
 const HowItWorks = () => {
