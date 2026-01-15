@@ -12,8 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Loader2, Cpu, ArrowRight, Zap, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
-
-const N8N_WEBHOOK_URL = "https://aerelionlabs.app.n8n.cloud/webhook/api/activate-agents";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ActivateAgentsModalProps {
   open: boolean;
@@ -39,22 +38,35 @@ export function ActivateAgentsModal({
   const [apiResponse, setApiResponse] = useState<any>(null);
 
   const callActivateApi = async () => {
+    // Get current session for authentication
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    
+    if (sessionError || !session) {
+      throw new Error("Please sign in to activate agents");
+    }
+
     const payload = {
       audit_id: auditId,
       name: name.trim(),
-      email: email.trim(),
     };
 
     console.log("[ActivateAgents] Request:", {
-      url: N8N_WEBHOOK_URL,
+      url: `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/activate-agents`,
       payload,
     });
 
-    const response = await fetch(N8N_WEBHOOK_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+    // Call secure edge function instead of direct n8n webhook
+    const response = await fetch(
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/activate-agents`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify(payload),
+      }
+    );
 
     const result = await response.json();
 
@@ -94,13 +106,8 @@ export function ActivateAgentsModal({
     setError(null);
     setApiResponse(null);
 
-    if (!name.trim() || !email.trim()) {
-      setError("Name and email are required.");
-      return;
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError("Please enter a valid email address.");
+    if (!name.trim()) {
+      setError("Name is required.");
       return;
     }
 
@@ -145,6 +152,7 @@ export function ActivateAgentsModal({
         <form onSubmit={handleSubmit} className="space-y-6 pt-4">
           <p className="text-sm text-muted-foreground">
             We'll provision your private agent engine and guide tool connections.
+            You must be signed in to activate.
           </p>
 
           <div className="space-y-4">
@@ -160,15 +168,18 @@ export function ActivateAgentsModal({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">Email (from your account)</Label>
               <Input
                 id="email"
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@company.com"
-                disabled={submitting}
+                disabled
+                className="bg-muted/50"
               />
+              <p className="text-xs text-muted-foreground">
+                Email is automatically set from your signed-in account.
+              </p>
             </div>
           </div>
 
