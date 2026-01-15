@@ -83,7 +83,9 @@ const UnlockedApp = () => (
     {/* Marketplace Routes (primary site) */}
     <Route path="/" element={<LibraryHome />} />
     <Route path="/agents" element={<AgentLibrary />} />
+    <Route path="/packs" element={<AgentLibrary />} />
     <Route path="/agents/:slug" element={<AgentDetail />} />
+    <Route path="/packs/:slug" element={<AgentDetail />} />
     <Route path="/bundles" element={<BundleLibrary />} />
     <Route path="/bundles/:slug" element={<BundleDetail />} />
     <Route path="/deployment" element={<DeploymentOverview />} />
