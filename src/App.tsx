@@ -30,18 +30,7 @@ import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
 import ResetPassword from "./pages/ResetPassword";
 import Sanctuary from "./pages/Sanctuary";
-import Dashboard from "./pages/Dashboard";
-import AgentRun from "./pages/agents/AgentRun";
-import AgentSetup from "./pages/agents/AgentSetup";
-import AgentDashboard from "./pages/agents/AgentDashboard";
-import AgentActivity from "./pages/agents/AgentActivity";
-import StudioAgents from "./pages/studio/StudioAgents";
-import StudioPlans from "./pages/studio/StudioPlans";
-import StudioEntitlements from "./pages/studio/StudioEntitlements";
 import NotFound from "./pages/NotFound";
-import SystemAudit from "./pages/SystemAudit";
-import SystemAuditResult from "./pages/SystemAuditResult";
-import RequestDeployment from "./pages/RequestDeployment";
 
 // Library pages
 import LibraryHome from "./pages/library/LibraryHome";
@@ -97,18 +86,13 @@ const LockedApp = () => (
     <Route path="/auth" element={<Auth />} />
     <Route path="/admin" element={<Admin />} />
     <Route path="/reset-password" element={<ResetPassword />} />
-    <Route path="/dashboard" element={<Dashboard />} />
-    <Route path="/agents/:agentKey" element={<AgentRun />} />
-    <Route path="/studio/agents" element={<StudioAgents />} />
-    <Route path="/studio/plans" element={<StudioPlans />} />
-    <Route path="/studio/entitlements" element={<StudioEntitlements />} />
     <Route path="*" element={<RequestAccess />} />
   </Routes>
 );
 
 const UnlockedApp = () => (
   <Routes>
-    {/* Library/Marketplace Routes (new primary site) */}
+    {/* Library/Marketplace Routes (primary site) */}
     <Route path="/" element={<LibraryHome />} />
     <Route path="/agents" element={<AgentLibrary />} />
     <Route path="/agents/:slug" element={<AgentDetail />} />
@@ -151,16 +135,13 @@ const UnlockedApp = () => (
       </PortalRouteGuard>
     } />
 
-    {/* Legacy routes (redirects or preserved for existing links) */}
+    {/* Marketing and legal pages */}
     <Route path="/old-home" element={<Index />} />
     <Route path="/capabilities" element={<Capabilities />} />
     <Route path="/services" element={<Navigate to="/capabilities" replace />} />
     <Route path="/pricing" element={<Pricing />} />
     <Route path="/about" element={<About />} />
     <Route path="/get-started" element={<GetStarted />} />
-    <Route path="/system-audit" element={<SystemAudit />} />
-    <Route path="/system-audit/result" element={<SystemAuditResult />} />
-    <Route path="/request-deployment" element={<RequestDeployment />} />
     <Route path="/reliability" element={<Reliability />} />
     <Route path="/proof" element={<Proof />} />
     <Route path="/terms" element={<Terms />} />
@@ -170,6 +151,10 @@ const UnlockedApp = () => (
     <Route path="/confidentiality" element={<Confidentiality />} />
     <Route path="/disclaimer" element={<Disclaimer />} />
     <Route path="/auth" element={<Auth />} />
+    <Route path="/sanctuary" element={<Sanctuary />} />
+    <Route path="/reset-password" element={<ResetPassword />} />
+
+    {/* Admin routes */}
     <Route path="/admin" element={<Admin />} />
     <Route path="/admin/library" element={<AdminLibraryHome />} />
     <Route path="/admin/library/agents" element={<AdminAgentsList />} />
@@ -182,16 +167,7 @@ const UnlockedApp = () => (
     <Route path="/admin/setup" element={<AdminSetup />} />
     <Route path="/admin/monitoring" element={<AdminMonitoring />} />
     <Route path="/admin/activity" element={<AdminActivity />} />
-    <Route path="/reset-password" element={<ResetPassword />} />
-    <Route path="/sanctuary" element={<Sanctuary />} />
-    <Route path="/old-dashboard" element={<Dashboard />} />
-    <Route path="/agents/setup" element={<AgentSetup />} />
-    <Route path="/agents/dashboard" element={<AgentDashboard />} />
-    <Route path="/agents/activity" element={<AgentActivity />} />
-    <Route path="/agents/run/:agentKey" element={<AgentRun />} />
-    <Route path="/studio/agents" element={<StudioAgents />} />
-    <Route path="/studio/plans" element={<StudioPlans />} />
-    <Route path="/studio/entitlements" element={<StudioEntitlements />} />
+
     <Route path="*" element={<NotFound />} />
   </Routes>
 );
