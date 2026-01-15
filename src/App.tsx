@@ -5,10 +5,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { useEffect } from "react";
 import { HelmetProvider } from "react-helmet-async";
-import { AuthProvider } from "@/hooks/useAuth";
+import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { SubscriptionProvider } from "@/hooks/useSubscription";
 
-// Access gate - set to true to lock site
+// Access gate - set to true to lock site for public (admins bypass)
 const SITE_LOCKED = true;
 
 import RequestAccess from "./pages/RequestAccess";
@@ -194,6 +194,23 @@ const UnlockedApp = () => (
   </Routes>
 );
 
+// Smart gate: admins see full site, public sees locked
+const SiteGate = () => {
+  const { user, isAdmin, isLoading } = useAuth();
+  
+  // While loading auth, show locked routes (they handle their own auth)
+  if (isLoading) {
+    return <LockedApp />;
+  }
+  
+  // If site is locked but user is admin, show full site
+  if (SITE_LOCKED && !isAdmin) {
+    return <LockedApp />;
+  }
+  
+  return <UnlockedApp />;
+};
+
 const App = () => (
   <HelmetProvider>
     <QueryClientProvider client={queryClient}>
@@ -205,7 +222,7 @@ const App = () => (
           <ScrollToTop />
           <AuthProvider>
             <SubscriptionProvider>
-              {SITE_LOCKED ? <LockedApp /> : <UnlockedApp />}
+              <SiteGate />
             </SubscriptionProvider>
           </AuthProvider>
         </BrowserRouter>
