@@ -13,8 +13,8 @@ const steps = [
     id: 'welcome',
     icon: Sparkles,
     title: 'Welcome to AERELION',
-    description: 'Your marketplace for pre-engineered automation workflow packs. Download, import, and deploy.',
-    highlight: 'Professional n8n workflows ready to use.',
+    description: 'Your marketplace for pre-engineered automation workflow packs. Browse, purchase, and download.',
+    highlight: 'Professional n8n workflows ready to import.',
   },
   {
     id: 'browse',

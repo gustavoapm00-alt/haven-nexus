@@ -32,9 +32,9 @@ const LibraryHome = () => {
   return (
     <>
       <SEO
-        title="AERELION Library - Automation Workflows"
-        description="Automation workflows you can deploy in hours, not weeks. Browse proven n8n workflow packs and system bundles built for real operational outcomes."
-        keywords="automation, n8n workflows, operational automation, business automation, workflow automation"
+        title="AERELION Library - Workflow Packs"
+        description="Downloadable n8n workflow packs you can import in hours, not weeks. Browse proven workflow files and system bundles built for real operational outcomes."
+        keywords="n8n workflows, workflow packs, downloadable automation, business automation, workflow files"
       />
       
       <div className="min-h-screen bg-background">

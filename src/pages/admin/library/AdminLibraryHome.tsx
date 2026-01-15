@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import AdminGate from '@/components/AdminGate';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Bot, Package } from 'lucide-react';
+import { ArrowLeft, Package, Layers } from 'lucide-react';
 
 const AdminLibraryHome = () => {
   return (
@@ -25,29 +25,29 @@ const AdminLibraryHome = () => {
           <div className="mb-8">
             <h2 className="text-2xl font-display mb-2">Manage Marketplace Content</h2>
             <p className="text-muted-foreground">
-              Create, edit, and publish automation agents and system bundles.
+              Create, edit, and publish workflow packs and system bundles.
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
-            {/* Agents Card */}
+            {/* Workflow Packs Card */}
             <Link
               to="/admin/library/agents"
               className="group card-glass p-8 rounded-xl border-2 border-transparent hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5"
             >
               <div className="flex items-start gap-4">
                 <div className="p-4 bg-primary/10 rounded-xl group-hover:bg-primary/20 group-hover:scale-105 transition-all">
-                  <Bot className="w-8 h-8 text-primary" />
+                  <Package className="w-8 h-8 text-primary" />
                 </div>
                 <div className="flex-1">
                   <h3 className="font-display text-xl mb-2 group-hover:text-primary transition-colors">
-                    Automation Agents
+                    Workflow Packs
                   </h3>
                   <p className="text-muted-foreground text-sm mb-4">
-                    Manage individual n8n workflow agents. Upload workflows, set pricing, and publish to the marketplace.
+                    Manage individual n8n workflow packs. Upload workflows, set pricing, and publish to the marketplace.
                   </p>
                   <span className="text-sm text-primary font-medium">
-                    Manage Agents →
+                    Manage Packs →
                   </span>
                 </div>
               </div>

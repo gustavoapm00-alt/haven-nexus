@@ -173,9 +173,9 @@ export default function PortalAnalytics() {
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-semibold">Usage Analytics</h1>
+              <h1 className="text-2xl font-semibold">Download Activity</h1>
               <p className="text-muted-foreground text-sm mt-1">
-                Track your activity and usage patterns
+                View your downloads and account activity
               </p>
             </div>
             <div className="flex items-center gap-3">
