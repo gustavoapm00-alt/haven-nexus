@@ -916,7 +916,6 @@ export type Database = {
           company_name: string | null
           created_at: string
           display_name: string | null
-          email: string | null
           full_name: string | null
           goals: string[] | null
           id: string
@@ -930,7 +929,6 @@ export type Database = {
           company_name?: string | null
           created_at?: string
           display_name?: string | null
-          email?: string | null
           full_name?: string | null
           goals?: string[] | null
           id: string
@@ -944,7 +942,6 @@ export type Database = {
           company_name?: string | null
           created_at?: string
           display_name?: string | null
-          email?: string | null
           full_name?: string | null
           goals?: string[] | null
           id?: string
