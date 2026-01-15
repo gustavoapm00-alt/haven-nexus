@@ -121,51 +121,40 @@ serve(async (req) => {
       });
     }
 
-    // Create a Supabase client for edge runtime and validate via getUser(token).
-    const supabaseClient = createClient(
+    // Create admin client to validate JWT (required when verify_jwt = false)
+    const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
       {
         auth: {
           persistSession: false,
           autoRefreshToken: false,
         },
-        global: {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
       }
     );
 
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
+    const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(token);
 
-    if (userError) {
-      logger.error("JWT validation failed", { error: userError.message });
-      await logger.logResponse(401, "Invalid token", { authError: userError.message });
+    if (userError || !user?.email) {
+      logger.warn("JWT validation failed", { error: userError?.message ?? "no_user_or_email" });
+      await logger.logResponse(401, "Invalid token", { authError: userError?.message ?? "no_user_or_email" });
       return new Response(JSON.stringify({ error: "Invalid token" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 401,
       });
     }
 
-    if (!user?.email) {
-      logger.warn("User has no email");
-      await logger.logResponse(401, "Invalid token - no email");
-      return new Response(JSON.stringify({ error: "Invalid token" }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 401,
-      });
-    }
+    const userId = user.id;
+    const email = user.email;
 
-    logger.setUserId(user.id);
-    logger.debug("User authenticated", { userId: user.id });
+    logger.setUserId(userId);
+    logger.debug("User authenticated", { userId });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
     
     // Fetch customer with retry
     const customers = await withRetry(
-      async () => stripe.customers.list({ email: user.email!, limit: 1 }),
+      async () => stripe.customers.list({ email, limit: 1 }),
       { maxRetries: 3 }
     );
     
