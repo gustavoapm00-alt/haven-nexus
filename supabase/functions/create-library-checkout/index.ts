@@ -133,7 +133,7 @@ serve(async (req) => {
             currency: "usd",
             product_data: {
               name: itemName,
-              description: `${item_type === "agent" ? "Automation Agent" : "System Bundle"}: ${itemName}`,
+              description: `${item_type === "agent" ? "Workflow Pack" : "System Bundle"}: ${itemName}`,
             },
             unit_amount: priceCents,
           },
@@ -142,7 +142,7 @@ serve(async (req) => {
       ],
       mode: "payment",
       success_url: `${origin}/purchase-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/${item_type === "agent" ? "agents" : "bundles"}/${itemSlug}?canceled=true`,
+      cancel_url: `${origin}/${item_type === "agent" ? "packs" : "bundles"}/${itemSlug}?canceled=true`,
       metadata: {
         item_type,
         item_id,

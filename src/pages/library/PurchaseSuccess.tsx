@@ -297,9 +297,9 @@ const PurchaseSuccess = () => {
               <p className="text-muted-foreground mb-6">{error}</p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Button asChild variant="outline">
-                  <Link to="/agents">
+                  <Link to="/packs">
                     <ArrowLeft className="w-4 h-4 mr-2" />
-                    Browse Agents
+                    Browse Packs
                   </Link>
                 </Button>
                 <Button asChild>
@@ -613,13 +613,13 @@ const PurchaseSuccess = () => {
             {/* Actions */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10">
               <Button asChild variant="outline">
-                <Link to={purchase?.item_type === 'bundle' ? `/bundles/${purchase?.item_slug}` : `/agents/${purchase?.item_slug}`}>
+                <Link to={purchase?.item_type === 'bundle' ? `/bundles/${purchase?.item_slug}` : `/packs/${purchase?.item_slug}`}>
                   <ArrowLeft className="w-4 h-4 mr-2" />
-                  View {purchase?.item_type === 'bundle' ? 'Bundle' : 'Agent'} Details
+                  View {purchase?.item_type === 'bundle' ? 'Bundle' : 'Pack'} Details
                 </Link>
               </Button>
               <Button asChild>
-                <Link to="/agents">Browse More Agents</Link>
+                <Link to="/packs">Browse More Packs</Link>
               </Button>
             </div>
           </div>

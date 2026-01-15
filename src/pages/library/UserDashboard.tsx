@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { 
   Download, Loader2, Package, FileText, RefreshCw, 
   ShoppingBag, Calendar, ArrowRight, ExternalLink,
-  User, Mail, Clock, Settings, LogOut, Bot
+  User, Mail, Clock, Settings, LogOut
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -114,9 +114,9 @@ const UserDashboard = () => {
               transition={{ delay: 0.1 }}
             >
               <Button asChild variant="outline">
-                <Link to="/agents">
-                  <Bot className="w-4 h-4 mr-2" />
-                  Browse Agents
+                <Link to="/packs">
+                  <Package className="w-4 h-4 mr-2" />
+                  Browse Packs
                 </Link>
               </Button>
               <Button variant="ghost" onClick={handleSignOut}>
@@ -256,10 +256,10 @@ const UserDashboard = () => {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-xl font-bold text-foreground">Your Purchases</h2>
-                <p className="text-sm text-muted-foreground">Access and download your automation files</p>
+                <p className="text-sm text-muted-foreground">Access and download your workflow files</p>
               </div>
               <Button asChild variant="outline" size="sm">
-                <Link to="/agents">
+                <Link to="/packs">
                   Browse More
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Link>
@@ -278,7 +278,7 @@ const UserDashboard = () => {
                   </p>
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                     <Button asChild>
-                      <Link to="/agents">Browse Agents</Link>
+                      <Link to="/packs">Browse Packs</Link>
                     </Button>
                     <Button asChild variant="outline">
                       <Link to="/bundles">View Bundles</Link>

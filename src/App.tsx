@@ -82,9 +82,8 @@ const UnlockedApp = () => (
   <Routes>
     {/* Marketplace Routes (primary site) */}
     <Route path="/" element={<LibraryHome />} />
-    <Route path="/agents" element={<AgentLibrary />} />
     <Route path="/packs" element={<AgentLibrary />} />
-    <Route path="/agents/:slug" element={<AgentDetail />} />
+    <Route path="/agents" element={<Navigate to="/packs" replace />} />
     <Route path="/packs/:slug" element={<AgentDetail />} />
     <Route path="/bundles" element={<BundleLibrary />} />
     <Route path="/bundles/:slug" element={<BundleDetail />} />
@@ -114,7 +113,7 @@ const UnlockedApp = () => (
         <PortalBilling />
       </PortalRouteGuard>
     } />
-    <Route path="/portal/analytics" element={
+    <Route path="/portal/activity" element={
       <PortalRouteGuard>
         <PortalAnalytics />
       </PortalRouteGuard>
@@ -128,8 +127,8 @@ const UnlockedApp = () => (
     {/* Legacy redirects - redirect to marketplace equivalents */}
     <Route path="/pricing" element={<Navigate to="/bundles" replace />} />
     <Route path="/capabilities" element={<Navigate to="/deployment" replace />} />
-    <Route path="/get-started" element={<Navigate to="/agents" replace />} />
-    <Route path="/services" element={<Navigate to="/agents" replace />} />
+    <Route path="/get-started" element={<Navigate to="/packs" replace />} />
+    <Route path="/services" element={<Navigate to="/packs" replace />} />
     <Route path="/old-home" element={<Navigate to="/" replace />} />
     <Route path="/about" element={<Navigate to="/" replace />} />
     <Route path="/reliability" element={<Navigate to="/security" replace />} />

@@ -5,9 +5,9 @@ import { useClientProfile, ClientIntegration } from '@/hooks/useClientProfile';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { 
-  Loader2, LayoutDashboard, Bot, Puzzle, CreditCard, HelpCircle,
+  Loader2, LayoutDashboard, Package, Puzzle, CreditCard, HelpCircle,
   LogOut, User, ChevronRight, CheckCircle, AlertCircle, Download,
-  ExternalLink, BookOpen, Upload, Menu, X, Settings
+  ExternalLink, BookOpen, Upload, Menu, X, Settings, FileDown
 } from 'lucide-react';
 import PortalBackground from '@/components/portal/PortalBackground';
 import { GlassCard } from '@/components/portal/GlassCard';
@@ -35,10 +35,10 @@ const INTEGRATION_CONFIG: Record<string, { name: string; icon: string }> = {
 
 const NAV_ITEMS = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-  { id: 'agents', label: 'My Agents', icon: Bot },
+  { id: 'downloads', label: 'My Downloads', icon: Download },
   { id: 'integrations', label: 'Integrations', icon: Puzzle },
   { id: 'billing', label: 'Billing', icon: CreditCard, href: '/portal/billing' },
-  { id: 'analytics', label: 'Analytics', icon: Bot, href: '/portal/analytics' },
+  { id: 'activity', label: 'Download Activity', icon: FileDown, href: '/portal/activity' },
   { id: 'support', label: 'Support', icon: HelpCircle },
 ];
 
@@ -347,7 +347,7 @@ const ClientDashboard = () => {
                       <GlassCard key={purchase.id} className="p-4 flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                            <Bot className="w-5 h-5 text-primary" />
+                            <Package className="w-5 h-5 text-primary" />
                           </div>
                           <div>
                             <p className="font-medium">{purchase.item_name}</p>
@@ -366,13 +366,13 @@ const ClientDashboard = () => {
                   </div>
                 ) : (
                   <GlassCard className="p-8 text-center">
-                    <Bot className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+                    <Package className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
                     <p className="text-muted-foreground mb-4">No purchases yet</p>
                     <Link
-                      to="/agents"
+                      to="/packs"
                       className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
                     >
-                      Browse Library
+                      Browse Workflow Packs
                       <ExternalLink className="w-3 h-3" />
                     </Link>
                   </GlassCard>
@@ -383,14 +383,14 @@ const ClientDashboard = () => {
               <div>
                 <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Link to="/agents">
+                  <Link to="/packs">
                     <GlassCard className="p-4 flex items-center gap-3 group">
                       <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                        <Bot className="w-5 h-5 text-primary" />
+                        <Package className="w-5 h-5 text-primary" />
                       </div>
                       <div>
-                        <p className="font-medium">View Library</p>
-                        <p className="text-xs text-muted-foreground">Browse automation agents</p>
+                        <p className="font-medium">Browse Packs</p>
+                        <p className="text-xs text-muted-foreground">View workflow packs</p>
                       </div>
                     </GlassCard>
                   </Link>
@@ -435,7 +435,7 @@ const ClientDashboard = () => {
                       <div className="flex items-start justify-between">
                         <div className="flex items-start gap-4">
                           <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                            <Bot className="w-6 h-6 text-primary" />
+                            <Package className="w-6 h-6 text-primary" />
                           </div>
                           <div>
                             <h4 className="font-semibold">{purchase.item_name}</h4>
@@ -458,14 +458,14 @@ const ClientDashboard = () => {
                 </div>
               ) : (
                 <GlassCard className="p-12 text-center">
-                  <Bot className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No agents yet</h3>
-                  <p className="text-muted-foreground mb-6">Browse our library to find automation agents that fit your needs</p>
+                  <Package className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No workflow packs yet</h3>
+                  <p className="text-muted-foreground mb-6">Browse our library to find workflow packs that fit your needs</p>
                   <Link
-                    to="/agents"
+                    to="/packs"
                     className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
                   >
-                    Browse Library
+                    Browse Workflow Packs
                     <ExternalLink className="w-4 h-4" />
                   </Link>
                 </GlassCard>

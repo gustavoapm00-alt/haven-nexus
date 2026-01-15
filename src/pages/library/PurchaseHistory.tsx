@@ -200,12 +200,12 @@ const PurchaseHistory = () => {
             <div>
               <h1 className="text-3xl font-bold text-foreground mb-2">My Purchases</h1>
               <p className="text-muted-foreground">
-                Access your purchased automation agents and bundles
+                Access your purchased workflow packs and bundles
               </p>
             </div>
             <Button asChild variant="outline">
-              <Link to="/agents">
-                Browse More Agents
+              <Link to="/packs">
+                Browse More Packs
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Link>
             </Button>
@@ -225,11 +225,11 @@ const PurchaseHistory = () => {
               </div>
               <h2 className="text-xl font-semibold text-foreground mb-3">No Purchases Yet</h2>
               <p className="text-muted-foreground mb-6">
-                You haven't purchased any automation agents or bundles yet. Browse our library to find workflows that fit your needs.
+                You haven't purchased any workflow packs or bundles yet. Browse our library to find workflows that fit your needs.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                 <Button asChild>
-                  <Link to="/agents">Browse Agents</Link>
+                  <Link to="/packs">Browse Packs</Link>
                 </Button>
                 <Button asChild variant="outline">
                   <Link to="/bundles">View Bundles</Link>
