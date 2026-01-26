@@ -16,6 +16,7 @@ serve(async (req: Request) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
     const appBaseUrl = Deno.env.get("APP_BASE_URL") || "https://aerelion.systems";
+    const senderEmail = Deno.env.get("RESEND_FROM") || "noreply@aerelion.systems";
 
     if (!resendApiKey) {
       console.warn("RESEND_API_KEY not configured, skipping reminders");
@@ -46,6 +47,7 @@ serve(async (req: Request) => {
     console.log(`Found ${requests?.length || 0} requests needing reminders`);
 
     let sentCount = 0;
+    const errors: string[] = [];
 
     for (const request of requests || []) {
       try {
@@ -138,7 +140,7 @@ serve(async (req: Request) => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            from: "AERELION Systems <noreply@aerelion.systems>",
+            from: `AERELION Systems <${senderEmail}>`,
             to: [request.email],
             subject,
             html: emailHtml,
@@ -146,12 +148,14 @@ serve(async (req: Request) => {
         });
 
         if (!emailRes.ok) {
-          console.error(`Failed to send reminder to ${request.email}:`, await emailRes.text());
+          const errorText = await emailRes.text();
+          console.error(`Failed to send reminder to ${request.email}:`, emailRes.status, errorText);
+          errors.push(`${request.email}: ${emailRes.status}`);
           continue;
         }
 
         // Update request with reminder tracking
-        const updates: Record<string, any> = {
+        const updates: Record<string, unknown> = {
           last_reminder_sent_at: new Date().toISOString(),
           reminder_count: request.reminder_count + 1,
         };
@@ -161,22 +165,27 @@ serve(async (req: Request) => {
           updates.awaiting_credentials_since = new Date().toISOString();
         }
 
-        await supabase
+        const { error: updateError } = await supabase
           .from("installation_requests")
           .update(updates)
           .eq("id", request.id);
+
+        if (updateError) {
+          console.error(`Failed to update reminder tracking for ${request.id}:`, updateError);
+        }
 
         sentCount++;
         console.log(`Sent reminder ${reminderNumber} to ${request.email} for request ${request.id}`);
       } catch (reqError) {
         console.error(`Error processing request ${request.id}:`, reqError);
+        errors.push(`${request.id}: ${reqError instanceof Error ? reqError.message : 'Unknown error'}`);
       }
     }
 
-    console.log(`Completed: sent ${sentCount} reminders`);
+    console.log(`Completed: sent ${sentCount} reminders, ${errors.length} errors`);
 
     return new Response(
-      JSON.stringify({ success: true, sent: sentCount }),
+      JSON.stringify({ success: true, sent: sentCount, errors: errors.length > 0 ? errors : undefined }),
       { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
     );
   } catch (error: unknown) {

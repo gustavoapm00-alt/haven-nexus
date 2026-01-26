@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -29,6 +28,7 @@ serve(async (req: Request) => {
 
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
     const appBaseUrl = Deno.env.get("APP_BASE_URL") || "https://aerelion.systems";
+    const senderEmail = Deno.env.get("RESEND_FROM") || "noreply@aerelion.systems";
 
     if (!resendApiKey) {
       console.warn("RESEND_API_KEY not configured, skipping email notifications");
@@ -168,40 +168,67 @@ serve(async (req: Request) => {
 </body>
 </html>`;
 
+    // Track email results
+    const emailResults: { admin: boolean; customer: boolean } = { admin: false, customer: false };
+
     // Send admin email
-    await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${resendApiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: "AERELION Systems <noreply@aerelion.systems>",
-        to: ["contact@aerelion.systems"],
-        subject: `🔑 Access Info Submitted: ${business_name} – ${tool_name}`,
-        html: adminEmailHtml,
-      }),
-    });
+    try {
+      const adminRes = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${resendApiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from: `AERELION Systems <${senderEmail}>`,
+          to: ["contact@aerelion.systems"],
+          subject: `🔑 Access Info Submitted: ${business_name} – ${tool_name}`,
+          html: adminEmailHtml,
+        }),
+      });
+
+      if (adminRes.ok) {
+        emailResults.admin = true;
+        console.log("Admin email sent successfully");
+      } else {
+        const errorText = await adminRes.text();
+        console.error("Failed to send admin email:", adminRes.status, errorText);
+      }
+    } catch (adminError) {
+      console.error("Admin email error:", adminError);
+    }
 
     // Send customer confirmation
-    await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${resendApiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: "AERELION Systems <noreply@aerelion.systems>",
-        to: [customer_email],
-        subject: "✅ Access information received | AERELION Systems",
-        html: customerEmailHtml,
-      }),
-    });
+    try {
+      const customerRes = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${resendApiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from: `AERELION Systems <${senderEmail}>`,
+          to: [customer_email],
+          subject: "✅ Access information received | AERELION Systems",
+          html: customerEmailHtml,
+        }),
+      });
 
-    console.log("Customer update notifications sent successfully");
+      if (customerRes.ok) {
+        emailResults.customer = true;
+        console.log("Customer confirmation email sent successfully");
+      } else {
+        const errorText = await customerRes.text();
+        console.error("Failed to send customer email:", customerRes.status, errorText);
+      }
+    } catch (customerError) {
+      console.error("Customer email error:", customerError);
+    }
+
+    console.log("Customer update notifications completed:", emailResults);
 
     return new Response(
-      JSON.stringify({ success: true }),
+      JSON.stringify({ success: true, emailResults }),
       { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
     );
   } catch (error: unknown) {

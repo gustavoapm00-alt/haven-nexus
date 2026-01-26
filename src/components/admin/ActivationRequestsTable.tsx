@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, RefreshCw, Eye, Save, Filter } from 'lucide-react';
+import { Loader2, RefreshCw, Eye, Save, Filter, Clock, RotateCcw, BellOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -28,6 +28,8 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Switch } from '@/components/ui/switch';
 
 interface ActivationRequest {
   id: string;
@@ -47,6 +49,22 @@ interface ActivationRequest {
   activation_notes_customer: string | null;
   last_notified_status: string | null;
   setup_window: string | null;
+  reminder_count: number;
+  last_reminder_sent_at: string | null;
+  reminders_disabled: boolean;
+}
+
+interface CustomerUpdate {
+  id: string;
+  created_at: string;
+  update_type: string;
+  tool_name: string | null;
+  credential_method: string | null;
+  message: string | null;
+  secure_link: string | null;
+  credential_reference: string | null;
+  status: string;
+  reviewed_at: string | null;
 }
 
 const STATUS_OPTIONS = [
@@ -69,11 +87,20 @@ const FILTER_OPTIONS = [
   { value: 'live', label: 'Live' },
 ];
 
+const METHOD_LABELS: Record<string, string> = {
+  oauth: 'OAuth / Secure Link',
+  api_key: 'API Key Reference',
+  invite_user: 'User Invitation',
+  other: 'Other Method',
+};
+
 export function ActivationRequestsTable() {
   const [requests, setRequests] = useState<ActivationRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRequest, setSelectedRequest] = useState<ActivationRequest | null>(null);
   const [editedRequest, setEditedRequest] = useState<Partial<ActivationRequest>>({});
+  const [customerUpdates, setCustomerUpdates] = useState<CustomerUpdate[]>([]);
+  const [updatesLoading, setUpdatesLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [filter, setFilter] = useState('all');
 
@@ -107,6 +134,20 @@ export function ActivationRequestsTable() {
     setLoading(false);
   };
 
+  const fetchCustomerUpdates = async (requestId: string) => {
+    setUpdatesLoading(true);
+    const { data, error } = await supabase
+      .from('activation_customer_updates')
+      .select('*')
+      .eq('request_id', requestId)
+      .order('created_at', { ascending: false });
+
+    if (!error && data) {
+      setCustomerUpdates(data as CustomerUpdate[]);
+    }
+    setUpdatesLoading(false);
+  };
+
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString('en-US', {
       month: 'short',
@@ -115,15 +156,6 @@ export function ActivationRequestsTable() {
       hour: '2-digit',
       minute: '2-digit',
     });
-  };
-
-  const getStatusBadge = (status: string) => {
-    const statusOption = STATUS_OPTIONS.find(s => s.value === status);
-    return (
-      <Badge className={statusOption?.color || 'bg-muted'}>
-        {statusOption?.label || status}
-      </Badge>
-    );
   };
 
   const handleStatusChange = async (requestId: string, newStatus: string) => {
@@ -154,7 +186,9 @@ export function ActivationRequestsTable() {
       activation_eta: request.activation_eta,
       activation_notes_internal: request.activation_notes_internal,
       activation_notes_customer: request.activation_notes_customer,
+      reminders_disabled: request.reminders_disabled,
     });
+    fetchCustomerUpdates(request.id);
   };
 
   const saveRequestDetails = async () => {
@@ -193,15 +227,58 @@ export function ActivationRequestsTable() {
             itemName: selectedRequest.purchased_item,
           },
         });
+        toast.success('Changes saved & notification sent');
       } catch (e) {
         console.log('Status notification email skipped or failed');
+        toast.success('Changes saved (email notification failed)');
       }
+    } else {
+      toast.success('Changes saved');
     }
 
-    toast.success('Changes saved');
     setSaving(false);
     setSelectedRequest(null);
     fetchRequests();
+  };
+
+  const resetReminderCount = async () => {
+    if (!selectedRequest) return;
+    
+    const { error } = await supabase
+      .from('installation_requests')
+      .update({
+        reminder_count: 0,
+        last_reminder_sent_at: null,
+      })
+      .eq('id', selectedRequest.id);
+
+    if (error) {
+      toast.error('Failed to reset reminders');
+      return;
+    }
+
+    toast.success('Reminder count reset');
+    setSelectedRequest({ ...selectedRequest, reminder_count: 0, last_reminder_sent_at: null });
+  };
+
+  const markUpdateReviewed = async (updateId: string) => {
+    const { error } = await supabase
+      .from('activation_customer_updates')
+      .update({
+        status: 'reviewed',
+        reviewed_at: new Date().toISOString(),
+      })
+      .eq('id', updateId);
+
+    if (error) {
+      toast.error('Failed to mark as reviewed');
+      return;
+    }
+
+    toast.success('Marked as reviewed');
+    if (selectedRequest) {
+      fetchCustomerUpdates(selectedRequest.id);
+    }
   };
 
   if (loading) {
@@ -301,57 +378,91 @@ export function ActivationRequestsTable() {
 
       {/* Detail Modal */}
       <Dialog open={!!selectedRequest} onOpenChange={() => setSelectedRequest(null)}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Activation Request Details</DialogTitle>
           </DialogHeader>
           
           {selectedRequest && (
-            <div className="space-y-6">
-              {/* Customer Info */}
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <p className="text-muted-foreground mb-1">Business Name</p>
-                  <p className="font-medium">{selectedRequest.name}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground mb-1">Email</p>
-                  <p className="font-medium">{selectedRequest.email}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground mb-1">Company</p>
-                  <p className="font-medium">{selectedRequest.company || '—'}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground mb-1">Purchased Item</p>
-                  <p className="font-medium">{selectedRequest.purchased_item || '—'}</p>
-                </div>
-                <div className="col-span-2">
-                  <p className="text-muted-foreground mb-1">Preferred Systems</p>
-                  <p className="font-medium">{selectedRequest.preferred_systems || '—'}</p>
-                </div>
-                <div className="col-span-2">
-                  <p className="text-muted-foreground mb-1">Setup Window</p>
-                  <p className="font-medium">{selectedRequest.setup_window || selectedRequest.activation_eta || '—'}</p>
-                </div>
-                <div className="col-span-2">
-                  <p className="text-muted-foreground mb-1">Submitted</p>
-                  <p className="font-medium">{formatDate(selectedRequest.created_at)}</p>
-                </div>
-              </div>
-              
-              {selectedRequest.notes && (
-                <div>
-                  <p className="text-muted-foreground mb-2 text-sm">Customer Notes</p>
-                  <div className="bg-muted/50 rounded-lg p-4 text-sm whitespace-pre-wrap">
-                    {selectedRequest.notes}
+            <Tabs defaultValue="details" className="mt-4">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="details">Details</TabsTrigger>
+                <TabsTrigger value="management">Status & Management</TabsTrigger>
+                <TabsTrigger value="updates">
+                  Customer Updates
+                  {customerUpdates.filter(u => u.status === 'submitted').length > 0 && (
+                    <Badge variant="destructive" className="ml-2 h-5 w-5 p-0 flex items-center justify-center text-xs">
+                      {customerUpdates.filter(u => u.status === 'submitted').length}
+                    </Badge>
+                  )}
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="details" className="space-y-6 mt-6">
+                {/* Customer Info */}
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-muted-foreground mb-1">Business Name</p>
+                    <p className="font-medium">{selectedRequest.name}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground mb-1">Email</p>
+                    <p className="font-medium">{selectedRequest.email}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground mb-1">Company</p>
+                    <p className="font-medium">{selectedRequest.company || '—'}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground mb-1">Purchased Item</p>
+                    <p className="font-medium">{selectedRequest.purchased_item || '—'}</p>
+                  </div>
+                  <div className="col-span-2">
+                    <p className="text-muted-foreground mb-1">Preferred Systems</p>
+                    <p className="font-medium">{selectedRequest.preferred_systems || '—'}</p>
+                  </div>
+                  <div className="col-span-2">
+                    <p className="text-muted-foreground mb-1">Setup Window</p>
+                    <p className="font-medium">{selectedRequest.setup_window || selectedRequest.activation_eta || '—'}</p>
+                  </div>
+                  <div className="col-span-2">
+                    <p className="text-muted-foreground mb-1">Submitted</p>
+                    <p className="font-medium">{formatDate(selectedRequest.created_at)}</p>
                   </div>
                 </div>
-              )}
-
-              <div className="border-t pt-6 space-y-4">
-                <h4 className="font-semibold">Status & Management</h4>
                 
+                {selectedRequest.notes && (
+                  <div>
+                    <p className="text-muted-foreground mb-2 text-sm">Customer Notes</p>
+                    <div className="bg-muted/50 rounded-lg p-4 text-sm whitespace-pre-wrap">
+                      {selectedRequest.notes}
+                    </div>
+                  </div>
+                )}
+
+                {/* Reminder Status */}
+                <div className="border-t pt-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-sm text-muted-foreground">
+                        Reminders sent: {selectedRequest.reminder_count}/3
+                      </span>
+                      {selectedRequest.last_reminder_sent_at && (
+                        <span className="text-xs text-muted-foreground">
+                          (Last: {formatDate(selectedRequest.last_reminder_sent_at)})
+                        </span>
+                      )}
+                    </div>
+                    <Button variant="outline" size="sm" onClick={resetReminderCount}>
+                      <RotateCcw className="w-4 h-4 mr-1" />
+                      Reset
+                    </Button>
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="management" className="space-y-6 mt-6">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Internal Status</Label>
@@ -430,6 +541,20 @@ export function ActivationRequestsTable() {
                   />
                 </div>
 
+                <div className="flex items-center justify-between border-t pt-4">
+                  <div className="flex items-center gap-2">
+                    <BellOff className="w-4 h-4 text-muted-foreground" />
+                    <Label htmlFor="disable-reminders" className="text-sm font-normal">
+                      Disable automated reminders for this request
+                    </Label>
+                  </div>
+                  <Switch
+                    id="disable-reminders"
+                    checked={editedRequest.reminders_disabled || false}
+                    onCheckedChange={(checked) => setEditedRequest({ ...editedRequest, reminders_disabled: checked })}
+                  />
+                </div>
+
                 <div className="flex justify-end gap-3 pt-4">
                   <Button variant="outline" onClick={() => setSelectedRequest(null)}>
                     Cancel
@@ -439,8 +564,88 @@ export function ActivationRequestsTable() {
                     Save Changes
                   </Button>
                 </div>
-              </div>
-            </div>
+              </TabsContent>
+
+              <TabsContent value="updates" className="mt-6">
+                {updatesLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                  </div>
+                ) : customerUpdates.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No customer updates submitted yet
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {customerUpdates.map((update) => (
+                      <div
+                        key={update.id}
+                        className={`border rounded-lg p-4 ${
+                          update.status === 'submitted' ? 'border-yellow-500/50 bg-yellow-500/5' : 'border-border'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-4 mb-3">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium">{update.tool_name || 'Unknown Tool'}</span>
+                              <Badge variant={update.status === 'submitted' ? 'default' : 'secondary'}>
+                                {update.status}
+                              </Badge>
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {formatDate(update.created_at)}
+                            </p>
+                          </div>
+                          {update.status === 'submitted' && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => markUpdateReviewed(update.id)}
+                            >
+                              Mark Reviewed
+                            </Button>
+                          )}
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3 text-sm">
+                          <div>
+                            <p className="text-muted-foreground">Method</p>
+                            <p>{METHOD_LABELS[update.credential_method || ''] || update.credential_method || '—'}</p>
+                          </div>
+                          {update.secure_link && (
+                            <div>
+                              <p className="text-muted-foreground">Secure Link</p>
+                              <a
+                                href={update.secure_link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-primary hover:underline truncate block"
+                              >
+                                {update.secure_link}
+                              </a>
+                            </div>
+                          )}
+                          {update.credential_reference && (
+                            <div className="col-span-2">
+                              <p className="text-muted-foreground">Reference</p>
+                              <p className="font-mono text-xs bg-muted/50 rounded px-2 py-1 mt-1">
+                                {update.credential_reference}
+                              </p>
+                            </div>
+                          )}
+                          {update.message && (
+                            <div className="col-span-2">
+                              <p className="text-muted-foreground">Message</p>
+                              <p className="whitespace-pre-wrap mt-1">{update.message}</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
           )}
         </DialogContent>
       </Dialog>
