@@ -22,7 +22,7 @@ const LibraryFooter = () => {
             <h4 className="font-medium text-sm text-foreground mb-4">Services</h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/packs" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link to="/automations" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                   Automations
                 </Link>
               </li>

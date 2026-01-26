@@ -2,10 +2,10 @@ import { Cloud, BookOpen, Shield, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const badges = [
-  { icon: Cloud, label: 'Fully hosted & maintained' },
-  { icon: BookOpen, label: 'Quick activation guide' },
-  { icon: Shield, label: 'Secure credentials' },
-  { icon: RefreshCw, label: 'Continuous monitoring' },
+  { icon: Cloud, label: 'Hosted & Maintained' },
+  { icon: Shield, label: 'Encrypted Credentials' },
+  { icon: BookOpen, label: 'Activation in Hours' },
+  { icon: RefreshCw, label: 'Operator-Friendly' },
 ];
 
 const TrustStrip = () => {

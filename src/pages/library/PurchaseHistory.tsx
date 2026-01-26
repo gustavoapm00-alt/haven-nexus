@@ -200,12 +200,12 @@ const PurchaseHistory = () => {
             <div>
               <h1 className="text-3xl font-bold text-foreground mb-2">My Purchases</h1>
               <p className="text-muted-foreground">
-                Access your purchased workflow packs and bundles
+                Access your activated automations and bundles
               </p>
             </div>
             <Button asChild variant="outline">
-              <Link to="/packs">
-                Browse More Packs
+              <Link to="/automations">
+                Browse More Automations
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Link>
             </Button>
@@ -225,11 +225,11 @@ const PurchaseHistory = () => {
               </div>
               <h2 className="text-xl font-semibold text-foreground mb-3">No Purchases Yet</h2>
               <p className="text-muted-foreground mb-6">
-                You haven't purchased any workflow packs or bundles yet. Browse our library to find workflows that fit your needs.
+                You haven't purchased any automations or bundles yet. Browse our library to find automations that fit your needs.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                 <Button asChild>
-                  <Link to="/packs">Browse Packs</Link>
+                  <Link to="/automations">Browse Automations</Link>
                 </Button>
                 <Button asChild variant="outline">
                   <Link to="/bundles">View Bundles</Link>
@@ -259,7 +259,7 @@ const PurchaseHistory = () => {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                           <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                            {purchase.item_type === 'bundle' ? 'System Bundle' : 'Automation Agent'}
+                            {purchase.item_type === 'bundle' ? 'System Bundle' : 'Hosted Automation'}
                           </span>
                         </div>
                         <h3 className="text-lg font-semibold text-foreground mb-1 truncate">
@@ -289,7 +289,7 @@ const PurchaseHistory = () => {
                         size="sm"
                         asChild
                       >
-                        <Link to={`/${purchase.item_type === 'bundle' ? 'bundles' : 'agents'}/${purchase.item_slug}`}>
+                        <Link to={`/${purchase.item_type === 'bundle' ? 'bundles' : 'automations'}/${purchase.item_slug}`}>
                           <ExternalLink className="w-4 h-4 mr-2" />
                           View Details
                         </Link>

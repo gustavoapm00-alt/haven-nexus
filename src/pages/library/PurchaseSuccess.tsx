@@ -1,8 +1,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { 
-  CheckCircle, Download, Loader2, AlertCircle, ArrowLeft, 
-  FileText, Package, RefreshCw, ChevronDown, ChevronUp, Copy, Check,
+  CheckCircle, Loader2, AlertCircle, ArrowLeft, ArrowRight,
+  FileText, Package, ChevronDown, ChevronUp, Copy, Check,
   Bug
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -297,9 +297,9 @@ const PurchaseSuccess = () => {
               <p className="text-muted-foreground mb-6">{error}</p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Button asChild variant="outline">
-                  <Link to="/packs">
+                  <Link to="/automations">
                     <ArrowLeft className="w-4 h-4 mr-2" />
-                    Browse Packs
+                    Browse Automations
                   </Link>
                 </Button>
                 <Button asChild>
@@ -559,32 +559,20 @@ const PurchaseSuccess = () => {
               </Collapsible>
             )}
 
-            {/* Next Steps */}
-            <div className="card-enterprise p-6 bg-muted/30">
-              <h3 className="text-lg font-semibold text-foreground mb-4">
-                Next Steps
-              </h3>
-              <ol className="space-y-3 text-muted-foreground">
-                <li className="flex gap-3">
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground text-sm flex items-center justify-center">1</span>
-                  <span>Download the workflow file and deployment guide above</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground text-sm flex items-center justify-center">2</span>
-                  <span>Follow the deployment guide to import the workflow into n8n</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground text-sm flex items-center justify-center">3</span>
-                  <span>Configure your system credentials as specified in the guide</span>
-                </li>
-              </ol>
-              
-              <div className="mt-6 pt-6 border-t border-border">
-                <p className="text-sm text-muted-foreground mb-3">
-                  Need help with installation?
+            {/* Start Activation Setup CTA */}
+            <div className="card-enterprise p-6 bg-primary/5 border-primary/20">
+              <div className="text-center">
+                <h3 className="text-lg font-semibold text-foreground mb-2">
+                  Ready to Activate?
+                </h3>
+                <p className="text-muted-foreground mb-4">
+                  Complete your activation setup so we can configure and activate your automation.
                 </p>
-                <Button asChild variant="outline" size="sm">
-                  <Link to="/install">Request Installation Assistance</Link>
+                <Button asChild size="lg">
+                  <Link to="/activation-setup">
+                    Start Activation Setup
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Link>
                 </Button>
               </div>
             </div>
@@ -592,13 +580,13 @@ const PurchaseSuccess = () => {
             {/* Actions */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10">
               <Button asChild variant="outline">
-                <Link to={purchase?.item_type === 'bundle' ? `/bundles/${purchase?.item_slug}` : `/packs/${purchase?.item_slug}`}>
+                <Link to={purchase?.item_type === 'bundle' ? `/bundles/${purchase?.item_slug}` : `/automations/${purchase?.item_slug}`}>
                   <ArrowLeft className="w-4 h-4 mr-2" />
-                  View {purchase?.item_type === 'bundle' ? 'Bundle' : 'Pack'} Details
+                  View {purchase?.item_type === 'bundle' ? 'Bundle' : 'Automation'} Details
                 </Link>
               </Button>
-              <Button asChild>
-                <Link to="/packs">Browse More Packs</Link>
+              <Button asChild variant="ghost">
+                <Link to="/automations">Browse More Automations</Link>
               </Button>
             </div>
           </div>

@@ -33,6 +33,7 @@ import Documentation from "./pages/library/Documentation";
 import InstallationAssistance from "./pages/library/InstallationAssistance";
 import LibraryContact from "./pages/library/LibraryContact";
 import PurchaseSuccess from "./pages/library/PurchaseSuccess";
+import ActivationSetup from "./pages/library/ActivationSetup";
 import PurchaseHistory from "./pages/library/PurchaseHistory";
 import UserDashboard from "./pages/library/UserDashboard";
 
@@ -82,9 +83,10 @@ const UnlockedApp = () => (
   <Routes>
     {/* Marketplace Routes (primary site) */}
     <Route path="/" element={<LibraryHome />} />
-    <Route path="/packs" element={<AgentLibrary />} />
-    <Route path="/agents" element={<Navigate to="/packs" replace />} />
-    <Route path="/packs/:slug" element={<AgentDetail />} />
+    <Route path="/automations" element={<AgentLibrary />} />
+    <Route path="/packs" element={<Navigate to="/automations" replace />} />
+    <Route path="/agents" element={<Navigate to="/automations" replace />} />
+    <Route path="/automations/:slug" element={<AgentDetail />} />
     <Route path="/bundles" element={<BundleLibrary />} />
     <Route path="/bundles/:slug" element={<BundleDetail />} />
     <Route path="/how-it-works" element={<DeploymentOverview />} />
@@ -94,6 +96,7 @@ const UnlockedApp = () => (
     <Route path="/install" element={<InstallationAssistance />} />
     <Route path="/contact" element={<LibraryContact />} />
     <Route path="/purchase-success" element={<PurchaseSuccess />} />
+    <Route path="/activation-setup" element={<ActivationSetup />} />
     <Route path="/purchases" element={<PurchaseHistory />} />
     <Route path="/dashboard" element={<UserDashboard />} />
 
@@ -128,8 +131,8 @@ const UnlockedApp = () => (
     {/* Legacy redirects - redirect to marketplace equivalents */}
     <Route path="/pricing" element={<Navigate to="/bundles" replace />} />
     <Route path="/capabilities" element={<Navigate to="/how-it-works" replace />} />
-    <Route path="/get-started" element={<Navigate to="/packs" replace />} />
-    <Route path="/services" element={<Navigate to="/packs" replace />} />
+    <Route path="/get-started" element={<Navigate to="/automations" replace />} />
+    <Route path="/services" element={<Navigate to="/automations" replace />} />
     <Route path="/old-home" element={<Navigate to="/" replace />} />
     <Route path="/about" element={<Navigate to="/" replace />} />
     <Route path="/reliability" element={<Navigate to="/security" replace />} />

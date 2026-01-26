@@ -369,10 +369,10 @@ const ClientDashboard = () => {
                     <Package className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
                     <p className="text-muted-foreground mb-4">No purchases yet</p>
                     <Link
-                      to="/packs"
+                      to="/automations"
                       className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
                     >
-                      Browse Workflow Packs
+                      Browse Automations
                       <ExternalLink className="w-3 h-3" />
                     </Link>
                   </GlassCard>
@@ -383,14 +383,14 @@ const ClientDashboard = () => {
               <div>
                 <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Link to="/packs">
+                  <Link to="/automations">
                     <GlassCard className="p-4 flex items-center gap-3 group">
                       <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                         <Package className="w-5 h-5 text-primary" />
                       </div>
                       <div>
-                        <p className="font-medium">Browse Packs</p>
-                        <p className="text-xs text-muted-foreground">View workflow packs</p>
+                        <p className="font-medium">Browse Automations</p>
+                        <p className="text-xs text-muted-foreground">View hosted automations</p>
                       </div>
                     </GlassCard>
                   </Link>

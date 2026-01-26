@@ -9,7 +9,7 @@ const LibraryNavbar = () => {
   const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path + '/');
 
   const navLinks = [
-    { name: 'Automations', href: '/packs' },
+    { name: 'Automations', href: '/automations' },
     { name: 'System Bundles', href: '/bundles' },
     { name: 'How It Works', href: '/how-it-works' },
     { name: 'Documentation', href: '/docs' },

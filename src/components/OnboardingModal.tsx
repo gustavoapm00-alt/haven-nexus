@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Package, Download, FileJson, ArrowRight, Sparkles, CheckCircle } from 'lucide-react';
+import { X, Package, FileJson, ArrowRight, Sparkles, CheckCircle } from 'lucide-react';
 
 interface OnboardingModalProps {
   isOpen: boolean;
@@ -13,29 +13,29 @@ const steps = [
     id: 'welcome',
     icon: Sparkles,
     title: 'Welcome to AERELION',
-    description: 'Your marketplace for pre-engineered automation workflow packs. Browse, purchase, and download.',
-    highlight: 'Professional n8n workflows ready to import.',
+    description: 'Your platform for hosted automation systems. Browse, activate, and let us handle the rest.',
+    highlight: 'We configure and maintain everything for you.',
   },
   {
     id: 'browse',
     icon: Package,
-    title: 'Browse Workflow Packs',
-    description: 'Explore our library of automation templates. Each pack includes workflow JSON files and deployment documentation.',
+    title: 'Browse Hosted Automations',
+    description: 'Explore our library of automation systems. Each one is hosted and maintained on our infrastructure.',
     highlight: 'Find the right automation for your stack.',
   },
   {
-    id: 'download',
-    icon: Download,
-    title: 'Download & Import',
-    description: 'After purchase, download your workflow files instantly. Import them into your own n8n instance.',
-    highlight: 'Instant delivery, lifetime access.',
+    id: 'activate',
+    icon: CheckCircle,
+    title: 'Activate Your Automation',
+    description: 'After purchase, connect your tools securely and we activate the automation for you.',
+    highlight: 'No downloads, no deployment needed.',
   },
   {
-    id: 'configure',
+    id: 'maintain',
     icon: FileJson,
-    title: 'Configure in Your n8n',
-    description: 'Follow the included setup guide to import and configure workflows in your own n8n instance.',
-    highlight: 'You own and control your workflows.',
+    title: 'We Monitor and Maintain',
+    description: 'Your automation runs on our infrastructure. We handle updates, monitoring, and support.',
+    highlight: 'Stay focused on your business.',
   },
 ];
 
@@ -166,7 +166,7 @@ export const OnboardingModal = ({ isOpen, onClose, userName }: OnboardingModalPr
               >
                 {isLastStep ? (
                   <>
-                    Browse Packs
+                    Browse Automations
                     <Sparkles className="w-4 h-4" />
                   </>
                 ) : (

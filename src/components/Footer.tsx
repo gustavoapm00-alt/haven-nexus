@@ -17,10 +17,10 @@ const Footer = forwardRef<HTMLElement>((_, ref) => {
           {/* Navigation Links */}
           <div className="flex items-center gap-6 text-sm">
             <Link
-              to="/packs"
+              to="/automations"
               className="text-muted-foreground hover:text-primary transition-colors"
             >
-              Workflow Packs
+              Automations
             </Link>
             <Link
               to="/bundles"
