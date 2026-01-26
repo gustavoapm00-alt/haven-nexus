@@ -5,7 +5,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { 
   Loader2, ArrowLeft, Shield, Mail, CheckCircle, Clock, 
-  AlertCircle, Key, UserPlus, Link as LinkIcon, MessageSquare 
+  AlertCircle, Key, UserPlus, Link as LinkIcon, MessageSquare,
+  Pause, Construction, FlaskConical, PlayCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -42,10 +43,10 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.
   received: { label: 'Request Received', color: 'bg-blue-500/20 text-blue-400', icon: <Clock className="w-4 h-4" /> },
   in_review: { label: 'In Review', color: 'bg-blue-500/20 text-blue-400', icon: <Clock className="w-4 h-4" /> },
   awaiting_credentials: { label: 'Awaiting Access Info', color: 'bg-yellow-500/20 text-yellow-400', icon: <Key className="w-4 h-4" /> },
-  in_build: { label: 'Building', color: 'bg-purple-500/20 text-purple-400', icon: <Loader2 className="w-4 h-4 animate-spin" /> },
-  testing: { label: 'Testing', color: 'bg-orange-500/20 text-orange-400', icon: <Clock className="w-4 h-4" /> },
-  live: { label: 'Live', color: 'bg-green-500/20 text-green-400', icon: <CheckCircle className="w-4 h-4" /> },
-  paused: { label: 'Paused', color: 'bg-gray-500/20 text-gray-400', icon: <Clock className="w-4 h-4" /> },
+  in_build: { label: 'Building', color: 'bg-purple-500/20 text-purple-400', icon: <Construction className="w-4 h-4" /> },
+  testing: { label: 'Testing', color: 'bg-orange-500/20 text-orange-400', icon: <FlaskConical className="w-4 h-4" /> },
+  live: { label: 'Live', color: 'bg-green-500/20 text-green-400', icon: <PlayCircle className="w-4 h-4" /> },
+  paused: { label: 'Paused', color: 'bg-gray-500/20 text-gray-400', icon: <Pause className="w-4 h-4" /> },
   needs_attention: { label: 'Action Needed', color: 'bg-red-500/20 text-red-400', icon: <AlertCircle className="w-4 h-4" /> },
   completed: { label: 'Completed', color: 'bg-emerald-500/20 text-emerald-400', icon: <CheckCircle className="w-4 h-4" /> },
 };
@@ -59,23 +60,63 @@ const TIMELINE_STEPS = [
   { status: 'live', label: 'Live' },
 ];
 
-// Pattern to detect potential API keys/secrets
+// Strong secret detection patterns - provider-specific prefixes
 const SECRET_PATTERNS = [
-  /^sk[-_]/i,
-  /^pk[-_]/i,
-  /^api[-_]?key/i,
-  /^bearer\s+/i,
-  /^[a-zA-Z0-9]{32,}$/,
-  /^xox[baprs]-/i,
-  /^ghp_/i,
-  /^gho_/i,
-  /^github_pat_/i,
+  // OpenAI
+  /^sk-[a-zA-Z0-9]{20,}$/,
+  /^sk-proj-[a-zA-Z0-9-_]{20,}$/,
+  // Stripe
+  /^sk_live_[a-zA-Z0-9]{20,}$/,
+  /^sk_test_[a-zA-Z0-9]{20,}$/,
+  /^pk_live_[a-zA-Z0-9]{20,}$/,
+  /^pk_test_[a-zA-Z0-9]{20,}$/,
+  /^rk_live_[a-zA-Z0-9]{20,}$/,
+  /^rk_test_[a-zA-Z0-9]{20,}$/,
+  // Slack
+  /^xox[baprs]-[a-zA-Z0-9-]+$/,
+  // GitHub
+  /^ghp_[a-zA-Z0-9]{36,}$/,
+  /^gho_[a-zA-Z0-9]{36,}$/,
+  /^github_pat_[a-zA-Z0-9_]{22,}$/,
+  // AWS
+  /^AKIA[0-9A-Z]{16}$/,
+  /^ASIA[0-9A-Z]{16}$/,
+  // Google
+  /^AIza[0-9A-Za-z_-]{35}$/,
+  // Bearer tokens
+  /^Bearer\s+[a-zA-Z0-9._-]{20,}$/i,
+  // Twilio
+  /^SK[a-f0-9]{32}$/,
+  // SendGrid / Resend
+  /^SG\.[a-zA-Z0-9_-]{22}\.[a-zA-Z0-9_-]{43}$/,
+  /^re_[a-zA-Z0-9]{20,}$/,
+  // Generic but with high entropy requirement (40+ chars, mixed alphanumeric, not a URL)
 ];
 
 function looksLikeSecret(value: string): boolean {
   const trimmed = value.trim();
   if (trimmed.length < 20) return false;
-  return SECRET_PATTERNS.some(pattern => pattern.test(trimmed));
+  
+  // Check provider-specific patterns first
+  const hasSecretPattern = SECRET_PATTERNS.some(pattern => pattern.test(trimmed));
+  if (hasSecretPattern) return true;
+  
+  // Skip URLs - they are not secrets
+  if (/^https?:\/\//i.test(trimmed)) return false;
+  
+  // Skip UUIDs
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(trimmed)) return false;
+  
+  // High-entropy generic detection: 40+ chars, must have letters AND numbers, no spaces
+  if (trimmed.length >= 40 && /[a-zA-Z]/.test(trimmed) && /[0-9]/.test(trimmed) && !/\s/.test(trimmed)) {
+    // Additional check: if it's mostly alphanumeric with few special chars, might be a key
+    const alphanumericRatio = (trimmed.match(/[a-zA-Z0-9]/g) || []).length / trimmed.length;
+    if (alphanumericRatio > 0.85) {
+      return true;
+    }
+  }
+  
+  return false;
 }
 
 interface ActivationRequest {
@@ -126,27 +167,23 @@ export default function ActivationRequestDetail() {
     setLoading(true);
     setError(null);
     
+    // Query with BOTH id AND email for server-side enforcement
     const { data, error: fetchError } = await supabase
       .from('installation_requests')
       .select('id, name, email, purchased_item, preferred_systems, customer_visible_status, status_updated_at, activation_eta, activation_notes_customer')
       .eq('id', id)
+      .eq('email', user.email)
       .maybeSingle();
 
     if (fetchError) {
+      console.error('Fetch error:', fetchError);
       setError('Failed to load activation request.');
       setLoading(false);
       return;
     }
 
     if (!data) {
-      setError('Activation request not found.');
-      setLoading(false);
-      return;
-    }
-
-    // Verify email matches
-    if (data.email.toLowerCase() !== user.email.toLowerCase()) {
-      setError('You do not have permission to view this request.');
+      setError('Activation request not found or you do not have permission to view it.');
       setLoading(false);
       return;
     }
@@ -226,11 +263,12 @@ export default function ActivationRequestDetail() {
           status: 'in_review',
           status_updated_at: new Date().toISOString(),
         })
-        .eq('id', request.id);
+        .eq('id', request.id)
+        .eq('email', user.email); // Additional safety
 
       if (updateError) throw updateError;
 
-      // Trigger notification
+      // Trigger notification (don't fail submission if this fails)
       try {
         await supabase.functions.invoke('notify-activation-customer-update', {
           body: {
@@ -245,7 +283,6 @@ export default function ActivationRequestDetail() {
         });
       } catch (notifyError) {
         console.error('Notification error:', notifyError);
-        // Don't fail the submission if notification fails
       }
 
       toast({
@@ -259,6 +296,7 @@ export default function ActivationRequestDetail() {
       setMessage('');
       setSecureLink('');
       setCredentialReference('');
+      setFormErrors({});
       
       // Refresh request
       fetchRequest();
@@ -423,6 +461,19 @@ export default function ActivationRequestDetail() {
             </div>
           </div>
         )}
+
+        {/* Security Warning Banner */}
+        <div className="bg-destructive/5 border border-destructive/20 rounded-xl p-4 mb-6">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-destructive mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="font-medium text-destructive">Do not paste API keys or secrets here</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Use the reference method to indicate where the key is stored (e.g., "1Password vault: AERELION/YourCompany/Tool").
+              </p>
+            </div>
+          </div>
+        </div>
 
         {/* Credential Submission Form */}
         <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl p-6">
