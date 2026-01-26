@@ -107,7 +107,7 @@ const Admin = () => {
               <Link to="/portal/dashboard">
                 <Button variant="outline" size="sm">
                   <LayoutDashboard className="w-4 h-4 mr-2" />
-                  My Downloads
+                  My Automations
                 </Button>
               </Link>
               <Button variant="ghost" onClick={handleSignOut}>

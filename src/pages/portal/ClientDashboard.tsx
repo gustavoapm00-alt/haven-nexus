@@ -35,10 +35,10 @@ const INTEGRATION_CONFIG: Record<string, { name: string; icon: string }> = {
 
 const NAV_ITEMS = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-  { id: 'downloads', label: 'My Downloads', icon: Download },
+  { id: 'automations', label: 'My Automations', icon: Package },
   { id: 'integrations', label: 'Integrations', icon: Puzzle },
   { id: 'billing', label: 'Billing', icon: CreditCard, href: '/portal/billing' },
-  { id: 'activity', label: 'Download Activity', icon: FileDown, href: '/portal/activity' },
+  { id: 'activity', label: 'Activation History', icon: FileDown, href: '/portal/activity' },
   { id: 'support', label: 'Support', icon: HelpCircle },
 ];
 
@@ -234,7 +234,7 @@ const ClientDashboard = () => {
             <div>
               <h2 className="text-2xl font-semibold">
                 {activeSection === 'overview' && 'Dashboard'}
-                {activeSection === 'downloads' && 'My Downloads'}
+                {activeSection === 'automations' && 'My Automations'}
                 {activeSection === 'integrations' && 'Integrations'}
                 {activeSection === 'billing' && 'Billing'}
                 {activeSection === 'support' && 'Support'}
@@ -354,13 +354,13 @@ const ClientDashboard = () => {
                             <p className="text-xs text-muted-foreground capitalize">{purchase.item_type}</p>
                           </div>
                         </div>
-                        <button
-                          onClick={() => handleDownload(purchase)}
+                        <Link
+                          to={`/automations/${purchase.item_id}`}
                           className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/10 rounded-lg transition-colors"
                         >
-                          <Download className="w-3 h-3" />
-                          Download
-                        </button>
+                          <ChevronRight className="w-3 h-3" />
+                          View Status
+                        </Link>
                       </GlassCard>
                     ))}
                   </div>
@@ -395,24 +395,26 @@ const ClientDashboard = () => {
                     </GlassCard>
                   </Link>
 
-                  <GlassCard className="p-4 flex items-center gap-3 opacity-60 cursor-not-allowed">
-                    <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
-                      <Upload className="w-5 h-5 text-muted-foreground" />
-                    </div>
-                    <div>
-                      <p className="font-medium">Import Workflow</p>
-                      <p className="text-xs text-muted-foreground">Coming soon</p>
-                    </div>
-                  </GlassCard>
+                  <Link to="/activation-setup">
+                    <GlassCard className="p-4 flex items-center gap-3 group">
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                        <Upload className="w-5 h-5 text-primary" />
+                      </div>
+                      <div>
+                        <p className="font-medium">Activation Setup</p>
+                        <p className="text-xs text-muted-foreground">Connect your tools</p>
+                      </div>
+                    </GlassCard>
+                  </Link>
 
-                  <Link to="/docs">
+                  <Link to="/activation-walkthrough">
                     <GlassCard className="p-4 flex items-center gap-3 group">
                       <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                         <BookOpen className="w-5 h-5 text-primary" />
                       </div>
                       <div>
-                        <p className="font-medium">Setup Guide</p>
-                        <p className="text-xs text-muted-foreground">Documentation & help</p>
+                        <p className="font-medium">Activation Guide</p>
+                        <p className="text-xs text-muted-foreground">How it works</p>
                       </div>
                     </GlassCard>
                   </Link>
@@ -421,8 +423,8 @@ const ClientDashboard = () => {
             </div>
           )}
 
-          {/* My Downloads Section */}
-          {activeSection === 'downloads' && (
+          {/* My Automations Section */}
+          {activeSection === 'automations' && (
             <div className="space-y-6">
               {isLoadingPurchases ? (
                 <div className="flex items-center justify-center py-16">

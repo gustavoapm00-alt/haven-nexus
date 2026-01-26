@@ -145,7 +145,7 @@ const PurchaseHistory = () => {
   if (!authLoading && !user) {
     return (
       <div className="min-h-screen bg-background">
-        <SEO title="My Purchases" description="View your purchase history and download your automation files." />
+        <SEO title="My Purchases" description="View your purchase history and access your activated automations." />
         <LibraryNavbar />
         <SectionBand variant="light">
           <div className="max-w-md mx-auto text-center py-20">
@@ -154,7 +154,7 @@ const PurchaseHistory = () => {
             </div>
             <h1 className="text-2xl font-semibold text-foreground mb-3">Sign In Required</h1>
             <p className="text-muted-foreground mb-6">
-              Please sign in to view your purchases and access download links.
+              Please sign in to view your purchases and automation status.
             </p>
             <Button asChild>
               <Link to={`/auth?redirect=${encodeURIComponent('/purchases')}`}>
@@ -171,7 +171,7 @@ const PurchaseHistory = () => {
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-background">
-        <SEO title="My Purchases" description="View your purchase history and download your automation files." />
+        <SEO title="My Purchases" description="View your purchase history and access your activated automations." />
         <LibraryNavbar />
         <div className="section-padding flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
@@ -188,7 +188,7 @@ const PurchaseHistory = () => {
     <>
       <SEO
         title="My Purchases - AERELION Library"
-        description="View your purchase history and download your automation workflow files."
+        description="View your purchase history and access your activated automation systems."
       />
 
       <div className="min-h-screen bg-background">
@@ -296,64 +296,15 @@ const PurchaseHistory = () => {
                       </Button>
                       <Button
                         size="sm"
-                        onClick={() => fetchDownloads(purchase)}
-                        disabled={downloadingId === purchase.id}
+                        asChild
                       >
-                        {downloadingId === purchase.id ? (
-                          <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Loading...
-                          </>
-                        ) : (
-                          <>
-                            <Download className="w-4 h-4 mr-2" />
-                            Get Downloads
-                          </>
-                        )}
+                        <Link to="/activation-setup">
+                          <ArrowRight className="w-4 h-4 mr-2" />
+                          Start Activation
+                        </Link>
                       </Button>
                     </div>
                   </div>
-
-                  {/* Download Links */}
-                  {downloads[purchase.id] && downloads[purchase.id].length > 0 && (
-                    <motion.div 
-                      className="mt-4 pt-4 border-t border-border"
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                    >
-                      <div className="flex items-center justify-between mb-3">
-                        <h4 className="text-sm font-medium text-foreground">Download Files</h4>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => fetchDownloads(purchase)}
-                          disabled={downloadingId === purchase.id}
-                        >
-                          <RefreshCw className={`w-3 h-3 mr-1 ${downloadingId === purchase.id ? 'animate-spin' : ''}`} />
-                          Refresh
-                        </Button>
-                      </div>
-                      <div className="grid gap-2 sm:grid-cols-2">
-                        {downloads[purchase.id].map((download, i) => (
-                          <a
-                            key={i}
-                            href={download.url}
-                            download
-                            className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors group"
-                          >
-                            <FileText className="w-4 h-4 text-muted-foreground shrink-0" />
-                            <span className="text-sm font-medium text-foreground truncate flex-1">
-                              {download.name}
-                            </span>
-                            <Download className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
-                          </a>
-                        ))}
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-3">
-                        Links expire in 1 hour. Click "Refresh" to generate new links.
-                      </p>
-                    </motion.div>
-                  )}
                 </motion.div>
               ))}
             </div>
@@ -366,14 +317,14 @@ const PurchaseHistory = () => {
             <div className="max-w-2xl mx-auto text-center">
               <h2 className="text-lg font-semibold text-foreground mb-2">Need Help?</h2>
               <p className="text-muted-foreground mb-4">
-                If you're having trouble with downloads or need installation assistance, we're here to help.
+                If you need assistance with activation or have questions about your automations, we're here to help.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                 <Button asChild variant="outline">
-                  <Link to="/docs">View Documentation</Link>
+                  <Link to="/activation-walkthrough">View Activation Guide</Link>
                 </Button>
                 <Button asChild variant="outline">
-                  <Link to="/install">Request Installation Help</Link>
+                  <Link to="/contact">Contact Support</Link>
                 </Button>
               </div>
             </div>

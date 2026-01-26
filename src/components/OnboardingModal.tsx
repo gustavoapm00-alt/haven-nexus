@@ -28,7 +28,7 @@ const steps = [
     icon: CheckCircle,
     title: 'Activate Your Automation',
     description: 'After purchase, connect your tools securely and we activate the automation for you.',
-    highlight: 'No downloads, no deployment needed.',
+    highlight: 'We handle setup and configuration.',
   },
   {
     id: 'maintain',

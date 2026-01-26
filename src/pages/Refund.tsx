@@ -9,7 +9,7 @@ const Refund = () => {
     <div className="min-h-screen bg-background">
       <SEO 
         title="Refund Policy"
-        description="Refund Policy for AERELION. Learn about our digital product refund terms for workflow packs and bundles."
+        description="Refund Policy for AERELION Systems. Learn about our refund terms for hosted automation services."
         canonicalUrl="/refund"
         structuredData={schemas.breadcrumb([
           { name: 'Home', url: '/' },
@@ -100,8 +100,8 @@ const Refund = () => {
                   <h2 className="font-display text-2xl mb-4">7. Non-Refundable Items</h2>
                   <p className="text-muted-foreground mb-4">The following are not eligible for refunds:</p>
                   <ul className="list-disc list-inside text-muted-foreground space-y-2">
-                    <li>Downloaded digital products (workflow packs, bundles)</li>
-                    <li>Installation assistance services already rendered</li>
+                    <li>Activated automation systems once configuration has begun</li>
+                    <li>Activation and setup services already rendered</li>
                     <li>Third-party costs incurred on your behalf</li>
                   </ul>
                 </section>

@@ -107,7 +107,7 @@ const Footer = forwardRef<HTMLElement>((_, ref) => {
         </div>
 
         <p className="text-center text-xs text-muted-foreground/60 mt-4">
-          AERELION provides downloadable automation templates for n8n. Files are delivered digitally for import into your own infrastructure.
+          AERELION Systems configures, hosts, and maintains business automations on our infrastructure. You get outcomes, not files.
         </p>
       </div>
     </footer>

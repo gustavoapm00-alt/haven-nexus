@@ -13,7 +13,7 @@ const LibraryFooter = () => {
               AERELION
             </Link>
             <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
-              Hosted automation systems for operational teams.
+              We configure, host, and maintain business automations on our infrastructure.
             </p>
           </div>
 
