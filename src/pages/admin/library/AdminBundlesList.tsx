@@ -169,7 +169,7 @@ const AdminBundlesList = () => {
                     <TableHead>Slug</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Price</TableHead>
-                    <TableHead>Packs</TableHead>
+                    <TableHead>Automations</TableHead>
                     <TableHead className="w-24">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -194,7 +194,7 @@ const AdminBundlesList = () => {
                       <TableCell>{formatPrice(bundle.bundle_price_cents)}</TableCell>
                       <TableCell>
                         <span className="px-2 py-1 bg-secondary rounded text-xs">
-                          {bundle.included_agent_ids?.length || 0} packs
+                          {bundle.included_agent_ids?.length || 0} automations
                         </span>
                       </TableCell>
                       <TableCell>

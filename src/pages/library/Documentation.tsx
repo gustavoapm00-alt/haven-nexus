@@ -32,9 +32,9 @@ const Documentation = () => {
       title: 'Security & Privacy',
       description: 'How we handle your data and credentials.',
       links: [
-        { label: 'How credentials are stored', href: '#' },
-        { label: 'Data handling practices', href: '#' },
-        { label: 'Revoking access', href: '#' },
+        { label: 'How credentials are stored', href: '/security' },
+        { label: 'Data handling practices', href: '/security' },
+        { label: 'Revoking access', href: '/security' },
       ],
     },
     {

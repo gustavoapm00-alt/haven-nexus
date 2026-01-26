@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Loader2, CheckCircle, Send } from 'lucide-react';
+import { Loader2, CheckCircle, Send, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -32,11 +32,17 @@ const SETUP_WINDOWS = [
   'This week',
 ];
 
+interface FormErrors {
+  businessName?: string;
+  contactEmail?: string;
+}
+
 const ActivationSetup = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [errors, setErrors] = useState<FormErrors>({});
 
   const [formData, setFormData] = useState({
     businessName: '',
@@ -58,11 +64,27 @@ const ActivationSetup = () => {
     }));
   };
 
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {};
+    
+    if (!formData.businessName.trim()) {
+      newErrors.businessName = 'Business name is required';
+    }
+    
+    if (!formData.contactEmail.trim()) {
+      newErrors.contactEmail = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.contactEmail)) {
+      newErrors.contactEmail = 'Please enter a valid email address';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.businessName || !formData.contactEmail) {
-      toast.error('Please fill in required fields');
+    if (!validateForm()) {
       return;
     }
 
@@ -83,8 +105,13 @@ const ActivationSetup = () => {
 
       if (error) throw error;
 
+      // Trigger admin notification (fire and forget)
+      supabase.functions.invoke('notify-activation-request', {
+        body: formData,
+      }).catch(err => console.error('Notification failed:', err));
+
       setSubmitted(true);
-      toast.success('Setup request received!');
+      toast.success('Activation request received!');
     } catch (err) {
       console.error('Error submitting activation setup:', err);
       toast.error('Failed to submit. Please try again or contact us directly.');
@@ -160,10 +187,19 @@ const ActivationSetup = () => {
                 <Input
                   type="text"
                   value={formData.businessName}
-                  onChange={(e) => setFormData(prev => ({ ...prev, businessName: e.target.value }))}
+                  onChange={(e) => {
+                    setFormData(prev => ({ ...prev, businessName: e.target.value }));
+                    if (errors.businessName) setErrors(prev => ({ ...prev, businessName: undefined }));
+                  }}
                   placeholder="Your company or business name"
-                  required
+                  className={errors.businessName ? 'border-destructive' : ''}
                 />
+                {errors.businessName && (
+                  <p className="text-sm text-destructive mt-1 flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3" />
+                    {errors.businessName}
+                  </p>
+                )}
               </div>
 
               {/* Contact Email */}
@@ -174,10 +210,19 @@ const ActivationSetup = () => {
                 <Input
                   type="email"
                   value={formData.contactEmail}
-                  onChange={(e) => setFormData(prev => ({ ...prev, contactEmail: e.target.value }))}
+                  onChange={(e) => {
+                    setFormData(prev => ({ ...prev, contactEmail: e.target.value }));
+                    if (errors.contactEmail) setErrors(prev => ({ ...prev, contactEmail: undefined }));
+                  }}
                   placeholder="your@email.com"
-                  required
+                  className={errors.contactEmail ? 'border-destructive' : ''}
                 />
+                {errors.contactEmail && (
+                  <p className="text-sm text-destructive mt-1 flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3" />
+                    {errors.contactEmail}
+                  </p>
+                )}
               </div>
 
               {/* Phone (Optional) */}

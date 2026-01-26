@@ -68,7 +68,7 @@ const AdminAgentsList = () => {
     const { data, error } = await query;
 
     if (error) {
-      toast.error('Failed to fetch workflow packs');
+      toast.error('Failed to fetch automations');
       console.error(error);
     } else {
       setAgents(data || []);
@@ -83,7 +83,7 @@ const AdminAgentsList = () => {
       .eq('id', id);
 
     if (error) {
-      toast.error('Failed to delete workflow pack');
+      toast.error('Failed to delete automation');
       console.error(error);
     } else {
       toast.success(`Deleted "${name}"`);
@@ -115,7 +115,7 @@ const AdminAgentsList = () => {
                   Admin
                 </Link>
               </Button>
-              <h1 className="font-display text-xl">Workflow Packs</h1>
+              <h1 className="font-display text-xl">Hosted Automations</h1>
             </div>
             <div className="flex items-center gap-2">
               <Button variant="outline" asChild>
@@ -126,7 +126,7 @@ const AdminAgentsList = () => {
               <Button asChild>
                 <Link to="/admin/library/agents/new">
                   <Plus className="w-4 h-4 mr-2" />
-                  New Pack
+                  New Automation
                 </Link>
               </Button>
             </div>
@@ -137,7 +137,7 @@ const AdminAgentsList = () => {
           {/* Filters */}
           <div className="flex items-center gap-4 mb-6">
             <Input
-              placeholder="Search packs..."
+              placeholder="Search automations..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="max-w-xs"

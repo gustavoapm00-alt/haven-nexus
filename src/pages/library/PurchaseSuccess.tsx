@@ -446,6 +446,20 @@ const PurchaseSuccess = () => {
                 </div>
               </div>
               
+              <div className="flex flex-col sm:flex-row items-center gap-4 mt-6 pt-4 border-t border-border">
+                <Button asChild className="w-full sm:w-auto">
+                  <Link to="/activation-setup">
+                    Start Activation Setup
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" className="w-full sm:w-auto">
+                  <Link to="/activation-walkthrough">
+                    View Activation Walkthrough
+                  </Link>
+                </Button>
+              </div>
+              
               <p className="text-sm text-muted-foreground mt-6 pt-4 border-t border-border">
                 Questions? Contact us at <a href="mailto:contact@aerelion.systems" className="text-primary hover:underline">contact@aerelion.systems</a>
               </p>

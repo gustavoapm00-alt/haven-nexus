@@ -7,28 +7,28 @@ const SecurityPractices = () => {
   const practices = [
     {
       icon: Lock,
-      title: 'Customer-Controlled Workflows',
-      description: 'All workflow packs are designed for import into your own n8n instance. AERELION does not host, run, or access your workflows or systems remotely.',
+      title: 'Hosted Infrastructure',
+      description: 'All automations run on AERELION\'s secure infrastructure. You never need to manage servers, deployments, or technical configurations.',
     },
     {
       icon: Database,
-      title: 'No Centralized Data Processing',
-      description: 'AERELION does not store, process, or retain any operational data from your workflows. All data remains within your infrastructure at all times.',
+      title: 'Minimal Data Retention',
+      description: 'AERELION retains operational data only as long as necessary to run your automations. Logs and temporary data are regularly purged.',
     },
     {
       icon: Eye,
-      title: 'Workflow Transparency',
-      description: 'Every workflow pack is delivered as a complete, inspectable JSON file. Customers have full visibility into the logic, data handling, and system connections before and after import.',
+      title: 'Automation Transparency',
+      description: 'You have full visibility into what your automation does. We provide clear documentation of triggers, actions, and data flows.',
     },
     {
       icon: Users,
       title: 'Access Control',
-      description: 'Workflow pack publishing and library management is restricted to authorized administrators. Public access is limited to viewing published packs and completing purchases.',
+      description: 'Automation management is restricted to authorized administrators. You maintain control over connected accounts and can revoke access at any time.',
     },
     {
       icon: Shield,
       title: 'Data Minimization',
-      description: 'AERELION collects only the minimum data required to process purchases and deliver products: email address, purchase record, and payment confirmation. No operational data is collected.',
+      description: 'AERELION collects only the minimum data required to operate your automations: connection credentials (encrypted) and operational logs. We never sell customer data.',
     },
   ];
 
@@ -80,7 +80,7 @@ const SecurityPractices = () => {
             <div className="mt-16 p-6 bg-muted/50 rounded-lg border border-border">
               <h3 className="font-semibold text-foreground mb-3">Summary</h3>
               <p className="text-muted-foreground text-sm leading-relaxed">
-                AERELION delivers pre-engineered workflow packs that customers download and import into their own n8n instance. We do not access customer systems, process operational data, or maintain ongoing connections. Customers retain full control over their automation infrastructure.
+                AERELION operates hosted automations on our infrastructure. We securely store your credentials, run your automations, and maintain everything for you. You retain control over connected accounts and can revoke access at any time. For detailed security information, visit our <a href="/security" className="text-primary hover:underline">Security & Data Practices</a> page.
               </p>
             </div>
           </div>

@@ -124,7 +124,7 @@ const DeploymentOverview = () => {
             {/* CTA */}
             <div className="text-center">
               <Button asChild size="lg">
-                <Link to="/packs">Browse Automations</Link>
+                <Link to="/automations">Browse Automations</Link>
               </Button>
             </div>
           </div>

@@ -5,9 +5,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { 
   Loader2, LogOut, Mail, MessageSquare, Trash2, RefreshCw, 
-  ArrowRight, Settings, LayoutDashboard, Activity, Package
+  ArrowRight, Settings, LayoutDashboard, Activity, Package, Zap
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ActivationRequestsTable } from '@/components/admin/ActivationRequestsTable';
 
 interface EmailSignup {
   id: string;
@@ -134,12 +135,12 @@ const Admin = () => {
                 </div>
                 <div>
                   <h3 className="font-display text-lg group-hover:text-primary transition-colors">My Purchases</h3>
-                  <p className="text-muted-foreground text-sm">View and download your workflow packs</p>
+                  <p className="text-muted-foreground text-sm">View your purchased automations</p>
                 </div>
               </div>
             </Link>
             <Link 
-              to="/packs" 
+              to="/automations" 
               className="group card-glass p-6 rounded-xl border-2 border-transparent hover:border-primary/50 transition-all"
             >
               <div className="flex items-center gap-4">
@@ -147,8 +148,8 @@ const Admin = () => {
                   <Activity className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-display text-lg group-hover:text-primary transition-colors">Browse Packs</h3>
-                  <p className="text-muted-foreground text-sm">Explore workflow packs</p>
+                  <h3 className="font-display text-lg group-hover:text-primary transition-colors">Browse Automations</h3>
+                  <p className="text-muted-foreground text-sm">Explore hosted automations</p>
                 </div>
               </div>
             </Link>
@@ -189,12 +190,12 @@ const Admin = () => {
               <Settings className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <h2 className="font-display text-2xl">Marketplace Admin</h2>
-              <p className="text-muted-foreground text-sm">Manage workflow packs, bundles, and track activity</p>
+              <h2 className="font-display text-2xl">Hosted Automations Admin</h2>
+              <p className="text-muted-foreground text-sm">Manage automations, bundles, and track activity</p>
             </div>
           </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             <Link 
               to="/admin/library" 
               className="group card-glass p-6 rounded-xl border-2 border-transparent hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5"
@@ -205,7 +206,7 @@ const Admin = () => {
                 </div>
                 <div>
                   <h3 className="font-display text-xl mb-1 group-hover:text-primary transition-colors">Product Library</h3>
-                  <p className="text-muted-foreground text-sm">Manage workflow packs & bundles</p>
+                  <p className="text-muted-foreground text-sm">Manage automations & bundles</p>
                 </div>
               </div>
             </Link>
@@ -220,7 +221,7 @@ const Admin = () => {
                 </div>
                 <div>
                   <h3 className="font-display text-xl mb-1 group-hover:text-primary transition-colors">Marketplace Activity</h3>
-                  <p className="text-muted-foreground text-sm">Track purchases & downloads</p>
+                  <p className="text-muted-foreground text-sm">Track purchases & activity</p>
                 </div>
               </div>
             </Link>
@@ -239,6 +240,23 @@ const Admin = () => {
                 </div>
               </div>
             </Link>
+          </div>
+        </div>
+
+        {/* Activation Requests Section */}
+        <div className="mb-10">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <Zap className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <h2 className="font-display text-2xl">Activation Requests</h2>
+              <p className="text-muted-foreground text-sm">Pending automation activation requests from customers</p>
+            </div>
+          </div>
+          
+          <div className="card-glass rounded-lg p-6">
+            <ActivationRequestsTable />
           </div>
         </div>
 

@@ -32,3 +32,6 @@ verify_jwt = false
 
 [functions.get-usage-analytics]
 verify_jwt = false
+
+[functions.notify-activation-request]
+verify_jwt = false

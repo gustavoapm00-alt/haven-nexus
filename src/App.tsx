@@ -29,11 +29,13 @@ import BundleLibrary from "./pages/library/BundleLibrary";
 import BundleDetail from "./pages/library/BundleDetail";
 import DeploymentOverview from "./pages/library/DeploymentOverview";
 import SecurityPractices from "./pages/library/SecurityPractices";
+import Security from "./pages/library/Security";
 import Documentation from "./pages/library/Documentation";
 import InstallationAssistance from "./pages/library/InstallationAssistance";
 import LibraryContact from "./pages/library/LibraryContact";
 import PurchaseSuccess from "./pages/library/PurchaseSuccess";
 import ActivationSetup from "./pages/library/ActivationSetup";
+import ActivationWalkthrough from "./pages/library/ActivationWalkthrough";
 import PurchaseHistory from "./pages/library/PurchaseHistory";
 import UserDashboard from "./pages/library/UserDashboard";
 
@@ -85,18 +87,21 @@ const UnlockedApp = () => (
     <Route path="/" element={<LibraryHome />} />
     <Route path="/automations" element={<AgentLibrary />} />
     <Route path="/packs" element={<Navigate to="/automations" replace />} />
+    <Route path="/packs/:slug" element={<Navigate to="/automations" replace />} />
     <Route path="/agents" element={<Navigate to="/automations" replace />} />
     <Route path="/automations/:slug" element={<AgentDetail />} />
     <Route path="/bundles" element={<BundleLibrary />} />
     <Route path="/bundles/:slug" element={<BundleDetail />} />
     <Route path="/how-it-works" element={<DeploymentOverview />} />
     <Route path="/deployment" element={<Navigate to="/how-it-works" replace />} />
-    <Route path="/security" element={<SecurityPractices />} />
+    <Route path="/security" element={<Security />} />
+    <Route path="/security-practices" element={<SecurityPractices />} />
     <Route path="/docs" element={<Documentation />} />
     <Route path="/install" element={<InstallationAssistance />} />
     <Route path="/contact" element={<LibraryContact />} />
     <Route path="/purchase-success" element={<PurchaseSuccess />} />
     <Route path="/activation-setup" element={<ActivationSetup />} />
+    <Route path="/activation-walkthrough" element={<ActivationWalkthrough />} />
     <Route path="/purchases" element={<PurchaseHistory />} />
     <Route path="/dashboard" element={<UserDashboard />} />
 
