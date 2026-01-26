@@ -41,13 +41,13 @@ const AdminLibraryHome = () => {
                 </div>
                 <div className="flex-1">
                   <h3 className="font-display text-xl mb-2 group-hover:text-primary transition-colors">
-                    Workflow Packs
+                    Hosted Automations
                   </h3>
                   <p className="text-muted-foreground text-sm mb-4">
-                    Manage individual n8n workflow packs. Upload workflows, set pricing, and publish to the marketplace.
+                    Manage hosted automations. Configure pricing, requirements, and publish to the marketplace.
                   </p>
                   <span className="text-sm text-primary font-medium">
-                    Manage Packs →
+                    Manage Automations →
                   </span>
                 </div>
               </div>

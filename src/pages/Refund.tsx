@@ -51,14 +51,14 @@ const Refund = () => {
                 </section>
 
                 <section>
-                  <h2 className="font-display text-2xl mb-4">3. Digital Products</h2>
+                  <h2 className="font-display text-2xl mb-4">3. Hosted Automation Services</h2>
                   <p className="text-muted-foreground">
-                    Workflow packs and bundles are digital products delivered immediately upon purchase. 
-                    Due to the nature of digital delivery:
+                    Hosted automations and system bundles are activated and maintained by AERELION. 
+                    Due to the nature of hosted services:
                   </p>
                   <ul className="list-disc list-inside text-muted-foreground space-y-2 mt-4">
-                    <li>All sales of downloadable workflow packs are final</li>
-                    <li>Refunds are not available once files have been downloaded</li>
+                    <li>All sales of hosted automations are final once activation begins</li>
+                    <li>Refunds are not available once the automation has been configured</li>
                     <li>We recommend reviewing product details before purchase</li>
                   </ul>
                 </section>

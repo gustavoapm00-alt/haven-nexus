@@ -459,13 +459,13 @@ const ClientDashboard = () => {
               ) : (
                 <GlassCard className="p-12 text-center">
                   <Package className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No workflow packs yet</h3>
-                  <p className="text-muted-foreground mb-6">Browse our library to find workflow packs that fit your needs</p>
+                  <h3 className="text-lg font-semibold mb-2">No automations yet</h3>
+                  <p className="text-muted-foreground mb-6">Browse our library to find hosted automations that fit your needs</p>
                   <Link
-                    to="/packs"
+                    to="/automations"
                     className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
                   >
-                    Browse Workflow Packs
+                    Browse Automations
                     <ExternalLink className="w-4 h-4" />
                   </Link>
                 </GlassCard>
