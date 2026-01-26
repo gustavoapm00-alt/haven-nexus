@@ -35,3 +35,6 @@ verify_jwt = false
 
 [functions.notify-activation-request]
 verify_jwt = false
+
+[functions.notify-activation-status]
+verify_jwt = false

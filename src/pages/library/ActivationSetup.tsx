@@ -91,7 +91,7 @@ const ActivationSetup = () => {
     setLoading(true);
 
     try {
-      // Save to installation_requests table
+      // Save to installation_requests table with new status tracking fields
       const { error } = await supabase
         .from('installation_requests')
         .insert({
@@ -100,12 +100,17 @@ const ActivationSetup = () => {
           company: formData.businessName,
           purchased_item: formData.itemName || `${formData.purchaseType} (unspecified)`,
           preferred_systems: formData.selectedTools.join(', '),
-          notes: `Phone: ${formData.phone || 'Not provided'}\nSetup Window: ${formData.setupWindow}\n\n${formData.notes}`,
+          notes: `Phone: ${formData.phone || 'Not provided'}\n\n${formData.notes}`,
+          status: 'received',
+          customer_visible_status: 'received',
+          status_updated_at: new Date().toISOString(),
+          setup_window: formData.setupWindow,
+          activation_eta: formData.setupWindow,
         });
 
       if (error) throw error;
 
-      // Trigger admin notification (fire and forget)
+      // Trigger admin notification and customer confirmation (fire and forget)
       supabase.functions.invoke('notify-activation-request', {
         body: formData,
       }).catch(err => console.error('Notification failed:', err));
