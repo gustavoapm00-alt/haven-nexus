@@ -18,29 +18,29 @@ const LibraryHero = () => {
               className="text-center lg:text-left"
             >
               <p className="text-xs font-semibold text-primary mb-4 tracking-[0.2em] uppercase">
-                AERELION LIBRARY
+                AERELION SYSTEMS
               </p>
               <h1 className="text-4xl md:text-5xl lg:text-[3.25rem] font-bold text-foreground tracking-tight mb-6 leading-[1.1]">
-                Workflow packs you can import in hours, not weeks.
+                Automation systems activated for you in hours, not weeks.
               </h1>
               <p className="text-lg text-muted-foreground leading-relaxed mb-8 max-w-xl mx-auto lg:mx-0">
-                Browse proven n8n workflow packs and bundles built for real operational outcomes. Purchase, download, and import into your own n8n instance.
+                Browse hosted automations and system bundles built for real operational outcomes. We configure, run, and maintain everything—no code, no infrastructure.
               </p>
               
               <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-4">
                 <Button asChild size="lg" className="glow-accent">
                   <Link to="/packs">
-                    Browse Packs
+                    Activate Automations
                     <ArrowRight className="ml-2 w-4 h-4" />
                   </Link>
                 </Button>
                 <Button asChild variant="outline" size="lg">
-                  <Link to="/bundles">View Bundles</Link>
+                  <Link to="/bundles">View System Bundles</Link>
                 </Button>
               </div>
               
               <p className="text-sm text-muted-foreground">
-                Includes n8n workflow JSON + setup guide + instant download.
+                We host and maintain everything. You stay focused on your business.
               </p>
               
               <div className="mt-10">
@@ -66,19 +66,19 @@ const LibraryHero = () => {
                     <div className="w-3 h-3 rounded-full bg-destructive/60" />
                     <div className="w-3 h-3 rounded-full bg-yellow-500/60" />
                     <div className="w-3 h-3 rounded-full bg-green-500/60" />
-                    <span className="ml-2 text-xs text-muted-foreground font-medium">Pack Library</span>
+                    <span className="ml-2 text-xs text-muted-foreground font-medium">Automation Library</span>
                   </div>
                   
                   <div className="grid grid-cols-3 gap-4 mb-6">
                     <MiniStatCard 
                       icon={<Zap className="w-4 h-4 text-primary" />}
-                      label="Packs Available"
+                      label="Automations"
                       value="12"
                     />
                     <MiniStatCard 
                       icon={<Clock className="w-4 h-4 text-primary" />}
-                      label="Avg Setup"
-                      value="15 min"
+                      label="Avg Activation"
+                      value="2 hrs"
                     />
                     <MiniStatCard 
                       icon={<TrendingUp className="w-4 h-4 text-primary" />}
@@ -87,11 +87,11 @@ const LibraryHero = () => {
                     />
                   </div>
                   
-                  {/* Mini pack preview */}
+                  {/* Mini automation preview */}
                   <div className="space-y-3">
-                    <MiniPackRow name="Lead Intake Router" status="popular" />
-                    <MiniPackRow name="CRM Enrichment Layer" status="popular" />
-                    <MiniPackRow name="Weekly KPI Digest" status="new" />
+                    <MiniAutomationRow name="Lead Intake Router" status="popular" />
+                    <MiniAutomationRow name="CRM Enrichment Layer" status="popular" />
+                    <MiniAutomationRow name="Weekly KPI Digest" status="new" />
                   </div>
                 </div>
               </div>
@@ -111,7 +111,7 @@ const MiniStatCard = ({ icon, label, value }: { icon: React.ReactNode; label: st
   </div>
 );
 
-const MiniPackRow = ({ name, status }: { name: string; status: 'popular' | 'new' }) => (
+const MiniAutomationRow = ({ name, status }: { name: string; status: 'popular' | 'new' }) => (
   <div className="flex items-center justify-between bg-background border border-border rounded-lg px-3 py-2">
     <span className="text-sm text-foreground font-medium truncate">{name}</span>
     <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${

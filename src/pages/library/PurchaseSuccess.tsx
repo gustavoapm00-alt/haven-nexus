@@ -363,8 +363,8 @@ const PurchaseSuccess = () => {
   return (
     <>
       <SEO
-        title="Purchase Complete"
-        description="Thank you for your purchase. Download your automation files below."
+        title="Activation Started"
+        description="Thank you for your purchase. Your automation is being activated."
       />
 
       <div className="min-h-screen bg-background">
@@ -378,7 +378,7 @@ const PurchaseSuccess = () => {
                 <CheckCircle className="w-10 h-10 text-primary" />
               </div>
               <h1 className="text-3xl font-semibold text-foreground mb-3">
-                Purchase Complete
+                Activation Started
               </h1>
               <p className="text-muted-foreground">
                 Thank you for your purchase. A confirmation email has been sent to{' '}
@@ -398,7 +398,7 @@ const PurchaseSuccess = () => {
                 </div>
                 <div className="flex-1">
                   <p className="text-sm text-muted-foreground mb-1">
-                    {purchase?.item_type === 'bundle' ? 'System Bundle' : 'Automation Agent'}
+                    {purchase?.item_type === 'bundle' ? 'System Bundle' : 'Hosted Automation'}
                   </p>
                   <h2 className="text-xl font-semibold text-foreground mb-2">
                     {purchase?.item_name}
@@ -410,66 +410,45 @@ const PurchaseSuccess = () => {
               </div>
             </div>
 
-            {/* Download Section */}
+            {/* Next Steps Section */}
             <div className="card-enterprise p-6 mb-8">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-                  <Download className="w-5 h-5" />
-                  Your Downloads
-                </h3>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={handleRefreshDownloads}
-                  disabled={downloadLoading}
-                >
-                  <RefreshCw className={`w-4 h-4 mr-2 ${downloadLoading ? 'animate-spin' : ''}`} />
-                  Refresh
-                </Button>
+              <h3 className="text-lg font-semibold text-foreground flex items-center gap-2 mb-4">
+                What Happens Next
+              </h3>
+              
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium flex-shrink-0">
+                    1
+                  </div>
+                  <div>
+                    <p className="font-medium text-foreground">We'll contact you shortly</p>
+                    <p className="text-sm text-muted-foreground">Our team will reach out to guide you through the setup process.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium flex-shrink-0">
+                    2
+                  </div>
+                  <div>
+                    <p className="font-medium text-foreground">Connect your tools securely</p>
+                    <p className="text-sm text-muted-foreground">We'll help you securely connect the required tools and credentials.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium flex-shrink-0">
+                    3
+                  </div>
+                  <div>
+                    <p className="font-medium text-foreground">We activate and maintain it</p>
+                    <p className="text-sm text-muted-foreground">Your automation will run on our infrastructure. We handle everything from here.</p>
+                  </div>
+                </div>
               </div>
-
-              {downloadLoading && downloads.length === 0 ? (
-                <div className="flex items-center gap-3 text-muted-foreground py-4">
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  <span>Preparing your download links...</span>
-                </div>
-              ) : downloads.length > 0 ? (
-                <div className="space-y-3">
-                  {downloads.map((download, index) => (
-                    <a
-                      key={index}
-                      href={download.url}
-                      download
-                      className="flex items-center justify-between p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors group"
-                    >
-                      <div className="flex items-center gap-3">
-                        <FileText className="w-5 h-5 text-muted-foreground" />
-                        <span className="font-medium text-foreground">{download.name}</span>
-                      </div>
-                      <Button size="sm" variant="ghost" className="group-hover:bg-primary group-hover:text-primary-foreground">
-                        <Download className="w-4 h-4" />
-                      </Button>
-                    </a>
-                  ))}
-                  <p className="text-sm text-muted-foreground mt-4">
-                    Download links expire in 1 hour. Click "Refresh" to generate new links.
-                  </p>
-                </div>
-              ) : (
-                <div className="text-center py-6">
-                  <p className="text-muted-foreground mb-4">
-                    {noFilesMessage || 'Files are being prepared. They will be available shortly.'}
-                  </p>
-                  <Button 
-                    variant="outline" 
-                    onClick={handleRefreshDownloads}
-                    disabled={downloadLoading}
-                  >
-                    <RefreshCw className={`w-4 h-4 mr-2 ${downloadLoading ? 'animate-spin' : ''}`} />
-                    Refresh Downloads
-                  </Button>
-                </div>
-              )}
+              
+              <p className="text-sm text-muted-foreground mt-6 pt-4 border-t border-border">
+                Questions? Contact us at <a href="mailto:contact@aerelion.systems" className="text-primary hover:underline">contact@aerelion.systems</a>
+              </p>
             </div>
 
             {/* Debug Diagnostics Panel - shows in debug mode or dev */}

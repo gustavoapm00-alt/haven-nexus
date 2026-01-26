@@ -67,10 +67,10 @@ const BundleCard = ({
           </p>
         )}
 
-        {/* Included Packs */}
+        {/* Included Automations */}
         <div className="mb-4">
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
-            Includes {includedAgentNames.length} packs
+            Includes {includedAgentNames.length} hosted automations
           </p>
           <ul className="space-y-1.5">
             {includedAgentNames.slice(0, 3).map((agentName) => (

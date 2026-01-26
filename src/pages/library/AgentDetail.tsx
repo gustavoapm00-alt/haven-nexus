@@ -1,6 +1,6 @@
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { useEffect } from 'react';
-import { ArrowLeft, Clock, TrendingUp, Check, Download, Loader2 } from 'lucide-react';
+import { ArrowLeft, Clock, TrendingUp, Check, Zap, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Accordion,
@@ -35,15 +35,19 @@ const AgentDetail = () => {
   const faqs = [
     {
       question: 'Do I need coding experience?',
-      answer: 'No. The deployment guide walks through each step.',
+      answer: 'No. We handle all technical configuration and maintenance.',
     },
     {
-      question: 'Can I customize messages or logic?',
-      answer: 'Yes. Customization guidance is included.',
+      question: 'Can I customize the automation logic?',
+      answer: 'Yes. We can adjust the automation to fit your specific needs.',
     },
     {
-      question: 'Does this work for my industry?',
-      answer: 'If the operational function applies, the agent is compatible.',
+      question: 'Who runs the automation?',
+      answer: 'AERELION Systems operates and monitors all automations on our infrastructure.',
+    },
+    {
+      question: 'How are my credentials handled?',
+      answer: 'Credentials are encrypted and securely stored. You can revoke access at any time.',
     },
   ];
 
@@ -70,12 +74,12 @@ const AgentDetail = () => {
         <LibraryNavbar />
         <div className="section-padding">
           <div className="container-main max-w-4xl text-center">
-            <h1 className="text-2xl font-semibold text-foreground mb-4">Workflow Pack Not Found</h1>
+            <h1 className="text-2xl font-semibold text-foreground mb-4">Automation Not Found</h1>
             <p className="text-muted-foreground mb-6">
-              The workflow pack you're looking for doesn't exist or has been removed.
+              The automation you're looking for doesn't exist or has been removed.
             </p>
             <Button asChild>
-              <Link to="/packs">Browse All Packs</Link>
+              <Link to="/packs">Browse All Automations</Link>
             </Button>
           </div>
         </div>
@@ -89,7 +93,7 @@ const AgentDetail = () => {
       <SEO
         title={agent.name}
         description={agent.short_outcome}
-        keywords={[...agent.sectors, ...agent.systems, 'n8n workflow', 'workflow pack'].join(', ')}
+        keywords={[...agent.sectors, ...agent.systems, 'hosted automation', 'managed automation'].join(', ')}
       />
 
       <div className="min-h-screen bg-background">
@@ -103,7 +107,7 @@ const AgentDetail = () => {
               className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8"
             >
               <ArrowLeft className="w-4 h-4" />
-              Back to Workflow Packs
+              Back to Automations
             </Link>
 
             {/* Header */}
@@ -119,10 +123,10 @@ const AgentDetail = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
               {/* Main Content */}
               <div className="lg:col-span-2 space-y-10">
-                {/* What This Workflow Does */}
+                {/* What This Automation Does */}
                 <section>
                   <h2 className="text-lg font-semibold text-foreground mb-4">
-                    What This Workflow Does
+                    What This Automation Does
                   </h2>
                   <p className="text-muted-foreground leading-relaxed">
                     {agent.description}
@@ -143,10 +147,10 @@ const AgentDetail = () => {
                   </div>
                 </section>
 
-                {/* Tools Required */}
+                {/* Tools We Connect */}
                 <section>
                   <h2 className="text-lg font-semibold text-foreground mb-4">
-                    Tools Required
+                    Tools We Connect
                   </h2>
                   <div className="flex flex-wrap gap-2">
                     {agent.systems.map((system) => (
@@ -155,19 +159,19 @@ const AgentDetail = () => {
                   </div>
                 </section>
 
-                {/* Setup Profile */}
+                {/* Activation Profile */}
                 <section>
                   <h2 className="text-lg font-semibold text-foreground mb-4">
-                    Setup Profile
+                    Activation Profile
                   </h2>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="card-enterprise p-4">
                       <div className="flex items-center gap-2 text-muted-foreground mb-2">
                         <Clock className="w-4 h-4" />
-                        <span className="text-sm">Setup Time</span>
+                        <span className="text-sm">Activation Time</span>
                       </div>
                       <p className="font-semibold text-foreground">
-                        {agent.setup_time_min}–{agent.setup_time_max} minutes
+                        {agent.setup_time_min}–{agent.setup_time_max} hours
                       </p>
                     </div>
                     <div className="card-enterprise p-4">
@@ -199,10 +203,10 @@ const AgentDetail = () => {
                   </ol>
                 </section>
 
-                {/* What You Get */}
+                {/* What's Included */}
                 <section>
                   <h2 className="text-lg font-semibold text-foreground mb-4">
-                    What You Get
+                    What's Included
                   </h2>
                   <ul className="space-y-2">
                     {agent.includes.map((item, index) => (
@@ -217,7 +221,7 @@ const AgentDetail = () => {
                 {/* Requirements */}
                 <section>
                   <h2 className="text-lg font-semibold text-foreground mb-4">
-                    Requirements Before Importing
+                    Requirements Before Activation
                   </h2>
                   <ul className="space-y-2">
                     {agent.requirements.map((req, index) => (
@@ -270,7 +274,7 @@ const AgentDetail = () => {
               <div className="lg:col-span-1">
                 <div className="card-enterprise p-6 sticky top-24">
                   <h3 className="text-lg font-semibold text-foreground mb-2">
-                    Access
+                    Activate This Automation
                   </h3>
                   <p className="text-3xl font-semibold text-foreground mb-6">
                     {formatPrice(agent.price_cents)}
@@ -285,17 +289,14 @@ const AgentDetail = () => {
                     {checkoutLoading ? (
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                     ) : (
-                      <Download className="w-4 h-4 mr-2" />
+                      <Zap className="w-4 h-4 mr-2" />
                     )}
-                    {!isAuthenticated ? 'Sign In to Purchase' : 'Purchase & Download'}
+                    {!isAuthenticated ? 'Sign In to Activate' : 'Activate Automation'}
                   </Button>
 
-                  <Link
-                    to="/install"
-                    className="block text-center text-sm text-muted-foreground hover:text-foreground"
-                  >
-                    Need help installing?
-                  </Link>
+                  <p className="text-center text-sm text-muted-foreground">
+                    We configure and maintain everything for you
+                  </p>
                 </div>
               </div>
             </div>

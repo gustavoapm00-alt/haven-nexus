@@ -89,7 +89,7 @@ const UserDashboard = () => {
     <>
       <SEO
         title="Dashboard - AERELION"
-        description="Manage your account and access your purchased automation workflows."
+        description="Manage your account and view your activated automations."
       />
 
       <div className="min-h-screen bg-background">
@@ -132,8 +132,8 @@ const UserDashboard = () => {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
             {[
               { label: 'Total Purchases', value: stats.totalPurchases, icon: ShoppingBag },
-              { label: 'Agents Owned', value: stats.uniqueAgentsOwned, icon: FileText },
-              { label: 'Bundles Owned', value: stats.bundlePurchases, icon: Package },
+              { label: 'Automations Active', value: stats.uniqueAgentsOwned, icon: FileText },
+              { label: 'Bundles Active', value: stats.bundlePurchases, icon: Package },
               { label: 'Total Invested', value: formatPrice(stats.totalSpentCents), icon: Clock },
             ].map((stat, i) => (
               <motion.div
@@ -255,8 +255,8 @@ const UserDashboard = () => {
           >
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-xl font-bold text-foreground">Your Purchases</h2>
-                <p className="text-sm text-muted-foreground">Access and download your workflow files</p>
+                <h2 className="text-xl font-bold text-foreground">Your Automations</h2>
+                <p className="text-sm text-muted-foreground">View your activated automations</p>
               </div>
               <Button asChild variant="outline" size="sm">
                 <Link to="/packs">
@@ -309,7 +309,7 @@ const UserDashboard = () => {
                             </div>
                             <div className="flex-1 min-w-0">
                               <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                                {purchase.item_type === 'bundle' ? 'System Bundle' : 'Automation Agent'}
+                                {purchase.item_type === 'bundle' ? 'System Bundle' : 'Hosted Automation'}
                               </span>
                               <h3 className="text-lg font-semibold text-foreground mb-1 truncate">
                                 {purchase.item_name}

@@ -1,4 +1,4 @@
-import { Book, FileText, Download, Settings, HelpCircle } from 'lucide-react';
+import { Book, Cloud, Settings, HelpCircle, Shield } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import LibraryNavbar from '@/components/library/LibraryNavbar';
@@ -8,33 +8,33 @@ import SEO from '@/components/SEO';
 const Documentation = () => {
   const docSections = [
     {
-      icon: Download,
+      icon: Cloud,
       title: 'Getting Started',
-      description: 'New to AERELION workflow packs? Start here.',
+      description: 'New to AERELION hosted automations? Start here.',
       links: [
-        { label: 'What is a workflow pack?', href: '#' },
-        { label: 'System requirements', href: '#' },
-        { label: 'Your first import', href: '#' },
+        { label: 'What is a hosted automation?', href: '#' },
+        { label: 'How activation works', href: '#' },
+        { label: 'Your first automation', href: '#' },
       ],
     },
     {
       icon: Settings,
-      title: 'Import & Setup Guides',
-      description: 'Step-by-step instructions for n8n.',
+      title: 'Connection Guides',
+      description: 'Step-by-step instructions for connecting your tools.',
       links: [
-        { label: 'n8n setup and configuration', href: '#' },
-        { label: 'Importing workflow files', href: '#' },
-        { label: 'Credential configuration', href: '#' },
+        { label: 'Connecting your first tool', href: '#' },
+        { label: 'Credential management', href: '#' },
+        { label: 'Revoking access', href: '#' },
       ],
     },
     {
-      icon: FileText,
-      title: 'Integration References',
-      description: 'System-specific configuration guides.',
+      icon: Shield,
+      title: 'Security & Privacy',
+      description: 'How we handle your data and credentials.',
       links: [
-        { label: 'Google Workspace integration', href: '#' },
-        { label: 'Slack setup', href: '#' },
-        { label: 'Payment provider setup', href: '#' },
+        { label: 'How credentials are stored', href: '#' },
+        { label: 'Data handling practices', href: '#' },
+        { label: 'Revoking access', href: '#' },
       ],
     },
     {
@@ -42,9 +42,9 @@ const Documentation = () => {
       title: 'Troubleshooting',
       description: 'Common issues and solutions.',
       links: [
-        { label: 'Credential configuration issues', href: '#' },
-        { label: 'File import errors', href: '#' },
-        { label: 'Node compatibility', href: '#' },
+        { label: 'Connection issues', href: '#' },
+        { label: 'Tool authorization', href: '#' },
+        { label: 'Getting support', href: '#' },
       ],
     },
   ];
@@ -53,8 +53,8 @@ const Documentation = () => {
     <>
       <SEO
         title="Documentation"
-        description="Comprehensive guides for importing and configuring AERELION workflow packs in n8n."
-        keywords="documentation, guides, n8n, workflow setup, import guide"
+        description="Comprehensive guides for AERELION hosted automations. Learn how we configure, run, and maintain automations for you."
+        keywords="documentation, guides, hosted automation, automation setup"
       />
 
       <div className="min-h-screen bg-background">
@@ -70,7 +70,7 @@ const Documentation = () => {
             </div>
             
             <p className="text-lg text-muted-foreground leading-relaxed mb-12">
-              Comprehensive guides for importing and configuring workflow packs. Each purchase includes specific documentation, but these general guides cover common setup tasks.
+              Comprehensive guides for getting started with AERELION hosted automations. We handle the technical complexity—these guides help you connect your tools and understand how everything works.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
@@ -99,12 +99,12 @@ const Documentation = () => {
 
             {/* Help CTA */}
             <div className="text-center p-8 bg-muted/50 rounded-lg border border-border">
-              <h3 className="font-semibold text-foreground mb-2">Need hands-on help?</h3>
+              <h3 className="font-semibold text-foreground mb-2">Need assistance?</h3>
               <p className="text-sm text-muted-foreground mb-4">
-                Our installation assistance service can help you import and configure workflow packs.
+                Our team is here to help you get started with your hosted automations.
               </p>
               <Button asChild variant="outline">
-                <Link to="/install">View Installation Options</Link>
+                <Link to="/contact">Contact Support</Link>
               </Button>
             </div>
           </div>
