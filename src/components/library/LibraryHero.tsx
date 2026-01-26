@@ -29,7 +29,7 @@ const LibraryHero = () => {
               
               <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-4">
                 <Button asChild size="lg" className="glow-accent">
-                  <Link to="/packs">
+                  <Link to="/automations">
                     Activate Automations
                     <ArrowRight className="ml-2 w-4 h-4" />
                   </Link>

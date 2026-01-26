@@ -133,7 +133,7 @@ const AgentCard = ({
           {formatPrice(priceCents)}
         </span>
         <Link
-          to={`/packs/${slug}`}
+          to={`/automations/${slug}`}
           className={`inline-flex items-center gap-1.5 text-sm font-medium transition-colors ${
             isDark 
               ? 'text-primary-foreground bg-primary/80 hover:bg-primary px-3 py-1.5 rounded-md' 

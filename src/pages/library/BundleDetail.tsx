@@ -134,7 +134,7 @@ const BundleDetail = () => {
                     {bundle.included_agents.map((agent) => (
                       <Link
                         key={agent.id}
-                        to={`/packs/${agent.slug}`}
+                        to={`/automations/${agent.slug}`}
                         className="block card-enterprise p-4 hover:border-primary/30"
                       >
                         <div className="flex items-center justify-between">
@@ -203,6 +203,9 @@ const BundleDetail = () => {
                     <p className="text-sm text-muted-foreground mb-1">Bundle rate</p>
                     <p className="text-3xl font-semibold text-foreground">
                       {formatPrice(bundle.bundle_price_cents)}
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Includes activation and an initial monitoring period. Ongoing maintenance available.
                     </p>
                   </div>
 

@@ -5,9 +5,9 @@ import { useAuth } from '@/hooks/useAuth';
 
 const navLinks = [
   { name: 'Home', href: '/' },
-  { name: 'Workflow Packs', href: '/packs' },
-  { name: 'Bundles', href: '/bundles' },
-  { name: 'How It Works', href: '/deployment' },
+  { name: 'Automations', href: '/automations' },
+  { name: 'System Bundles', href: '/bundles' },
+  { name: 'How It Works', href: '/how-it-works' },
 ];
 
 const Navbar = forwardRef<HTMLElement>((_, ref) => {
@@ -61,9 +61,9 @@ const Navbar = forwardRef<HTMLElement>((_, ref) => {
               {link.name}
             </Link>
           ))}
-          <Link to="/packs" className="btn-primary !py-2 !px-4 text-xs">
+          <Link to="/automations" className="btn-primary !py-2 !px-4 text-xs">
             <ShoppingBag className="w-3.5 h-3.5 mr-1.5" />
-            Browse Packs
+            Browse Automations
           </Link>
           {!isLoading && (
             <>
@@ -119,12 +119,12 @@ const Navbar = forwardRef<HTMLElement>((_, ref) => {
           ))}
           <div className="px-6 py-3 space-y-2">
             <Link 
-              to="/packs" 
+              to="/automations" 
               onClick={handleLinkClick}
               className="btn-primary !py-2 !px-4 text-xs w-full justify-center"
             >
               <ShoppingBag className="w-3.5 h-3.5 mr-1.5" />
-              Browse Packs
+              Browse Automations
             </Link>
             {!isLoading && (
               <Link 

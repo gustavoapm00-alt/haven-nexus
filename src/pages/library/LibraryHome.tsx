@@ -123,7 +123,7 @@ const LibraryHome = () => {
             transition={{ delay: 0.4 }}
           >
             <Button asChild size="lg" className="bg-white text-foreground hover:bg-white/90 glow-accent">
-              <Link to="/packs">
+              <Link to="/automations">
                 View All Automations
                 <ArrowRight className="ml-2 w-4 h-4" />
               </Link>

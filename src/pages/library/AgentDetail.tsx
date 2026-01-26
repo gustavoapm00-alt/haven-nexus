@@ -34,20 +34,24 @@ const AgentDetail = () => {
 
   const faqs = [
     {
-      question: 'Do I need coding experience?',
-      answer: 'No. We handle all technical configuration and maintenance.',
+      question: 'Do I need to install anything?',
+      answer: 'No. AERELION hosts and maintains all automations for you. Nothing to install.',
     },
     {
-      question: 'Can I customize the automation logic?',
-      answer: 'Yes. We can adjust the automation to fit your specific needs.',
+      question: 'How does activation work?',
+      answer: 'After purchase, you connect your tools securely and we activate the automation on our infrastructure.',
     },
     {
-      question: 'Who runs the automation?',
-      answer: 'AERELION Systems operates and monitors all automations on our infrastructure.',
+      question: 'Who runs the automations?',
+      answer: 'AERELION Systems operates and monitors all automations on its infrastructure.',
     },
     {
       question: 'How are my credentials handled?',
       answer: 'Credentials are encrypted and securely stored. You can revoke access at any time.',
+    },
+    {
+      question: 'Is technical experience required?',
+      answer: 'No. These systems are built for non-technical operators.',
     },
   ];
 
@@ -79,7 +83,7 @@ const AgentDetail = () => {
               The automation you're looking for doesn't exist or has been removed.
             </p>
             <Button asChild>
-              <Link to="/packs">Browse All Automations</Link>
+              <Link to="/automations">Browse All Automations</Link>
             </Button>
           </div>
         </div>
@@ -103,7 +107,7 @@ const AgentDetail = () => {
           <div className="container-main max-w-4xl">
             {/* Back Link */}
             <Link
-              to="/packs"
+              to="/automations"
               className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -276,8 +280,11 @@ const AgentDetail = () => {
                   <h3 className="text-lg font-semibold text-foreground mb-2">
                     Activate This Automation
                   </h3>
-                  <p className="text-3xl font-semibold text-foreground mb-6">
+                  <p className="text-3xl font-semibold text-foreground mb-2">
                     {formatPrice(agent.price_cents)}
+                  </p>
+                  <p className="text-sm text-muted-foreground mb-6">
+                    Includes activation and an initial monitoring period. Ongoing maintenance available.
                   </p>
 
                   <Button 

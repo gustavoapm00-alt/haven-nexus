@@ -114,9 +114,9 @@ const UserDashboard = () => {
               transition={{ delay: 0.1 }}
             >
               <Button asChild variant="outline">
-                <Link to="/packs">
+                <Link to="/automations">
                   <Package className="w-4 h-4 mr-2" />
-                  Browse Packs
+                  Browse Automations
                 </Link>
               </Button>
               <Button variant="ghost" onClick={handleSignOut}>
@@ -259,7 +259,7 @@ const UserDashboard = () => {
                 <p className="text-sm text-muted-foreground">View your activated automations</p>
               </div>
               <Button asChild variant="outline" size="sm">
-                <Link to="/packs">
+                <Link to="/automations">
                   Browse More
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Link>
@@ -278,7 +278,7 @@ const UserDashboard = () => {
                   </p>
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                     <Button asChild>
-                      <Link to="/packs">Browse Packs</Link>
+                      <Link to="/automations">Browse Automations</Link>
                     </Button>
                     <Button asChild variant="outline">
                       <Link to="/bundles">View Bundles</Link>
@@ -334,7 +334,7 @@ const UserDashboard = () => {
                           {/* Actions */}
                           <div className="flex flex-col sm:flex-row gap-2 lg:shrink-0">
                             <Button variant="outline" size="sm" asChild>
-                              <Link to={`/${purchase.item_type === 'bundle' ? 'bundles' : 'agents'}/${purchase.item_slug}`}>
+                              <Link to={`/${purchase.item_type === 'bundle' ? 'bundles' : 'automations'}/${purchase.item_slug}`}>
                                 <ExternalLink className="w-4 h-4 mr-2" />
                                 View Details
                               </Link>
