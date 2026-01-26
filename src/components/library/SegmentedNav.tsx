@@ -10,13 +10,13 @@ interface Tab {
 }
 
 const tabs: Tab[] = [
-  { id: 'agents', label: 'Agents', action: 'scroll', target: 'featured-agents' },
+  { id: 'automations', label: 'Automations', action: 'scroll', target: 'featured-automations' },
   { id: 'bundles', label: 'Bundles', action: 'scroll', target: 'bundles-section' },
   { id: 'purchases', label: 'My Purchases', action: 'navigate', target: '/purchases' },
 ];
 
 const SegmentedNav = () => {
-  const [activeTab, setActiveTab] = useState('agents');
+  const [activeTab, setActiveTab] = useState('automations');
   const [isSticky, setIsSticky] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();

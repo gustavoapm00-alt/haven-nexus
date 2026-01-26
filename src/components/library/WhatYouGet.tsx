@@ -1,24 +1,24 @@
-import { FileJson, BookOpen, Lock } from 'lucide-react';
+import { Cloud, BookOpen, Shield } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const items = [
   {
-    icon: FileJson,
-    title: 'Workflow File',
-    description: 'Import-ready n8n JSON workflows built for practical use.',
-    stat: '1 JSON workflow',
+    icon: Cloud,
+    title: 'Hosted Automation',
+    description: 'We run and maintain the automation on our infrastructure. Nothing to install.',
+    stat: 'Fully managed',
   },
   {
     icon: BookOpen,
-    title: 'Deployment Guide',
-    description: 'Step-by-step setup with required credentials and configuration notes.',
-    stat: 'Checklist-style setup',
+    title: 'Activation Guide',
+    description: 'Clear steps to connect your tools and go live quickly.',
+    stat: 'Quick setup',
   },
   {
-    icon: Lock,
-    title: 'Secure Delivery',
-    description: 'Private downloads with time-limited links and account access.',
-    stat: 'Time-limited links',
+    icon: Shield,
+    title: 'Secure Credentials',
+    description: 'Your credentials are encrypted and stored securely. You stay in control.',
+    stat: 'Revoke anytime',
   },
 ];
 

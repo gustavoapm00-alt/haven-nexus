@@ -23,18 +23,19 @@ const LibraryHome = () => {
   const { bundles: featuredBundles, loading: bundlesLoading } = useBundles({ featured: true, limit: 3 });
 
   const faqItems = [
-    { q: 'What tools are supported?', a: 'Designed for n8n and common tools; each guide lists requirements.' },
-    { q: 'What technical level is required?', a: 'Checklist-style deployment with basic API key setup.' },
-    { q: 'How do downloads work?', a: 'Signed links expire; purchases remain available via your account.' },
-    { q: 'Is installation help available?', a: 'Available by request.' },
+    { q: 'Do I need to install anything?', a: 'No. AERELION hosts and maintains all automations for you.' },
+    { q: 'How does activation work?', a: 'After purchase, you connect your tools and we activate the automation.' },
+    { q: 'Who runs the automations?', a: 'AERELION Systems operates and monitors all automations on its infrastructure.' },
+    { q: 'How are credentials handled?', a: 'Credentials are encrypted and securely stored. You can revoke access at any time.' },
+    { q: 'Is technical experience required?', a: 'No. These systems are built for non-technical operators.' },
   ];
 
   return (
     <>
       <SEO
-        title="AERELION Library - Workflow Packs"
-        description="Downloadable n8n workflow packs you can import in hours, not weeks. Browse proven workflow files and system bundles built for real operational outcomes."
-        keywords="n8n workflows, workflow packs, downloadable automation, business automation, workflow files"
+        title="AERELION Systems - Hosted Automations"
+        description="Automation systems activated for you in hours, not weeks. We configure, run, and maintain everything—no code, no infrastructure."
+        keywords="hosted automation, business automation, managed automation, automation service, operational systems"
       />
       
       <div className="min-h-screen bg-background">
@@ -52,8 +53,8 @@ const LibraryHome = () => {
           <WhatYouGet />
         </SectionBand>
 
-        {/* Featured Agents - Dark Band with Parallax */}
-        <SectionBand variant="ink" id="featured-agents" enableParallax>
+        {/* Featured Automations - Dark Band with Parallax */}
+        <SectionBand variant="ink" id="featured-automations" enableParallax>
           <motion.div 
             className="text-center mb-10"
             initial={{ opacity: 0, y: 30 }}
@@ -68,10 +69,10 @@ const LibraryHome = () => {
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
             >
-              Workflow Library
+              Automation Library
             </motion.span>
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">Featured Workflow Packs</h2>
-            <p className="text-white/60">Pre-built n8n workflows ready to download and import</p>
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">Featured Automations</h2>
+            <p className="text-white/60">Hosted systems designed to eliminate repeatable operational work</p>
           </motion.div>
           {agentsLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -123,7 +124,7 @@ const LibraryHome = () => {
           >
             <Button asChild size="lg" className="bg-white text-foreground hover:bg-white/90 glow-accent">
               <Link to="/packs">
-                View All Workflow Packs
+                View All Automations
                 <ArrowRight className="ml-2 w-4 h-4" />
               </Link>
             </Button>
@@ -139,7 +140,7 @@ const LibraryHome = () => {
         <SectionBand variant="light" id="bundles-section">
           <div className="text-center mb-10">
             <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3">System Bundles</h2>
-            <p className="text-muted-foreground">Curated agent packs with bundle savings</p>
+            <p className="text-muted-foreground">Fully managed automation systems with bundle savings</p>
           </div>
           {bundlesLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -192,12 +193,12 @@ const LibraryHome = () => {
                 <Shield className="w-6 h-6 text-primary" />
               </div>
             </div>
-            <h2 className="text-2xl font-bold text-foreground mb-4">Built for Transparency</h2>
+            <h2 className="text-2xl font-bold text-foreground mb-4">Built for Reliability</h2>
             <p className="text-muted-foreground mb-6">
-              Built to be understandable, maintainable, and adjustable. If you need installation support, you can request assistance.
+              We monitor and maintain every automation we host. If something needs attention, we handle it—you stay focused on your business.
             </p>
             <Button asChild variant="outline">
-              <Link to="/install">Request Installation Assistance</Link>
+              <Link to="/contact">Contact Us</Link>
             </Button>
           </div>
         </SectionBand>

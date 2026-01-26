@@ -48,9 +48,9 @@ const BundleLibrary = () => {
   return (
     <>
       <SEO
-        title="Workflow Bundles"
-        description="Curated sets of n8n workflow packs designed to address common operational bottlenecks. Save with bundled pricing."
-        keywords="workflow bundles, n8n bundles, automation bundles, workflow packs"
+        title="System Bundles"
+        description="Curated sets of hosted automations designed to address common operational bottlenecks. Save with bundled pricing. We configure, run, and maintain everything."
+        keywords="automation bundles, hosted automation, managed systems, business automation"
       />
 
       <div className="min-h-screen bg-background">
@@ -60,10 +60,10 @@ const BundleLibrary = () => {
           <div className="container-main">
             <div className="mb-8">
               <h1 className="text-3xl font-semibold text-foreground mb-3">
-                Workflow Bundles
+                System Bundles
               </h1>
               <p className="text-muted-foreground">
-                Curated sets of n8n workflow packs designed to address common operational bottlenecks.
+                Curated sets of hosted automations designed to address common operational bottlenecks.
               </p>
             </div>
 

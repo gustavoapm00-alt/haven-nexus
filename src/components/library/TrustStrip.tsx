@@ -1,11 +1,11 @@
-import { FileJson, BookOpen, Shield, RefreshCw } from 'lucide-react';
+import { Cloud, BookOpen, Shield, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const badges = [
-  { icon: FileJson, label: 'Import-ready n8n JSON' },
-  { icon: BookOpen, label: 'Step-by-step deployment guide' },
-  { icon: Shield, label: 'Secure delivery' },
-  { icon: RefreshCw, label: 'Lifetime updates' },
+  { icon: Cloud, label: 'Fully hosted & maintained' },
+  { icon: BookOpen, label: 'Quick activation guide' },
+  { icon: Shield, label: 'Secure credentials' },
+  { icon: RefreshCw, label: 'Continuous monitoring' },
 ];
 
 const TrustStrip = () => {

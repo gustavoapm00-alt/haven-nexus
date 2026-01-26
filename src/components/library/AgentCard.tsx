@@ -116,7 +116,7 @@ const AgentCard = ({
         }`}>
           <div className="flex items-center gap-1.5">
             <Clock className="w-3.5 h-3.5" />
-            <span>{setupTimeMin}–{setupTimeMax} min</span>
+            <span>{setupTimeMin}–{setupTimeMax} hrs activation</span>
           </div>
           <div className="flex items-center gap-1.5">
             <TrendingUp className="w-3.5 h-3.5" />
@@ -140,7 +140,7 @@ const AgentCard = ({
               : 'text-primary hover:underline'
           }`}
         >
-          View Pack
+          Activate Automation
           <ArrowRight className="w-4 h-4" />
         </Link>
       </div>

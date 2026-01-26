@@ -1,6 +1,6 @@
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { useEffect } from 'react';
-import { ArrowLeft, ArrowRight, Download, Package, Loader2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Zap, Package, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import LibraryNavbar from '@/components/library/LibraryNavbar';
 import LibraryFooter from '@/components/library/LibraryFooter';
@@ -25,10 +25,10 @@ const BundleDetail = () => {
 
   const formatPrice = (cents: number) => `$${(cents / 100).toFixed(0)}`;
 
-  const setupSteps = [
-    'Select a workflow pack from the bundle',
-    'Download files and review setup documentation',
-    'Import into your n8n instance and configure',
+  const activationSteps = [
+    'Purchase the bundle to unlock all included automations',
+    'Connect your tools securely through our guided process',
+    'We activate and maintain each automation for you',
   ];
 
   if (loading) {
@@ -77,7 +77,7 @@ const BundleDetail = () => {
       <SEO
         title={bundle.name}
         description={bundle.objective}
-        keywords={[...bundle.sectors, 'n8n bundle', 'workflow bundle', 'workflow packs'].join(', ')}
+        keywords={[...bundle.sectors, 'automation bundle', 'hosted automation', 'managed systems'].join(', ')}
       />
 
       <div className="min-h-screen bg-background">
@@ -125,10 +125,10 @@ const BundleDetail = () => {
                   </p>
                 </section>
 
-                {/* Included Packs */}
+                {/* Included Automations */}
                 <section>
                   <h2 className="text-lg font-semibold text-foreground mb-4">
-                    Included Workflow Packs
+                    Included Hosted Automations
                   </h2>
                   <div className="space-y-3">
                     {bundle.included_agents.map((agent) => (
@@ -167,13 +167,13 @@ const BundleDetail = () => {
                   </div>
                 </section>
 
-                {/* How to Import */}
+                {/* How Activation Works */}
                 <section>
                   <h2 className="text-lg font-semibold text-foreground mb-4">
-                    How to Import
+                    How Activation Works
                   </h2>
                   <ol className="space-y-3">
-                    {setupSteps.map((step, index) => (
+                    {activationSteps.map((step, index) => (
                       <li key={index} className="flex gap-4">
                         <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground text-sm flex items-center justify-center">
                           {index + 1}
@@ -215,17 +215,14 @@ const BundleDetail = () => {
                     {checkoutLoading ? (
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                     ) : (
-                      <Download className="w-4 h-4 mr-2" />
+                      <Zap className="w-4 h-4 mr-2" />
                     )}
-                    {!isAuthenticated ? 'Sign In to Purchase' : 'Purchase & Download'}
+                    {!isAuthenticated ? 'Sign In to Activate' : 'Activate Bundle'}
                   </Button>
 
-                  <Link
-                    to="/install"
-                    className="block text-center text-sm text-muted-foreground hover:text-foreground"
-                  >
-                    Need help importing?
-                  </Link>
+                  <p className="text-center text-sm text-muted-foreground">
+                    We configure and maintain everything for you
+                  </p>
                 </div>
               </div>
             </div>

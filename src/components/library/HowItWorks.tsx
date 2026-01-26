@@ -1,10 +1,9 @@
 import { motion } from 'framer-motion';
 
 const steps = [
-  { step: 1, title: 'Choose a pack or bundle', description: 'Browse our library of n8n workflow files' },
-  { step: 2, title: 'Purchase access', description: 'Secure checkout with instant delivery' },
-  { step: 3, title: 'Download your files', description: 'Get the JSON workflow and setup guide' },
-  { step: 4, title: 'Import and configure', description: 'Follow the guide in your own n8n' },
+  { step: 1, title: 'Choose an automation or bundle', description: 'Browse our library of hosted systems' },
+  { step: 2, title: 'Connect your tools securely', description: 'We guide you through the connection process' },
+  { step: 3, title: 'We activate and maintain it', description: 'Your automation runs on our infrastructure' },
 ];
 
 const HowItWorks = () => {
@@ -15,9 +14,9 @@ const HowItWorks = () => {
       </div>
       <div className="relative">
         {/* Connection line */}
-        <div className="hidden md:block absolute top-6 left-1/2 -translate-x-1/2 w-[80%] h-0.5 bg-gradient-to-r from-transparent via-border to-transparent" />
+        <div className="hidden md:block absolute top-6 left-1/2 -translate-x-1/2 w-[60%] h-0.5 bg-gradient-to-r from-transparent via-border to-transparent" />
         
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6">
           {steps.map((step, index) => (
             <motion.div
               key={step.step}
@@ -36,6 +35,17 @@ const HowItWorks = () => {
           ))}
         </div>
       </div>
+      
+      {/* Supporting line */}
+      <motion.p 
+        className="text-center text-sm text-muted-foreground mt-8"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ delay: 0.4 }}
+      >
+        No downloads. No infrastructure. No code.
+      </motion.p>
     </div>
   );
 };
