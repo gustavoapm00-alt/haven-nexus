@@ -721,34 +721,70 @@ export type Database = {
       }
       installation_requests: {
         Row: {
+          activation_eta: string | null
+          activation_notes_customer: string | null
+          activation_notes_internal: string | null
+          automation_id: string | null
+          bundle_id: string | null
           company: string | null
           created_at: string
+          customer_visible_status: string | null
           email: string
           id: string
+          internal_owner: string | null
+          last_notified_status: string | null
           name: string
           notes: string | null
           preferred_systems: string | null
+          purchase_id: string | null
           purchased_item: string | null
+          setup_window: string | null
+          status: string | null
+          status_updated_at: string | null
         }
         Insert: {
+          activation_eta?: string | null
+          activation_notes_customer?: string | null
+          activation_notes_internal?: string | null
+          automation_id?: string | null
+          bundle_id?: string | null
           company?: string | null
           created_at?: string
+          customer_visible_status?: string | null
           email: string
           id?: string
+          internal_owner?: string | null
+          last_notified_status?: string | null
           name: string
           notes?: string | null
           preferred_systems?: string | null
+          purchase_id?: string | null
           purchased_item?: string | null
+          setup_window?: string | null
+          status?: string | null
+          status_updated_at?: string | null
         }
         Update: {
+          activation_eta?: string | null
+          activation_notes_customer?: string | null
+          activation_notes_internal?: string | null
+          automation_id?: string | null
+          bundle_id?: string | null
           company?: string | null
           created_at?: string
+          customer_visible_status?: string | null
           email?: string
           id?: string
+          internal_owner?: string | null
+          last_notified_status?: string | null
           name?: string
           notes?: string | null
           preferred_systems?: string | null
+          purchase_id?: string | null
           purchased_item?: string | null
+          setup_window?: string | null
+          status?: string | null
+          status_updated_at?: string | null
         }
         Relationships: []
       }

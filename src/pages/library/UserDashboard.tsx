@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import LibraryNavbar from '@/components/library/LibraryNavbar';
 import LibraryFooter from '@/components/library/LibraryFooter';
 import SectionBand from '@/components/library/SectionBand';
+import { ActivationStatusCard } from '@/components/library/ActivationStatusCard';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useEntitlements } from '@/hooks/useEntitlements';
@@ -246,6 +247,16 @@ const UserDashboard = () => {
               </Card>
             </motion.div>
           </div>
+
+          {/* Activation Status */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.28 }}
+            className="mb-12"
+          >
+            <ActivationStatusCard />
+          </motion.div>
 
           {/* Purchases Section */}
           <motion.div
