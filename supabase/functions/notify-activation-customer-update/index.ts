@@ -28,12 +28,12 @@ serve(async (req: Request) => {
 
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
     const appBaseUrl = Deno.env.get("APP_BASE_URL") || "https://aerelion.systems";
-    const senderEmail = Deno.env.get("RESEND_FROM") || "noreply@aerelion.systems";
+    const senderEmail = Deno.env.get("RESEND_FROM") || "AERELION Systems <contact@aerelion.systems>";
 
     if (!resendApiKey) {
       console.warn("RESEND_API_KEY not configured, skipping email notifications");
       return new Response(
-        JSON.stringify({ success: true, message: "Email skipped - no API key" }),
+        JSON.stringify({ success: true, message: "Email skipped - no API key", emailResults: { admin: false, customer: false } }),
         { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
       );
     }
@@ -45,7 +45,7 @@ serve(async (req: Request) => {
       other: "Other Method",
     };
 
-    // Send admin notification
+    // Build admin notification email HTML
     const adminEmailHtml = `
 <!DOCTYPE html>
 <html>
@@ -107,7 +107,7 @@ serve(async (req: Request) => {
 </body>
 </html>`;
 
-    // Send customer confirmation
+    // Build customer confirmation email HTML
     const customerEmailHtml = `
 <!DOCTYPE html>
 <html>
@@ -180,7 +180,7 @@ serve(async (req: Request) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          from: `AERELION Systems <${senderEmail}>`,
+          from: senderEmail,
           to: ["contact@aerelion.systems"],
           subject: `🔑 Access Info Submitted: ${business_name} – ${tool_name}`,
           html: adminEmailHtml,
@@ -207,7 +207,7 @@ serve(async (req: Request) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          from: `AERELION Systems <${senderEmail}>`,
+          from: senderEmail,
           to: [customer_email],
           subject: "✅ Access information received | AERELION Systems",
           html: customerEmailHtml,

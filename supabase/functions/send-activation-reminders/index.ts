@@ -6,17 +6,36 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+interface ActivationRequest {
+  id: string;
+  name: string;
+  email: string;
+  purchased_item: string | null;
+  customer_visible_status: string;
+  reminder_count: number;
+  last_reminder_sent_at: string | null;
+  awaiting_credentials_since: string | null;
+}
+
 serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
     const appBaseUrl = Deno.env.get("APP_BASE_URL") || "https://aerelion.systems";
-    const senderEmail = Deno.env.get("RESEND_FROM") || "noreply@aerelion.systems";
+    const senderEmail = Deno.env.get("RESEND_FROM") || "AERELION Systems <contact@aerelion.systems>";
+
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
+      return new Response(
+        JSON.stringify({ error: "Server configuration error" }),
+        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
 
     if (!resendApiKey) {
       console.warn("RESEND_API_KEY not configured, skipping reminders");
@@ -28,7 +47,7 @@ serve(async (req: Request) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Find requests needing reminders
+    // Find requests needing reminders (48+ hours since last reminder or never sent)
     const fortyEightHoursAgo = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
 
     const { data: requests, error: fetchError } = await supabase
@@ -49,7 +68,7 @@ serve(async (req: Request) => {
     let sentCount = 0;
     const errors: string[] = [];
 
-    for (const request of requests || []) {
+    for (const request of (requests || []) as ActivationRequest[]) {
       try {
         const isFirstReminder = request.reminder_count === 0;
         const reminderNumber = request.reminder_count + 1;
@@ -57,13 +76,13 @@ serve(async (req: Request) => {
         // Determine email subject based on status and reminder count
         let subject: string;
         if (request.customer_visible_status === "needs_attention") {
-          subject = `⚠️ Action needed to continue activation | AERELION`;
+          subject = "⚠️ Action needed to continue activation | AERELION";
         } else if (reminderNumber === 1) {
-          subject = `🔑 Action needed to activate your automation | AERELION`;
+          subject = "🔑 Action needed to activate your automation | AERELION";
         } else if (reminderNumber === 2) {
-          subject = `🔑 Reminder: We still need access to continue | AERELION`;
+          subject = "🔑 Reminder: We still need access to continue | AERELION";
         } else {
-          subject = `🔑 Final reminder: Access info needed | AERELION`;
+          subject = "🔑 Final reminder: Access info needed | AERELION";
         }
 
         const emailHtml = `
@@ -132,7 +151,7 @@ serve(async (req: Request) => {
 </body>
 </html>`;
 
-        // Send email
+        // Send email via Resend
         const emailRes = await fetch("https://api.resend.com/emails", {
           method: "POST",
           headers: {
@@ -140,7 +159,7 @@ serve(async (req: Request) => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            from: `AERELION Systems <${senderEmail}>`,
+            from: senderEmail,
             to: [request.email],
             subject,
             html: emailHtml,
@@ -160,7 +179,7 @@ serve(async (req: Request) => {
           reminder_count: request.reminder_count + 1,
         };
 
-        // Set awaiting_credentials_since on first reminder if not set
+        // Set awaiting_credentials_since on first reminder if not already set
         if (isFirstReminder && !request.awaiting_credentials_since) {
           updates.awaiting_credentials_since = new Date().toISOString();
         }
@@ -178,14 +197,18 @@ serve(async (req: Request) => {
         console.log(`Sent reminder ${reminderNumber} to ${request.email} for request ${request.id}`);
       } catch (reqError) {
         console.error(`Error processing request ${request.id}:`, reqError);
-        errors.push(`${request.id}: ${reqError instanceof Error ? reqError.message : 'Unknown error'}`);
+        errors.push(`${request.id}: ${reqError instanceof Error ? reqError.message : "Unknown error"}`);
       }
     }
 
     console.log(`Completed: sent ${sentCount} reminders, ${errors.length} errors`);
 
     return new Response(
-      JSON.stringify({ success: true, sent: sentCount, errors: errors.length > 0 ? errors : undefined }),
+      JSON.stringify({ 
+        success: true, 
+        sent: sentCount, 
+        errors: errors.length > 0 ? errors : undefined 
+      }),
       { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
     );
   } catch (error: unknown) {
