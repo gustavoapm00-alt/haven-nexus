@@ -28,7 +28,7 @@ serve(async (req: Request) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
     const appBaseUrl = Deno.env.get("APP_BASE_URL") || "https://aerelion.systems";
-    // IMPORTANT: Use a valid sender format with email address
+    // CRITICAL: Fallback MUST be a valid "Name <email>" format for Resend
     const senderEmail = Deno.env.get("RESEND_FROM") || "AERELION Systems <noreply@aerelion.systems>";
 
     // Validate required environment variables
