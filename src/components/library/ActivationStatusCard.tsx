@@ -115,6 +115,15 @@ export function ActivationStatusCard() {
                 </Badge>
               </div>
 
+              {/* CTA for awaiting credentials */}
+              {['awaiting_credentials', 'needs_attention'].includes(req.customer_visible_status) && (
+                <Link to={`/activation-request/${req.id}`}>
+                  <Button size="sm" variant="default" className="mt-2">
+                    Submit Access Info
+                  </Button>
+                </Link>
+              )}
+
               <div className="mt-3 pt-3 border-t border-border/50 grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <p className="text-muted-foreground">Last Updated</p>

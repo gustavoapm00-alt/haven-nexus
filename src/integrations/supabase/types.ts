@@ -14,6 +14,65 @@ export type Database = {
   }
   public: {
     Tables: {
+      activation_customer_updates: {
+        Row: {
+          attachment_url: string | null
+          created_at: string
+          credential_method: string | null
+          credential_reference: string | null
+          customer_email: string
+          id: string
+          message: string | null
+          request_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          secure_link: string | null
+          status: string
+          tool_name: string | null
+          update_type: string
+        }
+        Insert: {
+          attachment_url?: string | null
+          created_at?: string
+          credential_method?: string | null
+          credential_reference?: string | null
+          customer_email: string
+          id?: string
+          message?: string | null
+          request_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          secure_link?: string | null
+          status?: string
+          tool_name?: string | null
+          update_type: string
+        }
+        Update: {
+          attachment_url?: string | null
+          created_at?: string
+          credential_method?: string | null
+          credential_reference?: string | null
+          customer_email?: string
+          id?: string
+          message?: string | null
+          request_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          secure_link?: string | null
+          status?: string
+          tool_name?: string | null
+          update_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activation_customer_updates_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "installation_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agent_catalog: {
         Row: {
           agent_key: string
@@ -725,6 +784,7 @@ export type Database = {
           activation_notes_customer: string | null
           activation_notes_internal: string | null
           automation_id: string | null
+          awaiting_credentials_since: string | null
           bundle_id: string | null
           company: string | null
           created_at: string
@@ -733,11 +793,14 @@ export type Database = {
           id: string
           internal_owner: string | null
           last_notified_status: string | null
+          last_reminder_sent_at: string | null
           name: string
           notes: string | null
           preferred_systems: string | null
           purchase_id: string | null
           purchased_item: string | null
+          reminder_count: number
+          reminders_disabled: boolean
           setup_window: string | null
           status: string | null
           status_updated_at: string | null
@@ -747,6 +810,7 @@ export type Database = {
           activation_notes_customer?: string | null
           activation_notes_internal?: string | null
           automation_id?: string | null
+          awaiting_credentials_since?: string | null
           bundle_id?: string | null
           company?: string | null
           created_at?: string
@@ -755,11 +819,14 @@ export type Database = {
           id?: string
           internal_owner?: string | null
           last_notified_status?: string | null
+          last_reminder_sent_at?: string | null
           name: string
           notes?: string | null
           preferred_systems?: string | null
           purchase_id?: string | null
           purchased_item?: string | null
+          reminder_count?: number
+          reminders_disabled?: boolean
           setup_window?: string | null
           status?: string | null
           status_updated_at?: string | null
@@ -769,6 +836,7 @@ export type Database = {
           activation_notes_customer?: string | null
           activation_notes_internal?: string | null
           automation_id?: string | null
+          awaiting_credentials_since?: string | null
           bundle_id?: string | null
           company?: string | null
           created_at?: string
@@ -777,11 +845,14 @@ export type Database = {
           id?: string
           internal_owner?: string | null
           last_notified_status?: string | null
+          last_reminder_sent_at?: string | null
           name?: string
           notes?: string | null
           preferred_systems?: string | null
           purchase_id?: string | null
           purchased_item?: string | null
+          reminder_count?: number
+          reminders_disabled?: boolean
           setup_window?: string | null
           status?: string | null
           status_updated_at?: string | null
