@@ -350,66 +350,14 @@ const UserDashboard = () => {
                                 View Details
                               </Link>
                             </Button>
-                            <Button
-                              size="sm"
-                              onClick={() => fetchDownloads(purchase.item_type, purchase.item_id, purchase.id)}
-                              disabled={downloadingId === purchase.id}
-                            >
-                              {downloadingId === purchase.id ? (
-                                <>
-                                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                  Loading...
-                                </>
-                              ) : (
-                                <>
-                                  <Download className="w-4 h-4 mr-2" />
-                                  Get Downloads
-                                </>
-                              )}
+                            <Button size="sm" asChild>
+                              <Link to="/activation-setup">
+                                <ArrowRight className="w-4 h-4 mr-2" />
+                                Activation Setup
+                              </Link>
                             </Button>
                           </div>
                         </div>
-
-                        {/* Download Links */}
-                        {downloads[purchase.id] && downloads[purchase.id].length > 0 && (
-                          <motion.div 
-                            className="mt-4 pt-4 border-t border-border"
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                          >
-                            <div className="flex items-center justify-between mb-3">
-                              <h4 className="text-sm font-medium text-foreground">Download Files</h4>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => fetchDownloads(purchase.item_type, purchase.item_id, purchase.id)}
-                                disabled={downloadingId === purchase.id}
-                              >
-                                <RefreshCw className={`w-3 h-3 mr-1 ${downloadingId === purchase.id ? 'animate-spin' : ''}`} />
-                                Refresh
-                              </Button>
-                            </div>
-                            <div className="grid gap-2 sm:grid-cols-2">
-                              {downloads[purchase.id].map((download, i) => (
-                                <a
-                                  key={i}
-                                  href={download.url}
-                                  download
-                                  className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors group"
-                                >
-                                  <FileText className="w-4 h-4 text-muted-foreground shrink-0" />
-                                  <span className="text-sm font-medium text-foreground truncate flex-1">
-                                    {download.name}
-                                  </span>
-                                  <Download className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
-                                </a>
-                              ))}
-                            </div>
-                            <p className="text-xs text-muted-foreground mt-3">
-                              Links expire in 1 hour. Click "Refresh" to generate new links.
-                            </p>
-                          </motion.div>
-                        )}
                       </CardContent>
                     </Card>
                   </motion.div>

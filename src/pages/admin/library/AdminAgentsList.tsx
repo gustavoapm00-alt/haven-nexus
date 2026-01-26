@@ -214,7 +214,7 @@ const AdminAgentsList = () => {
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogHeader>
-                                <AlertDialogTitle>Delete Workflow Pack</AlertDialogTitle>
+                                <AlertDialogTitle>Delete Automation</AlertDialogTitle>
                                 <AlertDialogDescription>
                                   Are you sure you want to delete "{agent.name}"? This action cannot be undone.
                                 </AlertDialogDescription>

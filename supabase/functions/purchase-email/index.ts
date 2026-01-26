@@ -99,39 +99,39 @@ serve(async (req: Request): Promise<Response> => {
             </td>
           </tr>
           
-          <!-- Download Button -->
+          <!-- Next Steps -->
           <tr>
             <td style="padding: 0 40px 30px; text-align: center;">
               <a href="${downloadUrl}" style="display: inline-block; padding: 14px 32px; background-color: #003366; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 600; border-radius: 6px; letter-spacing: 0.5px;">
-                Access Your Downloads
+                Start Activation Setup
               </a>
               <p style="margin: 16px 0 0; color: #707070; font-size: 13px;">
-                Download links are valid for 24 hours. You can regenerate them anytime from your purchase page.
+                We'll guide you through connecting your tools so we can activate your automation.
               </p>
             </td>
           </tr>
           
-          <!-- What's Included -->
+          <!-- What Happens Next -->
           <tr>
             <td style="padding: 0 40px 30px;">
-              <h3 style="margin: 0 0 16px; color: #1a1a1a; font-size: 16px; font-weight: 600;">What's Included</h3>
+              <h3 style="margin: 0 0 16px; color: #1a1a1a; font-size: 16px; font-weight: 600;">What Happens Next</h3>
               <table role="presentation" style="width: 100%; border-collapse: collapse;">
                 <tr>
                   <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb;">
-                    <span style="color: #22c55e; margin-right: 8px;">✓</span>
-                    <span style="color: #374151; font-size: 14px;">n8n workflow JSON file</span>
+                    <span style="color: #22c55e; margin-right: 8px;">1</span>
+                    <span style="color: #374151; font-size: 14px;">Complete your activation setup form</span>
                   </td>
                 </tr>
                 <tr>
                   <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb;">
-                    <span style="color: #22c55e; margin-right: 8px;">✓</span>
-                    <span style="color: #374151; font-size: 14px;">Step-by-step deployment guide (PDF)</span>
+                    <span style="color: #22c55e; margin-right: 8px;">2</span>
+                    <span style="color: #374151; font-size: 14px;">Connect your tools securely</span>
                   </td>
                 </tr>
                 <tr>
                   <td style="padding: 8px 0;">
-                    <span style="color: #22c55e; margin-right: 8px;">✓</span>
-                    <span style="color: #374151; font-size: 14px;">Lifetime access to updates</span>
+                    <span style="color: #22c55e; margin-right: 8px;">3</span>
+                    <span style="color: #374151; font-size: 14px;">We activate and maintain your automation</span>
                   </td>
                 </tr>
               </table>
@@ -144,7 +144,7 @@ serve(async (req: Request): Promise<Response> => {
               <div style="padding: 20px; background-color: #f0f9ff; border-radius: 6px; border-left: 4px solid #003366;">
                 <p style="margin: 0 0 8px; color: #1a1a1a; font-size: 14px; font-weight: 600;">Need Help?</p>
                 <p style="margin: 0; color: #707070; font-size: 13px;">
-                  If you have questions about deployment, visit our <a href="${appBaseUrl}/library/docs" style="color: #003366; text-decoration: none;">documentation</a> or <a href="${appBaseUrl}/library/contact" style="color: #003366; text-decoration: none;">contact support</a>.
+                  If you have questions about your automation, visit our <a href="${appBaseUrl}/activation-walkthrough" style="color: #003366; text-decoration: none;">activation guide</a> or <a href="${appBaseUrl}/contact" style="color: #003366; text-decoration: none;">contact support</a>.
                 </p>
               </div>
             </td>
