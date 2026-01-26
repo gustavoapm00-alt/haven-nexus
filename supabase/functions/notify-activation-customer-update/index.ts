@@ -16,6 +16,7 @@ interface CustomerUpdatePayload {
 }
 
 serve(async (req: Request) => {
+  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -28,12 +29,17 @@ serve(async (req: Request) => {
 
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
     const appBaseUrl = Deno.env.get("APP_BASE_URL") || "https://aerelion.systems";
-    const senderEmail = Deno.env.get("RESEND_FROM") || "AERELION Systems <contact@aerelion.systems>";
+    // IMPORTANT: Use a valid sender format with email address
+    const senderEmail = Deno.env.get("RESEND_FROM") || "AERELION Systems <noreply@aerelion.systems>";
 
     if (!resendApiKey) {
       console.warn("RESEND_API_KEY not configured, skipping email notifications");
       return new Response(
-        JSON.stringify({ success: true, message: "Email skipped - no API key", emailResults: { admin: false, customer: false } }),
+        JSON.stringify({ 
+          success: true, 
+          message: "Email skipped - no API key", 
+          emailResults: { admin: false, customer: false } 
+        }),
         { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
       );
     }

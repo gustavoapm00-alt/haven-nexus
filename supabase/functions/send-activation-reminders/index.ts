@@ -18,6 +18,7 @@ interface ActivationRequest {
 }
 
 serve(async (req: Request) => {
+  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -27,12 +28,14 @@ serve(async (req: Request) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
     const appBaseUrl = Deno.env.get("APP_BASE_URL") || "https://aerelion.systems";
-    const senderEmail = Deno.env.get("RESEND_FROM") || "AERELION Systems <contact@aerelion.systems>";
+    // IMPORTANT: Use a valid sender format with email address
+    const senderEmail = Deno.env.get("RESEND_FROM") || "AERELION Systems <noreply@aerelion.systems>";
 
+    // Validate required environment variables
     if (!supabaseUrl || !supabaseServiceKey) {
       console.error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
       return new Response(
-        JSON.stringify({ error: "Server configuration error" }),
+        JSON.stringify({ error: "Server configuration error: missing Supabase credentials" }),
         { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
       );
     }
@@ -169,7 +172,7 @@ serve(async (req: Request) => {
         if (!emailRes.ok) {
           const errorText = await emailRes.text();
           console.error(`Failed to send reminder to ${request.email}:`, emailRes.status, errorText);
-          errors.push(`${request.email}: ${emailRes.status}`);
+          errors.push(`${request.email}: ${emailRes.status} - ${errorText}`);
           continue;
         }
 
@@ -191,6 +194,7 @@ serve(async (req: Request) => {
 
         if (updateError) {
           console.error(`Failed to update reminder tracking for ${request.id}:`, updateError);
+          errors.push(`${request.id}: Failed to update tracking`);
         }
 
         sentCount++;
