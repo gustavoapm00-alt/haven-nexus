@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { SubscriptionProvider } from "@/hooks/useSubscription";
+import PasswordGate from "@/components/PasswordGate";
 
 // Access gate - set to false to allow public marketplace browsing
 const SITE_LOCKED = false;
@@ -195,14 +196,16 @@ const App = () => (
         <Toaster />
         <Sonner />
         
-        <BrowserRouter>
-          <ScrollToTop />
-          <AuthProvider>
-            <SubscriptionProvider>
-              <SiteGate />
-            </SubscriptionProvider>
-          </AuthProvider>
-        </BrowserRouter>
+        <PasswordGate>
+          <BrowserRouter>
+            <ScrollToTop />
+            <AuthProvider>
+              <SubscriptionProvider>
+                <SiteGate />
+              </SubscriptionProvider>
+            </AuthProvider>
+          </BrowserRouter>
+        </PasswordGate>
       </TooltipProvider>
     </QueryClientProvider>
   </HelmetProvider>
