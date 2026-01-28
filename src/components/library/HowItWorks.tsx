@@ -1,25 +1,44 @@
 import { motion } from 'framer-motion';
 
 const steps = [
-  { step: 1, title: 'Discovery call', description: 'We assess your operations and identify high-impact workflows' },
-  { step: 2, title: 'Scoped installation', description: 'We configure and install workflows on your infrastructure' },
-  { step: 3, title: 'Ongoing operation', description: 'We monitor, maintain, and optimize your systems' },
+  { 
+    step: 1, 
+    title: 'Select a Solution', 
+    description: 'Choose from our catalog of hosted automations or system bundles.' 
+  },
+  { 
+    step: 2, 
+    title: 'Secure Checkout', 
+    description: 'One-time purchase via Stripe. No usage-based pricing.' 
+  },
+  { 
+    step: 3, 
+    title: 'Activation Intake', 
+    description: 'Provide operational details and preferred connection methods.' 
+  },
+  { 
+    step: 4, 
+    title: 'Deployment & Operation', 
+    description: 'AERELION configures and operates the automation internally.' 
+  },
+  { 
+    step: 5, 
+    title: 'Ongoing Oversight', 
+    description: 'Track progress via the customer portal and email updates.' 
+  },
 ];
 
 const HowItWorks = () => {
   return (
-    <div>
+    <div id="how-it-works">
       <div className="text-center mb-12">
-        <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3">How We Work</h2>
-        <p className="text-muted-foreground max-w-xl mx-auto">
-          Every engagement is scoped to your operations. We handle the technical work—you get the outcomes.
-        </p>
+        <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3">
+          A Controlled, Predictable Engagement Model
+        </h2>
       </div>
-      <div className="relative">
-        {/* Connection line */}
-        <div className="hidden md:block absolute top-6 left-1/2 -translate-x-1/2 w-[60%] h-0.5 bg-gradient-to-r from-transparent via-border to-transparent" />
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6">
+      
+      <div className="max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 md:gap-2">
           {steps.map((step, index) => (
             <motion.div
               key={step.step}
@@ -32,23 +51,17 @@ const HowItWorks = () => {
               <div className="step-node mx-auto mb-4">
                 {step.step}
               </div>
-              <h3 className="font-semibold text-foreground mb-1 text-sm md:text-base">{step.title}</h3>
-              <p className="text-xs text-muted-foreground">{step.description}</p>
+              <h3 className="font-semibold text-foreground mb-2 text-sm">{step.title}</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">{step.description}</p>
+              
+              {/* Connection line for desktop */}
+              {index < steps.length - 1 && (
+                <div className="hidden md:block absolute top-5 left-[60%] w-[80%] h-px bg-border" />
+              )}
             </motion.div>
           ))}
         </div>
       </div>
-      
-      {/* Supporting line */}
-      <motion.p 
-        className="text-center text-sm text-muted-foreground mt-8"
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ delay: 0.4 }}
-      >
-        We take responsibility for outcomes, not just delivery.
-      </motion.p>
     </div>
   );
 };
