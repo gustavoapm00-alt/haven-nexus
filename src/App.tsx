@@ -24,6 +24,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Sanctuary from "./pages/Sanctuary";
 import NotFound from "./pages/NotFound";
 import Careers from "./pages/Careers";
+import About from "./pages/About";
 
 // Library pages (primary site)
 import LibraryHome from "./pages/library/LibraryHome";
@@ -146,7 +147,7 @@ const UnlockedApp = () => (
     <Route path="/get-started" element={<Navigate to="/contact" replace />} />
     <Route path="/services" element={<Navigate to="/automations" replace />} />
     <Route path="/old-home" element={<Navigate to="/" replace />} />
-    <Route path="/about" element={<Navigate to="/" replace />} />
+    <Route path="/about" element={<About />} />
     <Route path="/reliability" element={<Navigate to="/security" replace />} />
     <Route path="/proof" element={<Navigate to="/how-it-works" replace />} />
     <Route path="/portal/analytics" element={<Navigate to="/portal/activity" replace />} />
