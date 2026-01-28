@@ -9,9 +9,8 @@ const LibraryNavbar = () => {
   const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path + '/');
 
   const navLinks = [
-    { name: 'Automations', href: '/automations' },
-    { name: 'System Bundles', href: '/bundles' },
-    { name: 'How It Works', href: '/how-it-works' },
+    { name: 'How We Work', href: '/how-it-works' },
+    { name: 'Example Workflows', href: '/automations' },
     { name: 'Documentation', href: '/docs' },
   ];
 
@@ -45,9 +44,9 @@ const LibraryNavbar = () => {
           <div className="flex items-center gap-4">
             <Link
               to="/contact"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
             >
-              Contact
+              Book a Call
             </Link>
             {isAdmin && (
               <Link

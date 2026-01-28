@@ -1,34 +1,19 @@
-import { useParams, Link, useSearchParams } from 'react-router-dom';
-import { useEffect } from 'react';
-import { ArrowLeft, ArrowRight, Zap, Package, Loader2 } from 'lucide-react';
+import { useParams, Link } from 'react-router-dom';
+import { ArrowLeft, ArrowRight, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import LibraryNavbar from '@/components/library/LibraryNavbar';
 import LibraryFooter from '@/components/library/LibraryFooter';
 import { useBundle } from '@/hooks/useBundles';
-import { usePurchase } from '@/hooks/usePurchase';
-import { useAuth } from '@/hooks/useAuth';
 import SEO from '@/components/SEO';
-import { toast } from 'sonner';
 
 const BundleDetail = () => {
   const { slug } = useParams<{ slug: string }>();
-  const [searchParams] = useSearchParams();
   const { bundle, loading, error } = useBundle(slug || '');
-  const { initiateCheckout, loading: checkoutLoading, isAuthenticated } = usePurchase();
-  const { isLoading: authLoading } = useAuth();
 
-  useEffect(() => {
-    if (searchParams.get('canceled') === 'true') {
-      toast.info('Purchase canceled', { description: 'You can complete your purchase anytime.' });
-    }
-  }, [searchParams]);
-
-  const formatPrice = (cents: number) => `$${(cents / 100).toFixed(0)}`;
-
-  const activationSteps = [
-    'Purchase the bundle to unlock all included automations',
-    'Connect your tools securely through our guided process',
-    'We activate and maintain each automation for you',
+  const engagementSteps = [
+    'Book a discovery call to discuss your operations',
+    'We scope the engagement based on your workflows and tools',
+    'We install, configure, and maintain everything for you',
   ];
 
   if (loading) {
@@ -54,12 +39,12 @@ const BundleDetail = () => {
         <LibraryNavbar />
         <div className="section-padding">
           <div className="container-main max-w-4xl text-center">
-            <h1 className="text-2xl font-semibold text-foreground mb-4">Bundle Not Found</h1>
+            <h1 className="text-2xl font-semibold text-foreground mb-4">System Not Found</h1>
             <p className="text-muted-foreground mb-6">
-              The bundle you're looking for doesn't exist or has been removed.
+              The system you're looking for doesn't exist or has been removed.
             </p>
             <Button asChild>
-              <Link to="/bundles">Browse All Bundles</Link>
+              <Link to="/automations">Browse Example Workflows</Link>
             </Button>
           </div>
         </div>
@@ -68,16 +53,12 @@ const BundleDetail = () => {
     );
   }
 
-  const savingsPercent = Math.round(
-    ((bundle.individual_value_cents - bundle.bundle_price_cents) / bundle.individual_value_cents) * 100
-  );
-
   return (
     <>
       <SEO
-        title={bundle.name}
+        title={`${bundle.name} - System Example`}
         description={bundle.objective}
-        keywords={[...bundle.sectors, 'automation bundle', 'hosted automation', 'managed systems'].join(', ')}
+        keywords={[...bundle.sectors, 'AI operations', 'workflow integration', 'managed systems'].join(', ')}
       />
 
       <div className="min-h-screen bg-background">
@@ -87,11 +68,11 @@ const BundleDetail = () => {
           <div className="container-main max-w-4xl">
             {/* Back Link */}
             <Link
-              to="/bundles"
+              to="/automations"
               className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8"
             >
               <ArrowLeft className="w-4 h-4" />
-              Back to Bundles
+              Back to Example Workflows
             </Link>
 
             {/* Header */}
@@ -100,8 +81,8 @@ const BundleDetail = () => {
                 <div className="p-2 bg-primary/10 rounded-md">
                   <Package className="w-6 h-6 text-primary" />
                 </div>
-                <span className="text-sm font-medium text-primary bg-primary/10 px-3 py-1 rounded">
-                  Save {savingsPercent}%
+                <span className="text-xs font-semibold text-primary uppercase tracking-wide">
+                  System Example
                 </span>
               </div>
               <h1 className="text-3xl font-semibold text-foreground mb-3">
@@ -115,21 +96,24 @@ const BundleDetail = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
               {/* Main Content */}
               <div className="lg:col-span-2 space-y-10">
-                {/* What This Bundle Stabilizes */}
+                {/* What This System Stabilizes */}
                 <section>
                   <h2 className="text-lg font-semibold text-foreground mb-4">
-                    What This Bundle Stabilizes
+                    What This System Stabilizes
                   </h2>
                   <p className="text-muted-foreground leading-relaxed">
                     {bundle.description}
                   </p>
                 </section>
 
-                {/* Included Automations */}
+                {/* Included Workflows */}
                 <section>
                   <h2 className="text-lg font-semibold text-foreground mb-4">
-                    Included Hosted Automations
+                    Workflows Included in This System
                   </h2>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    These workflows are installed together as part of a scoped engagement.
+                  </p>
                   <div className="space-y-3">
                     {bundle.included_agents.map((agent) => (
                       <Link
@@ -153,10 +137,10 @@ const BundleDetail = () => {
                   </div>
                 </section>
 
-                {/* Best For */}
+                {/* Common Use Cases */}
                 <section>
                   <h2 className="text-lg font-semibold text-foreground mb-4">
-                    Best For
+                    Common Use Cases
                   </h2>
                   <div className="flex flex-wrap gap-2">
                     {bundle.sectors.map((sector) => (
@@ -167,13 +151,13 @@ const BundleDetail = () => {
                   </div>
                 </section>
 
-                {/* How Activation Works */}
+                {/* How Engagement Works */}
                 <section>
                   <h2 className="text-lg font-semibold text-foreground mb-4">
-                    How Activation Works
+                    How We Work Together
                   </h2>
                   <ol className="space-y-3">
-                    {activationSteps.map((step, index) => (
+                    {engagementSteps.map((step, index) => (
                       <li key={index} className="flex gap-4">
                         <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground text-sm flex items-center justify-center">
                           {index + 1}
@@ -188,43 +172,27 @@ const BundleDetail = () => {
               {/* Sidebar */}
               <div className="lg:col-span-1">
                 <div className="card-enterprise p-6 sticky top-24">
-                  <h3 className="text-lg font-semibold text-foreground mb-4">
-                    Pricing
+                  <h3 className="text-lg font-semibold text-foreground mb-2">
+                    Get This System Installed
                   </h3>
-                  
-                  <div className="mb-4">
-                    <p className="text-sm text-muted-foreground mb-1">Individual value</p>
-                    <p className="text-lg text-muted-foreground line-through">
-                      {formatPrice(bundle.individual_value_cents)}
-                    </p>
-                  </div>
-
-                  <div className="mb-6">
-                    <p className="text-sm text-muted-foreground mb-1">Bundle rate</p>
-                    <p className="text-3xl font-semibold text-foreground">
-                      {formatPrice(bundle.bundle_price_cents)}
-                    </p>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      Includes activation and an initial monitoring period. Ongoing maintenance available.
-                    </p>
-                  </div>
+                  <p className="text-sm text-muted-foreground mb-6">
+                    This system is installed as part of a scoped AI Ops engagement. 
+                    Pricing and scope are customized based on your operational needs.
+                  </p>
 
                   <Button 
+                    asChild
                     className="w-full mb-3" 
                     size="lg"
-                    onClick={() => initiateCheckout('bundle', bundle.id)}
-                    disabled={checkoutLoading || authLoading}
                   >
-                    {checkoutLoading ? (
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    ) : (
-                      <Zap className="w-4 h-4 mr-2" />
-                    )}
-                    {!isAuthenticated ? 'Sign In to Activate' : 'Activate Bundle'}
+                    <Link to="/contact">
+                      Book an AI Ops Installation
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Link>
                   </Button>
 
-                  <p className="text-center text-sm text-muted-foreground">
-                    We configure and maintain everything for you
+                  <p className="text-center text-xs text-muted-foreground">
+                    No technical experience required
                   </p>
                 </div>
               </div>

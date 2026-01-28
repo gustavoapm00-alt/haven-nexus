@@ -3,7 +3,7 @@ import { ArrowRight, Clock, TrendingUp } from 'lucide-react';
 import SystemIcon from './SystemIcon';
 import { motion } from 'framer-motion';
 
-interface AgentCardProps {
+interface WorkflowExampleCardProps {
   slug: string;
   name: string;
   shortOutcome: string;
@@ -13,11 +13,10 @@ interface AgentCardProps {
   setupTimeMax: number;
   capacityRecoveredMin: number;
   capacityRecoveredMax: number;
-  priceCents: number;
   variant?: 'light' | 'dark';
 }
 
-const AgentCard = ({
+const WorkflowExampleCard = ({
   slug,
   name,
   shortOutcome,
@@ -27,13 +26,8 @@ const AgentCard = ({
   setupTimeMax,
   capacityRecoveredMin,
   capacityRecoveredMax,
-  priceCents,
   variant = 'light',
-}: AgentCardProps) => {
-  const formatPrice = (cents: number) => {
-    return `$${(cents / 100).toFixed(0)}`;
-  };
-
+}: WorkflowExampleCardProps) => {
   const isDark = variant === 'dark';
 
   return (
@@ -48,6 +42,14 @@ const AgentCard = ({
     >
       {/* Header */}
       <div className="flex-1">
+        <div className="mb-2">
+          <span className={`text-xs font-medium uppercase tracking-wide ${
+            isDark ? 'text-primary/80' : 'text-primary'
+          }`}>
+            Example Workflow
+          </span>
+        </div>
+        
         <h3 className={`font-semibold text-base leading-snug mb-2 ${
           isDark ? 'text-white' : 'text-foreground'
         }`}>
@@ -59,7 +61,7 @@ const AgentCard = ({
           <p className={`text-xs font-medium uppercase tracking-wide mb-1 ${
             isDark ? 'text-white/50' : 'text-muted-foreground'
           }`}>
-            Outcome
+            What it solves
           </p>
           <p className={`text-sm ${isDark ? 'text-white/80' : 'text-muted-foreground'}`}>
             {shortOutcome}
@@ -72,7 +74,7 @@ const AgentCard = ({
             <p className={`text-xs font-medium uppercase tracking-wide mb-1.5 ${
               isDark ? 'text-white/50' : 'text-muted-foreground'
             }`}>
-              Best for
+              Common use cases
             </p>
             <div className="flex flex-wrap gap-1.5">
               {sectors.slice(0, 2).map((sector) => (
@@ -116,7 +118,7 @@ const AgentCard = ({
         }`}>
           <div className="flex items-center gap-1.5">
             <Clock className="w-3.5 h-3.5" />
-            <span>{setupTimeMin}–{setupTimeMax} hrs activation</span>
+            <span>{setupTimeMin}–{setupTimeMax} hrs typical</span>
           </div>
           <div className="flex items-center gap-1.5">
             <TrendingUp className="w-3.5 h-3.5" />
@@ -129,8 +131,8 @@ const AgentCard = ({
       <div className={`flex items-center justify-between mt-6 pt-4 border-t ${
         isDark ? 'border-white/10' : 'border-border'
       }`}>
-        <span className={`font-bold text-lg ${isDark ? 'text-white' : 'text-foreground'}`}>
-          {formatPrice(priceCents)}
+        <span className={`text-xs ${isDark ? 'text-white/50' : 'text-muted-foreground'}`}>
+          Included in scoped installations
         </span>
         <Link
           to={`/automations/${slug}`}
@@ -140,7 +142,7 @@ const AgentCard = ({
               : 'text-primary hover:underline'
           }`}
         >
-          Activate Automation
+          View Details
           <ArrowRight className="w-4 h-4" />
         </Link>
       </div>
@@ -148,4 +150,4 @@ const AgentCard = ({
   );
 };
 
-export default AgentCard;
+export default WorkflowExampleCard;
