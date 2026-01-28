@@ -1,11 +1,11 @@
 import { motion } from 'framer-motion';
-import { Shield, Lock, KeyRound, Server } from 'lucide-react';
+import { Shield, Lock, KeyRound, Eye } from 'lucide-react';
 
 const securityPoints = [
-  { icon: KeyRound, text: 'Secure credential handling' },
-  { icon: Lock, text: 'Principle-of-least-access connections' },
-  { icon: Shield, text: 'No unnecessary credential storage' },
-  { icon: Server, text: 'Controlled infrastructure and access' },
+  { icon: KeyRound, text: 'Credentials encrypted at rest and in transit' },
+  { icon: Lock, text: 'Principle-of-least-privilege access only' },
+  { icon: Eye, text: 'Full visibility and revocation at any time' },
+  { icon: Shield, text: 'Operated on controlled, auditable infrastructure' },
 ];
 
 const SecurityControl = () => {
@@ -17,9 +17,12 @@ const SecurityControl = () => {
         viewport={{ once: true }}
         transition={{ duration: 0.5 }}
       >
-        <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-8">
-          Enterprise-Grade by Default
+        <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4">
+          Enterprise-Grade Security by Default
         </h2>
+        <p className="text-muted-foreground mb-8">
+          We handle your credentials and data with the care expected by regulated industries.
+        </p>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
           {securityPoints.map((point, index) => (
@@ -40,7 +43,7 @@ const SecurityControl = () => {
         </div>
         
         <p className="text-sm text-muted-foreground">
-          Automation is treated as an operational responsibility, not a software experiment.
+          Automation is treated as an operational responsibility—not a software experiment.
         </p>
       </motion.div>
     </div>

@@ -69,7 +69,7 @@ const LibraryNavbar = () => {
                 className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
               >
                 <User className="w-4 h-4" />
-                <span className="hidden sm:inline">Account</span>
+                <span className="hidden sm:inline">Dashboard</span>
               </Link>
             )}
           </div>

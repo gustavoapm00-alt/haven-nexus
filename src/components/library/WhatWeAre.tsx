@@ -12,7 +12,7 @@ const features = [
   },
   {
     icon: Activity,
-    text: 'Actively operated and monitored',
+    text: 'Operated and monitored continuously',
   },
 ];
 
@@ -26,13 +26,13 @@ const WhatWeAre = () => {
         transition={{ duration: 0.5 }}
       >
         <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-6">
-          Automation, Operated as a Service
+          A Managed Automation Operator
         </h2>
         <p className="text-muted-foreground text-lg leading-relaxed mb-8">
-          AERELION Systems is a managed automation operator for small and mid-sized organizations.
+          AERELION is a done-for-you operational service for professional services firms, government contractors, and compliance-driven organizations.
         </p>
         <p className="text-muted-foreground mb-8">
-          We deliver predefined automation systems that are:
+          We deliver pre-built automation systems that are:
         </p>
         
         <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-8">
@@ -54,8 +54,7 @@ const WhatWeAre = () => {
         </div>
         
         <p className="text-muted-foreground text-sm max-w-xl mx-auto">
-          Customers never install software or run workflows themselves.<br />
-          Automation remains invisible. Operations remain stable.
+          Customers buy outcomes, not tools. We take responsibility for execution.
         </p>
       </motion.div>
     </div>

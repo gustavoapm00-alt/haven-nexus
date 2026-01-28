@@ -12,19 +12,19 @@ const Documentation = () => {
       title: 'Getting Started',
       description: 'New to AERELION managed automations? Start here.',
       links: [
-        { label: 'What is a managed automation?', href: '#' },
+        { label: 'What is a managed automation?', href: '/how-it-works' },
         { label: 'How activation works', href: '/activation-walkthrough' },
-        { label: 'Your first automation', href: '#' },
+        { label: 'What to expect', href: '/how-it-works' },
       ],
     },
     {
       icon: Settings,
-      title: 'Connection Guides',
+      title: 'Connection & Access',
       description: 'How we connect to your tools securely.',
       links: [
-        { label: 'What access we need', href: '#' },
+        { label: 'What access we need from you', href: '/activation-walkthrough' },
         { label: 'How credentials are handled', href: '/security' },
-        { label: 'Revoking access', href: '/security' },
+        { label: 'Revoking access at any time', href: '/security' },
       ],
     },
     {
@@ -34,17 +34,17 @@ const Documentation = () => {
       links: [
         { label: 'Credential encryption', href: '/security' },
         { label: 'Data handling practices', href: '/security' },
-        { label: 'Access revocation', href: '/security' },
+        { label: 'Compliance considerations', href: '/security' },
       ],
     },
     {
       icon: HelpCircle,
-      title: 'Support',
-      description: 'Getting help with your managed automations.',
+      title: 'Support & Status',
+      description: 'Tracking your automations and getting help.',
       links: [
-        { label: 'Status tracking', href: '/dashboard' },
-        { label: 'Contacting support', href: '/contact' },
-        { label: 'Common questions', href: '#' },
+        { label: 'Status tracking in your dashboard', href: '/dashboard' },
+        { label: 'Contacting our team', href: '/contact' },
+        { label: 'Common questions', href: '/how-it-works' },
       ],
     },
   ];
@@ -53,7 +53,7 @@ const Documentation = () => {
     <>
       <SEO
         title="Documentation - AERELION Systems"
-        description="Guides for AERELION managed automations. Learn how we configure, operate, and maintain automations on your behalf."
+        description="Guidance for AERELION managed automations. Learn how we configure, operate, and maintain automations on your behalf."
         keywords="documentation, guides, managed automation, automation operator"
       />
 
@@ -70,7 +70,7 @@ const Documentation = () => {
             </div>
             
             <p className="text-lg text-muted-foreground leading-relaxed mb-12">
-              Guidance for AERELION managed automations. We handle the technical complexity—these resources help you understand what to expect and how we operate on your behalf.
+              Guidance for working with AERELION. We handle the technical complexity—these resources help you understand what to expect and how we operate on your behalf.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
@@ -84,12 +84,12 @@ const Documentation = () => {
                   <ul className="space-y-2">
                     {section.links.map((link) => (
                       <li key={link.label}>
-                        <a
-                          href={link.href}
+                        <Link
+                          to={link.href}
                           className="text-sm text-primary hover:underline"
                         >
                           {link.label}
-                        </a>
+                        </Link>
                       </li>
                     ))}
                   </ul>

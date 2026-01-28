@@ -19,24 +19,24 @@ const AgentDetail = () => {
 
   const faqs = [
     {
-      question: 'Is this something I operate myself?',
-      answer: 'No. AERELION configures, operates, and maintains all automations on our infrastructure. You provide tool access—we handle the technical work.',
+      question: 'Do I operate this myself?',
+      answer: 'No. AERELION configures, operates, and maintains all automations on our infrastructure. You provide tool access—we handle everything else.',
     },
     {
       question: 'How does pricing work?',
-      answer: 'Pricing is scoped per engagement. Schedule a discovery call to discuss your needs and receive a custom quote.',
+      answer: 'Pricing is outcome-based and scoped per engagement. Schedule a discovery call to discuss your needs and receive a custom quote.',
     },
     {
       question: 'Who runs and maintains this automation?',
-      answer: 'AERELION operates and monitors all automations. If something needs attention, we handle it.',
+      answer: 'AERELION operates and monitors all automations. If something needs attention, we handle it. You receive outcomes, not tasks.',
     },
     {
       question: 'How are my credentials handled?',
-      answer: 'Credentials are encrypted and securely stored on our infrastructure. You retain full control and can revoke access at any time.',
+      answer: 'Credentials are encrypted at rest and in transit, stored securely on our infrastructure. You retain full control and can revoke access at any time.',
     },
     {
       question: 'Do I need technical experience?',
-      answer: 'No. These automations are configured and maintained by our team. No code or technical knowledge required from you.',
+      answer: 'No. These automations are configured and maintained by our team. No code, no configuration, no technical knowledge required from you.',
     },
   ];
 
@@ -68,7 +68,7 @@ const AgentDetail = () => {
               The automation you're looking for doesn't exist or has been removed.
             </p>
             <Button asChild>
-              <Link to="/automations">Browse Automations</Link>
+              <Link to="/automations">View All Automations</Link>
             </Button>
           </div>
         </div>
@@ -80,7 +80,7 @@ const AgentDetail = () => {
   return (
     <>
       <SEO
-        title={`${agent.name} - Managed Automation | AERELION Systems`}
+        title={`${agent.name} - Operated by AERELION`}
         description={agent.short_outcome}
         keywords={[...agent.sectors, ...agent.systems, 'managed automation', 'hosted automation', 'automation operator'].join(', ')}
       />
@@ -96,13 +96,13 @@ const AgentDetail = () => {
               className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8"
             >
               <ArrowLeft className="w-4 h-4" />
-              Back to Automation Catalog
+              Back to Automations
             </Link>
 
             {/* Header */}
             <div className="mb-10">
               <span className="text-xs font-semibold text-primary uppercase tracking-wide mb-2 block">
-                Managed Automation
+                Operated by AERELION
               </span>
               <h1 className="text-3xl font-semibold text-foreground mb-3">
                 {agent.name}
@@ -125,10 +125,10 @@ const AgentDetail = () => {
                   </p>
                 </section>
 
-                {/* Common Use Cases */}
+                {/* Who This Is For */}
                 <section>
                   <h2 className="text-lg font-semibold text-foreground mb-4">
-                    Common Use Cases
+                    Who This Is For
                   </h2>
                   <div className="flex flex-wrap gap-2">
                     {agent.sectors.map((sector) => (
@@ -139,7 +139,7 @@ const AgentDetail = () => {
                   </div>
                 </section>
 
-                {/* Tools Commonly Used */}
+                {/* Tools Commonly Involved */}
                 <section>
                   <h2 className="text-lg font-semibold text-foreground mb-4">
                     Tools Commonly Involved
@@ -184,7 +184,7 @@ const AgentDetail = () => {
                 {/* How It Works */}
                 <section>
                   <h2 className="text-lg font-semibold text-foreground mb-4">
-                    How This Automation Operates
+                    How We Operate This Automation
                   </h2>
                   <ol className="space-y-3">
                     {agent.how_it_works.map((step, index) => (
@@ -198,7 +198,7 @@ const AgentDetail = () => {
                   </ol>
                 </section>
 
-                {/* What's Delivered */}
+                {/* What's Included */}
                 <section>
                   <h2 className="text-lg font-semibold text-foreground mb-4">
                     What's Included
@@ -213,10 +213,10 @@ const AgentDetail = () => {
                   </ul>
                 </section>
 
-                {/* Prerequisites */}
+                {/* What We Need From You */}
                 <section>
                   <h2 className="text-lg font-semibold text-foreground mb-4">
-                    What We'll Need From You
+                    What We Need From You
                   </h2>
                   <ul className="space-y-2">
                     {agent.requirements.map((req, index) => (

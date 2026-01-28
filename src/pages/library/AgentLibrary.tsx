@@ -60,9 +60,9 @@ const AgentLibrary = () => {
   return (
     <>
       <SEO
-        title="Managed Automation Catalog - AERELION Systems"
-        description="Browse the automation systems AERELION configures, operates, and maintains on your behalf. No software to install. No workflows to manage."
-        keywords="managed automation, hosted automation, business automation, operational systems, automation operator"
+        title="Automations We Operate - AERELION Systems"
+        description="Browse the operational automations AERELION configures, operates, and maintains on your behalf. No software to install. No workflows to manage."
+        keywords="managed automation, hosted automation, business automation, operational systems, automation operator, professional services"
       />
 
       <div className="min-h-screen bg-background">
@@ -78,8 +78,8 @@ const AgentLibrary = () => {
                 Automations We Operate
               </h1>
               <p className="text-muted-foreground max-w-2xl">
-                Browse the automation systems AERELION configures and operates on your behalf. 
-                Each solution is delivered, hosted, and maintained by our team—no technical work required from you.
+                Each automation below is configured, hosted, and operated by AERELION on your behalf. 
+                No technical work required from you—we take responsibility for execution and outcomes.
               </p>
             </div>
 
@@ -87,7 +87,7 @@ const AgentLibrary = () => {
             <div className="card-enterprise p-6 mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
               <div>
                 <h3 className="font-semibold text-foreground mb-1">Ready to get started?</h3>
-                <p className="text-sm text-muted-foreground">Schedule a discovery call to discuss your operational needs.</p>
+                <p className="text-sm text-muted-foreground">Schedule a discovery call to discuss which automations fit your operations.</p>
               </div>
               <Button asChild>
                 <Link to="/contact">
@@ -103,7 +103,7 @@ const AgentLibrary = () => {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
                   type="text"
-                  placeholder="Search workflows..."
+                  placeholder="Search automations..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
@@ -147,7 +147,7 @@ const AgentLibrary = () => {
 
             {/* Results count */}
             <p className="text-sm text-muted-foreground mb-6">
-              {filteredAgents.length} managed automation{filteredAgents.length !== 1 ? 's' : ''}
+              {filteredAgents.length} automation{filteredAgents.length !== 1 ? 's' : ''} available
             </p>
 
             {/* Agent Grid */}

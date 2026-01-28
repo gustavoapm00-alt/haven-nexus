@@ -16,7 +16,7 @@ const FinalCTA = () => {
           Automation Should Be Dependable. Operations Should Be Calm.
         </h2>
         <p className="text-muted-foreground mb-8">
-          AERELION Systems removes automation from your list of things to manage.
+          AERELION removes automation from your list of things to manage. We operate it for you.
         </p>
         
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -28,7 +28,7 @@ const FinalCTA = () => {
           </Button>
           <Button asChild variant="outline" size="lg" className="text-base px-8 py-6">
             <Link to="/automations">
-              Browse Automations
+              View Automations
             </Link>
           </Button>
         </div>

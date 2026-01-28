@@ -7,11 +7,11 @@ const phases = [
     title: 'Diagnose', 
     days: 'Days 1–5',
     icon: Search,
-    description: 'We review your operations, identify automation opportunities, and scope the engagement.' 
+    description: 'We review your operations, identify automation opportunities, and define a fixed scope for the engagement.' 
   },
   { 
     phase: 2, 
-    title: 'Activate', 
+    title: 'Install', 
     days: 'Days 6–20',
     icon: Wrench,
     description: 'AERELION configures and deploys automations on our infrastructure. You provide tool access—we handle everything else.' 
@@ -21,14 +21,14 @@ const phases = [
     title: 'Stabilize', 
     days: 'Days 21–30',
     icon: CheckCircle,
-    description: 'We monitor, refine, and ensure reliable operation. Ongoing maintenance is included.' 
+    description: 'We monitor, refine, and ensure reliable operation. Optional ongoing maintenance available.' 
   },
 ];
 
 const commitments = [
-  'Automations run on AERELION infrastructure',
-  'Credentials are encrypted and revocable',
-  'You never touch implementation',
+  'All automations run on AERELION infrastructure',
+  'Credentials are encrypted and revocable at any time',
+  'You never touch implementation or maintenance',
 ];
 
 const HowItWorks = () => {
@@ -36,10 +36,10 @@ const HowItWorks = () => {
     <div id="how-it-works">
       <div className="text-center mb-12">
         <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3">
-          A 30-Day Engagement Model
+          A 30-Day Scoped Engagement
         </h2>
         <p className="text-muted-foreground max-w-xl mx-auto">
-          Predictable delivery. Clear accountability. No surprises.
+          Fixed scope. Clear accountability. No surprises.
         </p>
       </div>
       

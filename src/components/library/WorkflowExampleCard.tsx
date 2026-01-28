@@ -46,7 +46,7 @@ const WorkflowExampleCard = ({
           <span className={`text-xs font-medium uppercase tracking-wide ${
             isDark ? 'text-primary/80' : 'text-primary'
           }`}>
-            Managed Automation
+            Operated by AERELION
           </span>
         </div>
         
@@ -61,7 +61,7 @@ const WorkflowExampleCard = ({
           <p className={`text-xs font-medium uppercase tracking-wide mb-1 ${
             isDark ? 'text-white/50' : 'text-muted-foreground'
           }`}>
-            What it solves
+            Problem Solved
           </p>
           <p className={`text-sm ${isDark ? 'text-white/80' : 'text-muted-foreground'}`}>
             {shortOutcome}
@@ -74,7 +74,7 @@ const WorkflowExampleCard = ({
             <p className={`text-xs font-medium uppercase tracking-wide mb-1.5 ${
               isDark ? 'text-white/50' : 'text-muted-foreground'
             }`}>
-              Common use cases
+              Common Use Cases
             </p>
             <div className="flex flex-wrap gap-1.5">
               {sectors.slice(0, 2).map((sector) => (
@@ -122,7 +122,7 @@ const WorkflowExampleCard = ({
           </div>
           <div className="flex items-center gap-1.5">
             <TrendingUp className="w-3.5 h-3.5" />
-            <span>+{capacityRecoveredMin}–{capacityRecoveredMax} hrs/wk recovered</span>
+            <span>+{capacityRecoveredMin}–{capacityRecoveredMax} hrs/wk</span>
           </div>
         </div>
       </div>
@@ -132,7 +132,7 @@ const WorkflowExampleCard = ({
         isDark ? 'border-white/10' : 'border-border'
       }`}>
         <span className={`text-xs ${isDark ? 'text-white/50' : 'text-muted-foreground'}`}>
-          Operated by AERELION
+          We operate this for you
         </span>
         <Link
           to={`/automations/${slug}`}

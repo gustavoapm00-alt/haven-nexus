@@ -15,8 +15,8 @@ const LibraryHome = () => {
     <>
       <SEO
         title="AERELION Systems - Managed Automation Operator"
-        description="Fully-managed business automations operated on our infrastructure. We design, deploy, and run automation systems so your organization doesn't have to."
-        keywords="managed automation, automation operator, hosted automation, business automation, operational systems"
+        description="AERELION is a managed automation operator for professional services firms and compliance-driven organizations. We configure, host, operate, and maintain automation systems on our infrastructure."
+        keywords="managed automation, automation operator, hosted automation, professional services automation, compliance automation, government contractor automation"
       />
       
       <div className="min-h-screen bg-background">
