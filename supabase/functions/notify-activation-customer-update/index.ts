@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { requireAdminAuth } from "../_shared/admin-auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -15,17 +16,55 @@ interface CustomerUpdatePayload {
   message?: string;
 }
 
+// Mask email for logging (security)
+function maskEmail(email: string): string {
+  const [local, domain] = email.split('@');
+  if (!domain) return '***@***';
+  const maskedLocal = local.length > 2 ? local[0] + '***' + local[local.length - 1] : '***';
+  return `${maskedLocal}@${domain}`;
+}
+
 serve(async (req: Request) => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // SECURITY: Require admin authentication
+  const authResult = await requireAdminAuth(req);
+  if (!authResult.authorized) {
+    console.warn("Unauthorized notify-activation-customer-update attempt");
+    return new Response(
+      JSON.stringify({ error: authResult.error }),
+      { 
+        status: authResult.statusCode, 
+        headers: { ...corsHeaders, "Content-Type": "application/json" } 
+      }
+    );
+  }
+
   try {
     const payload: CustomerUpdatePayload = await req.json();
     const { request_id, customer_email, business_name, purchased_item, tool_name, credential_method, message } = payload;
 
-    console.log("Processing customer update notification:", { request_id, customer_email, tool_name });
+    // Validate required fields
+    if (!request_id || !customer_email || !tool_name) {
+      return new Response(
+        JSON.stringify({ error: "Missing required fields" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Basic email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(customer_email)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid email format" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    console.log("Processing customer update notification:", { request_id, email: maskEmail(customer_email), tool_name });
 
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
     const appBaseUrl = Deno.env.get("APP_BASE_URL") || "https://aerelion.systems";
@@ -222,7 +261,7 @@ serve(async (req: Request) => {
 
       if (customerRes.ok) {
         emailResults.customer = true;
-        console.log("Customer confirmation email sent successfully");
+        console.log("Customer confirmation email sent to:", maskEmail(customer_email));
       } else {
         const errorText = await customerRes.text();
         console.error("Failed to send customer email:", customerRes.status, errorText);
