@@ -60,9 +60,9 @@ const AgentLibrary = () => {
   return (
     <>
       <SEO
-        title="Example Workflows - AERELION"
-        description="Browse example operational workflows we install as part of an AI Ops engagement. We configure, operate, and maintain everything."
-        keywords="AI operations, workflow examples, automation installation, managed automation"
+        title="Managed Automation Catalog - AERELION Systems"
+        description="Browse the automation systems AERELION configures, operates, and maintains on your behalf. No software to install. No workflows to manage."
+        keywords="managed automation, hosted automation, business automation, operational systems, automation operator"
       />
 
       <div className="min-h-screen bg-background">
@@ -72,14 +72,14 @@ const AgentLibrary = () => {
           <div className="container-main">
             <div className="mb-8">
               <span className="text-xs font-semibold text-primary uppercase tracking-wide mb-2 block">
-                Workflow Examples
+                Automation Catalog
               </span>
               <h1 className="text-3xl font-semibold text-foreground mb-3">
-                Workflows We Install
+                Automations We Operate
               </h1>
               <p className="text-muted-foreground max-w-2xl">
-                These are examples of operational workflows we configure as part of a scoped AI Ops engagement. 
-                Scope and pricing are customized per engagement—not per workflow.
+                Browse the automation systems AERELION configures and operates on your behalf. 
+                Each solution is delivered, hosted, and maintained by our team—no technical work required from you.
               </p>
             </div>
 
@@ -87,11 +87,11 @@ const AgentLibrary = () => {
             <div className="card-enterprise p-6 mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
               <div>
                 <h3 className="font-semibold text-foreground mb-1">Ready to get started?</h3>
-                <p className="text-sm text-muted-foreground">Book a discovery call to discuss your operational needs.</p>
+                <p className="text-sm text-muted-foreground">Schedule a discovery call to discuss your operational needs.</p>
               </div>
               <Button asChild>
                 <Link to="/contact">
-                  Book an AI Ops Installation
+                  Schedule Discovery Call
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Link>
               </Button>
@@ -147,7 +147,7 @@ const AgentLibrary = () => {
 
             {/* Results count */}
             <p className="text-sm text-muted-foreground mb-6">
-              {filteredAgents.length} example workflow{filteredAgents.length !== 1 ? 's' : ''}
+              {filteredAgents.length} managed automation{filteredAgents.length !== 1 ? 's' : ''}
             </p>
 
             {/* Agent Grid */}
@@ -160,7 +160,7 @@ const AgentLibrary = () => {
             ) : filteredAgents.length === 0 ? (
               <div className="text-center py-16">
                 <Filter className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="font-medium text-foreground mb-2">No workflows found</h3>
+                <h3 className="font-medium text-foreground mb-2">No automations found</h3>
                 <p className="text-sm text-muted-foreground mb-4">
                   Try adjusting your filters or search query.
                 </p>
