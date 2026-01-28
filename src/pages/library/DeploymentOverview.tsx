@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import LibraryNavbar from '@/components/library/LibraryNavbar';
 import LibraryFooter from '@/components/library/LibraryFooter';
-import SEO from '@/components/SEO';
+import SEO, { schemas } from '@/components/SEO';
 
 const DeploymentOverview = () => {
   const phases = [
@@ -99,12 +99,31 @@ const DeploymentOverview = () => {
     },
   ];
 
+  const howItWorksStructuredData = [
+    schemas.howTo(
+      "AERELION 30-Day Managed Automation Engagement",
+      "How AERELION diagnoses, installs, and stabilizes automation workflows",
+      [
+        "Phase 1: Diagnose - Map operations and identify time leaks",
+        "Phase 2: Install - Configure and deploy workflows on your infrastructure",
+        "Phase 3: Stabilize - Monitor, adjust, and confirm reliable operation"
+      ]
+    ),
+    schemas.faqPage(faqs),
+    schemas.breadcrumb([
+      { name: 'Home', url: '/' },
+      { name: 'How It Works', url: '/how-it-works' }
+    ])
+  ];
+
   return (
     <>
       <SEO
-        title="How We Work"
-        description="A 30-day scoped engagement to diagnose, install, and stabilize AI-powered workflows. Fixed scope, outcome-owned, no technical work required from you."
-        keywords="AI operations, automation service, fixed scope, managed automation, workflow installation"
+        title="How AERELION Works – 30-Day Managed Automation Engagement"
+        description="AERELION's 30-day scoped engagement: diagnose operational friction, install automation workflows, and stabilize for reliable operation. Fixed scope, outcome-owned, no technical work required."
+        keywords="how managed automation works, automation engagement process, 30-day automation, workflow installation, business process automation, fixed scope automation"
+        canonicalUrl="/how-it-works"
+        structuredData={howItWorksStructuredData}
       />
 
       <div className="min-h-screen bg-background">

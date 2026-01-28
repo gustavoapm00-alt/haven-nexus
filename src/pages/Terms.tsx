@@ -7,12 +7,13 @@ const Terms = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO 
-        title="Terms of Service"
-        description="Terms of Service for AERELION Systems. We provide AI operations integration services on a scoped-engagement basis."
+        title="Terms of Service – AERELION Systems"
+        description="Terms of Service for AERELION Systems managed automation services. Learn about our scoped-engagement model, ownership, client responsibilities, and service terms."
+        keywords="terms of service, automation service agreement, managed automation terms, service contract, professional services terms"
         canonicalUrl="/terms"
         structuredData={schemas.breadcrumb([
           { name: 'Home', url: '/' },
-          { name: 'Terms', url: '/terms' }
+          { name: 'Terms of Service', url: '/terms' }
         ])}
       />
       <Navbar />

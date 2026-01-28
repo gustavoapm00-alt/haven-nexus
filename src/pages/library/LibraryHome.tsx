@@ -8,15 +8,39 @@ import Differentiation from '@/components/library/Differentiation';
 import WhoThisIsFor from '@/components/library/WhoThisIsFor';
 import SecurityControl from '@/components/library/SecurityControl';
 import FinalCTA from '@/components/library/FinalCTA';
-import SEO from '@/components/SEO';
+import SEO, { schemas } from '@/components/SEO';
 
 const LibraryHome = () => {
+  const homeStructuredData = [
+    schemas.organization,
+    schemas.localBusiness,
+    schemas.service(
+      "Managed Automation Services",
+      "We configure, host, operate, and maintain business automation systems for professional services firms. No code, no infrastructure, no technical work required.",
+      "/"
+    ),
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "AERELION Systems",
+      "url": "https://aerelion.systems",
+      "description": "Managed automation operator for professional services firms",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://aerelion.systems/automations?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+  ];
+
   return (
     <>
       <SEO
-        title="AERELION Systems - Managed Automation Operator"
-        description="AERELION is a managed automation operator for professional services firms and compliance-driven organizations. We configure, host, operate, and maintain automation systems on our infrastructure."
-        keywords="managed automation, automation operator, hosted automation, professional services automation, compliance automation, government contractor automation"
+        title="AERELION Systems – Managed Automation Operator for Professional Services"
+        description="AERELION is a managed automation operator. We configure, host, operate, and maintain business automation systems for professional services firms and compliance-driven organizations. No code, no infrastructure—we handle everything."
+        keywords="managed automation operator, hosted automation services, business process automation, professional services automation, compliance automation, government contractor automation, workflow automation, operational efficiency, automation as a service"
+        canonicalUrl="/"
+        structuredData={homeStructuredData}
       />
       
       <div className="min-h-screen bg-background">

@@ -3,7 +3,7 @@ import { ArrowRight, Shield, Users, Target, Zap, Building2, Handshake } from 'lu
 import { Button } from '@/components/ui/button';
 import LibraryNavbar from '@/components/library/LibraryNavbar';
 import LibraryFooter from '@/components/library/LibraryFooter';
-import SEO from '@/components/SEO';
+import SEO, { schemas } from '@/components/SEO';
 import { motion } from 'framer-motion';
 
 const About = () => {
@@ -58,12 +58,27 @@ const About = () => {
     },
   ];
 
+  const aboutStructuredData = [
+    schemas.organization,
+    schemas.breadcrumb([
+      { name: 'Home', url: '/' },
+      { name: 'About', url: '/about' }
+    ]),
+    schemas.webPage(
+      "About AERELION Systems",
+      "Learn about AERELION's managed operator model for professional services automation",
+      "/about"
+    )
+  ];
+
   return (
     <>
       <SEO
-        title="About AERELION Systems | Managed Automation Operator"
-        description="AERELION Systems is a managed automation operator for professional services firms. We configure, host, and operate automation systems so you can focus on your clients."
-        keywords="about AERELION, managed automation, automation operator, professional services automation, systems partner"
+        title="About AERELION – The Managed Automation Operator Model"
+        description="AERELION Systems is a managed automation operator for professional services firms. We configure, host, and operate automation systems so you can focus on serving clients. Learn about our operating principles."
+        keywords="about AERELION, managed automation operator, automation as a service, professional services automation, business operations partner, workflow automation company"
+        canonicalUrl="/about"
+        structuredData={aboutStructuredData}
       />
 
       <div className="min-h-screen bg-background">

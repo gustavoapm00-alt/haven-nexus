@@ -1,24 +1,55 @@
-# Aerlion Systems - robots.txt
-# https://aerlion.systems
+# AERELION Systems - robots.txt
+# https://aerelion.systems
 
+# Allow all major search engines
 User-agent: Googlebot
 Allow: /
 
 User-agent: Bingbot
 Allow: /
 
+User-agent: Slurp
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: Baiduspider
+Allow: /
+
+User-agent: YandexBot
+Allow: /
+
+# Social media crawlers
 User-agent: Twitterbot
 Allow: /
 
 User-agent: facebookexternalhit
 Allow: /
 
+User-agent: LinkedInBot
+Allow: /
+
+# Default rule for all other bots
 User-agent: *
 Allow: /
+
+# Block admin and auth pages from indexing
 Disallow: /auth
 Disallow: /admin
+Disallow: /admin/*
 Disallow: /reset-password
-Disallow: /console/
+Disallow: /portal/
+Disallow: /portal/*
+Disallow: /dashboard
+Disallow: /purchases
+Disallow: /activation-setup
+Disallow: /activation-walkthrough
+Disallow: /activation-request/
+Disallow: /purchase-success
 
-# Sitemap
-Sitemap: https://aerlion.systems/sitemap.xml
+# Sitemap location
+Sitemap: https://aerelion.systems/sitemap.xml
+
+# Crawl-delay for well-behaved bots
+Crawl-delay: 1

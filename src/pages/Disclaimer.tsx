@@ -7,8 +7,9 @@ const Disclaimer = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO 
-        title="Disclaimer"
-        description="Standard disclaimer for Aerlion Systems. Website content is informational. Formal agreements enable stronger collaboration."
+        title="Disclaimer – AERELION Systems"
+        description="Standard disclaimer for AERELION Systems. Website content is informational. Formal written agreements establish professional relationships."
+        keywords="disclaimer, legal notice, informational content, professional relationships"
         canonicalUrl="/disclaimer"
         structuredData={schemas.breadcrumb([
           { name: 'Home', url: '/' },
