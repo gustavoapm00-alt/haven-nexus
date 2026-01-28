@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ScrollReveal from '@/components/ScrollReveal';
@@ -9,7 +8,7 @@ const Terms = () => {
     <div className="min-h-screen bg-background">
       <SEO 
         title="Terms of Service"
-        description="Terms of Service for Aerlion Systems AI automation platform. Read our terms regarding services, user responsibilities, payment, and liability."
+        description="Terms of Service for AERELION Systems. We provide AI operations integration services on a scoped-engagement basis."
         canonicalUrl="/terms"
         structuredData={schemas.breadcrumb([
           { name: 'Home', url: '/' },
@@ -20,99 +19,93 @@ const Terms = () => {
       
       <main className="pt-24">
         <section className="section-padding">
-          <div className="container-main max-w-4xl">
+          <div className="container-main max-w-3xl">
             <ScrollReveal>
-              <h1 className="font-display text-5xl md:text-6xl mb-8">
-                TERMS OF <span className="text-gradient">SERVICE</span>
+              <h1 className="font-display text-4xl md:text-5xl mb-6">
+                Terms of Service
               </h1>
-              <p className="text-muted-foreground mb-8">
-                Last updated: December 2024
+              <p className="text-muted-foreground mb-10">
+                Last updated: January 2026
               </p>
             </ScrollReveal>
 
             <ScrollReveal delay={0.1}>
-              <div className="prose prose-invert max-w-none space-y-8">
+              <div className="prose prose-invert max-w-none space-y-10">
+                
                 <section>
-                  <h2 className="font-display text-2xl mb-4">1. Acceptance of Terms</h2>
+                  <h2 className="font-display text-xl mb-3">Overview</h2>
                   <p className="text-muted-foreground">
-                    By accessing or using Aerlion Systems' services, you agree to be bound by these 
-                    Terms of Service. If you do not agree to these terms, please do not use our services.
+                    AERELION Systems ("we," "us") provides AI operations integration services. 
+                    We install, configure, and operate automation workflows on behalf of clients 
+                    under scoped engagements. By engaging our services, you agree to these terms.
                   </p>
                 </section>
 
                 <section>
-                  <h2 className="font-display text-2xl mb-4">2. Services Description</h2>
-                  <p className="text-muted-foreground">
-                    Aerlion Systems provides AI automation, workflow optimization, e-commerce solutions, 
-                    and related technology services. We reserve the right to modify, suspend, or discontinue 
-                    any service at any time.
-                  </p>
-                </section>
-
-                <section>
-                  <h2 className="font-display text-2xl mb-4">3. User Responsibilities</h2>
-                  <p className="text-muted-foreground mb-4">You agree to:</p>
+                  <h2 className="font-display text-xl mb-3">Services</h2>
                   <ul className="list-disc list-inside text-muted-foreground space-y-2">
-                    <li>Provide accurate and complete information</li>
-                    <li>Maintain the security of your account credentials</li>
-                    <li>Use services in compliance with applicable laws</li>
-                    <li>Not misuse or attempt to gain unauthorized access to our systems</li>
+                    <li>We diagnose operational inefficiencies in your business processes.</li>
+                    <li>We install and configure workflows using your existing tools and accounts.</li>
+                    <li>We monitor and maintain workflows during the engagement period.</li>
+                    <li>Pricing is determined per engagement, not per individual workflow.</li>
                   </ul>
                 </section>
 
                 <section>
-                  <h2 className="font-display text-2xl mb-4">4. Intellectual Property</h2>
+                  <h2 className="font-display text-xl mb-3">Ownership & Access</h2>
+                  <ul className="list-disc list-inside text-muted-foreground space-y-2">
+                    <li>You retain full ownership of your accounts, tools, and workflows.</li>
+                    <li>Credentials you provide are used solely to deliver agreed services.</li>
+                    <li>You may revoke our access at any time through your tool settings.</li>
+                    <li>Upon engagement completion, we provide documentation and transfer operational control to you.</li>
+                  </ul>
+                </section>
+
+                <section>
+                  <h2 className="font-display text-xl mb-3">Client Responsibilities</h2>
+                  <ul className="list-disc list-inside text-muted-foreground space-y-2">
+                    <li>Provide accurate access credentials and operational context.</li>
+                    <li>Respond to requests for clarification within reasonable timeframes.</li>
+                    <li>Maintain active subscriptions to third-party tools required for workflows.</li>
+                  </ul>
+                </section>
+
+                <section>
+                  <h2 className="font-display text-xl mb-3">Payment</h2>
                   <p className="text-muted-foreground">
-                    All content, features, and functionality of our services are owned by Aerlion Systems 
-                    and protected by intellectual property laws. Custom solutions developed for clients 
-                    are subject to individual service agreements.
+                    Engagement fees are quoted upfront and scoped to the agreed deliverables. 
+                    No recurring subscriptions are required to use our services. 
+                    Additional work beyond the original scope is quoted separately.
                   </p>
                 </section>
 
                 <section>
-                  <h2 className="font-display text-2xl mb-4">5. Payment Terms</h2>
+                  <h2 className="font-display text-xl mb-3">Limitation of Liability</h2>
                   <p className="text-muted-foreground">
-                    Payment terms are established in individual service agreements. All fees are 
-                    non-refundable unless otherwise specified. We reserve the right to modify pricing 
-                    with reasonable notice.
+                    We provide services in good faith based on the information you supply. 
+                    We are not liable for indirect, incidental, or consequential damages. 
+                    Our total liability is limited to the fees paid for the specific engagement.
                   </p>
                 </section>
 
                 <section>
-                  <h2 className="font-display text-2xl mb-4">6. Limitation of Liability</h2>
+                  <h2 className="font-display text-xl mb-3">Changes to Terms</h2>
                   <p className="text-muted-foreground">
-                    Aerlion Systems shall not be liable for any indirect, incidental, special, or 
-                    consequential damages arising from the use of our services. Our total liability 
-                    is limited to the amount paid for services in the preceding 12 months.
+                    We may update these terms. Continued engagement constitutes acceptance of updated terms. 
+                    Material changes will be communicated directly to active clients.
                   </p>
                 </section>
 
                 <section>
-                  <h2 className="font-display text-2xl mb-4">7. Termination</h2>
+                  <h2 className="font-display text-xl mb-3">Contact</h2>
                   <p className="text-muted-foreground">
-                    Either party may terminate services with reasonable notice. Upon termination, 
-                    your right to use services ceases immediately. We may terminate immediately 
-                    for violations of these terms.
-                  </p>
-                </section>
-
-                <section>
-                  <h2 className="font-display text-2xl mb-4">8. Changes to Terms</h2>
-                  <p className="text-muted-foreground">
-                    We may update these terms periodically. Continued use of our services after 
-                    changes constitutes acceptance of the updated terms.
-                  </p>
-                </section>
-
-                <section>
-                  <h2 className="font-display text-2xl mb-4">9. Contact</h2>
-                  <p className="text-muted-foreground">
-                    For questions about these Terms of Service, contact us at{' '}
-                    <a href="mailto:contact@aerlion.systems" className="text-primary hover:underline">
-                      contact@aerlion.systems
+                    Questions? Email{' '}
+                    <a href="mailto:contact@aerelion.systems" className="text-primary hover:underline">
+                      contact@aerelion.systems
                     </a>
                   </p>
                 </section>
+
               </div>
             </ScrollReveal>
           </div>
