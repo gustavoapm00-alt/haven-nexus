@@ -7,7 +7,7 @@ import LibraryNavbar from '@/components/library/LibraryNavbar';
 import LibraryFooter from '@/components/library/LibraryFooter';
 import WorkflowExampleCard from '@/components/library/WorkflowExampleCard';
 import { useAgents } from '@/hooks/useAgents';
-import SEO from '@/components/SEO';
+import SEO, { schemas } from '@/components/SEO';
 
 const AgentLibrary = () => {
   const { agents, loading } = useAgents();
@@ -57,12 +57,26 @@ const AgentLibrary = () => {
 
   const hasFilters = searchQuery || selectedSector || selectedSystem;
 
+  const catalogStructuredData = [
+    schemas.service(
+      "Hosted Automation Catalog",
+      "Browse operational automations AERELION configures, operates, and maintains. No software to install, no workflows to manage.",
+      "/automations"
+    ),
+    schemas.breadcrumb([
+      { name: 'Home', url: '/' },
+      { name: 'Automations', url: '/automations' }
+    ])
+  ];
+
   return (
     <>
       <SEO
-        title="Automations We Operate - AERELION Systems"
-        description="Browse the operational automations AERELION configures, operates, and maintains on your behalf. No software to install. No workflows to manage."
-        keywords="managed automation, hosted automation, business automation, operational systems, automation operator, professional services"
+        title="Hosted Automation Catalog – Managed Business Automations | AERELION"
+        description="Browse 20+ operational automations AERELION configures, operates, and maintains on your behalf. Lead follow-up, client onboarding, reporting, compliance workflows. No software to install."
+        keywords="hosted automation, managed automation catalog, business automation services, lead follow-up automation, client onboarding automation, compliance automation, CRM automation, professional services workflow"
+        canonicalUrl="/automations"
+        structuredData={catalogStructuredData}
       />
 
       <div className="min-h-screen bg-background">

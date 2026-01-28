@@ -2,19 +2,52 @@ import { Link } from 'react-router-dom';
 import { ExternalLink } from 'lucide-react';
 import LibraryNavbar from '@/components/library/LibraryNavbar';
 import LibraryFooter from '@/components/library/LibraryFooter';
-import SEO from '@/components/SEO';
+import SEO, { schemas } from '@/components/SEO';
 import { Button } from '@/components/ui/button';
 
 // Breezy careers page URL
 const BREEZY_CAREERS_URL = 'https://aerelion-systems-llc.breezy.hr/p/69e13036d878-automation-operations-specialist';
 
 const Careers = () => {
+  const careersStructuredData = [
+    schemas.webPage(
+      "Careers at AERELION",
+      "Join our team of automation operators",
+      "/careers"
+    ),
+    schemas.breadcrumb([
+      { name: 'Home', url: '/' },
+      { name: 'Careers', url: '/careers' }
+    ]),
+    {
+      "@context": "https://schema.org",
+      "@type": "JobPosting",
+      "title": "Automation Operations Specialist",
+      "description": "Operate and maintain automation systems for professional services firms",
+      "hiringOrganization": {
+        "@type": "Organization",
+        "name": "AERELION Systems",
+        "sameAs": "https://aerelion.systems"
+      },
+      "employmentType": "FULL_TIME",
+      "jobLocation": {
+        "@type": "Place",
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "US"
+        }
+      }
+    }
+  ];
+
   return (
     <>
       <SEO
-        title="Careers at AERELION | Join Our Team"
-        description="We're building a team that operates and maintains automation systems for professional services firms and compliance-driven organizations. View open positions."
-        keywords="careers, jobs, automation operator, professional services, hiring"
+        title="Careers at AERELION – Join Our Automation Operations Team"
+        description="We're building a team that operates and maintains automation systems for professional services firms. We hire operators who value reliability, accountability, and clear scope. View open positions."
+        keywords="automation jobs, operations careers, automation operator jobs, professional services careers, remote automation jobs, workflow operations"
+        canonicalUrl="/careers"
+        structuredData={careersStructuredData}
       />
       
       <div className="min-h-screen bg-background flex flex-col">

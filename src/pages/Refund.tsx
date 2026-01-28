@@ -8,12 +8,13 @@ const Refund = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO 
-        title="Refund Policy"
-        description="Refund Policy for AERELION Systems. Learn about our refund terms for hosted automation services."
+        title="Refund Policy – AERELION Systems"
+        description="Refund Policy for AERELION managed automation services. Learn about our refund eligibility, process, and terms for hosted automation engagements."
+        keywords="refund policy, automation refund, service refund, cancellation policy, money back guarantee"
         canonicalUrl="/refund"
         structuredData={schemas.breadcrumb([
           { name: 'Home', url: '/' },
-          { name: 'Refund', url: '/refund' }
+          { name: 'Refund Policy', url: '/refund' }
         ])}
       />
       <Navbar />

@@ -7,12 +7,13 @@ const Privacy = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO 
-        title="Privacy Policy - AERELION Systems"
-        description="Privacy Policy for AERELION Systems. We process data only to deliver managed automation services. We never sell your data."
+        title="Privacy Policy – AERELION Systems"
+        description="Privacy Policy for AERELION Systems. We process data only to deliver managed automation services. Credentials encrypted at rest. We never sell, share, or monetize your data."
+        keywords="privacy policy, data protection, credential security, automation privacy, data handling, GDPR compliance"
         canonicalUrl="/privacy"
         structuredData={schemas.breadcrumb([
           { name: 'Home', url: '/' },
-          { name: 'Privacy', url: '/privacy' }
+          { name: 'Privacy Policy', url: '/privacy' }
         ])}
       />
       <LibraryNavbar />

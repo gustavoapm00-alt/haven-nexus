@@ -3,7 +3,7 @@ import { ArrowRight, Check, Clock, Shield, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import LibraryNavbar from '@/components/library/LibraryNavbar';
 import LibraryFooter from '@/components/library/LibraryFooter';
-import SEO from '@/components/SEO';
+import SEO, { schemas } from '@/components/SEO';
 
 const Pricing = () => {
   const engagementFeatures = [
@@ -46,12 +46,34 @@ const Pricing = () => {
     },
   ];
 
+  const pricingFaqs = [
+    { question: 'How is pricing determined?', answer: 'Pricing is based on the scope and complexity of your engagement. During our discovery call, we understand your operations and provide a fixed quote.' },
+    { question: 'Are there per-task or per-run fees?', answer: 'No. Our engagements are fixed-scope. You pay for the outcome, not for individual automation runs or API calls.' },
+    { question: 'What happens after the 30-day engagement?', answer: 'You can choose ongoing monitoring retainer, or we hand off and you manage independently. Either way, you maintain full control.' },
+    { question: 'Do I need technical experience?', answer: 'No. AERELION handles all technical configuration and operation. You provide context about your business—we handle the rest.' }
+  ];
+
+  const pricingStructuredData = [
+    schemas.faqPage(pricingFaqs),
+    schemas.service(
+      "30-Day Managed Automation Engagement",
+      "Fixed-scope automation engagement with diagnosis, installation, and stabilization. Outcome-based pricing.",
+      "/pricing"
+    ),
+    schemas.breadcrumb([
+      { name: 'Home', url: '/' },
+      { name: 'Pricing', url: '/pricing' }
+    ])
+  ];
+
   return (
     <>
       <SEO
-        title="Pricing | AERELION Systems"
-        description="AERELION delivers managed automation through fixed-scope engagements. Pay for outcomes, not software licenses. No technical work required."
-        keywords="pricing, managed automation, engagement, outcome-based, fixed scope, automation operator"
+        title="Pricing – Outcome-Based Managed Automation Engagements | AERELION"
+        description="AERELION delivers managed automation through fixed-scope 30-day engagements. Pay for operational outcomes, not software licenses or per-task fees. No technical work required from you."
+        keywords="automation pricing, managed automation cost, outcome-based pricing, fixed scope engagement, automation service pricing, professional services automation cost"
+        canonicalUrl="/pricing"
+        structuredData={pricingStructuredData}
       />
 
       <div className="min-h-screen bg-background">

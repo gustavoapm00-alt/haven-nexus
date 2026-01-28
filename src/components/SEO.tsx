@@ -11,14 +11,15 @@ interface SEOProps {
   noIndex?: boolean;
 }
 
-const BASE_URL = 'https://aerlion.systems';
+const BASE_URL = 'https://aerelion.systems';
 const DEFAULT_OG_IMAGE = `${BASE_URL}/og-image.png`;
-const SITE_NAME = 'Aerlion Systems';
+const SITE_NAME = 'AERELION Systems';
+const DEFAULT_DESCRIPTION = 'AERELION is a managed automation operator for professional services firms. We configure, host, operate, and maintain business automation systems—no code, no infrastructure, no technical work required.';
 
 const SEO = ({
   title,
-  description = 'Aerlion Systems builds intelligent automation solutions that handle repetitive tasks so you can focus on growth. AI agents, workflows, and e-commerce solutions.',
-  keywords = 'AI automation, business automation, AI agents, workflow automation, e-commerce automation, Shopify development, SaaS development',
+  description = DEFAULT_DESCRIPTION,
+  keywords = 'managed automation, automation operator, hosted automation, business automation services, professional services automation, compliance automation, government contractor automation, workflow automation, operational efficiency',
   canonicalUrl,
   ogImage = DEFAULT_OG_IMAGE,
   ogType = 'website',
@@ -26,11 +27,11 @@ const SEO = ({
   noIndex = false,
 }: SEOProps) => {
   const fullTitle = title 
-    ? `${title} | ${SITE_NAME}` 
-    : `${SITE_NAME} – AI Automation for Business Growth`;
+    ? title.includes('AERELION') ? title : `${title} | ${SITE_NAME}`
+    : `${SITE_NAME} – Managed Automation Operator`;
   
   const fullCanonicalUrl = canonicalUrl 
-    ? `${BASE_URL}${canonicalUrl}` 
+    ? `${BASE_URL}${canonicalUrl.startsWith('/') ? canonicalUrl : `/${canonicalUrl}`}` 
     : BASE_URL;
 
   const structuredDataArray = structuredData 
@@ -44,7 +45,8 @@ const SEO = ({
       <meta name="title" content={fullTitle} />
       <meta name="description" content={description} />
       <meta name="keywords" content={keywords} />
-      {noIndex && <meta name="robots" content="noindex, nofollow" />}
+      <meta name="author" content="AERELION Systems" />
+      <meta name="robots" content={noIndex ? "noindex, nofollow" : "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"} />
       
       {/* Canonical URL */}
       <link rel="canonical" href={fullCanonicalUrl} />
@@ -56,6 +58,7 @@ const SEO = ({
       <meta property="og:description" content={description} />
       <meta property="og:image" content={ogImage} />
       <meta property="og:site_name" content={SITE_NAME} />
+      <meta property="og:locale" content="en_US" />
       
       {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />
@@ -81,12 +84,33 @@ export const schemas = {
   organization: {
     "@context": "https://schema.org",
     "@type": "Organization",
-    "name": "Aerlion Systems",
-    "url": "https://aerlion.systems",
-    "logo": "https://aerlion.systems/og-image.png",
-    "description": "AI-powered automation solutions for businesses ready to scale.",
-    "email": "contact@aerlion.systems",
-    "sameAs": ["https://instagram.com/aerlion.systems"]
+    "name": "AERELION Systems",
+    "alternateName": "AERELION",
+    "url": "https://aerelion.systems",
+    "logo": "https://aerelion.systems/og-image.png",
+    "description": "AERELION is a managed automation operator for professional services firms and compliance-driven organizations. We configure, host, operate, and maintain automation systems.",
+    "foundingDate": "2024",
+    "email": "contact@aerelion.systems",
+    "areaServed": "Worldwide",
+    "serviceType": ["Managed Automation", "Business Process Automation", "Workflow Automation"],
+    "sameAs": [],
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "email": "contact@aerelion.systems",
+      "contactType": "customer service",
+      "availableLanguage": ["English"]
+    }
+  },
+  
+  localBusiness: {
+    "@context": "https://schema.org",
+    "@type": "ProfessionalService",
+    "name": "AERELION Systems",
+    "description": "Managed automation operator for professional services firms",
+    "url": "https://aerelion.systems",
+    "email": "contact@aerelion.systems",
+    "priceRange": "$$",
+    "openingHours": "Mo-Fr 09:00-18:00"
   },
   
   breadcrumb: (items: { name: string; url: string }[]) => ({
@@ -96,7 +120,7 @@ export const schemas = {
       "@type": "ListItem",
       "position": index + 1,
       "name": item.name,
-      "item": `https://aerlion.systems${item.url}`
+      "item": `https://aerelion.systems${item.url}`
     }))
   }),
   
@@ -113,32 +137,61 @@ export const schemas = {
     }))
   }),
   
-  service: (name: string, description: string) => ({
+  service: (name: string, description: string, url?: string) => ({
     "@context": "https://schema.org",
     "@type": "Service",
     "serviceType": name,
     "provider": {
       "@type": "Organization",
-      "name": "Aerlion Systems"
+      "name": "AERELION Systems",
+      "url": "https://aerelion.systems"
     },
     "description": description,
-    "areaServed": "Worldwide"
+    "areaServed": "Worldwide",
+    "url": url ? `https://aerelion.systems${url}` : "https://aerelion.systems"
   }),
   
-  product: (name: string, description: string, price: string, currency: string = 'USD') => ({
+  webPage: (name: string, description: string, url: string) => ({
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": name,
+    "description": description,
+    "url": `https://aerelion.systems${url}`,
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "AERELION Systems",
+      "url": "https://aerelion.systems"
+    }
+  }),
+  
+  product: (name: string, description: string, price?: string, currency: string = 'USD') => ({
     "@context": "https://schema.org",
     "@type": "Product",
     "name": name,
     "description": description,
     "brand": {
       "@type": "Brand",
-      "name": "Aerlion Systems"
+      "name": "AERELION Systems"
     },
-    "offers": {
-      "@type": "Offer",
-      "price": price,
-      "priceCurrency": currency,
-      "availability": "https://schema.org/InStock"
-    }
+    ...(price && {
+      "offers": {
+        "@type": "Offer",
+        "price": price,
+        "priceCurrency": currency,
+        "availability": "https://schema.org/InStock"
+      }
+    })
+  }),
+
+  howTo: (name: string, description: string, steps: string[]) => ({
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": name,
+    "description": description,
+    "step": steps.map((step, index) => ({
+      "@type": "HowToStep",
+      "position": index + 1,
+      "text": step
+    }))
   })
 };

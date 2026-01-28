@@ -1,7 +1,7 @@
 import { Shield, Lock, Eye, RefreshCw, Database, Mail, Key, Server, Users } from 'lucide-react';
 import LibraryNavbar from '@/components/library/LibraryNavbar';
 import LibraryFooter from '@/components/library/LibraryFooter';
-import SEO from '@/components/SEO';
+import SEO, { schemas } from '@/components/SEO';
 
 const Security = () => {
   const practices = [
@@ -47,12 +47,26 @@ const Security = () => {
     },
   ];
 
+  const securityStructuredData = [
+    schemas.webPage(
+      "Security & Data Practices",
+      "How AERELION protects your credentials and data",
+      "/security"
+    ),
+    schemas.breadcrumb([
+      { name: 'Home', url: '/' },
+      { name: 'Security', url: '/security' }
+    ])
+  ];
+
   return (
     <>
       <SEO
-        title="Security & Data Practices | AERELION Systems"
-        description="AERELION operates automations on secure infrastructure with encrypted credentials, least-privilege access, and full customer control. We never sell your data."
-        keywords="security, data practices, encryption, privacy, credentials, managed automation, compliance"
+        title="Security & Data Practices – How AERELION Protects Your Data"
+        description="AERELION operates automations on secure, encrypted infrastructure. Least-privilege credential access, data encryption at rest and in transit, full customer control. We never sell your data."
+        keywords="automation security, data protection, credential encryption, secure automation, compliance security, data privacy, least privilege access, SOC 2"
+        canonicalUrl="/security"
+        structuredData={securityStructuredData}
       />
 
       <div className="min-h-screen bg-background">

@@ -83,14 +83,17 @@ const Contact = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO 
-        title="Contact - AERELION Systems"
-        description="Schedule a discovery call with AERELION Systems. Discuss your operational challenges and learn how managed automation can help."
-        keywords="contact AERELION Systems, automation inquiry, discovery call, managed automation"
+        title="Contact AERELION – Schedule a Discovery Call"
+        description="Schedule a discovery call with AERELION Systems. Discuss your operational challenges and learn how managed automation can recover hours weekly. We respond within 24-48 hours."
+        keywords="contact AERELION, automation consultation, discovery call, managed automation inquiry, schedule call, business automation help"
         canonicalUrl="/contact"
-        structuredData={schemas.breadcrumb([
-          { name: 'Home', url: '/' },
-          { name: 'Contact', url: '/contact' }
-        ])}
+        structuredData={[
+          schemas.breadcrumb([
+            { name: 'Home', url: '/' },
+            { name: 'Contact', url: '/contact' }
+          ]),
+          schemas.webPage("Contact AERELION Systems", "Schedule a discovery call for managed automation services", "/contact")
+        ]}
       />
       <LibraryNavbar />
       

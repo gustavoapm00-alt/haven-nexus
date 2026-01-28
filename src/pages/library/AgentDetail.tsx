@@ -11,7 +11,7 @@ import LibraryNavbar from '@/components/library/LibraryNavbar';
 import LibraryFooter from '@/components/library/LibraryFooter';
 import SystemIcon from '@/components/library/SystemIcon';
 import { useAgent } from '@/hooks/useAgents';
-import SEO from '@/components/SEO';
+import SEO, { schemas } from '@/components/SEO';
 
 const AgentDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -77,12 +77,25 @@ const AgentDetail = () => {
     );
   }
 
+  const agentStructuredData = [
+    schemas.product(agent.name, agent.short_outcome),
+    schemas.service(agent.name, agent.description, `/automations/${agent.slug}`),
+    schemas.faqPage(faqs),
+    schemas.breadcrumb([
+      { name: 'Home', url: '/' },
+      { name: 'Automations', url: '/automations' },
+      { name: agent.name, url: `/automations/${agent.slug}` }
+    ])
+  ];
+
   return (
     <>
       <SEO
-        title={`${agent.name} - Operated by AERELION`}
-        description={agent.short_outcome}
-        keywords={[...agent.sectors, ...agent.systems, 'managed automation', 'hosted automation', 'automation operator'].join(', ')}
+        title={`${agent.name} – Managed Automation by AERELION`}
+        description={`${agent.short_outcome}. AERELION configures, operates, and maintains this automation on your behalf. ${agent.capacity_recovered_min}-${agent.capacity_recovered_max} hours recovered weekly.`}
+        keywords={[...agent.sectors, ...agent.systems, 'managed automation', 'hosted automation', 'automation operator', 'workflow automation', agent.name.toLowerCase()].join(', ')}
+        canonicalUrl={`/automations/${agent.slug}`}
+        structuredData={agentStructuredData}
       />
 
       <div className="min-h-screen bg-background">

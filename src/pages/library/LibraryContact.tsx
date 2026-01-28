@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/select';
 import LibraryNavbar from '@/components/library/LibraryNavbar';
 import LibraryFooter from '@/components/library/LibraryFooter';
-import SEO from '@/components/SEO';
+import SEO, { schemas } from '@/components/SEO';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { engagementFormSchema, type EngagementFormData } from '@/lib/validations';
@@ -121,12 +121,26 @@ const LibraryContact = () => {
     return [...currentTools, tool];
   };
 
+  const contactStructuredData = [
+    schemas.webPage(
+      "Book a Managed Automation Engagement",
+      "Schedule a discovery call to discuss your operational challenges",
+      "/contact"
+    ),
+    schemas.breadcrumb([
+      { name: 'Home', url: '/' },
+      { name: 'Contact', url: '/contact' }
+    ])
+  ];
+
   return (
     <>
       <SEO
-        title="Book an AI Ops Installation"
-        description="Tell us what's leaking time in your operations. We'll scope the engagement and handle the install."
-        keywords="AI operations, automation installation, workflow integration, business operations"
+        title="Book a Discovery Call – Start Your Managed Automation Engagement"
+        description="Tell us what's leaking time in your operations. Schedule a discovery call with AERELION to scope your managed automation engagement. We respond within 24-48 hours."
+        keywords="book automation consultation, schedule discovery call, managed automation inquiry, automation services contact, workflow automation consultation"
+        canonicalUrl="/contact"
+        structuredData={contactStructuredData}
       />
 
       <div className="min-h-screen bg-background">
