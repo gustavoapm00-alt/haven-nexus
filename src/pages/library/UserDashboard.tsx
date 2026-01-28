@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
-  Download, Loader2, Package, FileText, RefreshCw, 
+  Loader2, Package, FileText, 
   ShoppingBag, Calendar, ArrowRight, ExternalLink,
-  User, Mail, Clock, Settings, LogOut
+  User, Mail, Clock, Settings, LogOut, Shield
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,56 +12,22 @@ import LibraryNavbar from '@/components/library/LibraryNavbar';
 import LibraryFooter from '@/components/library/LibraryFooter';
 import SectionBand from '@/components/library/SectionBand';
 import { ActivationStatusCard } from '@/components/library/ActivationStatusCard';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useEntitlements } from '@/hooks/useEntitlements';
 import SEO from '@/components/SEO';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 
-interface DownloadLink {
-  name: string;
-  type: 'workflow' | 'guide';
-  url: string;
-  expires_in: number;
-}
-
 const UserDashboard = () => {
   const { user, isLoading: authLoading, signOut } = useAuth();
   const navigate = useNavigate();
   const { loading, purchases, entitledAgents, stats } = useEntitlements();
-  const [downloadingId, setDownloadingId] = useState<string | null>(null);
-  const [downloads, setDownloads] = useState<Record<string, DownloadLink[]>>({});
 
   // Redirect to auth if not logged in
   if (!authLoading && !user) {
     navigate('/auth?redirect=/dashboard');
     return null;
   }
-
-  const fetchDownloads = async (itemType: 'agent' | 'bundle', itemId: string, purchaseId: string) => {
-    setDownloadingId(purchaseId);
-    try {
-      const { data, error } = await supabase.functions.invoke('get-download-links', {
-        body: { item_type: itemType, item_id: itemId },
-      });
-
-      if (error) throw new Error(error.message);
-      if (data.error) throw new Error(data.error);
-
-      setDownloads(prev => ({
-        ...prev,
-        [purchaseId]: data.downloads || [],
-      }));
-
-      toast.success('Download links ready');
-    } catch (err) {
-      console.error('Error fetching downloads:', err);
-      toast.error('Failed to generate download links');
-    } finally {
-      setDownloadingId(null);
-    }
-  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -73,7 +39,7 @@ const UserDashboard = () => {
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-background">
-        <SEO title="Dashboard" description="Manage your account and access your purchased automation workflows." />
+        <SEO title="Dashboard" description="Track your automation status and account details." />
         <LibraryNavbar />
         <div className="section-padding flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
@@ -90,7 +56,7 @@ const UserDashboard = () => {
     <>
       <SEO
         title="Dashboard - AERELION"
-        description="Manage your account and view your activated automations."
+        description="Track your automation status and view account details. We operate automations for you."
       />
 
       <div className="min-h-screen bg-background">
@@ -211,25 +177,25 @@ const UserDashboard = () => {
                         <FileText className="w-4 h-4 mr-2" />
                         <div className="text-left">
                           <div className="font-medium">Documentation</div>
-                          <div className="text-xs text-muted-foreground">Setup guides & tutorials</div>
+                          <div className="text-xs text-muted-foreground">Guides & resources</div>
                         </div>
                       </Link>
                     </Button>
                     <Button asChild variant="outline" className="justify-start h-auto py-3">
-                      <Link to="/install">
+                      <Link to="/activation-walkthrough">
                         <Settings className="w-4 h-4 mr-2" />
                         <div className="text-left">
-                          <div className="font-medium">Installation Help</div>
-                          <div className="text-xs text-muted-foreground">Get assistance setting up</div>
+                          <div className="font-medium">Activation Guide</div>
+                          <div className="text-xs text-muted-foreground">How we activate for you</div>
                         </div>
                       </Link>
                     </Button>
                     <Button asChild variant="outline" className="justify-start h-auto py-3">
                       <Link to="/security">
-                        <Package className="w-4 h-4 mr-2" />
+                        <Shield className="w-4 h-4 mr-2" />
                         <div className="text-left">
                           <div className="font-medium">Security Practices</div>
-                          <div className="text-xs text-muted-foreground">Data ownership & privacy</div>
+                          <div className="text-xs text-muted-foreground">How we handle credentials</div>
                         </div>
                       </Link>
                     </Button>
@@ -267,7 +233,7 @@ const UserDashboard = () => {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-xl font-bold text-foreground">Your Automations</h2>
-                <p className="text-sm text-muted-foreground">View your activated automations</p>
+                <p className="text-sm text-muted-foreground">Automations operated by AERELION on your behalf</p>
               </div>
               <Button asChild variant="outline" size="sm">
                 <Link to="/automations">
@@ -283,16 +249,16 @@ const UserDashboard = () => {
                   <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
                     <ShoppingBag className="w-8 h-8 text-muted-foreground" />
                   </div>
-                  <h3 className="text-lg font-semibold text-foreground mb-2">No purchases yet</h3>
+                  <h3 className="text-lg font-semibold text-foreground mb-2">No automations yet</h3>
                   <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                    Browse our library to find automation workflows that fit your operational needs.
+                    Schedule a discovery call to discuss automation solutions for your operations.
                   </p>
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                     <Button asChild>
-                      <Link to="/automations">Browse Automations</Link>
+                      <Link to="/contact">Schedule a Call</Link>
                     </Button>
                     <Button asChild variant="outline">
-                      <Link to="/bundles">View Bundles</Link>
+                      <Link to="/automations">Browse Automations</Link>
                     </Button>
                   </div>
                 </CardContent>
@@ -319,8 +285,8 @@ const UserDashboard = () => {
                               )}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                                {purchase.item_type === 'bundle' ? 'System Bundle' : 'Hosted Automation'}
+                              <span className="text-xs font-medium text-primary uppercase tracking-wide">
+                                {purchase.item_type === 'bundle' ? 'Managed System' : 'Managed Automation'} • Operated by AERELION
                               </span>
                               <h3 className="text-lg font-semibold text-foreground mb-1 truncate">
                                 {purchase.item_name}
@@ -333,27 +299,16 @@ const UserDashboard = () => {
                                 <span className="font-medium text-foreground">
                                   {formatPrice(purchase.amount_cents)}
                                 </span>
-                                {purchase.download_count && purchase.download_count > 0 && (
-                                  <span className="text-xs">
-                                    Downloaded {purchase.download_count}×
-                                  </span>
-                                )}
                               </div>
                             </div>
                           </div>
 
                           {/* Actions */}
                           <div className="flex flex-col sm:flex-row gap-2 lg:shrink-0">
-                            <Button variant="outline" size="sm" asChild>
-                              <Link to={`/${purchase.item_type === 'bundle' ? 'bundles' : 'automations'}/${purchase.item_slug}`}>
-                                <ExternalLink className="w-4 h-4 mr-2" />
-                                View Details
-                              </Link>
-                            </Button>
                             <Button size="sm" asChild>
                               <Link to="/activation-setup">
                                 <ArrowRight className="w-4 h-4 mr-2" />
-                                Activation Setup
+                                Track Activation
                               </Link>
                             </Button>
                           </div>
@@ -365,7 +320,7 @@ const UserDashboard = () => {
               </div>
             )}
 
-            {/* Entitled Agents from Bundles */}
+            {/* Automations from Bundles */}
             {entitledAgents.filter(a => a.source === 'bundle').length > 0 && (
               <motion.div
                 className="mt-8"
@@ -374,10 +329,10 @@ const UserDashboard = () => {
                 transition={{ delay: 0.4 }}
               >
                 <h3 className="text-lg font-semibold text-foreground mb-4">
-                  Agents from Your Bundles
+                  Automations in Your Systems
                 </h3>
                 <p className="text-sm text-muted-foreground mb-4">
-                  You have access to these agents through your bundle purchases.
+                  These automations are operated as part of your managed systems.
                 </p>
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {entitledAgents.filter(a => a.source === 'bundle').map((agent) => (

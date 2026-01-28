@@ -10,41 +10,41 @@ const Documentation = () => {
     {
       icon: Cloud,
       title: 'Getting Started',
-      description: 'New to AERELION hosted automations? Start here.',
+      description: 'New to AERELION managed automations? Start here.',
       links: [
-        { label: 'What is a hosted automation?', href: '#' },
-        { label: 'How activation works', href: '#' },
+        { label: 'What is a managed automation?', href: '#' },
+        { label: 'How activation works', href: '/activation-walkthrough' },
         { label: 'Your first automation', href: '#' },
       ],
     },
     {
       icon: Settings,
       title: 'Connection Guides',
-      description: 'Step-by-step instructions for connecting your tools.',
+      description: 'How we connect to your tools securely.',
       links: [
-        { label: 'Connecting your first tool', href: '#' },
-        { label: 'Credential management', href: '#' },
-        { label: 'Revoking access', href: '#' },
+        { label: 'What access we need', href: '#' },
+        { label: 'How credentials are handled', href: '/security' },
+        { label: 'Revoking access', href: '/security' },
       ],
     },
     {
       icon: Shield,
       title: 'Security & Privacy',
-      description: 'How we handle your data and credentials.',
+      description: 'How AERELION protects your data and credentials.',
       links: [
-        { label: 'How credentials are stored', href: '/security' },
+        { label: 'Credential encryption', href: '/security' },
         { label: 'Data handling practices', href: '/security' },
-        { label: 'Revoking access', href: '/security' },
+        { label: 'Access revocation', href: '/security' },
       ],
     },
     {
       icon: HelpCircle,
-      title: 'Troubleshooting',
-      description: 'Common issues and solutions.',
+      title: 'Support',
+      description: 'Getting help with your managed automations.',
       links: [
-        { label: 'Connection issues', href: '#' },
-        { label: 'Tool authorization', href: '#' },
-        { label: 'Getting support', href: '#' },
+        { label: 'Status tracking', href: '/dashboard' },
+        { label: 'Contacting support', href: '/contact' },
+        { label: 'Common questions', href: '#' },
       ],
     },
   ];
@@ -52,9 +52,9 @@ const Documentation = () => {
   return (
     <>
       <SEO
-        title="Documentation"
-        description="Comprehensive guides for AERELION hosted automations. Learn how we configure, run, and maintain automations for you."
-        keywords="documentation, guides, hosted automation, automation setup"
+        title="Documentation - AERELION Systems"
+        description="Guides for AERELION managed automations. Learn how we configure, operate, and maintain automations on your behalf."
+        keywords="documentation, guides, managed automation, automation operator"
       />
 
       <div className="min-h-screen bg-background">
@@ -70,7 +70,7 @@ const Documentation = () => {
             </div>
             
             <p className="text-lg text-muted-foreground leading-relaxed mb-12">
-              Comprehensive guides for getting started with AERELION hosted automations. We handle the technical complexity—these guides help you connect your tools and understand how everything works.
+              Guidance for AERELION managed automations. We handle the technical complexity—these resources help you understand what to expect and how we operate on your behalf.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
@@ -101,10 +101,10 @@ const Documentation = () => {
             <div className="text-center p-8 bg-muted/50 rounded-lg border border-border">
               <h3 className="font-semibold text-foreground mb-2">Need assistance?</h3>
               <p className="text-sm text-muted-foreground mb-4">
-                Our team is here to help you get started with your hosted automations.
+                Our team is here to help you with your managed automations.
               </p>
               <Button asChild variant="outline">
-                <Link to="/contact">Contact Support</Link>
+                <Link to="/contact">Contact Us</Link>
               </Button>
             </div>
           </div>
