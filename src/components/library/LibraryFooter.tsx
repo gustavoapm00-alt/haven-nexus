@@ -61,6 +61,23 @@ const LibraryFooter = () => {
             </ul>
           </div>
 
+          {/* Company */}
+          <div>
+            <h4 className="font-medium text-sm text-foreground mb-4">Company</h4>
+            <ul className="space-y-2">
+              <li>
+                <Link to="/careers" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  Careers
+                </Link>
+              </li>
+              <li>
+                <Link to="/contact" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  Contact
+                </Link>
+              </li>
+            </ul>
+          </div>
+
           {/* Governance */}
           <div>
             <h4 className="font-medium text-sm text-foreground mb-4">Governance</h4>

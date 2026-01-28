@@ -23,6 +23,7 @@ import Admin from "./pages/Admin";
 import ResetPassword from "./pages/ResetPassword";
 import Sanctuary from "./pages/Sanctuary";
 import NotFound from "./pages/NotFound";
+import Careers from "./pages/Careers";
 
 // Library pages (primary site)
 import LibraryHome from "./pages/library/LibraryHome";
@@ -104,6 +105,7 @@ const UnlockedApp = () => (
     <Route path="/activation-request/:id" element={<ActivationRequestDetail />} />
     <Route path="/purchases" element={<PurchaseHistory />} />
     <Route path="/dashboard" element={<UserDashboard />} />
+    <Route path="/careers" element={<Careers />} />
 
     {/* Client Portal routes */}
     <Route path="/portal/auth" element={<ClientAuth />} />
