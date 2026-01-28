@@ -778,6 +778,51 @@ export type Database = {
         }
         Relationships: []
       }
+      engagement_requests: {
+        Row: {
+          calm_in_30_days: string | null
+          company_name: string | null
+          created_at: string
+          current_tools: string[] | null
+          email: string
+          id: string
+          name: string
+          operational_pain: string
+          primary_goal: string
+          status: string
+          team_size: string
+          website: string | null
+        }
+        Insert: {
+          calm_in_30_days?: string | null
+          company_name?: string | null
+          created_at?: string
+          current_tools?: string[] | null
+          email: string
+          id?: string
+          name: string
+          operational_pain: string
+          primary_goal: string
+          status?: string
+          team_size: string
+          website?: string | null
+        }
+        Update: {
+          calm_in_30_days?: string | null
+          company_name?: string | null
+          created_at?: string
+          current_tools?: string[] | null
+          email?: string
+          id?: string
+          name?: string
+          operational_pain?: string
+          primary_goal?: string
+          status?: string
+          team_size?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
       installation_requests: {
         Row: {
           activation_eta: string | null
