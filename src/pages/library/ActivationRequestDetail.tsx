@@ -449,6 +449,28 @@ export default function ActivationRequestDetail() {
           </div>
         </div>
 
+        {/* Secure Credential Intake CTA */}
+        <div className="bg-primary/10 border border-primary/30 rounded-xl p-6 mb-8">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+              <Shield className="w-6 h-6 text-primary" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-lg mb-1">Secure Credential Setup</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Use our encrypted credential intake to securely connect your tools. 
+                Your credentials are encrypted with AES-256-GCM and can be revoked anytime.
+              </p>
+              <Link to={`/credentials/${request.id}`}>
+                <Button className="gap-2">
+                  <Key className="w-4 h-4" />
+                  Connect Your Tools Securely
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+
         {/* Customer Notes from AERELION */}
         {request.activation_notes_customer && (
           <div className="bg-primary/5 border border-primary/20 rounded-xl p-6 mb-8">
