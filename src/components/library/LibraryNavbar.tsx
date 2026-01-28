@@ -12,6 +12,7 @@ const LibraryNavbar = () => {
     { name: 'Automations', href: '/automations' },
     { name: 'How It Works', href: '/how-it-works' },
     { name: 'Documentation', href: '/docs' },
+    { name: 'Careers', href: '/careers' },
   ];
 
   return (
