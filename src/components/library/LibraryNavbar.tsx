@@ -9,8 +9,8 @@ const LibraryNavbar = () => {
   const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path + '/');
 
   const navLinks = [
-    { name: 'How We Work', href: '/how-it-works' },
-    { name: 'Example Workflows', href: '/automations' },
+    { name: 'Automations', href: '/automations' },
+    { name: 'How It Works', href: '/how-it-works' },
     { name: 'Documentation', href: '/docs' },
   ];
 
@@ -46,7 +46,7 @@ const LibraryNavbar = () => {
               to="/contact"
               className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
             >
-              Book a Call
+              Schedule a Call
             </Link>
             {isAdmin && (
               <Link
