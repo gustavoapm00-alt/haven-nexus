@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { requireAdminAuth } from "../_shared/admin-auth.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,6 +14,14 @@ interface StatusNotificationPayload {
   activationEta?: string;
   activationNotes?: string;
   itemName?: string;
+}
+
+// Mask email for logging (security)
+function maskEmail(email: string): string {
+  const [local, domain] = email.split('@');
+  if (!domain) return '***@***';
+  const maskedLocal = local.length > 2 ? local[0] + '***' + local[local.length - 1] : '***';
+  return `${maskedLocal}@${domain}`;
 }
 
 const STATUS_MESSAGES: Record<string, { emoji: string; subject: string; heading: string; message: string }> = {
@@ -180,12 +189,34 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // SECURITY: Require admin authentication
+  const authResult = await requireAdminAuth(req);
+  if (!authResult.authorized) {
+    console.warn("Unauthorized notify-activation-status attempt");
+    return new Response(
+      JSON.stringify({ error: authResult.error }),
+      { 
+        status: authResult.statusCode, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      }
+    );
+  }
+
   try {
     const payload: StatusNotificationPayload = await req.json();
     
     if (!payload.customerEmail || !payload.newStatus) {
       return new Response(
         JSON.stringify({ error: 'Missing required fields' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Basic email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(payload.customerEmail)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid email format' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -212,7 +243,7 @@ serve(async (req) => {
         const errorData = await emailRes.text();
         console.error('Status notification email error:', errorData);
       } else {
-        console.log(`Status notification email sent: ${payload.newStatus}`);
+        console.log(`Status notification email sent: ${payload.newStatus} to ${maskEmail(payload.customerEmail)}`);
       }
     } else {
       console.log('RESEND_API_KEY not configured - skipping status notification');

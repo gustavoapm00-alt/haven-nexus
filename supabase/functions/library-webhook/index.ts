@@ -89,34 +89,41 @@ serve(async (req) => {
     let event: Stripe.Event;
     
     const webhookSecret = Deno.env.get("STRIPE_LIBRARY_WEBHOOK_SECRET");
-    const allowInsecure = Deno.env.get("ALLOW_INSECURE_STRIPE_WEBHOOK") === "true";
     
-    if (webhookSecret && signature) {
-      try {
-        event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
-        console.log("✅ Webhook signature verified successfully");
-      } catch (err) {
-        const errMessage = err instanceof Error ? err.message : "Unknown error";
-        console.error("Webhook signature verification failed:", errMessage);
-        return new Response(JSON.stringify({ error: "Invalid signature" }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-    } else if (allowInsecure) {
-      // Development mode only - allow unsigned parsing
-      event = JSON.parse(body);
-      console.warn("⚠️ DEV MODE: Processing webhook without signature verification");
-    } else {
-      // Production: require signature verification
-      console.error("Webhook signature verification not configured");
+    // SECURITY: Webhook signature verification is MANDATORY
+    // No insecure bypass paths are allowed
+    if (!webhookSecret) {
+      console.error("CRITICAL: STRIPE_LIBRARY_WEBHOOK_SECRET not configured");
       return new Response(
-        JSON.stringify({ error: "Webhook signature verification is not configured." }),
+        JSON.stringify({ error: "Webhook secret not configured" }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+    
+    if (!signature) {
+      console.error("Missing Stripe signature header");
+      return new Response(
+        JSON.stringify({ error: "Missing stripe-signature header" }),
         {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         }
       );
+    }
+    
+    try {
+      event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+      console.log("✅ Webhook signature verified successfully");
+    } catch (err) {
+      const errMessage = err instanceof Error ? err.message : "Unknown error";
+      console.error("Webhook signature verification failed:", errMessage);
+      return new Response(JSON.stringify({ error: "Invalid signature" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     // Log event type and session ID for observability
@@ -149,7 +156,7 @@ serve(async (req) => {
           });
         }
 
-        // Record the purchase
+        // Record the purchase (idempotent via onConflict)
         const { error: insertError } = await supabaseAdmin
           .from("purchases")
           .upsert({
@@ -172,7 +179,7 @@ serve(async (req) => {
           throw new Error("Failed to record purchase");
         }
 
-        console.log(`✅ Purchase recorded for ${customerEmail}: ${metadata.item_type} ${metadata.item_id}`);
+        console.log(`✅ Purchase recorded for [REDACTED]: ${metadata.item_type} ${metadata.item_id}`);
 
         // Fetch item name for the email
         let itemName = metadata.item_name || "";

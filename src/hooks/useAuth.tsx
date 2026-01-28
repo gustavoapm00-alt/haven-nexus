@@ -33,7 +33,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Check admin role with setTimeout to prevent deadlock
         if (session?.user) {
           setTimeout(() => {
-            checkAdminRole(session.user.id, session.user.email);
+            checkAdminRole(session.user.id);
           }, 0);
         } else {
           setIsAdmin(false);
@@ -47,7 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        checkAdminRole(session.user.id, session.user.email);
+        checkAdminRole(session.user.id);
       }
       setIsLoading(false);
     });
@@ -55,8 +55,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const checkAdminRole = async (userId: string, userEmail?: string) => {
-    // First check user_roles table
+  const checkAdminRole = async (userId: string) => {
+    // SECURITY: Admin status is determined ONLY via user_roles table
+    // No fallback to client-exposed environment variables
     const { data } = await supabase
       .from('user_roles')
       .select('role')
@@ -64,22 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .eq('role', 'admin')
       .maybeSingle();
     
-    if (data) {
-      setIsAdmin(true);
-      return;
-    }
-
-    // Fallback: check ADMIN_EMAIL_ALLOWLIST env variable
-    if (userEmail) {
-      const allowlist = import.meta.env.VITE_ADMIN_EMAIL_ALLOWLIST || '';
-      const allowedEmails = allowlist.split(',').map((e: string) => e.trim().toLowerCase()).filter(Boolean);
-      if (allowedEmails.includes(userEmail.toLowerCase())) {
-        setIsAdmin(true);
-        return;
-      }
-    }
-
-    setIsAdmin(false);
+    setIsAdmin(!!data);
   };
 
   const signIn = async (email: string, password: string) => {

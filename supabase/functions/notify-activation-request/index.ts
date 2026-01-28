@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { requireAdminAuth } from "../_shared/admin-auth.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -14,6 +15,14 @@ interface ActivationRequestPayload {
   selectedTools: string[];
   setupWindow: string;
   notes?: string;
+}
+
+// Mask email for logging (security)
+function maskEmail(email: string): string {
+  const [local, domain] = email.split('@');
+  if (!domain) return '***@***';
+  const maskedLocal = local.length > 2 ? local[0] + '***' + local[local.length - 1] : '***';
+  return `${maskedLocal}@${domain}`;
 }
 
 const generateCustomerEmailHtml = (payload: ActivationRequestPayload) => `
@@ -176,6 +185,19 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // SECURITY: Require admin authentication
+  const authResult = await requireAdminAuth(req);
+  if (!authResult.authorized) {
+    console.warn("Unauthorized notify-activation-request attempt");
+    return new Response(
+      JSON.stringify({ error: authResult.error }),
+      { 
+        status: authResult.statusCode, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      }
+    );
+  }
+
   try {
     const payload: ActivationRequestPayload = await req.json();
     
@@ -183,6 +205,15 @@ serve(async (req) => {
     if (!payload.businessName || !payload.contactEmail) {
       return new Response(
         JSON.stringify({ error: 'Missing required fields' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Basic email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(payload.contactEmail)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid email format' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -209,7 +240,7 @@ serve(async (req) => {
         const errorData = await customerEmailRes.text();
         console.error('Customer email error:', errorData);
       } else {
-        console.log('Customer confirmation email sent');
+        console.log('Customer confirmation email sent to:', maskEmail(payload.contactEmail));
       }
 
       // Send admin notification email

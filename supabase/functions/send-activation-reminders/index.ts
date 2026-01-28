@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { requireCronSecret } from "../_shared/admin-auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -17,10 +18,31 @@ interface ActivationRequest {
   awaiting_credentials_since: string | null;
 }
 
+// Mask email for logging (security)
+function maskEmail(email: string): string {
+  const [local, domain] = email.split('@');
+  if (!domain) return '***@***';
+  const maskedLocal = local.length > 2 ? local[0] + '***' + local[local.length - 1] : '***';
+  return `${maskedLocal}@${domain}`;
+}
+
 serve(async (req: Request) => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  // SECURITY: Require cron secret for scheduled jobs
+  const authResult = requireCronSecret(req);
+  if (!authResult.authorized) {
+    console.warn("Unauthorized send-activation-reminders attempt");
+    return new Response(
+      JSON.stringify({ error: authResult.error }),
+      { 
+        status: authResult.statusCode, 
+        headers: { ...corsHeaders, "Content-Type": "application/json" } 
+      }
+    );
   }
 
   try {
@@ -171,8 +193,8 @@ serve(async (req: Request) => {
 
         if (!emailRes.ok) {
           const errorText = await emailRes.text();
-          console.error(`Failed to send reminder to ${request.email}:`, emailRes.status, errorText);
-          errors.push(`${request.email}: ${emailRes.status} - ${errorText}`);
+          console.error(`Failed to send reminder to ${maskEmail(request.email)}:`, emailRes.status, errorText);
+          errors.push(`${request.id}: ${emailRes.status}`);
           continue;
         }
 
@@ -198,7 +220,7 @@ serve(async (req: Request) => {
         }
 
         sentCount++;
-        console.log(`Sent reminder ${reminderNumber} to ${request.email} for request ${request.id}`);
+        console.log(`Sent reminder ${reminderNumber} to ${maskEmail(request.email)} for request ${request.id}`);
       } catch (reqError) {
         console.error(`Error processing request ${request.id}:`, reqError);
         errors.push(`${request.id}: ${reqError instanceof Error ? reqError.message : "Unknown error"}`);
