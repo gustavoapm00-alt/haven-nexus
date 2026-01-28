@@ -45,14 +45,14 @@ const LibraryHero = () => {
               {/* CTAs */}
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Button asChild size="lg" className="text-base px-8 py-6">
-                  <Link to="/automations">
-                    View Automation Library
+                  <Link to="/contact">
+                    Schedule a Discovery Call
                     <ArrowRight className="ml-2 w-5 h-5" />
                   </Link>
                 </Button>
                 <Button asChild variant="outline" size="lg" className="text-base px-8 py-6">
-                  <Link to="#how-it-works">
-                    How It Works
+                  <Link to="/automations">
+                    Browse Automations
                   </Link>
                 </Button>
               </div>
