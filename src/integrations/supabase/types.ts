@@ -73,48 +73,6 @@ export type Database = {
           },
         ]
       }
-      agent_catalog: {
-        Row: {
-          agent_key: string
-          category: string
-          created_at: string | null
-          description: string | null
-          id: string
-          is_active: boolean | null
-          model: string | null
-          name: string
-          output_schema: Json | null
-          system_prompt: string
-          user_prompt_template: string
-        }
-        Insert: {
-          agent_key: string
-          category: string
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          is_active?: boolean | null
-          model?: string | null
-          name: string
-          output_schema?: Json | null
-          system_prompt: string
-          user_prompt_template: string
-        }
-        Update: {
-          agent_key?: string
-          category?: string
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          is_active?: boolean | null
-          model?: string | null
-          name?: string
-          output_schema?: Json | null
-          system_prompt?: string
-          user_prompt_template?: string
-        }
-        Relationships: []
-      }
       agent_files: {
         Row: {
           agent_id: string
@@ -149,65 +107,6 @@ export type Database = {
             columns: ["agent_id"]
             isOneToOne: false
             referencedRelation: "automation_agents"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      agent_runs: {
-        Row: {
-          agent_key: string | null
-          attempt_count: number
-          created_at: string
-          error: string | null
-          id: string
-          idempotency_key: string | null
-          input_json: Json
-          org_id: string
-          output_json: Json | null
-          output_text: string | null
-          relevance_agent_id: string | null
-          relevance_trace_id: string | null
-          status: string
-          updated_at: string
-        }
-        Insert: {
-          agent_key?: string | null
-          attempt_count?: number
-          created_at?: string
-          error?: string | null
-          id?: string
-          idempotency_key?: string | null
-          input_json?: Json
-          org_id: string
-          output_json?: Json | null
-          output_text?: string | null
-          relevance_agent_id?: string | null
-          relevance_trace_id?: string | null
-          status?: string
-          updated_at?: string
-        }
-        Update: {
-          agent_key?: string | null
-          attempt_count?: number
-          created_at?: string
-          error?: string | null
-          id?: string
-          idempotency_key?: string | null
-          input_json?: Json
-          org_id?: string
-          output_json?: Json | null
-          output_text?: string | null
-          relevance_agent_id?: string | null
-          relevance_trace_id?: string | null
-          status?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "agent_runs_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "orgs"
             referencedColumns: ["id"]
           },
         ]
@@ -913,164 +812,6 @@ export type Database = {
         }
         Relationships: []
       }
-      org_members: {
-        Row: {
-          created_at: string
-          org_id: string
-          role: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          org_id: string
-          role: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          org_id?: string
-          role?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "org_members_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "orgs"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      org_subscriptions: {
-        Row: {
-          org_id: string
-          period_end: string | null
-          period_start: string | null
-          plan_id: string | null
-          runs_used_this_period: number
-          status: string
-          updated_at: string | null
-        }
-        Insert: {
-          org_id: string
-          period_end?: string | null
-          period_start?: string | null
-          plan_id?: string | null
-          runs_used_this_period?: number
-          status?: string
-          updated_at?: string | null
-        }
-        Update: {
-          org_id?: string
-          period_end?: string | null
-          period_start?: string | null
-          plan_id?: string | null
-          runs_used_this_period?: number
-          status?: string
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "org_subscriptions_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: true
-            referencedRelation: "orgs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "org_subscriptions_plan_id_fkey"
-            columns: ["plan_id"]
-            isOneToOne: false
-            referencedRelation: "plans"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      orgs: {
-        Row: {
-          created_at: string
-          id: string
-          name: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          name: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          name?: string
-        }
-        Relationships: []
-      }
-      plan_entitlements: {
-        Row: {
-          agent_key: string
-          included: boolean | null
-          per_agent_run_limit: number | null
-          plan_id: string
-        }
-        Insert: {
-          agent_key: string
-          included?: boolean | null
-          per_agent_run_limit?: number | null
-          plan_id: string
-        }
-        Update: {
-          agent_key?: string
-          included?: boolean | null
-          per_agent_run_limit?: number | null
-          plan_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "plan_entitlements_agent_key_fkey"
-            columns: ["agent_key"]
-            isOneToOne: false
-            referencedRelation: "agent_catalog"
-            referencedColumns: ["agent_key"]
-          },
-          {
-            foreignKeyName: "plan_entitlements_plan_id_fkey"
-            columns: ["plan_id"]
-            isOneToOne: false
-            referencedRelation: "plans"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      plans: {
-        Row: {
-          category: string
-          created_at: string | null
-          id: string
-          is_active: boolean | null
-          monthly_run_limit: number
-          name: string
-          price_display: string
-        }
-        Insert: {
-          category: string
-          created_at?: string | null
-          id?: string
-          is_active?: boolean | null
-          monthly_run_limit?: number
-          name: string
-          price_display: string
-        }
-        Update: {
-          category?: string
-          created_at?: string | null
-          id?: string
-          is_active?: boolean | null
-          monthly_run_limit?: number
-          name?: string
-          price_display?: string
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -1179,50 +920,6 @@ export type Database = {
         }
         Relationships: []
       }
-      relevance_agents: {
-        Row: {
-          agent_key: string
-          created_at: string
-          id: string
-          is_enabled: boolean
-          name: string
-          org_id: string
-          outbound_secret: string | null
-          trigger_url: string
-          updated_at: string
-        }
-        Insert: {
-          agent_key: string
-          created_at?: string
-          id?: string
-          is_enabled?: boolean
-          name: string
-          org_id: string
-          outbound_secret?: string | null
-          trigger_url: string
-          updated_at?: string
-        }
-        Update: {
-          agent_key?: string
-          created_at?: string
-          id?: string
-          is_enabled?: boolean
-          name?: string
-          org_id?: string
-          outbound_secret?: string | null
-          trigger_url?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "relevance_agents_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "orgs"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       user_roles: {
         Row: {
           created_at: string
@@ -1246,50 +943,7 @@ export type Database = {
       }
     }
     Views: {
-      relevance_agents_safe: {
-        Row: {
-          agent_key: string | null
-          created_at: string | null
-          id: string | null
-          is_enabled: boolean | null
-          name: string | null
-          org_id: string | null
-          outbound_secret: string | null
-          trigger_url: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          agent_key?: string | null
-          created_at?: string | null
-          id?: string | null
-          is_enabled?: boolean | null
-          name?: string | null
-          org_id?: string | null
-          outbound_secret?: never
-          trigger_url?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          agent_key?: string | null
-          created_at?: string | null
-          id?: string | null
-          is_enabled?: boolean | null
-          name?: string | null
-          org_id?: string | null
-          outbound_secret?: never
-          trigger_url?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "relevance_agents_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "orgs"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
+      [_ in never]: never
     }
     Functions: {
       check_rate_limit: {
@@ -1311,14 +965,6 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: never; Returns: boolean }
-      is_org_admin_or_owner: {
-        Args: { _org_id: string; _user_id: string }
-        Returns: boolean
-      }
-      is_org_member: {
-        Args: { _org_id: string; _user_id: string }
-        Returns: boolean
-      }
     }
     Enums: {
       app_role: "admin" | "user"
