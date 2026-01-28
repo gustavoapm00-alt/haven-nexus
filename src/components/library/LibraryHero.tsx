@@ -7,7 +7,7 @@ const LibraryHero = () => {
   const bulletPoints = [
     'No software to install',
     'No workflows to manage',
-    'No internal automation ownership',
+    'No technical burden on your team',
   ];
 
   return (
@@ -20,11 +20,14 @@ const LibraryHero = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
+              <p className="text-sm font-medium text-primary uppercase tracking-wide mb-4">
+                Managed Automation Operator
+              </p>
               <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground tracking-tight mb-6 leading-[1.15]">
-                Managed Automations. Delivered, Operated, and Maintained for You.
+                We Operate Automations for You.
               </h1>
               <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-10 max-w-2xl mx-auto">
-                AERELION Systems provides fully-managed business automations operated on our infrastructure. We design, deploy, and run automation systems so your organization doesn't have to.
+                AERELION delivers fully-hosted operational automations for professional services firms and compliance-driven organizations. We configure, run, and maintain everything on our infrastructure—so you don't have to.
               </p>
               
               {/* Bullet Points */}
@@ -52,7 +55,7 @@ const LibraryHero = () => {
                 </Button>
                 <Button asChild variant="outline" size="lg" className="text-base px-8 py-6">
                   <Link to="/automations">
-                    Browse Automations
+                    View Automations
                   </Link>
                 </Button>
               </div>

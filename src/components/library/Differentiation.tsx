@@ -2,9 +2,9 @@ import { motion } from 'framer-motion';
 import { CheckCircle } from 'lucide-react';
 
 const differentiators = [
-  'Not a self-serve automation platform',
-  'No workflow maintenance risk',
-  'No retraining internal staff',
+  'Not a SaaS platform or DIY tool',
+  'No workflow maintenance burden on your team',
+  'No need to retrain internal staff',
   'Clear accountability for outcomes',
   'Human-operated systems, not black-box software',
 ];
@@ -39,7 +39,7 @@ const Differentiation = () => {
         </div>
         
         <p className="text-sm text-muted-foreground">
-          If an automation needs attention, AERELION handles it.
+          If an automation needs attention, AERELION handles it. You receive outcomes.
         </p>
       </motion.div>
     </div>

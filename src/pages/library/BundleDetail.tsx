@@ -44,7 +44,7 @@ const BundleDetail = () => {
               The system you're looking for doesn't exist or has been removed.
             </p>
             <Button asChild>
-              <Link to="/automations">Browse Example Workflows</Link>
+              <Link to="/automations">View All Automations</Link>
             </Button>
           </div>
         </div>
@@ -56,9 +56,9 @@ const BundleDetail = () => {
   return (
     <>
       <SEO
-        title={`${bundle.name} - Managed System | AERELION Systems`}
+        title={`${bundle.name} - Operated by AERELION`}
         description={bundle.objective}
-        keywords={[...bundle.sectors, 'managed automation', 'hosted automation', 'automation operator'].join(', ')}
+        keywords={[...bundle.sectors, 'managed automation', 'hosted automation', 'automation operator', 'system bundle'].join(', ')}
       />
 
       <div className="min-h-screen bg-background">
@@ -72,7 +72,7 @@ const BundleDetail = () => {
               className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8"
             >
               <ArrowLeft className="w-4 h-4" />
-              Back to Automation Catalog
+              Back to Automations
             </Link>
 
             {/* Header */}
@@ -82,7 +82,7 @@ const BundleDetail = () => {
                   <Package className="w-6 h-6 text-primary" />
                 </div>
                 <span className="text-xs font-semibold text-primary uppercase tracking-wide">
-                  Managed System
+                  Operated System Bundle
                 </span>
               </div>
               <h1 className="text-3xl font-semibold text-foreground mb-3">
@@ -137,10 +137,10 @@ const BundleDetail = () => {
                   </div>
                 </section>
 
-                {/* Common Use Cases */}
+                {/* Who This Is For */}
                 <section>
                   <h2 className="text-lg font-semibold text-foreground mb-4">
-                    Common Use Cases
+                    Who This Is For
                   </h2>
                   <div className="flex flex-wrap gap-2">
                     {bundle.sectors.map((sector) => (
@@ -151,7 +151,7 @@ const BundleDetail = () => {
                   </div>
                 </section>
 
-                {/* How Engagement Works */}
+                {/* How We Deliver */}
                 <section>
                   <h2 className="text-lg font-semibold text-foreground mb-4">
                     How We Deliver This System

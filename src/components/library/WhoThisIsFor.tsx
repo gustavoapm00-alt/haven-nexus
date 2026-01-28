@@ -1,15 +1,22 @@
 import { motion } from 'framer-motion';
 
-const benefits = [
-  'Automation without technical overhead',
-  'Predictable delivery',
-  'Reduced internal complexity',
-  'A single operator responsible for outcomes',
+const audiences = [
+  'Professional services firms',
+  'Government contractors (primes & subs)',
+  'Compliance-driven organizations',
+  'Regulated or reputation-sensitive operators',
+];
+
+const roles = [
+  'Founders & Managing Partners',
+  'Operations Directors',
+  'Program Managers',
+  'Chiefs of Staff',
 ];
 
 const WhoThisIsFor = () => {
   return (
-    <div className="max-w-2xl mx-auto text-center">
+    <div className="max-w-3xl mx-auto text-center">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -17,26 +24,52 @@ const WhoThisIsFor = () => {
         transition={{ duration: 0.5 }}
       >
         <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-6">
-          Designed for Operators Who Value Stability
+          Designed for Organizations That Value Stability
         </h2>
         
         <p className="text-muted-foreground mb-8">
-          This service is for organizations that want:
+          This service is for teams that need automation without the internal overhead.
         </p>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10 max-w-lg mx-auto">
-          {benefits.map((benefit, index) => (
-            <motion.div
-              key={benefit}
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
-              className="card-panel p-4 text-sm text-foreground"
-            >
-              {benefit}
-            </motion.div>
-          ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+          <div>
+            <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide mb-4">
+              Who We Serve
+            </h3>
+            <div className="space-y-2">
+              {audiences.map((audience, index) => (
+                <motion.div
+                  key={audience}
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  className="card-panel p-3 text-sm text-foreground"
+                >
+                  {audience}
+                </motion.div>
+              ))}
+            </div>
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide mb-4">
+              Who We Work With
+            </h3>
+            <div className="space-y-2">
+              {roles.map((role, index) => (
+                <motion.div
+                  key={role}
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  className="card-panel p-3 text-sm text-foreground"
+                >
+                  {role}
+                </motion.div>
+              ))}
+            </div>
+          </div>
         </div>
         
         <p className="text-sm text-muted-foreground/80 italic">

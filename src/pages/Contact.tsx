@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Mail, Instagram, Send, ArrowRight } from 'lucide-react';
+import { Mail, Send, ArrowRight, Phone, Calendar } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { contactFormSchema } from '@/lib/validations';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+import LibraryNavbar from '@/components/library/LibraryNavbar';
+import LibraryFooter from '@/components/library/LibraryFooter';
 import ScrollReveal from '@/components/ScrollReveal';
 import SEO, { schemas } from '@/components/SEO';
+import { Button } from '@/components/ui/button';
 
 interface FormErrors {
   name?: string;
@@ -82,50 +83,33 @@ const Contact = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO 
-        title="Contact"
-        description="Get in touch with AERELION Systems. For operational questions, system inquiries, or to start a conversation about your automation needs."
-        keywords="contact AERELION Systems, automation inquiry, operational systems contact"
+        title="Contact - AERELION Systems"
+        description="Schedule a discovery call with AERELION Systems. Discuss your operational challenges and learn how managed automation can help."
+        keywords="contact AERELION Systems, automation inquiry, discovery call, managed automation"
         canonicalUrl="/contact"
         structuredData={schemas.breadcrumb([
           { name: 'Home', url: '/' },
           { name: 'Contact', url: '/contact' }
         ])}
       />
-      <Navbar />
+      <LibraryNavbar />
       
-      <main className="pt-24">
+      <main className="pt-12">
         {/* Hero */}
         <section className="section-padding">
           <div className="container-main">
             <ScrollReveal>
               <div className="text-center max-w-3xl mx-auto">
-                <span className="tag-chip mb-6">Contact</span>
-                <h1 className="font-display text-5xl md:text-6xl mb-6">
-                  START A <span className="text-gradient">CONVERSATION</span>
+                <span className="text-xs font-semibold text-primary uppercase tracking-wide mb-4 block">
+                  Get in Touch
+                </span>
+                <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+                  Schedule a Discovery Call
                 </h1>
-                <p className="text-xl text-muted-foreground">
-                  Have a question or want to discuss your operational challenges? 
+                <p className="text-lg text-muted-foreground">
+                  Discuss your operational challenges and learn how AERELION can help. 
                   We respond within 24-48 hours.
                 </p>
-              </div>
-            </ScrollReveal>
-          </div>
-        </section>
-
-        {/* Intake Prompt */}
-        <section className="section-padding pt-0">
-          <div className="container-main max-w-2xl">
-            <ScrollReveal>
-              <div className="card-glass p-6 rounded-lg text-center mb-12">
-                <h2 className="font-display text-xl mb-2">Looking to Engage?</h2>
-                <p className="text-muted-foreground text-sm mb-4">
-                  If you're ready to explore working with AERELION, the qualification intake 
-                  will route you to the right entry mode faster than a general message.
-                </p>
-                <Link to="/get-started" className="btn-primary inline-flex">
-                  Take the Intake Assessment
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
               </div>
             </ScrollReveal>
           </div>
@@ -138,47 +122,45 @@ const Contact = () => {
               {/* Contact Info */}
               <ScrollReveal>
                 <div>
-                  <h2 className="font-display text-3xl mb-6">GET IN TOUCH</h2>
-                  <p className="text-muted-foreground mb-8">
-                    For general inquiries, questions about our capabilities, 
-                    or anything else — reach out below.
-                  </p>
-
-                  <div className="space-y-6">
-                    <a 
-                      href="mailto:contact@aerlion.systems" 
-                      className="flex items-center gap-4 p-4 card-glass rounded-lg hover:border-primary/50 transition-colors"
-                    >
-                      <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <h2 className="text-xl font-semibold text-foreground mb-6">What to Expect</h2>
+                  
+                  <div className="space-y-4 mb-8">
+                    <div className="flex items-start gap-4 p-4 card-panel rounded-lg">
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <Calendar className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-foreground">Discovery Call</p>
+                        <p className="text-sm text-muted-foreground">30-minute conversation to understand your operations</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-4 p-4 card-panel rounded-lg">
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <Phone className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-foreground">Scoped Proposal</p>
+                        <p className="text-sm text-muted-foreground">Clear scope, timeline, and fixed pricing</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-4 p-4 card-panel rounded-lg">
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                         <Mail className="h-5 w-5 text-primary" />
                       </div>
                       <div>
-                        <p className="font-medium">Email</p>
-                        <p className="text-muted-foreground text-sm">contact@aerlion.systems</p>
+                        <p className="font-medium text-foreground">Email</p>
+                        <p className="text-sm text-muted-foreground">contact@aerlion.systems</p>
                       </div>
-                    </a>
-
-                    <a 
-                      href="https://instagram.com/aerlion.systems" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-4 p-4 card-glass rounded-lg hover:border-primary/50 transition-colors"
-                    >
-                      <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                        <Instagram className="h-5 w-5 text-primary" />
-                      </div>
-                      <div>
-                        <p className="font-medium">Instagram</p>
-                        <p className="text-muted-foreground text-sm">@aerlion.systems</p>
-                      </div>
-                    </a>
+                    </div>
                   </div>
 
-                  <div className="mt-8 p-6 card-glass rounded-lg">
-                    <h3 className="font-display text-xl mb-2">Response Time</h3>
-                    <p className="text-muted-foreground text-sm">
-                      We typically respond within 24-48 business hours. For faster routing, 
-                      use the intake assessment above.
+                  <div className="p-6 card-panel rounded-lg">
+                    <h3 className="font-semibold text-foreground mb-2">Response Time</h3>
+                    <p className="text-sm text-muted-foreground">
+                      We typically respond within 24-48 business hours. 
+                      For urgent matters, email us directly.
                     </p>
                   </div>
                 </div>
@@ -186,8 +168,8 @@ const Contact = () => {
 
               {/* Contact Form */}
               <ScrollReveal delay={0.1}>
-                <div className="card-glass p-8 rounded-lg">
-                  <h2 className="font-display text-2xl mb-6">SEND A MESSAGE</h2>
+                <div className="card-panel p-8 rounded-lg">
+                  <h2 className="text-xl font-semibold text-foreground mb-6">Send a Message</h2>
                   
                   <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
@@ -250,10 +232,11 @@ const Contact = () => {
                       )}
                     </div>
 
-                    <button
+                    <Button
                       type="submit"
                       disabled={isSubmitting}
-                      className="btn-secondary w-full justify-center"
+                      className="w-full"
+                      size="lg"
                     >
                       {isSubmitting ? (
                         'Sending...'
@@ -263,7 +246,7 @@ const Contact = () => {
                           <Send className="ml-2 h-4 w-4" />
                         </>
                       )}
-                    </button>
+                    </Button>
                   </form>
                 </div>
               </ScrollReveal>
@@ -272,7 +255,7 @@ const Contact = () => {
         </section>
       </main>
 
-      <Footer />
+      <LibraryFooter />
     </div>
   );
 };

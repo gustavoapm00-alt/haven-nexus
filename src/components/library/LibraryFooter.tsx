@@ -13,7 +13,7 @@ const LibraryFooter = () => {
               AERELION
             </Link>
             <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
-              Managed automation operator. We configure, host, and maintain automation systems on our infrastructure.
+              Managed automation operator for professional services firms and compliance-driven organizations. We configure, host, and maintain automation systems on our infrastructure.
             </p>
           </div>
 
@@ -46,6 +46,11 @@ const LibraryFooter = () => {
               <li>
                 <Link to="/docs" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                   Documentation
+                </Link>
+              </li>
+              <li>
+                <Link to="/activation-walkthrough" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  Activation Guide
                 </Link>
               </li>
               <li>

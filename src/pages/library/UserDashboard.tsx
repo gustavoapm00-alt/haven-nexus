@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   Loader2, Package, FileText, 
-  ShoppingBag, Calendar, ArrowRight, ExternalLink,
+  ShoppingBag, Calendar, ArrowRight,
   User, Mail, Clock, Settings, LogOut, Shield
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -15,7 +15,6 @@ import { ActivationStatusCard } from '@/components/library/ActivationStatusCard'
 import { useAuth } from '@/hooks/useAuth';
 import { useEntitlements } from '@/hooks/useEntitlements';
 import SEO from '@/components/SEO';
-import { toast } from 'sonner';
 import { format } from 'date-fns';
 
 const UserDashboard = () => {
@@ -56,7 +55,7 @@ const UserDashboard = () => {
     <>
       <SEO
         title="Dashboard - AERELION"
-        description="Track your automation status and view account details. We operate automations for you."
+        description="Track your automation status and account details. We operate automations for you."
       />
 
       <div className="min-h-screen bg-background">
@@ -71,7 +70,7 @@ const UserDashboard = () => {
             >
               <h1 className="text-3xl font-bold text-foreground mb-2">Dashboard</h1>
               <p className="text-muted-foreground">
-                Welcome back, {user?.email?.split('@')[0] || 'Operator'}
+                Welcome back, {user?.email?.split('@')[0] || 'there'}
               </p>
             </motion.div>
             <motion.div 
@@ -83,7 +82,7 @@ const UserDashboard = () => {
               <Button asChild variant="outline">
                 <Link to="/automations">
                   <Package className="w-4 h-4 mr-2" />
-                  Browse Automations
+                  View Automations
                 </Link>
               </Button>
               <Button variant="ghost" onClick={handleSignOut}>
@@ -98,9 +97,9 @@ const UserDashboard = () => {
         <SectionBand variant="light">
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
             {[
-              { label: 'Total Purchases', value: stats.totalPurchases, icon: ShoppingBag },
+              { label: 'Total Engagements', value: stats.totalPurchases, icon: ShoppingBag },
               { label: 'Automations Active', value: stats.uniqueAgentsOwned, icon: FileText },
-              { label: 'Bundles Active', value: stats.bundlePurchases, icon: Package },
+              { label: 'System Bundles', value: stats.bundlePurchases, icon: Package },
               { label: 'Total Invested', value: formatPrice(stats.totalSpentCents), icon: Clock },
             ].map((stat, i) => (
               <motion.div
@@ -224,7 +223,7 @@ const UserDashboard = () => {
             <ActivationStatusCard />
           </motion.div>
 
-          {/* Purchases Section */}
+          {/* Engagements Section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -237,7 +236,7 @@ const UserDashboard = () => {
               </div>
               <Button asChild variant="outline" size="sm">
                 <Link to="/automations">
-                  Browse More
+                  View All
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Link>
               </Button>
@@ -249,7 +248,7 @@ const UserDashboard = () => {
                   <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
                     <ShoppingBag className="w-8 h-8 text-muted-foreground" />
                   </div>
-                  <h3 className="text-lg font-semibold text-foreground mb-2">No automations yet</h3>
+                  <h3 className="text-lg font-semibold text-foreground mb-2">No active engagements</h3>
                   <p className="text-muted-foreground mb-6 max-w-md mx-auto">
                     Schedule a discovery call to discuss automation solutions for your operations.
                   </p>
@@ -258,7 +257,7 @@ const UserDashboard = () => {
                       <Link to="/contact">Schedule a Call</Link>
                     </Button>
                     <Button asChild variant="outline">
-                      <Link to="/automations">Browse Automations</Link>
+                      <Link to="/automations">View Automations</Link>
                     </Button>
                   </div>
                 </CardContent>
@@ -286,7 +285,7 @@ const UserDashboard = () => {
                             </div>
                             <div className="flex-1 min-w-0">
                               <span className="text-xs font-medium text-primary uppercase tracking-wide">
-                                {purchase.item_type === 'bundle' ? 'Managed System' : 'Managed Automation'} • Operated by AERELION
+                                {purchase.item_type === 'bundle' ? 'System Bundle' : 'Automation'} • Operated by AERELION
                               </span>
                               <h3 className="text-lg font-semibold text-foreground mb-1 truncate">
                                 {purchase.item_name}
@@ -308,7 +307,7 @@ const UserDashboard = () => {
                             <Button size="sm" asChild>
                               <Link to="/activation-setup">
                                 <ArrowRight className="w-4 h-4 mr-2" />
-                                Track Activation
+                                Track Status
                               </Link>
                             </Button>
                           </div>
@@ -338,7 +337,7 @@ const UserDashboard = () => {
                   {entitledAgents.filter(a => a.source === 'bundle').map((agent) => (
                     <Card key={agent.id} className="card-panel">
                       <CardContent className="p-4">
-                        <Link to={`/agents/${agent.slug}`} className="block group">
+                        <Link to={`/automations/${agent.slug}`} className="block group">
                           <h4 className="font-medium text-foreground group-hover:text-primary transition-colors mb-1">
                             {agent.name}
                           </h4>
