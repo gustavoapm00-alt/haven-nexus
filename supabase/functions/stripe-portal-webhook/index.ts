@@ -33,29 +33,32 @@ serve(async (req) => {
 
     let event: Stripe.Event;
 
-    // Verify signature if secret is configured
-    if (webhookSecret && signature) {
-      try {
-        event = await stripe.webhooks.constructEventAsync(body, signature, webhookSecret);
-        logStep("Signature verified");
-      } catch (err) {
-        logStep("Signature verification failed", { error: String(err) });
-        return new Response(
-          JSON.stringify({ error: "Invalid signature" }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
-        );
-      }
-    } else {
-      // Allow insecure for testing
-      const allowInsecure = Deno.env.get("ALLOW_INSECURE_STRIPE_WEBHOOK") === "true";
-      if (!allowInsecure) {
-        return new Response(
-          JSON.stringify({ error: "Webhook secret not configured" }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
-        );
-      }
-      event = JSON.parse(body);
-      logStep("Insecure mode - parsed without verification");
+    // Signature verification is mandatory
+    if (!webhookSecret) {
+      logStep("ERROR: STRIPE_LIBRARY_WEBHOOK_SECRET not configured");
+      return new Response(
+        JSON.stringify({ error: "Webhook not configured" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
+      );
+    }
+
+    if (!signature) {
+      logStep("ERROR: Missing stripe-signature header");
+      return new Response(
+        JSON.stringify({ error: "Missing signature" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+      );
+    }
+
+    try {
+      event = await stripe.webhooks.constructEventAsync(body, signature, webhookSecret);
+      logStep("Signature verified");
+    } catch (err) {
+      logStep("Signature verification failed", { error: String(err) });
+      return new Response(
+        JSON.stringify({ error: "Invalid signature" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+      );
     }
 
     // Create admin Supabase client
