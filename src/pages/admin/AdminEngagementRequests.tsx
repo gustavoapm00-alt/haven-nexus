@@ -6,7 +6,7 @@ import { toast } from '@/hooks/use-toast';
 import { 
   Loader2, LogOut, ArrowLeft, RefreshCw, Filter, Search, Download,
   Mail, Building2, Globe, Users, Target, Calendar,
-  Clock, MessageSquare, CheckCircle2, AlertCircle
+  Clock, MessageSquare, CheckCircle2, AlertCircle, ArrowUpDown
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -42,6 +42,27 @@ const GOAL_LABELS: Record<string, string> = {
   'reporting': 'Reporting',
   'internal-ops': 'Internal Ops',
   'other': 'Other',
+};
+
+// Sort key options
+const SORT_KEY_OPTIONS = [
+  { value: 'created_at', label: 'Created date' },
+  { value: 'name', label: 'Name' },
+  { value: 'status', label: 'Status' },
+  { value: 'last_contacted_at', label: 'Last contacted' },
+] as const;
+
+type SortKey = 'created_at' | 'name' | 'status' | 'last_contacted_at';
+type SortDir = 'asc' | 'desc';
+
+// Status priority for sorting (lower = higher priority)
+const STATUS_PRIORITY: Record<string, number> = {
+  new: 0,
+  in_review: 1,
+  scheduled: 2,
+  active: 3,
+  completed: 4,
+  closed: 5,
 };
 
 function getStatusBadge(status: string) {
@@ -131,6 +152,8 @@ const AdminEngagementRequests = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
+  const [sortKey, setSortKey] = useState<SortKey>('created_at');
+  const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [selectedRequest, setSelectedRequest] = useState<EngagementRequest | null>(null);
   const [editingNotes, setEditingNotes] = useState('');
   const [editingStatus, setEditingStatus] = useState('');
@@ -172,15 +195,75 @@ const AdminEngagementRequests = () => {
     return result;
   }, [requests, filter, searchQuery, dateFrom, dateTo]);
 
+  // Sort the filtered results
+  const sortedRequests = useMemo(() => {
+    const sorted = [...filteredRequests];
+    
+    sorted.sort((a, b) => {
+      let comparison = 0;
+      
+      switch (sortKey) {
+        case 'created_at': {
+          comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+          break;
+        }
+        case 'name': {
+          comparison = a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+          break;
+        }
+        case 'status': {
+          const aPriority = STATUS_PRIORITY[a.status] ?? 99;
+          const bPriority = STATUS_PRIORITY[b.status] ?? 99;
+          comparison = aPriority - bPriority;
+          break;
+        }
+        case 'last_contacted_at': {
+          // Nulls always sort last regardless of direction
+          if (!a.last_contacted_at && !b.last_contacted_at) {
+            comparison = 0;
+          } else if (!a.last_contacted_at) {
+            return 1; // a goes last
+          } else if (!b.last_contacted_at) {
+            return -1; // b goes last
+          } else {
+            comparison = new Date(a.last_contacted_at).getTime() - new Date(b.last_contacted_at).getTime();
+          }
+          break;
+        }
+      }
+      
+      // Apply direction
+      if (sortKey !== 'last_contacted_at' || (a.last_contacted_at && b.last_contacted_at)) {
+        comparison = sortDir === 'desc' ? -comparison : comparison;
+      }
+      
+      // Stable sort: fall back to created_at desc if equal
+      if (comparison === 0) {
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      }
+      
+      return comparison;
+    });
+    
+    return sorted;
+  }, [filteredRequests, sortKey, sortDir]);
+
   // Export to CSV
   const exportToCSV = () => {
+    if (sortedRequests.length === 0) {
+      toast({
+        title: 'Nothing to export',
+        description: 'No matches in your current filters',
+      });
+      return;
+    }
     const headers = [
       'created_at', 'status', 'admin_seen', 'name', 'email', 'company_name',
       'website', 'team_size', 'primary_goal', 'operational_pain', 'calm_in_30_days',
       'current_tools', 'notes_internal', 'last_contacted_at'
     ];
     
-    const rows = filteredRequests.map(r => [
+    const rows = sortedRequests.map(r => [
       escapeCSV(r.created_at),
       escapeCSV(r.status),
       escapeCSV(String(r.admin_seen ?? false)),
@@ -208,6 +291,11 @@ const AdminEngagementRequests = () => {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+    
+    toast({
+      title: 'Export ready',
+      description: `Downloaded ${sortedRequests.length} request${sortedRequests.length !== 1 ? 's' : ''}`,
+    });
   };
 
   useEffect(() => {
@@ -386,8 +474,34 @@ const AdminEngagementRequests = () => {
                 </Button>
               )}
             </div>
+            
+            {/* Sort Controls */}
+            <div className="flex items-center gap-2">
+              <ArrowUpDown className="w-4 h-4 text-muted-foreground" />
+              <Select value={sortKey} onValueChange={(v) => setSortKey(v as SortKey)}>
+                <SelectTrigger className="w-36 h-9">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {SORT_KEY_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSortDir(d => d === 'asc' ? 'desc' : 'asc')}
+                className="w-16"
+              >
+                {sortDir === 'asc' ? 'Asc' : 'Desc'}
+              </Button>
+            </div>
+            
             <div className="sm:ml-auto">
-              <Button variant="outline" size="sm" onClick={exportToCSV} disabled={filteredRequests.length === 0}>
+              <Button variant="outline" size="sm" onClick={exportToCSV} disabled={sortedRequests.length === 0}>
                 <Download className="w-4 h-4 mr-2" />
                 Export CSV
               </Button>
@@ -397,9 +511,9 @@ const AdminEngagementRequests = () => {
 
         {/* Result count */}
         <p className="text-sm text-muted-foreground mb-4">
-          {filteredRequests.length === 0 
+          {sortedRequests.length === 0 
             ? 'No matches' 
-            : `${filteredRequests.length} result${filteredRequests.length !== 1 ? 's' : ''}`}
+            : `${sortedRequests.length} result${sortedRequests.length !== 1 ? 's' : ''}`}
         </p>
 
         {/* Request List */}
@@ -407,13 +521,13 @@ const AdminEngagementRequests = () => {
           <div className="text-center py-12">
             <Loader2 className="w-6 h-6 animate-spin mx-auto text-muted-foreground" />
           </div>
-        ) : filteredRequests.length === 0 ? (
+        ) : sortedRequests.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
             No engagement requests {filter === 'new' ? 'pending review' : 'yet'}
           </div>
         ) : (
           <div className="card-glass rounded-lg overflow-hidden divide-y divide-border">
-            {filteredRequests.map((request) => {
+            {sortedRequests.map((request) => {
               const statusBadge = getStatusBadge(request.status);
               return (
                 <button
