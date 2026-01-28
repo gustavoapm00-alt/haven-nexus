@@ -4,8 +4,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useEngagementRequests, type EngagementRequest } from '@/hooks/useEngagementRequests';
 import { toast } from '@/hooks/use-toast';
 import { 
-  Loader2, LogOut, ArrowLeft, RefreshCw, Filter, Search,
-  Mail, Building2, Globe, Users, Target,
+  Loader2, LogOut, ArrowLeft, RefreshCw, Filter, Search, Download,
+  Mail, Building2, Globe, Users, Target, Calendar,
   Clock, MessageSquare, CheckCircle2, AlertCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -96,6 +96,32 @@ function CurrentToolsDisplay({ tools }: { tools: string[] | string | null }) {
   );
 }
 
+// CSV escape helper
+function escapeCSV(value: string | null | undefined): string {
+  if (value == null) return '';
+  const str = String(value);
+  if (str.includes(',') || str.includes('"') || str.includes('\n') || str.includes('\r')) {
+    return `"${str.replace(/"/g, '""')}"`;
+  }
+  return str;
+}
+
+// Format current_tools for CSV
+function formatToolsForCSV(tools: string[] | string | null): string {
+  if (!tools) return '';
+  if (Array.isArray(tools)) return tools.filter(Boolean).join(' | ');
+  const trimmed = String(tools).trim();
+  if (trimmed.startsWith('[')) {
+    try {
+      const parsed = JSON.parse(trimmed);
+      return Array.isArray(parsed) ? parsed.filter(Boolean).join(' | ') : trimmed;
+    } catch {
+      return trimmed;
+    }
+  }
+  return trimmed;
+}
+
 const AdminEngagementRequests = () => {
   const { user, isAdmin, isLoading: authLoading, signOut } = useAuth();
   const navigate = useNavigate();
@@ -103,6 +129,8 @@ const AdminEngagementRequests = () => {
   
   const [filter, setFilter] = useState<'all' | 'new'>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
   const [selectedRequest, setSelectedRequest] = useState<EngagementRequest | null>(null);
   const [editingNotes, setEditingNotes] = useState('');
   const [editingStatus, setEditingStatus] = useState('');
@@ -112,12 +140,24 @@ const AdminEngagementRequests = () => {
   const filteredRequests = useMemo(() => {
     let result = requests;
     
-    // Apply status filter first
+    // (a) Apply status filter first
     if (filter === 'new') {
       result = result.filter(r => r.status === 'new');
     }
     
-    // Apply search if query exists
+    // (b) Apply date filter
+    if (dateFrom) {
+      const fromDate = new Date(dateFrom);
+      fromDate.setHours(0, 0, 0, 0);
+      result = result.filter(r => new Date(r.created_at) >= fromDate);
+    }
+    if (dateTo) {
+      const toDate = new Date(dateTo);
+      toDate.setHours(23, 59, 59, 999);
+      result = result.filter(r => new Date(r.created_at) <= toDate);
+    }
+    
+    // (c) Apply search if query exists
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase().trim();
       result = result.filter(r => 
@@ -130,7 +170,45 @@ const AdminEngagementRequests = () => {
     }
     
     return result;
-  }, [requests, filter, searchQuery]);
+  }, [requests, filter, searchQuery, dateFrom, dateTo]);
+
+  // Export to CSV
+  const exportToCSV = () => {
+    const headers = [
+      'created_at', 'status', 'admin_seen', 'name', 'email', 'company_name',
+      'website', 'team_size', 'primary_goal', 'operational_pain', 'calm_in_30_days',
+      'current_tools', 'notes_internal', 'last_contacted_at'
+    ];
+    
+    const rows = filteredRequests.map(r => [
+      escapeCSV(r.created_at),
+      escapeCSV(r.status),
+      escapeCSV(String(r.admin_seen ?? false)),
+      escapeCSV(r.name),
+      escapeCSV(r.email),
+      escapeCSV(r.company_name),
+      escapeCSV(r.website),
+      escapeCSV(r.team_size),
+      escapeCSV(r.primary_goal),
+      escapeCSV(r.operational_pain),
+      escapeCSV(r.calm_in_30_days),
+      escapeCSV(formatToolsForCSV(r.current_tools)),
+      escapeCSV(r.notes_internal),
+      escapeCSV(r.last_contacted_at),
+    ]);
+    
+    const csvContent = [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const today = new Date().toISOString().split('T')[0];
+    link.href = url;
+    link.download = `engagement-requests-${today}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -247,32 +325,71 @@ const AdminEngagementRequests = () => {
         )}
 
         {/* Search + Filter */}
-        <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="Search name, email, company, website, pain..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9"
-            />
+        <div className="space-y-4 mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="Search name, email, company, website, pain..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            <div className="flex items-center gap-3">
+              <Filter className="w-4 h-4 text-muted-foreground" />
+              <div className="flex gap-2">
+                <Button
+                  variant={filter === 'all' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setFilter('all')}
+                >
+                  All ({requests.length})
+                </Button>
+                <Button
+                  variant={filter === 'new' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setFilter('new')}
+                >
+                  New ({requests.filter(r => r.status === 'new').length})
+                </Button>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            <Filter className="w-4 h-4 text-muted-foreground" />
-            <div className="flex gap-2">
-              <Button
-                variant={filter === 'all' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setFilter('all')}
-              >
-                All ({requests.length})
-              </Button>
-              <Button
-                variant={filter === 'new' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setFilter('new')}
-              >
-                New ({requests.filter(r => r.status === 'new').length})
+
+          {/* Date Range Filter + Export */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">From:</span>
+              <Input
+                type="date"
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+                className="w-40"
+              />
+              <span className="text-sm text-muted-foreground">To:</span>
+              <Input
+                type="date"
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+                className="w-40"
+              />
+              {(dateFrom || dateTo) && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => { setDateFrom(''); setDateTo(''); }}
+                  className="text-muted-foreground"
+                >
+                  Clear
+                </Button>
+              )}
+            </div>
+            <div className="sm:ml-auto">
+              <Button variant="outline" size="sm" onClick={exportToCSV} disabled={filteredRequests.length === 0}>
+                <Download className="w-4 h-4 mr-2" />
+                Export CSV
               </Button>
             </div>
           </div>
