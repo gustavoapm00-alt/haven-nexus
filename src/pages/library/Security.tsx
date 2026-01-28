@@ -101,13 +101,13 @@ const Security = () => {
                 <div>
                   <h3 className="font-semibold text-foreground mb-1">Questions?</h3>
                   <p className="text-muted-foreground text-sm mb-2">
-                    Security concerns or questions about our practices? Contact us.
+                    Security concerns or questions about our practices?
                   </p>
                   <a 
-                    href="mailto:contact@aerelion.systems" 
+                    href="/contact" 
                     className="text-primary hover:underline font-medium text-sm"
                   >
-                    contact@aerelion.systems
+                    Contact us via our booking form →
                   </a>
                 </div>
               </div>

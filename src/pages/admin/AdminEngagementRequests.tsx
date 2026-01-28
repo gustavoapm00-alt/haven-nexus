@@ -5,8 +5,8 @@ import { useEngagementRequests, type EngagementRequest } from '@/hooks/useEngage
 import { toast } from '@/hooks/use-toast';
 import { 
   Loader2, LogOut, ArrowLeft, RefreshCw, Filter, 
-  Mail, Phone, Building2, Globe, Users, Target,
-  Clock, MessageSquare, CheckCircle2, AlertCircle, X
+  Mail, Building2, Globe, Users, Target,
+  Clock, MessageSquare, CheckCircle2, AlertCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -87,7 +87,7 @@ const AdminEngagementRequests = () => {
     setEditingStatus(request.status);
     
     // Mark as seen when opened
-    if (!request.admin_seen) {
+    if (!(request.admin_seen ?? false)) {
       await markAsSeen(request.id);
     }
   };
@@ -230,7 +230,7 @@ const AdminEngagementRequests = () => {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-1">
                       <span className="font-medium truncate">{request.name}</span>
-                      {!request.admin_seen && request.status === 'new' && (
+                      {!(request.admin_seen ?? false) && request.status === 'new' && (
                         <span className="w-2 h-2 bg-primary rounded-full" />
                       )}
                     </div>
@@ -303,24 +303,52 @@ const AdminEngagementRequests = () => {
                 </div>
 
                 {/* Tools */}
-                {selectedRequest.current_tools && selectedRequest.current_tools.length > 0 && (
+                {selectedRequest.current_tools && (
                   <div>
                     <h4 className="text-sm font-medium mb-2">Current Tools</h4>
                     <div className="flex flex-wrap gap-2">
-                      {selectedRequest.current_tools.map((tool) => (
-                        <Badge key={tool} variant="secondary">{tool}</Badge>
-                      ))}
+                      {(() => {
+                        // Safely parse current_tools - could be array, JSON string, or comma-separated
+                        let tools: string[] = [];
+                        const rawTools = selectedRequest.current_tools as string[] | string | null;
+                        
+                        if (!rawTools) {
+                          return <span className="text-sm text-muted-foreground">None specified</span>;
+                        }
+                        
+                        if (Array.isArray(rawTools)) {
+                          tools = rawTools.filter(Boolean);
+                        } else if (typeof rawTools === 'string') {
+                          const trimmed = rawTools.trim();
+                          if (trimmed.startsWith('[')) {
+                            try {
+                              const parsed = JSON.parse(trimmed);
+                              tools = Array.isArray(parsed) ? parsed : [];
+                            } catch {
+                              tools = trimmed.split(',').map(t => t.trim()).filter(Boolean);
+                            }
+                          } else if (trimmed) {
+                            tools = trimmed.split(',').map(t => t.trim()).filter(Boolean);
+                          }
+                        }
+                        
+                        return tools.length > 0 
+                          ? tools.map((tool) => <Badge key={tool} variant="secondary">{tool}</Badge>)
+                          : <span className="text-sm text-muted-foreground">None specified</span>;
+                      })()}
                     </div>
                   </div>
                 )}
 
                 {/* Pain Point */}
-                <div>
-                  <h4 className="text-sm font-medium mb-2">Biggest Operational Pain</h4>
-                  <p className="text-sm text-muted-foreground whitespace-pre-wrap bg-muted/30 p-3 rounded-lg">
-                    {selectedRequest.operational_pain}
-                  </p>
-                </div>
+                {selectedRequest.operational_pain && (
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">Biggest Operational Pain</h4>
+                    <p className="text-sm text-muted-foreground whitespace-pre-wrap bg-muted/30 p-3 rounded-lg">
+                      {selectedRequest.operational_pain}
+                    </p>
+                  </div>
+                )}
 
                 {/* Calm Vision */}
                 {selectedRequest.calm_in_30_days && (

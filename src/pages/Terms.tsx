@@ -99,10 +99,10 @@ const Terms = () => {
                 <section>
                   <h2 className="font-display text-xl mb-3">Contact</h2>
                   <p className="text-muted-foreground">
-                    Questions? Email{' '}
-                    <a href="mailto:contact@aerelion.systems" className="text-primary hover:underline">
-                      contact@aerelion.systems
-                    </a>
+                    Questions about these terms? Contact us via our{' '}
+                    <a href="/contact" className="text-primary hover:underline">
+                      booking form
+                    </a>.
                   </p>
                 </section>
 

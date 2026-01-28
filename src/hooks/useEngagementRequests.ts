@@ -17,7 +17,7 @@ export interface EngagementRequest {
   calm_in_30_days: string | null;
   notes_internal: string | null;
   last_contacted_at: string | null;
-  admin_seen: boolean;
+  admin_seen: boolean | null;
 }
 
 interface UseEngagementRequestsState {
@@ -54,7 +54,7 @@ export function useEngagementRequests() {
 
       // Cast the data since we know the new columns exist
       const requests = (data || []) as EngagementRequest[];
-      const newCount = requests.filter(r => r.status === 'new' && !r.admin_seen).length;
+      const newCount = requests.filter(r => r.status === 'new' && !(r.admin_seen ?? false)).length;
 
       setState({
         requests,
@@ -89,8 +89,8 @@ export function useEngagementRequests() {
         ),
         newCount: prev.requests.filter(r => 
           r.id === id 
-            ? (updates.status ?? r.status) === 'new' && !(updates.admin_seen ?? r.admin_seen)
-            : r.status === 'new' && !r.admin_seen
+            ? (updates.status ?? r.status) === 'new' && !((updates.admin_seen ?? r.admin_seen) ?? false)
+            : r.status === 'new' && !(r.admin_seen ?? false)
         ).length,
       }));
 
