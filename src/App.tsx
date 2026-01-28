@@ -22,11 +22,10 @@ import ResetPassword from "./pages/ResetPassword";
 import Sanctuary from "./pages/Sanctuary";
 import NotFound from "./pages/NotFound";
 
-// Library/Marketplace pages (primary site)
+// Library pages (primary site)
 import LibraryHome from "./pages/library/LibraryHome";
 import AgentLibrary from "./pages/library/AgentLibrary";
 import AgentDetail from "./pages/library/AgentDetail";
-import BundleLibrary from "./pages/library/BundleLibrary";
 import BundleDetail from "./pages/library/BundleDetail";
 import DeploymentOverview from "./pages/library/DeploymentOverview";
 import SecurityPractices from "./pages/library/SecurityPractices";
@@ -85,17 +84,12 @@ const LockedApp = () => (
 
 const UnlockedApp = () => (
   <Routes>
-    {/* Marketplace Routes (primary site) */}
+    {/* Primary Site Routes */}
     <Route path="/" element={<LibraryHome />} />
     <Route path="/automations" element={<AgentLibrary />} />
-    <Route path="/packs" element={<Navigate to="/automations" replace />} />
-    <Route path="/packs/:slug" element={<Navigate to="/automations" replace />} />
-    <Route path="/agents" element={<Navigate to="/automations" replace />} />
     <Route path="/automations/:slug" element={<AgentDetail />} />
-    <Route path="/bundles" element={<BundleLibrary />} />
     <Route path="/bundles/:slug" element={<BundleDetail />} />
     <Route path="/how-it-works" element={<DeploymentOverview />} />
-    <Route path="/deployment" element={<Navigate to="/how-it-works" replace />} />
     <Route path="/security" element={<Security />} />
     <Route path="/security-practices" element={<SecurityPractices />} />
     <Route path="/docs" element={<Documentation />} />
@@ -136,10 +130,15 @@ const UnlockedApp = () => (
       </PortalRouteGuard>
     } />
 
-    {/* Legacy redirects - redirect to marketplace equivalents */}
-    <Route path="/pricing" element={<Navigate to="/bundles" replace />} />
+    {/* Legacy redirects - redirect to service pages */}
+    <Route path="/bundles" element={<Navigate to="/automations" replace />} />
+    <Route path="/packs" element={<Navigate to="/automations" replace />} />
+    <Route path="/packs/:slug" element={<Navigate to="/automations" replace />} />
+    <Route path="/agents" element={<Navigate to="/automations" replace />} />
+    <Route path="/pricing" element={<Navigate to="/contact" replace />} />
+    <Route path="/deployment" element={<Navigate to="/how-it-works" replace />} />
     <Route path="/capabilities" element={<Navigate to="/how-it-works" replace />} />
-    <Route path="/get-started" element={<Navigate to="/automations" replace />} />
+    <Route path="/get-started" element={<Navigate to="/contact" replace />} />
     <Route path="/services" element={<Navigate to="/automations" replace />} />
     <Route path="/old-home" element={<Navigate to="/" replace />} />
     <Route path="/about" element={<Navigate to="/" replace />} />

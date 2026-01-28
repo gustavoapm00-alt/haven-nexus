@@ -1,16 +1,19 @@
 import { motion } from 'framer-motion';
 
 const steps = [
-  { step: 1, title: 'Choose an automation or bundle', description: 'Browse our library of hosted systems' },
-  { step: 2, title: 'Connect your tools securely', description: 'We guide you through the connection process' },
-  { step: 3, title: 'We activate and maintain it', description: 'Your automation runs on our infrastructure' },
+  { step: 1, title: 'Discovery call', description: 'We assess your operations and identify high-impact workflows' },
+  { step: 2, title: 'Scoped installation', description: 'We configure and install workflows on your infrastructure' },
+  { step: 3, title: 'Ongoing operation', description: 'We monitor, maintain, and optimize your systems' },
 ];
 
 const HowItWorks = () => {
   return (
     <div>
       <div className="text-center mb-12">
-        <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3">How It Works</h2>
+        <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3">How We Work</h2>
+        <p className="text-muted-foreground max-w-xl mx-auto">
+          Every engagement is scoped to your operations. We handle the technical work—you get the outcomes.
+        </p>
       </div>
       <div className="relative">
         {/* Connection line */}
@@ -30,7 +33,7 @@ const HowItWorks = () => {
                 {step.step}
               </div>
               <h3 className="font-semibold text-foreground mb-1 text-sm md:text-base">{step.title}</h3>
-              <p className="text-xs text-muted-foreground hidden md:block">{step.description}</p>
+              <p className="text-xs text-muted-foreground">{step.description}</p>
             </motion.div>
           ))}
         </div>
@@ -44,7 +47,7 @@ const HowItWorks = () => {
         viewport={{ once: true }}
         transition={{ delay: 0.4 }}
       >
-        No downloads. No infrastructure. No code.
+        We take responsibility for outcomes, not just delivery.
       </motion.p>
     </div>
   );

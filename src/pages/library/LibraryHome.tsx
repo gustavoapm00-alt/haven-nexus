@@ -5,56 +5,47 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import LibraryNavbar from '@/components/library/LibraryNavbar';
 import LibraryFooter from '@/components/library/LibraryFooter';
 import LibraryHero from '@/components/library/LibraryHero';
-import SegmentedNav from '@/components/library/SegmentedNav';
-import TrustStrip from '@/components/library/TrustStrip';
 import SectionBand from '@/components/library/SectionBand';
 import WhatYouGet from '@/components/library/WhatYouGet';
 import HowItWorks from '@/components/library/HowItWorks';
-import AgentCard from '@/components/library/AgentCard';
-import BundleCard from '@/components/library/BundleCard';
+import WorkflowExampleCard from '@/components/library/WorkflowExampleCard';
 import EmailCaptureForm from '@/components/library/EmailCaptureForm';
 import { useAgents } from '@/hooks/useAgents';
-import { useBundles } from '@/hooks/useBundles';
 import SEO from '@/components/SEO';
 import { motion } from 'framer-motion';
 
 const LibraryHome = () => {
   const { agents: featuredAgents, loading: agentsLoading } = useAgents({ featured: true, limit: 6 });
-  const { bundles: featuredBundles, loading: bundlesLoading } = useBundles({ featured: true, limit: 3 });
 
   const faqItems = [
-    { q: 'Do I need to install anything?', a: 'No. AERELION hosts and maintains all automations for you.' },
-    { q: 'How does activation work?', a: 'After purchase, you connect your tools and we activate the automation.' },
-    { q: 'Who runs the automations?', a: 'AERELION Systems operates and monitors all automations on its infrastructure.' },
-    { q: 'How are credentials handled?', a: 'Credentials are encrypted and securely stored. You can revoke access at any time.' },
-    { q: 'Is technical experience required?', a: 'No. These systems are built for non-technical operators.' },
+    { q: 'Do I need technical experience?', a: 'No. AERELION handles all technical configuration, installation, and maintenance. You provide access to your tools—we do the rest.' },
+    { q: 'How does pricing work?', a: 'Pricing is scoped per engagement, not per automation. We assess your operations and provide a fixed quote for the work involved.' },
+    { q: 'Who runs and maintains the workflows?', a: 'AERELION operates and monitors all installed workflows. If something breaks, we fix it.' },
+    { q: 'How are my credentials handled?', a: 'Credentials are encrypted and securely stored. You retain full control and can revoke access at any time.' },
+    { q: 'What happens after installation?', a: 'We provide ongoing maintenance and monitoring. You have direct access to our team for support and optimization.' },
   ];
 
   return (
     <>
       <SEO
-        title="AERELION Systems - Hosted Automations"
-        description="Automation systems activated for you in hours, not weeks. We configure, run, and maintain everything—no code, no infrastructure."
-        keywords="hosted automation, business automation, managed automation, automation service, operational systems"
+        title="AERELION - AI Operations Integration"
+        description="We install, configure, and maintain your operational workflows. An AI operations integration firm that takes responsibility for outcomes."
+        keywords="AI operations, workflow integration, automation installation, managed automation, operational systems"
       />
       
       <div className="min-h-screen bg-background">
         <LibraryNavbar />
-        <SegmentedNav />
 
         {/* Hero */}
         <LibraryHero />
-
-        {/* Trust Strip */}
-        <TrustStrip />
 
         {/* What You Get */}
         <SectionBand variant="light">
           <WhatYouGet />
         </SectionBand>
 
-        {/* Featured Automations - Dark Band with Parallax */}
-        <SectionBand variant="ink" id="featured-automations" enableParallax>
+        {/* Example Workflows - Dark Band */}
+        <SectionBand variant="ink" id="example-workflows" enableParallax>
           <motion.div 
             className="text-center mb-10"
             initial={{ opacity: 0, y: 30 }}
@@ -69,10 +60,12 @@ const LibraryHome = () => {
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
             >
-              Automation Library
+              Example Workflows
             </motion.span>
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">Featured Automations</h2>
-            <p className="text-white/60">Hosted systems designed to eliminate repeatable operational work</p>
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">Workflows We Install</h2>
+            <p className="text-white/60 max-w-xl mx-auto">
+              These are examples of operational workflows we configure as part of a scoped engagement.
+            </p>
           </motion.div>
           {agentsLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -98,7 +91,7 @@ const LibraryHome = () => {
                     transition: { duration: 0.2 }
                   }}
                 >
-                  <AgentCard
+                  <WorkflowExampleCard
                     slug={agent.slug}
                     name={agent.name}
                     shortOutcome={agent.short_outcome}
@@ -108,7 +101,6 @@ const LibraryHome = () => {
                     setupTimeMax={agent.setup_time_max}
                     capacityRecoveredMin={agent.capacity_recovered_min}
                     capacityRecoveredMax={agent.capacity_recovered_max}
-                    priceCents={agent.price_cents}
                     variant="dark"
                   />
                 </motion.div>
@@ -124,7 +116,7 @@ const LibraryHome = () => {
           >
             <Button asChild size="lg" className="bg-white text-foreground hover:bg-white/90 glow-accent">
               <Link to="/automations">
-                View All Automations
+                See All Example Workflows
                 <ArrowRight className="ml-2 w-4 h-4" />
               </Link>
             </Button>
@@ -136,55 +128,24 @@ const LibraryHome = () => {
           <HowItWorks />
         </SectionBand>
 
-        {/* System Bundles */}
-        <SectionBand variant="light" id="bundles-section">
-          <div className="text-center mb-10">
-            <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3">System Bundles</h2>
-            <p className="text-muted-foreground">Fully managed automation systems with bundle savings</p>
-          </div>
-          {bundlesLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="card-panel p-6 h-72 animate-pulse bg-muted" />
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {featuredBundles.map((bundle, index) => (
-                <motion.div
-                  key={bundle.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <BundleCard
-                    slug={bundle.slug}
-                    name={bundle.name}
-                    objective={bundle.objective}
-                    includedAgentNames={bundle.included_agents.map(a => a.name)}
-                    sectors={bundle.sectors}
-                    individualValueCents={bundle.individual_value_cents}
-                    bundlePriceCents={bundle.bundle_price_cents}
-                  />
-                </motion.div>
-              ))}
-            </div>
-          )}
-        </SectionBand>
-
         {/* Who It's For */}
-        <SectionBand variant="muted">
+        <SectionBand variant="light">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-2xl font-bold text-foreground mb-4">Who It's For</h2>
-            <p className="text-muted-foreground text-lg">
-              Operators, founders, and teams who want repeatable systems for lead intake, sales ops, customer support, ecommerce ops, reporting, KPI visibility, and creator workflows.
+            <h2 className="text-2xl font-bold text-foreground mb-4">Who We Work With</h2>
+            <p className="text-muted-foreground text-lg mb-8">
+              Operators, founders, and teams who want reliable automation systems without the technical overhead. We work with businesses that value outcomes over tooling.
             </p>
+            <Button asChild size="lg">
+              <Link to="/contact">
+                Book an AI Ops Installation
+                <ArrowRight className="ml-2 w-4 h-4" />
+              </Link>
+            </Button>
           </div>
         </SectionBand>
 
         {/* Trust Section */}
-        <SectionBand variant="light">
+        <SectionBand variant="muted">
           <div className="max-w-3xl mx-auto text-center">
             <div className="relative w-14 h-14 mx-auto mb-6">
               <div className="absolute inset-0 border border-primary/10 rounded-full" />
@@ -193,18 +154,15 @@ const LibraryHome = () => {
                 <Shield className="w-6 h-6 text-primary" />
               </div>
             </div>
-            <h2 className="text-2xl font-bold text-foreground mb-4">Built for Reliability</h2>
+            <h2 className="text-2xl font-bold text-foreground mb-4">We Take Responsibility</h2>
             <p className="text-muted-foreground mb-6">
-              We monitor and maintain every automation we host. If something needs attention, we handle it—you stay focused on your business.
+              AERELION operates and monitors every workflow we install. If something needs attention, we handle it—you stay focused on your business.
             </p>
-            <Button asChild variant="outline">
-              <Link to="/contact">Contact Us</Link>
-            </Button>
           </div>
         </SectionBand>
 
         {/* FAQ Section */}
-        <SectionBand variant="muted">
+        <SectionBand variant="light">
           <div className="max-w-2xl mx-auto">
             <div className="text-center mb-10">
               <HelpCircle className="w-8 h-8 text-primary mx-auto mb-4" />
@@ -225,10 +183,26 @@ const LibraryHome = () => {
           </div>
         </SectionBand>
 
+        {/* CTA Section */}
+        <SectionBand variant="muted">
+          <div className="text-center max-w-xl mx-auto">
+            <h2 className="text-2xl font-bold text-foreground mb-4">Ready to get started?</h2>
+            <p className="text-muted-foreground mb-6">
+              Book a discovery call and we'll assess your operations to identify high-impact workflows.
+            </p>
+            <Button asChild size="lg" className="glow-accent">
+              <Link to="/contact">
+                Book an AI Ops Installation
+                <ArrowRight className="ml-2 w-4 h-4" />
+              </Link>
+            </Button>
+          </div>
+        </SectionBand>
+
         {/* Email Capture */}
         <SectionBand variant="light">
           <div className="text-center max-w-xl mx-auto">
-            <h2 className="text-xl font-bold text-foreground mb-4">Get Update Notifications</h2>
+            <h2 className="text-xl font-bold text-foreground mb-4">Get Updates</h2>
             <EmailCaptureForm 
               sourcePage="homepage" 
               buttonText="Subscribe"

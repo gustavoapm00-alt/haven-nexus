@@ -1,6 +1,5 @@
-import { useParams, Link, useSearchParams } from 'react-router-dom';
-import { useEffect } from 'react';
-import { ArrowLeft, Clock, TrendingUp, Check, Zap, Loader2 } from 'lucide-react';
+import { useParams, Link } from 'react-router-dom';
+import { ArrowLeft, Clock, TrendingUp, Check, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Accordion,
@@ -12,46 +11,32 @@ import LibraryNavbar from '@/components/library/LibraryNavbar';
 import LibraryFooter from '@/components/library/LibraryFooter';
 import SystemIcon from '@/components/library/SystemIcon';
 import { useAgent } from '@/hooks/useAgents';
-import { usePurchase } from '@/hooks/usePurchase';
-import { useAuth } from '@/hooks/useAuth';
 import SEO from '@/components/SEO';
-import { toast } from 'sonner';
 
 const AgentDetail = () => {
   const { slug } = useParams<{ slug: string }>();
-  const [searchParams] = useSearchParams();
   const { agent, loading, error } = useAgent(slug || '');
-  const { initiateCheckout, loading: checkoutLoading, isAuthenticated } = usePurchase();
-  const { isLoading: authLoading } = useAuth();
-
-  useEffect(() => {
-    if (searchParams.get('canceled') === 'true') {
-      toast.info('Purchase canceled', { description: 'You can complete your purchase anytime.' });
-    }
-  }, [searchParams]);
-
-  const formatPrice = (cents: number) => `$${(cents / 100).toFixed(0)}`;
 
   const faqs = [
     {
-      question: 'Do I need to install anything?',
-      answer: 'No. AERELION hosts and maintains all automations for you. Nothing to install.',
+      question: 'Is this something I install myself?',
+      answer: 'No. AERELION installs, configures, and maintains all workflows as part of a scoped engagement. You provide tool access—we handle the technical work.',
     },
     {
-      question: 'How does activation work?',
-      answer: 'After purchase, you connect your tools securely and we activate the automation on our infrastructure.',
+      question: 'How does pricing work?',
+      answer: 'Pricing is scoped per engagement, not per workflow. This example is included as part of an AI Ops Installation. Book a call to get a quote.',
     },
     {
-      question: 'Who runs the automations?',
-      answer: 'AERELION Systems operates and monitors all automations on its infrastructure.',
+      question: 'Who runs and maintains this workflow?',
+      answer: 'AERELION operates and monitors all installed workflows. If something breaks, we fix it.',
     },
     {
       question: 'How are my credentials handled?',
-      answer: 'Credentials are encrypted and securely stored. You can revoke access at any time.',
+      answer: 'Credentials are encrypted and securely stored. You retain full control and can revoke access at any time.',
     },
     {
-      question: 'Is technical experience required?',
-      answer: 'No. These systems are built for non-technical operators.',
+      question: 'Do I need technical experience?',
+      answer: 'No. These workflows are installed and maintained by our team. No code or technical knowledge required.',
     },
   ];
 
@@ -78,12 +63,12 @@ const AgentDetail = () => {
         <LibraryNavbar />
         <div className="section-padding">
           <div className="container-main max-w-4xl text-center">
-            <h1 className="text-2xl font-semibold text-foreground mb-4">Automation Not Found</h1>
+            <h1 className="text-2xl font-semibold text-foreground mb-4">Workflow Not Found</h1>
             <p className="text-muted-foreground mb-6">
-              The automation you're looking for doesn't exist or has been removed.
+              The workflow you're looking for doesn't exist or has been removed.
             </p>
             <Button asChild>
-              <Link to="/automations">Browse All Automations</Link>
+              <Link to="/automations">Browse Example Workflows</Link>
             </Button>
           </div>
         </div>
@@ -95,9 +80,9 @@ const AgentDetail = () => {
   return (
     <>
       <SEO
-        title={agent.name}
+        title={`${agent.name} - Example Workflow`}
         description={agent.short_outcome}
-        keywords={[...agent.sectors, ...agent.systems, 'hosted automation', 'managed automation'].join(', ')}
+        keywords={[...agent.sectors, ...agent.systems, 'AI operations', 'workflow integration'].join(', ')}
       />
 
       <div className="min-h-screen bg-background">
@@ -111,11 +96,14 @@ const AgentDetail = () => {
               className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8"
             >
               <ArrowLeft className="w-4 h-4" />
-              Back to Automations
+              Back to Example Workflows
             </Link>
 
             {/* Header */}
             <div className="mb-10">
+              <span className="text-xs font-semibold text-primary uppercase tracking-wide mb-2 block">
+                Example Workflow We Install
+              </span>
               <h1 className="text-3xl font-semibold text-foreground mb-3">
                 {agent.name}
               </h1>
@@ -127,20 +115,20 @@ const AgentDetail = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
               {/* Main Content */}
               <div className="lg:col-span-2 space-y-10">
-                {/* What This Automation Does */}
+                {/* What This Workflow Solves */}
                 <section>
                   <h2 className="text-lg font-semibold text-foreground mb-4">
-                    What This Automation Does
+                    What This Workflow Solves
                   </h2>
                   <p className="text-muted-foreground leading-relaxed">
                     {agent.description}
                   </p>
                 </section>
 
-                {/* Best For */}
+                {/* Common Use Cases */}
                 <section>
                   <h2 className="text-lg font-semibold text-foreground mb-4">
-                    Best For
+                    Common Use Cases
                   </h2>
                   <div className="flex flex-wrap gap-2">
                     {agent.sectors.map((sector) => (
@@ -151,11 +139,14 @@ const AgentDetail = () => {
                   </div>
                 </section>
 
-                {/* Tools We Connect */}
+                {/* Tools Commonly Used */}
                 <section>
                   <h2 className="text-lg font-semibold text-foreground mb-4">
-                    Tools We Connect
+                    Tools Commonly Used
                   </h2>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Actual tools vary based on your existing stack and requirements.
+                  </p>
                   <div className="flex flex-wrap gap-2">
                     {agent.systems.map((system) => (
                       <SystemIcon key={system} name={system} size="md" />
@@ -163,19 +154,19 @@ const AgentDetail = () => {
                   </div>
                 </section>
 
-                {/* Activation Profile */}
+                {/* Typical Engagement Profile */}
                 <section>
                   <h2 className="text-lg font-semibold text-foreground mb-4">
-                    Activation Profile
+                    Typical Engagement Profile
                   </h2>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="card-enterprise p-4">
                       <div className="flex items-center gap-2 text-muted-foreground mb-2">
                         <Clock className="w-4 h-4" />
-                        <span className="text-sm">Activation Time</span>
+                        <span className="text-sm">Installation Time</span>
                       </div>
                       <p className="font-semibold text-foreground">
-                        {agent.setup_time_min}–{agent.setup_time_max} hours
+                        {agent.setup_time_min}–{agent.setup_time_max} hours typical
                       </p>
                     </div>
                     <div className="card-enterprise p-4">
@@ -193,7 +184,7 @@ const AgentDetail = () => {
                 {/* How It Works */}
                 <section>
                   <h2 className="text-lg font-semibold text-foreground mb-4">
-                    How It Works
+                    How This Workflow Operates
                   </h2>
                   <ol className="space-y-3">
                     {agent.how_it_works.map((step, index) => (
@@ -207,10 +198,10 @@ const AgentDetail = () => {
                   </ol>
                 </section>
 
-                {/* What's Included */}
+                {/* What's Delivered */}
                 <section>
                   <h2 className="text-lg font-semibold text-foreground mb-4">
-                    What's Included
+                    What's Delivered
                   </h2>
                   <ul className="space-y-2">
                     {agent.includes.map((item, index) => (
@@ -222,10 +213,10 @@ const AgentDetail = () => {
                   </ul>
                 </section>
 
-                {/* Requirements */}
+                {/* Prerequisites */}
                 <section>
                   <h2 className="text-lg font-semibold text-foreground mb-4">
-                    Requirements Before Activation
+                    What We'll Need From You
                   </h2>
                   <ul className="space-y-2">
                     {agent.requirements.map((req, index) => (
@@ -278,31 +269,25 @@ const AgentDetail = () => {
               <div className="lg:col-span-1">
                 <div className="card-enterprise p-6 sticky top-24">
                   <h3 className="text-lg font-semibold text-foreground mb-2">
-                    Activate This Automation
+                    How This Fits Your Operations
                   </h3>
-                  <p className="text-3xl font-semibold text-foreground mb-2">
-                    {formatPrice(agent.price_cents)}
-                  </p>
                   <p className="text-sm text-muted-foreground mb-6">
-                    Includes activation and an initial monitoring period. Ongoing maintenance available.
+                    This workflow is installed as part of a scoped AI Ops engagement. Pricing and scope are customized based on your operational needs.
                   </p>
 
                   <Button 
+                    asChild
                     className="w-full mb-3" 
                     size="lg"
-                    onClick={() => initiateCheckout('agent', agent.id)}
-                    disabled={checkoutLoading || authLoading}
                   >
-                    {checkoutLoading ? (
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    ) : (
-                      <Zap className="w-4 h-4 mr-2" />
-                    )}
-                    {!isAuthenticated ? 'Sign In to Activate' : 'Activate Automation'}
+                    <Link to="/contact">
+                      Book an AI Ops Installation
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Link>
                   </Button>
 
-                  <p className="text-center text-sm text-muted-foreground">
-                    We configure and maintain everything for you
+                  <p className="text-center text-xs text-muted-foreground">
+                    No technical experience required
                   </p>
                 </div>
               </div>
