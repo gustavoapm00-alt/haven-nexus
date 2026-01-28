@@ -46,7 +46,7 @@ const WorkflowExampleCard = ({
           <span className={`text-xs font-medium uppercase tracking-wide ${
             isDark ? 'text-primary/80' : 'text-primary'
           }`}>
-            Example Workflow
+            Managed Automation
           </span>
         </div>
         
@@ -118,11 +118,11 @@ const WorkflowExampleCard = ({
         }`}>
           <div className="flex items-center gap-1.5">
             <Clock className="w-3.5 h-3.5" />
-            <span>{setupTimeMin}–{setupTimeMax} hrs typical</span>
+            <span>{setupTimeMin}–{setupTimeMax} hrs activation</span>
           </div>
           <div className="flex items-center gap-1.5">
             <TrendingUp className="w-3.5 h-3.5" />
-            <span>+{capacityRecoveredMin}–{capacityRecoveredMax} hrs/wk</span>
+            <span>+{capacityRecoveredMin}–{capacityRecoveredMax} hrs/wk recovered</span>
           </div>
         </div>
       </div>
@@ -132,7 +132,7 @@ const WorkflowExampleCard = ({
         isDark ? 'border-white/10' : 'border-border'
       }`}>
         <span className={`text-xs ${isDark ? 'text-white/50' : 'text-muted-foreground'}`}>
-          Included in scoped installations
+          Operated by AERELION
         </span>
         <Link
           to={`/automations/${slug}`}
@@ -142,7 +142,7 @@ const WorkflowExampleCard = ({
               : 'text-primary hover:underline'
           }`}
         >
-          View Details
+          Learn More
           <ArrowRight className="w-4 h-4" />
         </Link>
       </div>
