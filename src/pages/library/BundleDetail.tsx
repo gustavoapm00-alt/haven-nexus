@@ -11,9 +11,9 @@ const BundleDetail = () => {
   const { bundle, loading, error } = useBundle(slug || '');
 
   const engagementSteps = [
-    'Book a discovery call to discuss your operations',
+    'Schedule a discovery call to discuss your operations',
     'We scope the engagement based on your workflows and tools',
-    'We install, configure, and maintain everything for you',
+    'AERELION configures, operates, and maintains everything on your behalf',
   ];
 
   if (loading) {
@@ -56,9 +56,9 @@ const BundleDetail = () => {
   return (
     <>
       <SEO
-        title={`${bundle.name} - System Example`}
+        title={`${bundle.name} - Managed System | AERELION Systems`}
         description={bundle.objective}
-        keywords={[...bundle.sectors, 'AI operations', 'workflow integration', 'managed systems'].join(', ')}
+        keywords={[...bundle.sectors, 'managed automation', 'hosted automation', 'automation operator'].join(', ')}
       />
 
       <div className="min-h-screen bg-background">
@@ -72,7 +72,7 @@ const BundleDetail = () => {
               className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8"
             >
               <ArrowLeft className="w-4 h-4" />
-              Back to Example Workflows
+              Back to Automation Catalog
             </Link>
 
             {/* Header */}
@@ -82,7 +82,7 @@ const BundleDetail = () => {
                   <Package className="w-6 h-6 text-primary" />
                 </div>
                 <span className="text-xs font-semibold text-primary uppercase tracking-wide">
-                  System Example
+                  Managed System
                 </span>
               </div>
               <h1 className="text-3xl font-semibold text-foreground mb-3">
@@ -96,23 +96,23 @@ const BundleDetail = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
               {/* Main Content */}
               <div className="lg:col-span-2 space-y-10">
-                {/* What This System Stabilizes */}
+                {/* What This System Delivers */}
                 <section>
                   <h2 className="text-lg font-semibold text-foreground mb-4">
-                    What This System Stabilizes
+                    What This System Delivers
                   </h2>
                   <p className="text-muted-foreground leading-relaxed">
                     {bundle.description}
                   </p>
                 </section>
 
-                {/* Included Workflows */}
+                {/* Included Automations */}
                 <section>
                   <h2 className="text-lg font-semibold text-foreground mb-4">
-                    Workflows Included in This System
+                    Automations in This System
                   </h2>
                   <p className="text-sm text-muted-foreground mb-4">
-                    These workflows are installed together as part of a scoped engagement.
+                    These automations are configured and operated together by AERELION as a unified system.
                   </p>
                   <div className="space-y-3">
                     {bundle.included_agents.map((agent) => (
@@ -154,7 +154,7 @@ const BundleDetail = () => {
                 {/* How Engagement Works */}
                 <section>
                   <h2 className="text-lg font-semibold text-foreground mb-4">
-                    How We Work Together
+                    How We Deliver This System
                   </h2>
                   <ol className="space-y-3">
                     {engagementSteps.map((step, index) => (
@@ -173,11 +173,11 @@ const BundleDetail = () => {
               <div className="lg:col-span-1">
                 <div className="card-enterprise p-6 sticky top-24">
                   <h3 className="text-lg font-semibold text-foreground mb-2">
-                    Get This System Installed
+                    Have This System Operated for You
                   </h3>
                   <p className="text-sm text-muted-foreground mb-6">
-                    This system is installed as part of a scoped AI Ops engagement. 
-                    Pricing and scope are customized based on your operational needs.
+                    This system is delivered as part of a managed engagement. 
+                    AERELION configures, hosts, and operates everything on your behalf.
                   </p>
 
                   <Button 
@@ -186,7 +186,7 @@ const BundleDetail = () => {
                     size="lg"
                   >
                     <Link to="/contact">
-                      Book an AI Ops Installation
+                      Schedule Discovery Call
                       <ArrowRight className="w-4 h-4 ml-2" />
                     </Link>
                   </Button>
