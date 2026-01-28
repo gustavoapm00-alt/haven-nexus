@@ -1,55 +1,65 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { useClientProfile, ClientIntegration } from '@/hooks/useClientProfile';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
+import { useClientProfile } from '@/hooks/useClientProfile';
+import { useActivationStatus, ActiveAutomation } from '@/hooks/useActivationStatus';
 import { 
-  Loader2, LayoutDashboard, Package, Puzzle, CreditCard, HelpCircle,
-  LogOut, User, ChevronRight, CheckCircle, AlertCircle, Download,
-  ExternalLink, BookOpen, Upload, Menu, X, Settings, FileDown
+  Loader2, Package, Shield, CheckCircle, Clock, AlertTriangle, 
+  PauseCircle, ChevronRight, ExternalLink, LogOut, User, 
+  HelpCircle, FileText, Lock, Bell
 } from 'lucide-react';
 import PortalBackground from '@/components/portal/PortalBackground';
 import { GlassCard } from '@/components/portal/GlassCard';
-import { SubscriptionBadge } from '@/components/portal/SubscriptionBadge';
 import { NotificationBell } from '@/components/portal/NotificationBell';
 
-interface Purchase {
-  id: string;
-  item_id: string;
-  item_type: string;
-  amount_cents: number;
-  status: string;
-  created_at: string;
-  item_name?: string;
-}
-
-const INTEGRATION_CONFIG: Record<string, { name: string; icon: string }> = {
-  n8n: { name: 'n8n', icon: '⚡' },
-  gmail: { name: 'Gmail', icon: '📧' },
-  slack: { name: 'Slack', icon: '💬' },
-  sheets: { name: 'Google Sheets', icon: '📊' },
-  notion: { name: 'Notion', icon: '📝' },
-  hubspot: { name: 'HubSpot', icon: '🎯' },
+// Status display configuration
+const STATUS_CONFIG: Record<ActiveAutomation['status'], { 
+  label: string; 
+  icon: React.ElementType; 
+  color: string;
+  bgColor: string;
+}> = {
+  active: { 
+    label: 'Active', 
+    icon: CheckCircle, 
+    color: 'text-emerald-500',
+    bgColor: 'bg-emerald-500/10'
+  },
+  in_review: { 
+    label: 'In Review', 
+    icon: Clock, 
+    color: 'text-blue-500',
+    bgColor: 'bg-blue-500/10'
+  },
+  pending_credentials: { 
+    label: 'Awaiting Connection', 
+    icon: Lock, 
+    color: 'text-amber-500',
+    bgColor: 'bg-amber-500/10'
+  },
+  paused: { 
+    label: 'Paused', 
+    icon: PauseCircle, 
+    color: 'text-muted-foreground',
+    bgColor: 'bg-muted/50'
+  },
+  needs_attention: { 
+    label: 'Needs Attention', 
+    icon: AlertTriangle, 
+    color: 'text-red-500',
+    bgColor: 'bg-red-500/10'
+  },
 };
 
-const NAV_ITEMS = [
-  { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-  { id: 'automations', label: 'My Automations', icon: Package },
-  { id: 'integrations', label: 'Integrations', icon: Puzzle },
-  { id: 'billing', label: 'Billing', icon: CreditCard, href: '/portal/billing' },
-  { id: 'activity', label: 'Activation History', icon: FileDown, href: '/portal/activity' },
-  { id: 'support', label: 'Support', icon: HelpCircle },
-];
-
 const ClientDashboard = () => {
-  const [activeSection, setActiveSection] = useState('overview');
-  const [purchases, setPurchases] = useState<Purchase[]>([]);
-  const [isLoadingPurchases, setIsLoadingPurchases] = useState(true);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
   const { user, isLoading: authLoading, signOut } = useAuth();
-  const { profile, integrations, isLoading: profileLoading } = useClientProfile();
+  const { profile, isLoading: profileLoading } = useClientProfile();
+  const { 
+    activeAutomations, 
+    requiredConnections, 
+    hasIncompleteSetup,
+    loading: activationLoading 
+  } = useActivationStatus();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -58,96 +68,12 @@ const ClientDashboard = () => {
     }
   }, [user, authLoading, navigate]);
 
-  useEffect(() => {
-    const fetchPurchases = async () => {
-      if (!user) return;
-      
-      setIsLoadingPurchases(true);
-      try {
-        const { data } = await supabase
-          .from('purchases')
-          .select('*')
-          .eq('user_id', user.id)
-          .in('status', ['completed', 'paid'])
-          .order('created_at', { ascending: false });
-
-        if (data) {
-          // Fetch item names
-          const agentIds = data.filter(p => p.item_type === 'agent').map(p => p.item_id);
-          const bundleIds = data.filter(p => p.item_type === 'bundle').map(p => p.item_id);
-
-          let agentNames: Record<string, string> = {};
-          let bundleNames: Record<string, string> = {};
-
-          if (agentIds.length > 0) {
-            const { data: agents } = await supabase
-              .from('automation_agents')
-              .select('id, name')
-              .in('id', agentIds);
-            agentNames = Object.fromEntries((agents || []).map(a => [a.id, a.name]));
-          }
-
-          if (bundleIds.length > 0) {
-            const { data: bundles } = await supabase
-              .from('automation_bundles')
-              .select('id, name')
-              .in('id', bundleIds);
-            bundleNames = Object.fromEntries((bundles || []).map(b => [b.id, b.name]));
-          }
-
-          setPurchases(data.map(p => ({
-            ...p,
-            item_name: p.item_type === 'agent' 
-              ? agentNames[p.item_id] 
-              : bundleNames[p.item_id] || 'Unknown Item',
-          })));
-        }
-      } catch (error) {
-        console.error('Error fetching purchases:', error);
-      } finally {
-        setIsLoadingPurchases(false);
-      }
-    };
-
-    fetchPurchases();
-  }, [user]);
-
   const handleSignOut = async () => {
     await signOut();
     navigate('/portal/auth');
   };
 
-  const handleDownload = async (purchase: Purchase) => {
-    try {
-      const { data, error } = await supabase.functions.invoke('get-download-links', {
-        body: { 
-          item_type: purchase.item_type, 
-          item_id: purchase.item_id 
-        },
-      });
-
-      if (error) throw error;
-
-      if (data?.files?.length > 0) {
-        // Open the first file (workflow)
-        const workflowFile = data.files.find((f: { type: string }) => f.type === 'workflow');
-        if (workflowFile?.url) {
-          window.open(workflowFile.url, '_blank');
-        }
-        toast({ title: 'Download started' });
-      } else {
-        toast({ title: 'No files available', variant: 'destructive' });
-      }
-    } catch {
-      toast({ title: 'Download failed', variant: 'destructive' });
-    }
-  };
-
-  const getIntegrationStatus = (provider: string): ClientIntegration | undefined => {
-    return integrations.find(i => i.provider === provider);
-  };
-
-  if (authLoading || profileLoading) {
+  if (authLoading || profileLoading || activationLoading) {
     return (
       <PortalBackground>
         <div className="min-h-screen flex items-center justify-center">
@@ -157,410 +83,256 @@ const ClientDashboard = () => {
     );
   }
 
-  const showOnboardingBanner = profile && !profile.onboarding_complete;
-
   return (
     <PortalBackground>
-      <div className="min-h-screen flex">
-        {/* Mobile sidebar toggle */}
-        <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-card/80 backdrop-blur rounded-lg border border-border/50"
-        >
-          {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
-
-        {/* Sidebar */}
-        <aside 
-          className={`fixed lg:static inset-y-0 left-0 z-40 w-64 transform transition-transform lg:translate-x-0 ${
-            sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          }`}
-        >
-          <GlassCard variant="dark" hover={false} className="h-full rounded-none lg:rounded-r-xl flex flex-col">
-            {/* Logo */}
-            <div className="p-6 border-b border-border/20">
-              <h1 className="text-xl font-semibold">AERELION</h1>
-              <p className="text-xs text-muted-foreground mt-1">Client Portal</p>
-            </div>
-
-            {/* Nav Items */}
-            <nav className="flex-1 p-4 space-y-1">
-              {NAV_ITEMS.map(item => {
-                const Icon = item.icon;
-                const isActive = activeSection === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => { setActiveSection(item.id); setSidebarOpen(false); }}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                      isActive 
-                        ? 'bg-primary/20 text-primary' 
-                        : 'text-muted-foreground hover:text-foreground hover:bg-muted/10'
-                    }`}
-                  >
-                    <Icon className="w-4 h-4" />
-                    {item.label}
-                  </button>
-                );
-              })}
-            </nav>
-
-            {/* User Menu */}
-            <div className="p-4 border-t border-border/20">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-                  <User className="w-4 h-4 text-primary" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{profile?.full_name || 'User'}</p>
-                  <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
-                </div>
+      <div className="min-h-screen">
+        {/* Header */}
+        <header className="border-b border-border/20 bg-background/50 backdrop-blur-sm sticky top-0 z-40">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <Link to="/" className="text-xl font-semibold tracking-wide">
+                  AERELION
+                </Link>
+                <span className="text-xs text-muted-foreground px-2 py-1 bg-muted/50 rounded">
+                  Client Portal
+                </span>
               </div>
-              <button
-                onClick={handleSignOut}
-                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:text-destructive rounded-lg hover:bg-destructive/10 transition-colors"
-              >
-                <LogOut className="w-4 h-4" />
-                Sign Out
-              </button>
-            </div>
-          </GlassCard>
-        </aside>
-
-        {/* Main Content */}
-        <main className="flex-1 lg:ml-0 p-4 lg:p-8 pt-16 lg:pt-8">
-          {/* Top Status Bar */}
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-2xl font-semibold">
-                {activeSection === 'overview' && 'Dashboard'}
-                {activeSection === 'automations' && 'My Automations'}
-                {activeSection === 'integrations' && 'Integrations'}
-                {activeSection === 'billing' && 'Billing'}
-                {activeSection === 'support' && 'Support'}
-              </h2>
-            </div>
-            <div className="flex items-center gap-3">
-              {/* Notification Bell */}
-              <NotificationBell />
-              {/* Subscription Badge */}
-              <SubscriptionBadge />
               
-              {/* Setup Status */}
-              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${
-                profile?.onboarding_complete 
-                  ? 'bg-primary/10 text-primary' 
-                  : 'bg-yellow-500/10 text-yellow-600'
-              }`}>
-                {profile?.onboarding_complete ? (
-                  <>
-                    <CheckCircle className="w-3 h-3" />
-                    Setup Complete
-                  </>
-                ) : (
-                  <>
-                    <AlertCircle className="w-3 h-3" />
-                    Setup Incomplete
-                  </>
-                )}
+              <div className="flex items-center gap-3">
+                <NotificationBell />
+                
+                <div className="flex items-center gap-2 text-sm">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <User className="w-4 h-4 text-primary" />
+                  </div>
+                  <span className="hidden sm:inline text-muted-foreground">
+                    {profile?.full_name || user?.email}
+                  </span>
+                </div>
+                
+                <button
+                  onClick={handleSignOut}
+                  className="p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted/50 transition-colors"
+                  title="Sign out"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
               </div>
             </div>
           </div>
+        </header>
 
-          {/* Onboarding Banner */}
-          {showOnboardingBanner && (
-            <GlassCard variant="accent" className="p-4 mb-6 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <AlertCircle className="w-5 h-5 text-primary" />
-                <p className="text-sm">Complete your setup to unlock all features</p>
-              </div>
-              <Link
-                to="/portal/onboarding"
-                className="flex items-center gap-1 text-sm font-medium text-primary hover:underline"
-              >
-                Continue Setup
-                <ChevronRight className="w-4 h-4" />
-              </Link>
-            </GlassCard>
-          )}
+        <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+          {/* Welcome Message */}
+          <div>
+            <h1 className="text-2xl font-semibold">
+              Welcome back{profile?.full_name ? `, ${profile.full_name.split(' ')[0]}` : ''}
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              Your automation systems at a glance
+            </p>
+          </div>
 
-          {/* Overview Section */}
-          {activeSection === 'overview' && (
-            <div className="space-y-6">
-              {/* Welcome Panel */}
-              <GlassCard className="p-6">
-                <h3 className="text-lg font-semibold mb-1">
-                  Welcome back, {profile?.full_name?.split(' ')[0] || 'there'}!
-                </h3>
-                {profile?.company_name && (
-                  <p className="text-muted-foreground">{profile.company_name}</p>
-                )}
-              </GlassCard>
-
-              {/* Integration Status Cards */}
-              <div>
-                <h3 className="text-lg font-semibold mb-4">Your Setup</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {['n8n', 'slack', 'gmail'].map(provider => {
-                    const config = INTEGRATION_CONFIG[provider];
-                    const integration = getIntegrationStatus(provider);
-                    const isConfigured = integration?.status === 'configured';
-                    
-                    return (
-                      <GlassCard key={provider} className="p-4">
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center gap-2">
-                            <span className="text-xl">{config.icon}</span>
-                            <span className="font-medium">{config.name}</span>
-                          </div>
-                          <span className={`px-2 py-0.5 text-xs rounded-full ${
-                            isConfigured 
-                              ? 'bg-primary/10 text-primary' 
-                              : 'bg-muted text-muted-foreground'
-                          }`}>
-                            {isConfigured ? 'Connected' : 'Not configured'}
-                          </span>
-                        </div>
-                        <button
-                          onClick={() => setActiveSection('integrations')}
-                          className="text-xs text-primary hover:underline flex items-center gap-1"
-                        >
-                          {isConfigured ? 'View settings' : 'Configure'}
-                          <ChevronRight className="w-3 h-3" />
-                        </button>
-                      </GlassCard>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Purchased Items */}
-              <div>
-                <h3 className="text-lg font-semibold mb-4">Purchased Items</h3>
-                {isLoadingPurchases ? (
-                  <div className="flex items-center justify-center py-8">
-                    <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-                  </div>
-                ) : purchases.length > 0 ? (
-                  <div className="grid gap-3">
-                    {purchases.slice(0, 5).map(purchase => (
-                      <GlassCard key={purchase.id} className="p-4 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                            <Package className="w-5 h-5 text-primary" />
-                          </div>
-                          <div>
-                            <p className="font-medium">{purchase.item_name}</p>
-                            <p className="text-xs text-muted-foreground capitalize">{purchase.item_type}</p>
-                          </div>
-                        </div>
-                        <Link
-                          to={`/automations/${purchase.item_id}`}
-                          className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/10 rounded-lg transition-colors"
-                        >
-                          <ChevronRight className="w-3 h-3" />
-                          View Status
-                        </Link>
-                      </GlassCard>
-                    ))}
-                  </div>
-                ) : (
-                  <GlassCard className="p-8 text-center">
-                    <Package className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-                    <p className="text-muted-foreground mb-4">No purchases yet</p>
-                    <Link
-                      to="/automations"
-                      className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
-                    >
-                      Browse Automations
-                      <ExternalLink className="w-3 h-3" />
-                    </Link>
-                  </GlassCard>
-                )}
-              </div>
-
-              {/* Quick Actions */}
-              <div>
-                <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Link to="/automations">
-                    <GlassCard className="p-4 flex items-center gap-3 group">
-                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                        <Package className="w-5 h-5 text-primary" />
-                      </div>
-                      <div>
-                        <p className="font-medium">Browse Automations</p>
-                        <p className="text-xs text-muted-foreground">View hosted automations</p>
-                      </div>
-                    </GlassCard>
-                  </Link>
-
-                  <Link to="/activation-setup">
-                    <GlassCard className="p-4 flex items-center gap-3 group">
-                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                        <Upload className="w-5 h-5 text-primary" />
-                      </div>
-                      <div>
-                        <p className="font-medium">Activation Setup</p>
-                        <p className="text-xs text-muted-foreground">Connect your tools</p>
-                      </div>
-                    </GlassCard>
-                  </Link>
-
-                  <Link to="/activation-walkthrough">
-                    <GlassCard className="p-4 flex items-center gap-3 group">
-                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                        <BookOpen className="w-5 h-5 text-primary" />
-                      </div>
-                      <div>
-                        <p className="font-medium">Activation Guide</p>
-                        <p className="text-xs text-muted-foreground">How it works</p>
-                      </div>
-                    </GlassCard>
-                  </Link>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* My Automations Section */}
-          {activeSection === 'automations' && (
-            <div className="space-y-6">
-              {isLoadingPurchases ? (
-                <div className="flex items-center justify-center py-16">
-                  <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-                </div>
-              ) : purchases.length > 0 ? (
-                <div className="grid gap-4">
-                  {purchases.map(purchase => (
-                    <GlassCard key={purchase.id} className="p-6">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-start gap-4">
-                          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                            <Package className="w-6 h-6 text-primary" />
-                          </div>
-                          <div>
-                            <h4 className="font-semibold">{purchase.item_name}</h4>
-                            <p className="text-sm text-muted-foreground capitalize">{purchase.item_type}</p>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              Purchased {new Date(purchase.created_at).toLocaleDateString()}
-                            </p>
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => handleDownload(purchase)}
-                          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
-                        >
-                          <Download className="w-4 h-4" />
-                          Download
-                        </button>
-                      </div>
-                    </GlassCard>
-                  ))}
-                </div>
-              ) : (
-                <GlassCard className="p-12 text-center">
-                  <Package className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No automations yet</h3>
-                  <p className="text-muted-foreground mb-6">Browse our library to find hosted automations that fit your needs</p>
-                  <Link
-                    to="/automations"
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
-                  >
-                    Browse Automations
-                    <ExternalLink className="w-4 h-4" />
-                  </Link>
-                </GlassCard>
+          {/* Section 1: Active Automations (Primary) */}
+          <section>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold">Active Automations</h2>
+              {activeAutomations.length > 0 && (
+                <Link 
+                  to="/automations" 
+                  className="text-sm text-primary hover:underline flex items-center gap-1"
+                >
+                  Browse More
+                  <ExternalLink className="w-3 h-3" />
+                </Link>
               )}
             </div>
-          )}
 
-          {/* Integrations Section */}
-          {activeSection === 'integrations' && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {Object.entries(INTEGRATION_CONFIG).map(([provider, config]) => {
-                  const integration = getIntegrationStatus(provider);
-                  const isConfigured = integration?.status === 'configured';
+            {activeAutomations.length > 0 ? (
+              <div className="space-y-3">
+                {activeAutomations.map((automation) => {
+                  const statusConfig = STATUS_CONFIG[automation.status];
+                  const StatusIcon = statusConfig.icon;
                   
                   return (
-                    <GlassCard key={provider} className="p-6">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <span className="text-3xl">{config.icon}</span>
-                          <div>
-                            <h4 className="font-semibold">{config.name}</h4>
-                            <span className={`text-xs ${
-                              isConfigured ? 'text-primary' : 'text-muted-foreground'
-                            }`}>
-                              {isConfigured ? 'Connected' : 'Not configured'}
-                            </span>
+                    <GlassCard key={automation.purchase_id} className="p-5">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-start gap-4 flex-1">
+                          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                            <Package className="w-6 h-6 text-primary" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold">{automation.name}</h3>
+                            <p className="text-sm text-muted-foreground line-clamp-1">
+                              {automation.short_outcome}
+                            </p>
+                            
+                            {/* Status Badge */}
+                            <div className="flex items-center gap-2 mt-2">
+                              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${statusConfig.bgColor} ${statusConfig.color}`}>
+                                <StatusIcon className="w-3 h-3" />
+                                {statusConfig.label}
+                              </span>
+                              
+                              {automation.activation_eta && automation.status === 'in_review' && (
+                                <span className="text-xs text-muted-foreground">
+                                  ETA: {automation.activation_eta}
+                                </span>
+                              )}
+                            </div>
+                            
+                            {automation.notes && (
+                              <p className="text-xs text-muted-foreground mt-2 italic">
+                                "{automation.notes}"
+                              </p>
+                            )}
                           </div>
                         </div>
-                        <button className="p-2 hover:bg-muted rounded-lg transition-colors">
-                          <Settings className="w-4 h-4 text-muted-foreground" />
-                        </button>
-                      </div>
-                      
-                      {isConfigured && integration?.config && (
-                        <div className="text-xs text-muted-foreground bg-muted/50 rounded-lg p-3">
-                          {Object.entries(integration.config as Record<string, unknown>).map(([key, value]) => (
-                            <p key={key}><span className="font-medium">{key}:</span> {String(value)}</p>
-                          ))}
-                        </div>
-                      )}
-                      
-                      {!isConfigured && (
+                        
                         <Link
-                          to="/portal/onboarding"
-                          className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+                          to={automation.activation_request_id 
+                            ? `/activation-request/${automation.activation_request_id}` 
+                            : `/automations/${automation.id}`
+                          }
+                          className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-primary hover:bg-primary/10 rounded-lg transition-colors flex-shrink-0"
                         >
-                          Configure in setup wizard
-                          <ChevronRight className="w-3 h-3" />
+                          View Details
+                          <ChevronRight className="w-4 h-4" />
                         </Link>
-                      )}
+                      </div>
                     </GlassCard>
                   );
                 })}
               </div>
-            </div>
+            ) : (
+              <GlassCard className="p-10 text-center">
+                <Package className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No active automations</h3>
+                <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                  Browse our catalog to find hosted automations that AERELION will 
+                  configure, operate, and maintain for you.
+                </p>
+                <Link
+                  to="/automations"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
+                >
+                  Browse Automations
+                  <ExternalLink className="w-4 h-4" />
+                </Link>
+              </GlassCard>
+            )}
+          </section>
+
+          {/* Section 2: Required Connections (Conditional - Only shows when incomplete) */}
+          {hasIncompleteSetup && requiredConnections.length > 0 && (
+            <section>
+              <div className="flex items-center gap-2 mb-4">
+                <Lock className="w-5 h-5 text-amber-500" />
+                <h2 className="text-lg font-semibold">Required Connections</h2>
+              </div>
+              
+              <GlassCard variant="accent" className="p-5 border-amber-500/30">
+                <p className="text-sm text-muted-foreground mb-4">
+                  To activate your automation, we need secure access to the following services:
+                </p>
+                
+                <div className="space-y-3">
+                  {requiredConnections.map((connection, idx) => {
+                    const isConnected = connection.status === 'connected';
+                    
+                    return (
+                      <div 
+                        key={`${connection.service_name}-${idx}`}
+                        className="flex items-center justify-between p-3 bg-background/50 rounded-lg"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                            isConnected ? 'bg-emerald-500/10' : 'bg-amber-500/10'
+                          }`}>
+                            {isConnected ? (
+                              <CheckCircle className="w-4 h-4 text-emerald-500" />
+                            ) : (
+                              <Lock className="w-4 h-4 text-amber-500" />
+                            )}
+                          </div>
+                          <div>
+                            <p className="font-medium text-sm">{connection.service_name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              For {connection.automation_name}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        {!isConnected && (
+                          <Link
+                            to={`/credentials/${connection.activation_request_id}`}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-primary-foreground text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors"
+                          >
+                            <Shield className="w-3.5 h-3.5" />
+                            Connect Securely
+                          </Link>
+                        )}
+                        
+                        {isConnected && (
+                          <span className="text-xs text-emerald-500 font-medium">
+                            Connected
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                
+                <p className="text-xs text-muted-foreground mt-4 flex items-center gap-1.5">
+                  <Shield className="w-3.5 h-3.5" />
+                  Credentials are encrypted with AES-256-GCM and can be revoked anytime.
+                </p>
+              </GlassCard>
+            </section>
           )}
 
-          {/* Billing Section */}
-          {activeSection === 'billing' && (
-            <GlassCard className="p-8 text-center">
-              <CreditCard className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Billing & Invoices</h3>
-              <p className="text-muted-foreground mb-6">View your purchase history and manage payment methods</p>
-              <Link
-                to="/purchases"
-                className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
-              >
-                View Purchase History
-                <ExternalLink className="w-4 h-4" />
-              </Link>
+          {/* Section 3: System Status (Passive Footer) */}
+          <section className="pt-4 border-t border-border/20">
+            <GlassCard className="p-6 bg-muted/30">
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
+                  <Shield className="w-5 h-5 text-emerald-500" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-sm mb-1">System Status</h3>
+                  <p className="text-sm text-muted-foreground">
+                    All systems are hosted, monitored, and maintained by AERELION. 
+                    Your credentials are encrypted and revocable at any time.
+                  </p>
+                  
+                  <div className="flex flex-wrap gap-4 mt-4">
+                    <Link
+                      to="/contact"
+                      className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+                    >
+                      <HelpCircle className="w-4 h-4" />
+                      Contact Support
+                    </Link>
+                    <Link
+                      to="/docs"
+                      className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+                    >
+                      <FileText className="w-4 h-4" />
+                      Documentation
+                    </Link>
+                    <Link
+                      to="/purchases"
+                      className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+                    >
+                      <Bell className="w-4 h-4" />
+                      Purchase History
+                    </Link>
+                  </div>
+                </div>
+              </div>
             </GlassCard>
-          )}
-
-          {/* Support Section */}
-          {activeSection === 'support' && (
-            <div className="grid md:grid-cols-2 gap-6">
-              <Link to="/docs">
-                <GlassCard className="p-6 h-full group">
-                  <BookOpen className="w-8 h-8 text-primary mb-4" />
-                  <h4 className="font-semibold mb-2">Documentation</h4>
-                  <p className="text-sm text-muted-foreground">Setup guides, FAQs, and technical references</p>
-                </GlassCard>
-              </Link>
-              <Link to="/contact">
-                <GlassCard className="p-6 h-full group">
-                  <HelpCircle className="w-8 h-8 text-primary mb-4" />
-                  <h4 className="font-semibold mb-2">Contact Support</h4>
-                  <p className="text-sm text-muted-foreground">Get help from our support team</p>
-                </GlassCard>
-              </Link>
-            </div>
-          )}
+          </section>
         </main>
       </div>
     </PortalBackground>

@@ -4,8 +4,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useClientProfile } from '@/hooks/useClientProfile';
 import { toast } from '@/hooks/use-toast';
 import { 
-  Loader2, CheckCircle, User, Target, Puzzle, ClipboardCheck,
-  ChevronRight, ChevronLeft, Building2, Globe
+  Loader2, CheckCircle, User, Target, ClipboardCheck,
+  ChevronRight, ChevronLeft, Building2, Globe, Shield
 } from 'lucide-react';
 import PortalBackground from '@/components/portal/PortalBackground';
 import { GlassCard } from '@/components/portal/GlassCard';
@@ -30,24 +30,14 @@ const GOALS = [
   { id: 'lead_automation', label: 'Lead Automation', description: 'Automate lead capture and nurturing' },
   { id: 'internal_ops', label: 'Internal Operations', description: 'Streamline internal workflows' },
   { id: 'reporting', label: 'Reporting & Analytics', description: 'Automated reports and dashboards' },
-  { id: 'crm_sync', label: 'CRM Sync', description: 'Keep your CRM data in sync' },
-  { id: 'content_engine', label: 'Content Engine', description: 'Automate content creation and distribution' },
-];
-
-const INTEGRATIONS = [
-  { id: 'n8n', name: 'n8n', icon: '⚡', description: 'Workflow automation platform' },
-  { id: 'gmail', name: 'Gmail', icon: '📧', description: 'Email automation' },
-  { id: 'slack', name: 'Slack', icon: '💬', description: 'Team communication' },
-  { id: 'sheets', name: 'Google Sheets', icon: '📊', description: 'Spreadsheet automation' },
-  { id: 'notion', name: 'Notion', icon: '📝', description: 'Documentation & wikis' },
-  { id: 'hubspot', name: 'HubSpot', icon: '🎯', description: 'CRM & marketing' },
+  { id: 'client_comms', label: 'Client Communications', description: 'Automated appointment reminders and follow-ups' },
+  { id: 'document_mgmt', label: 'Document Management', description: 'Automate document processing and organization' },
 ];
 
 const steps = [
   { id: 1, title: 'Profile', icon: User },
   { id: 2, title: 'Goals', icon: Target },
-  { id: 3, title: 'Integrations', icon: Puzzle },
-  { id: 4, title: 'Review', icon: ClipboardCheck },
+  { id: 3, title: 'Review', icon: ClipboardCheck },
 ];
 
 const ClientOnboarding = () => {
@@ -60,11 +50,9 @@ const ClientOnboarding = () => {
   const [timezone, setTimezone] = useState('America/New_York');
   const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
   const [primaryGoal, setPrimaryGoal] = useState('');
-  const [selectedIntegrations, setSelectedIntegrations] = useState<string[]>([]);
-  const [integrationConfigs, setIntegrationConfigs] = useState<Record<string, Record<string, string>>>({});
 
   const { user, isLoading: authLoading } = useAuth();
-  const { profile, isLoading: profileLoading, updateProfile, upsertIntegration } = useClientProfile();
+  const { profile, isLoading: profileLoading, updateProfile } = useClientProfile();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -99,24 +87,6 @@ const ClientOnboarding = () => {
     }
   };
 
-  const toggleIntegration = (integrationId: string) => {
-    setSelectedIntegrations(prev =>
-      prev.includes(integrationId)
-        ? prev.filter(i => i !== integrationId)
-        : [...prev, integrationId]
-    );
-  };
-
-  const updateIntegrationConfig = (integrationId: string, key: string, value: string) => {
-    setIntegrationConfigs(prev => ({
-      ...prev,
-      [integrationId]: {
-        ...(prev[integrationId] || {}),
-        [key]: value,
-      },
-    }));
-  };
-
   const handleNext = () => {
     if (currentStep === 1) {
       if (!fullName.trim()) {
@@ -133,7 +103,7 @@ const ClientOnboarding = () => {
         setPrimaryGoal(selectedGoals[0]);
       }
     }
-    setCurrentStep(prev => Math.min(prev + 1, 4));
+    setCurrentStep(prev => Math.min(prev + 1, 3));
   };
 
   const handleBack = () => {
@@ -150,7 +120,7 @@ const ClientOnboarding = () => {
         timezone,
         goals: selectedGoals,
         primary_goal: primaryGoal || null,
-        onboarding_complete: false, // Not complete since skipped
+        onboarding_complete: false,
       });
       navigate('/portal/dashboard');
     } catch {
@@ -163,7 +133,6 @@ const ClientOnboarding = () => {
   const handleFinish = async () => {
     setIsSubmitting(true);
     try {
-      // Save profile
       await updateProfile({
         full_name: fullName,
         company_name: companyName || null,
@@ -172,15 +141,6 @@ const ClientOnboarding = () => {
         primary_goal: primaryGoal || selectedGoals[0] || null,
         onboarding_complete: true,
       });
-
-      // Save integrations
-      for (const integrationId of selectedIntegrations) {
-        await upsertIntegration(
-          integrationId,
-          'configured',
-          integrationConfigs[integrationId] || {}
-        );
-      }
 
       toast({ title: 'Setup complete!', description: 'Welcome to AERELION.' });
       navigate('/portal/dashboard');
@@ -207,11 +167,11 @@ const ClientOnboarding = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-2xl font-semibold">Welcome to AERELION</h1>
-          <p className="text-muted-foreground mt-1">Let's set up your workspace</p>
+          <p className="text-muted-foreground mt-1">Let's set up your account</p>
         </div>
 
         {/* Progress Steps */}
-        <div className="max-w-2xl mx-auto w-full mb-8">
+        <div className="max-w-xl mx-auto w-full mb-8">
           <div className="flex items-center justify-between">
             {steps.map((step, index) => {
               const StepIcon = step.icon;
@@ -250,7 +210,7 @@ const ClientOnboarding = () => {
         </div>
 
         {/* Step Content */}
-        <div className="max-w-2xl mx-auto w-full flex-1">
+        <div className="max-w-xl mx-auto w-full flex-1">
           <GlassCard className="p-6 md:p-8">
             {/* Step 1: Profile */}
             {currentStep === 1 && (
@@ -313,7 +273,7 @@ const ClientOnboarding = () => {
               <div className="space-y-6">
                 <div>
                   <h2 className="text-xl font-semibold mb-1">Your Goals</h2>
-                  <p className="text-muted-foreground text-sm">What do you want to automate?</p>
+                  <p className="text-muted-foreground text-sm">What operational challenges can we help with?</p>
                 </div>
 
                 <div className="grid gap-3">
@@ -361,200 +321,125 @@ const ClientOnboarding = () => {
               </div>
             )}
 
-            {/* Step 3: Integrations */}
+            {/* Step 3: Review */}
             {currentStep === 3 && (
               <div className="space-y-6">
                 <div>
-                  <h2 className="text-xl font-semibold mb-1">Integrations</h2>
-                  <p className="text-muted-foreground text-sm">Which tools do you use?</p>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {INTEGRATIONS.map(integration => (
-                    <button
-                      key={integration.id}
-                      type="button"
-                      onClick={() => toggleIntegration(integration.id)}
-                      className={`flex flex-col items-center p-4 rounded-lg border transition-all ${
-                        selectedIntegrations.includes(integration.id)
-                          ? 'border-primary bg-primary/10'
-                          : 'border-border/50 hover:border-border'
-                      }`}
-                    >
-                      <span className="text-2xl mb-2">{integration.icon}</span>
-                      <p className="font-medium text-sm">{integration.name}</p>
-                    </button>
-                  ))}
-                </div>
-
-                {/* Integration-specific configs */}
-                {selectedIntegrations.includes('n8n') && (
-                  <GlassCard variant="accent" className="p-4 space-y-3">
-                    <h3 className="font-medium">n8n Configuration</h3>
-                    <div>
-                      <label className="block text-sm mb-1">Instance URL</label>
-                      <input
-                        type="url"
-                        placeholder="https://your-n8n.example.com"
-                        value={integrationConfigs.n8n?.url || ''}
-                        onChange={(e) => updateIntegrationConfig('n8n', 'url', e.target.value)}
-                        className="w-full px-3 py-2 bg-background/50 border border-border/50 rounded-lg text-sm"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm mb-1">Instance Type</label>
-                      <select
-                        value={integrationConfigs.n8n?.type || 'cloud'}
-                        onChange={(e) => updateIntegrationConfig('n8n', 'type', e.target.value)}
-                        className="w-full px-3 py-2 bg-background/50 border border-border/50 rounded-lg text-sm"
-                      >
-                        <option value="cloud">Cloud</option>
-                        <option value="self-hosted">Self-hosted</option>
-                      </select>
-                    </div>
-                  </GlassCard>
-                )}
-
-                {selectedIntegrations.includes('slack') && (
-                  <GlassCard variant="accent" className="p-4 space-y-3">
-                    <h3 className="font-medium">Slack Configuration</h3>
-                    <div>
-                      <label className="block text-sm mb-1">Workspace Name</label>
-                      <input
-                        type="text"
-                        placeholder="your-workspace"
-                        value={integrationConfigs.slack?.workspace || ''}
-                        onChange={(e) => updateIntegrationConfig('slack', 'workspace', e.target.value)}
-                        className="w-full px-3 py-2 bg-background/50 border border-border/50 rounded-lg text-sm"
-                      />
-                    </div>
-                  </GlassCard>
-                )}
-
-                {selectedIntegrations.includes('gmail') && (
-                  <GlassCard variant="accent" className="p-4">
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={integrationConfigs.gmail?.later === 'true'}
-                        onChange={(e) => updateIntegrationConfig('gmail', 'later', e.target.checked ? 'true' : 'false')}
-                        className="rounded"
-                      />
-                      <span className="text-sm">Will connect Gmail later</span>
-                    </label>
-                  </GlassCard>
-                )}
-              </div>
-            )}
-
-            {/* Step 4: Review */}
-            {currentStep === 4 && (
-              <div className="space-y-6">
-                <div>
-                  <h2 className="text-xl font-semibold mb-1">Review & Finish</h2>
-                  <p className="text-muted-foreground text-sm">Confirm your setup details</p>
+                  <h2 className="text-xl font-semibold mb-1">Review & Confirm</h2>
+                  <p className="text-muted-foreground text-sm">Confirm your information to complete setup</p>
                 </div>
 
                 <div className="space-y-4">
-                  <GlassCard variant="default" hover={false} className="p-4">
-                    <h3 className="text-sm font-medium text-muted-foreground mb-2">Profile</h3>
-                    <p className="font-medium">{fullName}</p>
-                    {companyName && <p className="text-sm text-muted-foreground">{companyName}</p>}
-                    <p className="text-sm text-muted-foreground">{timezone}</p>
-                  </GlassCard>
+                  {/* Profile Summary */}
+                  <div className="p-4 bg-muted/30 rounded-lg space-y-2">
+                    <h3 className="font-medium text-sm flex items-center gap-2">
+                      <User className="w-4 h-4" />
+                      Profile
+                    </h3>
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <span className="text-muted-foreground">Name:</span>
+                      <span>{fullName}</span>
+                      {companyName && (
+                        <>
+                          <span className="text-muted-foreground">Company:</span>
+                          <span>{companyName}</span>
+                        </>
+                      )}
+                      <span className="text-muted-foreground">Timezone:</span>
+                      <span>{timezone.replace('_', ' ')}</span>
+                    </div>
+                  </div>
 
-                  <GlassCard variant="default" hover={false} className="p-4">
-                    <h3 className="text-sm font-medium text-muted-foreground mb-2">Goals</h3>
+                  {/* Goals Summary */}
+                  <div className="p-4 bg-muted/30 rounded-lg space-y-2">
+                    <h3 className="font-medium text-sm flex items-center gap-2">
+                      <Target className="w-4 h-4" />
+                      Goals
+                    </h3>
                     <div className="flex flex-wrap gap-2">
                       {selectedGoals.map(goalId => {
                         const goal = GOALS.find(g => g.id === goalId);
+                        const isPrimary = goalId === primaryGoal;
                         return (
                           <span 
-                            key={goalId} 
+                            key={goalId}
                             className={`px-2 py-1 rounded text-xs ${
-                              goalId === primaryGoal 
-                                ? 'bg-primary text-primary-foreground' 
+                              isPrimary 
+                                ? 'bg-primary/20 text-primary font-medium' 
                                 : 'bg-muted text-muted-foreground'
                             }`}
                           >
                             {goal?.label}
+                            {isPrimary && ' (Primary)'}
                           </span>
                         );
                       })}
                     </div>
-                  </GlassCard>
+                  </div>
 
-                  <GlassCard variant="default" hover={false} className="p-4">
-                    <h3 className="text-sm font-medium text-muted-foreground mb-2">Integrations</h3>
-                    {selectedIntegrations.length > 0 ? (
-                      <div className="flex flex-wrap gap-2">
-                        {selectedIntegrations.map(integrationId => {
-                          const integration = INTEGRATIONS.find(i => i.id === integrationId);
-                          return (
-                            <span key={integrationId} className="px-2 py-1 bg-muted text-muted-foreground rounded text-xs">
-                              {integration?.icon} {integration?.name}
-                            </span>
-                          );
-                        })}
-                      </div>
-                    ) : (
-                      <p className="text-sm text-muted-foreground">No integrations selected</p>
-                    )}
-                  </GlassCard>
+                  {/* What happens next */}
+                  <div className="p-4 border border-primary/30 bg-primary/5 rounded-lg">
+                    <h3 className="font-medium text-sm flex items-center gap-2 mb-2">
+                      <Shield className="w-4 h-4 text-primary" />
+                      What happens next
+                    </h3>
+                    <ul className="text-sm text-muted-foreground space-y-1">
+                      <li>• Browse our automation catalog and purchase what fits your needs</li>
+                      <li>• When prompted, securely connect the required services</li>
+                      <li>• AERELION will activate and maintain your automations</li>
+                    </ul>
+                  </div>
                 </div>
               </div>
             )}
 
-            {/* Navigation */}
-            <div className="flex items-center justify-between mt-8 pt-6 border-t border-border/50">
-              <div>
-                {currentStep > 1 && (
-                  <button
-                    type="button"
-                    onClick={handleBack}
-                    className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                    Back
-                  </button>
-                )}
-              </div>
-              
-              <div className="flex items-center gap-3">
+            {/* Navigation Buttons */}
+            <div className="flex items-center justify-between mt-8 pt-6 border-t border-border/20">
+              {currentStep > 1 ? (
                 <button
-                  type="button"
+                  onClick={handleBack}
+                  className="flex items-center gap-2 px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  Back
+                </button>
+              ) : (
+                <button
                   onClick={handleSkip}
                   disabled={isSubmitting}
-                  className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Skip for now
                 </button>
+              )}
 
-                {currentStep < 4 ? (
-                  <button
-                    type="button"
-                    onClick={handleNext}
-                    className="flex items-center gap-1 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
-                  >
-                    Next
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={handleFinish}
-                    disabled={isSubmitting}
-                    className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
-                  >
-                    {isSubmitting ? (
+              {currentStep < 3 ? (
+                <button
+                  onClick={handleNext}
+                  className="flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
+                >
+                  Continue
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              ) : (
+                <button
+                  onClick={handleFinish}
+                  disabled={isSubmitting}
+                  className="flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
+                >
+                  {isSubmitting ? (
+                    <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      Complete Setup
                       <CheckCircle className="w-4 h-4" />
-                    )}
-                    Finish Setup
-                  </button>
-                )}
-              </div>
+                    </>
+                  )}
+                </button>
+              )}
             </div>
           </GlassCard>
         </div>
