@@ -14,6 +14,74 @@ export type Database = {
   }
   public: {
     Tables: {
+      activation_credentials: {
+        Row: {
+          created_at: string
+          created_by: string
+          credential_type: string
+          encrypted_data: string
+          encryption_iv: string
+          encryption_tag: string
+          expires_at: string | null
+          id: string
+          last_verified_at: string | null
+          metadata: Json | null
+          request_id: string
+          revocation_reason: string | null
+          revoked_at: string | null
+          revoked_by: string | null
+          service_name: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          credential_type: string
+          encrypted_data: string
+          encryption_iv: string
+          encryption_tag: string
+          expires_at?: string | null
+          id?: string
+          last_verified_at?: string | null
+          metadata?: Json | null
+          request_id: string
+          revocation_reason?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          service_name: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          credential_type?: string
+          encrypted_data?: string
+          encryption_iv?: string
+          encryption_tag?: string
+          expires_at?: string | null
+          id?: string
+          last_verified_at?: string | null
+          metadata?: Json | null
+          request_id?: string
+          revocation_reason?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          service_name?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activation_credentials_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "installation_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       activation_customer_updates: {
         Row: {
           attachment_url: string | null
@@ -741,6 +809,9 @@ export type Database = {
           bundle_id: string | null
           company: string | null
           created_at: string
+          credentials_count: number | null
+          credentials_submitted_at: string | null
+          credentials_verified_at: string | null
           customer_visible_status: string | null
           email: string
           id: string
@@ -767,6 +838,9 @@ export type Database = {
           bundle_id?: string | null
           company?: string | null
           created_at?: string
+          credentials_count?: number | null
+          credentials_submitted_at?: string | null
+          credentials_verified_at?: string | null
           customer_visible_status?: string | null
           email: string
           id?: string
@@ -793,6 +867,9 @@ export type Database = {
           bundle_id?: string | null
           company?: string | null
           created_at?: string
+          credentials_count?: number | null
+          credentials_submitted_at?: string | null
+          credentials_verified_at?: string | null
           customer_visible_status?: string | null
           email?: string
           id?: string
