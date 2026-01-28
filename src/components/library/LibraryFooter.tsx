@@ -13,17 +13,17 @@ const LibraryFooter = () => {
               AERELION
             </Link>
             <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
-              We configure, host, and maintain business automations on our infrastructure.
+              Managed automation operator. We configure, host, and maintain automation systems on our infrastructure.
             </p>
           </div>
 
-          {/* Services */}
+          {/* Solutions */}
           <div>
-            <h4 className="font-medium text-sm text-foreground mb-4">Services</h4>
+            <h4 className="font-medium text-sm text-foreground mb-4">Solutions</h4>
             <ul className="space-y-2">
               <li>
                 <Link to="/automations" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  Automations
+                  Managed Automations
                 </Link>
               </li>
               <li>
@@ -39,9 +39,9 @@ const LibraryFooter = () => {
             </ul>
           </div>
 
-          {/* Support */}
+          {/* Resources */}
           <div>
-            <h4 className="font-medium text-sm text-foreground mb-4">Support</h4>
+            <h4 className="font-medium text-sm text-foreground mb-4">Resources</h4>
             <ul className="space-y-2">
               <li>
                 <Link to="/docs" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
@@ -50,7 +50,7 @@ const LibraryFooter = () => {
               </li>
               <li>
                 <Link to="/contact" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  Contact
+                  Schedule a Call
                 </Link>
               </li>
             </ul>
