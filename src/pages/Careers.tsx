@@ -5,8 +5,8 @@ import LibraryFooter from '@/components/library/LibraryFooter';
 import SEO from '@/components/SEO';
 import { Button } from '@/components/ui/button';
 
-// Breezy careers page URL - update this with your actual Breezy URL
-const BREEZY_CAREERS_URL = 'https://aerelion.breezy.hr';
+// Breezy careers page URL
+const BREEZY_CAREERS_URL = 'https://aerelion-systems-llc.breezy.hr/p/69e13036d878-automation-operations-specialist';
 
 const Careers = () => {
   return (
