@@ -100,10 +100,10 @@ const Privacy = () => {
                 <section>
                   <h2 className="font-display text-xl mb-3">Contact</h2>
                   <p className="text-muted-foreground">
-                    Privacy questions? Email{' '}
-                    <a href="mailto:contact@aerelion.systems" className="text-primary hover:underline">
-                      contact@aerelion.systems
-                    </a>
+                    Privacy questions? Contact us via our{' '}
+                    <a href="/contact" className="text-primary hover:underline">
+                      booking form
+                    </a>.
                   </p>
                 </section>
 
