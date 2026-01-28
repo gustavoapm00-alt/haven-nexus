@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useEngagementRequests } from '@/hooks/useEngagementRequests';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { 
   Loader2, LogOut, Mail, MessageSquare, Trash2, RefreshCw, 
-  ArrowRight, Settings, LayoutDashboard, Activity, Package, Zap
+  ArrowRight, Settings, LayoutDashboard, Activity, Package, Zap, Users
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { ActivationRequestsTable } from '@/components/admin/ActivationRequestsTable';
 
 interface EmailSignup {
@@ -27,6 +29,7 @@ interface ContactSubmission {
 
 const Admin = () => {
   const { user, isAdmin, isLoading, signOut } = useAuth();
+  const { newCount: engagementNewCount } = useEngagementRequests();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   
@@ -237,6 +240,26 @@ const Admin = () => {
                 <div>
                   <h3 className="font-display text-xl mb-1 group-hover:text-primary transition-colors">Admin Setup</h3>
                   <p className="text-muted-foreground text-sm">View access diagnostic</p>
+                </div>
+              </div>
+            </Link>
+
+            <Link 
+              to="/admin/engagement-requests" 
+              className="group card-glass p-6 rounded-xl border-2 border-transparent hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5 relative"
+            >
+              {engagementNewCount > 0 && (
+                <Badge className="absolute -top-2 -right-2 bg-primary text-primary-foreground">
+                  {engagementNewCount} new
+                </Badge>
+              )}
+              <div className="flex items-start gap-4">
+                <div className="p-4 bg-primary/10 rounded-xl group-hover:bg-primary/20 group-hover:scale-105 transition-all">
+                  <Users className="w-8 h-8 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-display text-xl mb-1 group-hover:text-primary transition-colors">Engagement Requests</h3>
+                  <p className="text-muted-foreground text-sm">Manage intake & leads</p>
                 </div>
               </div>
             </Link>

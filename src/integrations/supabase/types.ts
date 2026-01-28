@@ -780,13 +780,16 @@ export type Database = {
       }
       engagement_requests: {
         Row: {
+          admin_seen: boolean | null
           calm_in_30_days: string | null
           company_name: string | null
           created_at: string
           current_tools: string[] | null
           email: string
           id: string
+          last_contacted_at: string | null
           name: string
+          notes_internal: string | null
           operational_pain: string
           primary_goal: string
           status: string
@@ -794,13 +797,16 @@ export type Database = {
           website: string | null
         }
         Insert: {
+          admin_seen?: boolean | null
           calm_in_30_days?: string | null
           company_name?: string | null
           created_at?: string
           current_tools?: string[] | null
           email: string
           id?: string
+          last_contacted_at?: string | null
           name: string
+          notes_internal?: string | null
           operational_pain: string
           primary_goal: string
           status?: string
@@ -808,13 +814,16 @@ export type Database = {
           website?: string | null
         }
         Update: {
+          admin_seen?: boolean | null
           calm_in_30_days?: string | null
           company_name?: string | null
           created_at?: string
           current_tools?: string[] | null
           email?: string
           id?: string
+          last_contacted_at?: string | null
           name?: string
+          notes_internal?: string | null
           operational_pain?: string
           primary_goal?: string
           status?: string
