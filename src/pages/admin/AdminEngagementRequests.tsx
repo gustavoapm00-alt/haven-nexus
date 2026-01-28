@@ -1,14 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useEngagementRequests, type EngagementRequest } from '@/hooks/useEngagementRequests';
 import { toast } from '@/hooks/use-toast';
 import { 
-  Loader2, LogOut, ArrowLeft, RefreshCw, Filter, 
+  Loader2, LogOut, ArrowLeft, RefreshCw, Filter, Search,
   Mail, Building2, Globe, Users, Target,
   Clock, MessageSquare, CheckCircle2, AlertCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -58,16 +59,78 @@ function formatDate(dateString: string) {
   });
 }
 
+// Safe renderer for current_tools
+function CurrentToolsDisplay({ tools }: { tools: string[] | string | null }) {
+  if (!tools) {
+    return <span className="text-sm text-muted-foreground">None specified</span>;
+  }
+
+  let parsedTools: string[] = [];
+
+  if (Array.isArray(tools)) {
+    parsedTools = tools.filter(Boolean);
+  } else if (typeof tools === 'string') {
+    const trimmed = tools.trim();
+    if (trimmed.startsWith('[')) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        parsedTools = Array.isArray(parsed) ? parsed.filter(Boolean) : [];
+      } catch {
+        parsedTools = trimmed.split(',').map(t => t.trim()).filter(Boolean);
+      }
+    } else if (trimmed) {
+      parsedTools = trimmed.split(',').map(t => t.trim()).filter(Boolean);
+    }
+  }
+
+  if (parsedTools.length === 0) {
+    return <span className="text-sm text-muted-foreground">None specified</span>;
+  }
+
+  return (
+    <>
+      {parsedTools.map((tool, idx) => (
+        <Badge key={`${tool}-${idx}`} variant="secondary">{tool}</Badge>
+      ))}
+    </>
+  );
+}
+
 const AdminEngagementRequests = () => {
   const { user, isAdmin, isLoading: authLoading, signOut } = useAuth();
   const navigate = useNavigate();
   const { requests, newCount, isLoading, refresh, updateRequest, markAsSeen, markContacted } = useEngagementRequests();
   
   const [filter, setFilter] = useState<'all' | 'new'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedRequest, setSelectedRequest] = useState<EngagementRequest | null>(null);
   const [editingNotes, setEditingNotes] = useState('');
   const [editingStatus, setEditingStatus] = useState('');
   const [saving, setSaving] = useState(false);
+
+  // Filter and search logic
+  const filteredRequests = useMemo(() => {
+    let result = requests;
+    
+    // Apply status filter first
+    if (filter === 'new') {
+      result = result.filter(r => r.status === 'new');
+    }
+    
+    // Apply search if query exists
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      result = result.filter(r => 
+        r.name.toLowerCase().includes(query) ||
+        r.email.toLowerCase().includes(query) ||
+        (r.company_name?.toLowerCase().includes(query) ?? false) ||
+        (r.website?.toLowerCase().includes(query) ?? false) ||
+        r.operational_pain.toLowerCase().includes(query)
+      );
+    }
+    
+    return result;
+  }, [requests, filter, searchQuery]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -133,10 +196,6 @@ const AdminEngagementRequests = () => {
     navigate('/');
   };
 
-  const filteredRequests = filter === 'new' 
-    ? requests.filter(r => r.status === 'new')
-    : requests;
-
   if (authLoading || !user) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -187,26 +246,44 @@ const AdminEngagementRequests = () => {
           </div>
         )}
 
-        {/* Filter */}
-        <div className="flex items-center gap-3 mb-6">
-          <Filter className="w-4 h-4 text-muted-foreground" />
-          <div className="flex gap-2">
-            <Button
-              variant={filter === 'all' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setFilter('all')}
-            >
-              All ({requests.length})
-            </Button>
-            <Button
-              variant={filter === 'new' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setFilter('new')}
-            >
-              New ({requests.filter(r => r.status === 'new').length})
-            </Button>
+        {/* Search + Filter */}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Search name, email, company, website, pain..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+          <div className="flex items-center gap-3">
+            <Filter className="w-4 h-4 text-muted-foreground" />
+            <div className="flex gap-2">
+              <Button
+                variant={filter === 'all' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilter('all')}
+              >
+                All ({requests.length})
+              </Button>
+              <Button
+                variant={filter === 'new' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilter('new')}
+              >
+                New ({requests.filter(r => r.status === 'new').length})
+              </Button>
+            </div>
           </div>
         </div>
+
+        {/* Result count */}
+        <p className="text-sm text-muted-foreground mb-4">
+          {filteredRequests.length === 0 
+            ? 'No matches' 
+            : `${filteredRequests.length} result${filteredRequests.length !== 1 ? 's' : ''}`}
+        </p>
 
         {/* Request List */}
         {isLoading ? (
@@ -303,42 +380,12 @@ const AdminEngagementRequests = () => {
                 </div>
 
                 {/* Tools */}
-                {selectedRequest.current_tools && (
-                  <div>
-                    <h4 className="text-sm font-medium mb-2">Current Tools</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {(() => {
-                        // Safely parse current_tools - could be array, JSON string, or comma-separated
-                        let tools: string[] = [];
-                        const rawTools = selectedRequest.current_tools as string[] | string | null;
-                        
-                        if (!rawTools) {
-                          return <span className="text-sm text-muted-foreground">None specified</span>;
-                        }
-                        
-                        if (Array.isArray(rawTools)) {
-                          tools = rawTools.filter(Boolean);
-                        } else if (typeof rawTools === 'string') {
-                          const trimmed = rawTools.trim();
-                          if (trimmed.startsWith('[')) {
-                            try {
-                              const parsed = JSON.parse(trimmed);
-                              tools = Array.isArray(parsed) ? parsed : [];
-                            } catch {
-                              tools = trimmed.split(',').map(t => t.trim()).filter(Boolean);
-                            }
-                          } else if (trimmed) {
-                            tools = trimmed.split(',').map(t => t.trim()).filter(Boolean);
-                          }
-                        }
-                        
-                        return tools.length > 0 
-                          ? tools.map((tool) => <Badge key={tool} variant="secondary">{tool}</Badge>)
-                          : <span className="text-sm text-muted-foreground">None specified</span>;
-                      })()}
-                    </div>
+                <div>
+                  <h4 className="text-sm font-medium mb-2">Current Tools</h4>
+                  <div className="flex flex-wrap gap-2">
+                    <CurrentToolsDisplay tools={selectedRequest.current_tools} />
                   </div>
-                )}
+                </div>
 
                 {/* Pain Point */}
                 {selectedRequest.operational_pain && (
