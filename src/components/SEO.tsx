@@ -12,7 +12,7 @@ interface SEOProps {
 }
 
 const BASE_URL = 'https://aerelion.systems';
-const DEFAULT_OG_IMAGE = `${BASE_URL}/og-image.png`;
+const DEFAULT_OG_IMAGE = `${BASE_URL}/logo.png`;
 const SITE_NAME = 'AERELION Systems';
 const DEFAULT_DESCRIPTION = 'AERELION is a managed automation operator for professional services firms. We configure, host, operate, and maintain business automation systems—no code, no infrastructure, no technical work required.';
 
@@ -87,7 +87,7 @@ export const schemas = {
     "name": "AERELION Systems",
     "alternateName": "AERELION",
     "url": "https://aerelion.systems",
-    "logo": "https://aerelion.systems/og-image.png",
+    "logo": "https://aerelion.systems/logo.png",
     "description": "AERELION is a managed automation operator for professional services firms and compliance-driven organizations. We configure, host, operate, and maintain automation systems.",
     "foundingDate": "2024",
     "email": "contact@aerelion.systems",
