@@ -66,6 +66,7 @@ import AdminBundleEditor from "./pages/admin/library/AdminBundleEditor";
 import AdminSetup from "./pages/admin/AdminSetup";
 import AdminActivity from "./pages/admin/AdminActivity";
 import AdminEngagementRequests from "./pages/admin/AdminEngagementRequests";
+import AdminBulkImport from "./pages/admin/AdminBulkImport";
 
 const queryClient = new QueryClient();
 
@@ -184,6 +185,7 @@ const UnlockedApp = () => (
     <Route path="/admin/setup" element={<AdminSetup />} />
     <Route path="/admin/activity" element={<AdminActivity />} />
     <Route path="/admin/engagement-requests" element={<AdminEngagementRequests />} />
+    <Route path="/admin/import" element={<AdminBulkImport />} />
 
     <Route path="*" element={<NotFound />} />
   </Routes>

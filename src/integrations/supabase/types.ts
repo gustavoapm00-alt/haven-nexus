@@ -1078,6 +1078,106 @@ export type Database = {
           },
         ]
       }
+      n8n_workflow_templates: {
+        Row: {
+          automation_agent_id: string | null
+          created_at: string
+          description: string | null
+          detected_providers: string[] | null
+          file_hash: string | null
+          id: string
+          imported_by: string | null
+          name: string
+          node_count: number | null
+          original_filename: string | null
+          slug: string
+          trigger_type: string | null
+          updated_at: string
+          workflow_json: Json
+        }
+        Insert: {
+          automation_agent_id?: string | null
+          created_at?: string
+          description?: string | null
+          detected_providers?: string[] | null
+          file_hash?: string | null
+          id?: string
+          imported_by?: string | null
+          name: string
+          node_count?: number | null
+          original_filename?: string | null
+          slug: string
+          trigger_type?: string | null
+          updated_at?: string
+          workflow_json: Json
+        }
+        Update: {
+          automation_agent_id?: string | null
+          created_at?: string
+          description?: string | null
+          detected_providers?: string[] | null
+          file_hash?: string | null
+          id?: string
+          imported_by?: string | null
+          name?: string
+          node_count?: number | null
+          original_filename?: string | null
+          slug?: string
+          trigger_type?: string | null
+          updated_at?: string
+          workflow_json?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "n8n_workflow_templates_automation_agent_id_fkey"
+            columns: ["automation_agent_id"]
+            isOneToOne: false
+            referencedRelation: "automation_agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      oauth_states: {
+        Row: {
+          activation_request_id: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          provider: string
+          redirect_path: string | null
+          state_token: string
+          user_id: string
+        }
+        Insert: {
+          activation_request_id?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          provider: string
+          redirect_path?: string | null
+          state_token: string
+          user_id: string
+        }
+        Update: {
+          activation_request_id?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          provider?: string
+          redirect_path?: string | null
+          state_token?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "oauth_states_activation_request_id_fkey"
+            columns: ["activation_request_id"]
+            isOneToOne: false
+            referencedRelation: "installation_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -1221,6 +1321,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      cleanup_expired_oauth_states: { Args: never; Returns: undefined }
       cleanup_old_edge_logs: { Args: never; Returns: undefined }
       cleanup_rate_limits: { Args: never; Returns: undefined }
       get_usage_analytics: { Args: { p_user_id: string }; Returns: Json }
