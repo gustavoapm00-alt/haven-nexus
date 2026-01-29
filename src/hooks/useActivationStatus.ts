@@ -35,7 +35,7 @@ export interface RequiredConnection {
   service_name: string;
   automation_name: string;
   activation_request_id: string;
-  status: 'connected' | 'required';
+  status: 'connected' | 'required' | 'revoked';
 }
 
 // Map internal status to client-friendly status
@@ -51,6 +51,27 @@ function mapStatus(status: string | null): ActiveAutomation['status'] {
   
   // Default for received, in_review, in_build, testing
   return 'in_review';
+}
+
+// Map system names to display-friendly names
+function normalizeSystemName(system: string): string {
+  const systemMap: Record<string, string> = {
+    'email': 'Email',
+    'gmail': 'Gmail',
+    'calendar': 'Calendar',
+    'google calendar': 'Google Calendar',
+    'slack': 'Slack',
+    'notion': 'Notion',
+    'airtable': 'Airtable',
+    'crm': 'CRM',
+    'hubspot': 'HubSpot',
+    'stripe': 'Stripe',
+    'twilio': 'Twilio',
+    'sms': 'SMS',
+    'quickbooks': 'QuickBooks',
+  };
+  
+  return systemMap[system.toLowerCase()] || system;
 }
 
 export function useActivationStatus() {
@@ -144,15 +165,22 @@ export function useActivationStatus() {
               systems: agent.systems || [],
             });
 
-            // Add required connections for this automation
-            if (needsCredentials && activationRequest?.id) {
-              for (const system of (agent.systems || [])) {
+            // Add required connections for this automation based on real systems array
+            if (agent.systems && agent.systems.length > 0 && activationRequest?.id) {
+              const hasSubmittedCreds = !!activationRequest?.credentials_submitted_at;
+              
+              for (const system of agent.systems) {
                 connections.push({
-                  service_name: system,
+                  service_name: normalizeSystemName(system),
                   automation_name: agent.name,
                   activation_request_id: activationRequest.id,
-                  status: activationRequest?.credentials_submitted_at ? 'connected' : 'required',
+                  status: hasSubmittedCreds ? 'connected' : 'required',
                 });
+              }
+              
+              // Mark as incomplete if credentials not submitted
+              if (!hasSubmittedCreds && needsCredentials) {
+                hasIncomplete = true;
               }
             }
           }
