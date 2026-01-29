@@ -252,12 +252,12 @@ export function SecureCredentialForm({
             {isSubmitting ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Encrypting...
+                Connecting...
               </>
             ) : (
               <>
                 <Shield className="w-4 h-4 mr-2" />
-                Store Securely
+                Connect Securely
               </>
             )}
           </Button>
