@@ -13,18 +13,39 @@ interface CredentialPayload {
   metadata?: Record<string, unknown>; // Non-sensitive metadata
 }
 
+// Validate that a base64 string decodes to exactly 32 bytes (256 bits)
+function validateEncryptionKey(keyBase64: string): { valid: boolean; keyBytes?: Uint8Array; error?: string } {
+  try {
+    // Check if it's valid base64
+    const keyBytes = Uint8Array.from(atob(keyBase64), (c) => c.charCodeAt(0));
+    
+    // AES-256 requires exactly 32 bytes (256 bits)
+    if (keyBytes.length !== 32) {
+      return { 
+        valid: false, 
+        error: `Invalid key length: expected 32 bytes for AES-256, got ${keyBytes.length} bytes` 
+      };
+    }
+    
+    return { valid: true, keyBytes };
+  } catch (e) {
+    return { 
+      valid: false, 
+      error: "Invalid base64 encoding for encryption key" 
+    };
+  }
+}
+
 // AES-256-GCM encryption using Web Crypto API
 async function encryptCredentials(
   plaintext: string,
-  keyBase64: string
+  keyBytes: Uint8Array
 ): Promise<{ encryptedData: string; iv: string; tag: string }> {
-  // Decode the base64 key
-  const keyBytes = Uint8Array.from(atob(keyBase64), (c) => c.charCodeAt(0));
-  
-  // Import the key
+  // Import the key - cast ArrayBuffer for proper typing with Deno
+  const keyBuffer = keyBytes.buffer.slice(keyBytes.byteOffset, keyBytes.byteOffset + keyBytes.byteLength) as ArrayBuffer;
   const cryptoKey = await crypto.subtle.importKey(
     "raw",
-    keyBytes,
+    keyBuffer,
     { name: "AES-GCM", length: 256 },
     false,
     ["encrypt"]
@@ -78,10 +99,22 @@ Deno.serve(async (req) => {
     if (!encryptionKey) {
       console.error("CREDENTIAL_ENCRYPTION_KEY not configured");
       return new Response(
-        JSON.stringify({ error: "Server configuration error" }),
+        JSON.stringify({ error: "Server configuration error: encryption key not set" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    // Validate the encryption key format and length
+    const keyValidation = validateEncryptionKey(encryptionKey);
+    if (!keyValidation.valid) {
+      console.error("CREDENTIAL_ENCRYPTION_KEY validation failed:", keyValidation.error);
+      return new Response(
+        JSON.stringify({ error: "Server configuration error: invalid encryption key format. Generate with: openssl rand -base64 32" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    
+    const keyBytes = keyValidation.keyBytes!;
 
     // Create Supabase client with user's auth
     const supabase = createClient(supabaseUrl, supabaseAnonKey, {
@@ -145,7 +178,7 @@ Deno.serve(async (req) => {
 
     // Encrypt the credentials
     const credentialsJson = JSON.stringify(credentials);
-    const { encryptedData, iv, tag } = await encryptCredentials(credentialsJson, encryptionKey);
+    const { encryptedData, iv, tag } = await encryptCredentials(credentialsJson, keyBytes);
 
     // Store encrypted credentials
     const { data: credentialRecord, error: insertError } = await supabase
