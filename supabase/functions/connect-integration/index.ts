@@ -13,7 +13,11 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
  * - user_id: Owner of the credential
  * - provider: hubspot, gmail, etc.
  * - encrypted_payload: AES-256-GCM encrypted credentials
- * - activation_request_id: NULL (legacy) or optionally set for tracking
+ * - activation_request_id: NULL (user-level connections, not activation-specific)
+ * 
+ * Auto-Activation:
+ * When all required integrations for an activation are connected,
+ * automatically triggers the provisioning webhook.
  */
 
 const corsHeaders = {
@@ -58,6 +62,191 @@ async function encryptData(data: string, key: string): Promise<{ encrypted: stri
     iv: btoa(String.fromCharCode(...iv)),
     tag: btoa(String.fromCharCode(...tag)),
   };
+}
+
+// Types for Supabase data
+interface Activation {
+  automation_id: string | null;
+  status: string | null;
+}
+
+interface Automation {
+  id: string;
+  slug: string;
+  systems: string[] | null;
+  required_integrations: { provider?: string }[] | null;
+  webhook_url: string | null;
+}
+
+interface UserConnection {
+  id: string;
+  provider: string;
+  status: string;
+  connected_email: string | null;
+  granted_scopes: string[] | null;
+}
+
+// Helper to check if all required integrations are connected and trigger auto-activation
+async function checkAndAutoActivate(
+  supabaseAdmin: any,
+  userId: string,
+  userEmail: string,
+  activationRequestId: string
+): Promise<{ triggered: boolean; error?: string }> {
+  // Get activation and its automation
+  const { data: activation } = await supabaseAdmin
+    .from("installation_requests")
+    .select("automation_id, status")
+    .eq("id", activationRequestId)
+    .eq("email", userEmail)
+    .maybeSingle() as { data: Activation | null };
+
+  if (!activation?.automation_id) {
+    return { triggered: false, error: "Activation not found" };
+  }
+
+  // Don't auto-activate if already live or in_build
+  if (["live", "active", "in_build"].includes(activation.status || "")) {
+    return { triggered: false };
+  }
+
+  // Get automation details
+  const { data: automation } = await supabaseAdmin
+    .from("automation_agents")
+    .select("id, slug, systems, required_integrations, webhook_url")
+    .eq("id", activation.automation_id)
+    .maybeSingle() as { data: Automation | null };
+
+  if (!automation) {
+    return { triggered: false, error: "Automation not found" };
+  }
+
+  // Determine required providers
+  let requiredProviders: string[] = [];
+  if (automation.required_integrations && Array.isArray(automation.required_integrations)) {
+    requiredProviders = automation.required_integrations
+      .map((ri) => (ri.provider || '').toLowerCase())
+      .filter(Boolean);
+  } else if (automation.systems) {
+    requiredProviders = automation.systems.map((s: string) => s.toLowerCase());
+  }
+
+  // Get user's connected integrations (user-level)
+  const { data: userConnections } = await supabaseAdmin
+    .from("integration_connections")
+    .select("provider")
+    .eq("user_id", userId)
+    .eq("status", "connected") as { data: { provider: string }[] | null };
+
+  const connectedProviders = new Set(
+    (userConnections || []).map(c => c.provider.toLowerCase())
+  );
+
+  const allConnected = requiredProviders.length > 0 && 
+    requiredProviders.every(p => connectedProviders.has(p));
+
+  if (!allConnected) {
+    return { triggered: false };
+  }
+
+  // All required integrations connected - auto-activate!
+  console.log(`Auto-activating: All required integrations connected for activation ${activationRequestId}`);
+
+  // Update activation status
+  await supabaseAdmin
+    .from("installation_requests")
+    .update({
+      status: "in_build",
+      customer_visible_status: "in_build",
+      credentials_submitted_at: new Date().toISOString(),
+      status_updated_at: new Date().toISOString(),
+    })
+    .eq("id", activationRequestId);
+
+  // Check if webhook_url is configured
+  if (!automation.webhook_url) {
+    console.log(`No webhook_url configured for automation ${automation.id}, skipping auto-trigger`);
+    return { triggered: false };
+  }
+
+  // Trigger the provisioning webhook
+  const activationPayload = {
+    activation_id: activationRequestId,
+    automation_slug: automation.slug,
+    config: {},
+  };
+
+  try {
+    console.log(`Triggering auto-activation webhook: ${automation.webhook_url}`);
+    const response = await fetch(automation.webhook_url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(activationPayload),
+    });
+
+    const webhookSuccess = response.ok;
+
+    // Create or update n8n mapping
+    const credentialsReferenceId = `cred_bundle_${activationRequestId}`;
+    const { data: existingMapping } = await supabaseAdmin
+      .from("n8n_mappings")
+      .select("id")
+      .eq("activation_request_id", activationRequestId)
+      .eq("user_id", userId)
+      .maybeSingle() as { data: { id: string } | null };
+
+    const mappingData = {
+      user_id: userId,
+      activation_request_id: activationRequestId,
+      automation_id: automation.id,
+      status: webhookSuccess ? "active" : "error",
+      credentials_reference_id: credentialsReferenceId,
+      webhook_status: webhookSuccess ? "success" : "error",
+      provisioned_at: webhookSuccess ? new Date().toISOString() : null,
+      metadata: { auto_activated: true, customer_email: userEmail },
+      updated_at: new Date().toISOString(),
+    };
+
+    if (existingMapping) {
+      await supabaseAdmin
+        .from("n8n_mappings")
+        .update(mappingData)
+        .eq("id", existingMapping.id);
+    } else {
+      await supabaseAdmin
+        .from("n8n_mappings")
+        .insert(mappingData);
+    }
+
+    // Update activation status based on webhook result
+    await supabaseAdmin
+      .from("installation_requests")
+      .update({
+        status: webhookSuccess ? "live" : "needs_attention",
+        customer_visible_status: webhookSuccess ? "live" : "needs_attention",
+        status_updated_at: new Date().toISOString(),
+      })
+      .eq("id", activationRequestId);
+
+    if (webhookSuccess) {
+      // Create success notification
+      await supabaseAdmin
+        .from("client_notifications")
+        .insert({
+          user_id: userId,
+          type: "automation_activated",
+          title: "Automation Activated!",
+          body: "All required integrations connected. Your automation is now live.",
+          severity: "success",
+          metadata: { activation_request_id: activationRequestId },
+        });
+    }
+
+    return { triggered: true };
+  } catch (err) {
+    console.error("Auto-activation webhook failed:", err);
+    return { triggered: false, error: err instanceof Error ? err.message : "Webhook failed" };
+  }
 }
 
 serve(async (req) => {
@@ -131,6 +320,7 @@ serve(async (req) => {
           .select("id")
           .eq("user_id", userId)
           .eq("provider", provider)
+          .not("status", "in", "(archived,revoked)")
           .maybeSingle();
 
         if (existingConnection) {
@@ -144,6 +334,7 @@ serve(async (req) => {
               encryption_tag: tag,
               granted_scopes: grantedScopes || [],
               connected_email: connectedEmail || null,
+              activation_request_id: null, // User-level, not activation-specific
               updated_at: new Date().toISOString(),
             })
             .eq("id", existingConnection.id);
@@ -180,62 +371,16 @@ serve(async (req) => {
           }
         }
 
-        // If activation request provided, check if all required integrations are now connected
-        let allConnected = false;
+        // If activation request provided, check if auto-activation should happen
+        let autoActivated = false;
         if (activationRequestId) {
-          // Get activation and its automation
-          const { data: activation } = await supabaseAdmin
-            .from("installation_requests")
-            .select("automation_id")
-            .eq("id", activationRequestId)
-            .eq("email", userEmail)
-            .maybeSingle();
-
-          if (activation?.automation_id) {
-            // Get required integrations from automation
-            const { data: automation } = await supabaseAdmin
-              .from("automation_agents")
-              .select("systems, required_integrations")
-              .eq("id", activation.automation_id)
-              .maybeSingle();
-
-            // Determine required providers
-            let requiredProviders: string[] = [];
-            if (automation?.required_integrations && Array.isArray(automation.required_integrations)) {
-              requiredProviders = automation.required_integrations.map((ri: { provider?: string }) => 
-                (ri.provider || '').toLowerCase()
-              ).filter(Boolean);
-            } else if (automation?.systems) {
-              requiredProviders = automation.systems.map((s: string) => s.toLowerCase());
-            }
-
-            // Get user's connected integrations (user-level)
-            const { data: userConnections } = await supabaseAdmin
-              .from("integration_connections")
-              .select("provider")
-              .eq("user_id", userId)
-              .eq("status", "connected");
-
-            const connectedProviders = new Set(
-              (userConnections || []).map(c => c.provider.toLowerCase())
-            );
-
-            allConnected = requiredProviders.length > 0 && 
-              requiredProviders.every(p => connectedProviders.has(p));
-
-            if (allConnected) {
-              // Update activation status to ready for provisioning
-              await supabaseAdmin
-                .from("installation_requests")
-                .update({
-                  status: "in_build",
-                  customer_visible_status: "in_build",
-                  credentials_submitted_at: new Date().toISOString(),
-                  status_updated_at: new Date().toISOString(),
-                })
-                .eq("id", activationRequestId);
-            }
-          }
+          const result = await checkAndAutoActivate(
+            supabaseAdmin,
+            userId as string,
+            userEmail,
+            activationRequestId
+          );
+          autoActivated = result.triggered;
         }
 
         // Create admin notification
@@ -251,21 +396,24 @@ serve(async (req) => {
               provider,
               customer_email: userEmail,
               activation_request_id: activationRequestId || null,
+              auto_activated: autoActivated,
             },
           });
 
         return new Response(
           JSON.stringify({ 
             success: true, 
-            allConnected,
-            message: `${provider} connected successfully` 
+            autoActivated,
+            message: autoActivated 
+              ? `${provider} connected and automation activated!`
+              : `${provider} connected successfully` 
           }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
       case "revoke": {
-        // Revoke user's connection for this provider
+        // Revoke user's connection for this provider (user-level revocation)
         await supabaseAdmin
           .from("integration_connections")
           .update({
@@ -287,7 +435,7 @@ serve(async (req) => {
           .from("integration_connections")
           .select("provider, status, connected_email, granted_scopes, created_at, updated_at")
           .eq("user_id", userId)
-          .neq("status", "revoked");
+          .not("status", "in", "(revoked,archived)");
 
         return new Response(
           JSON.stringify({ connections: connections || [] }),
@@ -307,7 +455,7 @@ serve(async (req) => {
         // Get activation and verify ownership
         const { data: activation } = await supabaseAdmin
           .from("installation_requests")
-          .select("automation_id")
+          .select("automation_id, status")
           .eq("id", activationRequestId)
           .eq("email", userEmail)
           .maybeSingle();
@@ -328,14 +476,14 @@ serve(async (req) => {
 
         let requiredProviders: string[] = [];
         if (automation?.required_integrations && Array.isArray(automation.required_integrations)) {
-          requiredProviders = automation.required_integrations.map((ri: { provider?: string }) => 
-            (ri.provider || '').toLowerCase()
-          ).filter(Boolean);
+          requiredProviders = automation.required_integrations
+            .map((ri: { provider?: string }) => (ri.provider || '').toLowerCase())
+            .filter(Boolean);
         } else if (automation?.systems) {
           requiredProviders = automation.systems.map((s: string) => s.toLowerCase());
         }
 
-        // Get user's connected integrations
+        // Get user's connected integrations (user-level)
         const { data: userConnections } = await supabaseAdmin
           .from("integration_connections")
           .select("provider, status, connected_email")
@@ -356,6 +504,7 @@ serve(async (req) => {
             connected: Array.from(connectedProviders),
             missing,
             connections: userConnections || [],
+            activationStatus: activation.status,
           }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );

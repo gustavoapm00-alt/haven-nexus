@@ -292,6 +292,16 @@ export default function ConnectorScreen() {
       });
       setActiveProvider(null);
       setCredentials({});
+
+      // Check if auto-activation happened
+      if (result.data?.autoActivated) {
+        toast({
+          title: 'Automation Activated!',
+          description: 'All required integrations connected. Your automation is now live.',
+        });
+        // Redirect to dashboard after short delay
+        setTimeout(() => navigate('/portal/dashboard'), 1500);
+      }
     }
   };
 
@@ -369,11 +379,14 @@ export default function ConnectorScreen() {
             <div className="flex items-start gap-3">
               <Shield className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
               <div className="text-sm text-muted-foreground">
-                <p className="font-medium text-foreground mb-1">Secure Connection</p>
+                <p className="font-medium text-foreground mb-1">CONNECT ONCE. RUN MANY.</p>
                 <p>
                   Sent securely via HTTPS and encrypted at rest with AES-256-GCM.
-                  Never logged, emailed, or shown again after submission.
-                  Revocable at any time.
+                  Your connections are saved to your account and can be reused across all automations.
+                  {' '}
+                  <a href="/integrations" className="text-primary hover:underline">
+                    Manage integrations →
+                  </a>
                 </p>
               </div>
             </div>

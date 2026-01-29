@@ -45,7 +45,7 @@ import CredentialIntake from "./pages/library/CredentialIntake";
 import PurchaseHistory from "./pages/library/PurchaseHistory";
 import UserDashboard from "./pages/library/UserDashboard";
 import ConnectorScreen from "./pages/library/ConnectorScreen";
-
+import AccountIntegrations from "./pages/library/AccountIntegrations";
 // Client Portal pages
 import ClientAuth from "./pages/portal/ClientAuth";
 import ClientOnboarding from "./pages/portal/ClientOnboarding";
@@ -111,6 +111,7 @@ const UnlockedApp = () => (
     <Route path="/connect/:requestId" element={<ConnectorScreen />} />
     <Route path="/purchases" element={<PurchaseHistory />} />
     <Route path="/dashboard" element={<UserDashboard />} />
+    <Route path="/integrations" element={<AccountIntegrations />} />
     <Route path="/careers" element={<Careers />} />
 
     {/* Client Portal routes */}
