@@ -1023,6 +1023,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      auth_email: { Args: never; Returns: string }
       check_rate_limit: {
         Args: {
           p_action_type: string
