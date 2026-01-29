@@ -64,6 +64,7 @@ const PurchaseSuccess = () => {
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [noFilesMessage, setNoFilesMessage] = useState<string | null>(null);
+  const [activationRequestId, setActivationRequestId] = useState<string | null>(null);
   const [diagnostics, setDiagnostics] = useState<DiagnosticsState>({
     sessionId: null,
     sessionVerified: false,
@@ -116,6 +117,20 @@ const PurchaseSuccess = () => {
         webhookReceived: true,
         lastPurchase: data,
       }));
+      
+      // Check for activation request linked to this purchase
+      const { data: activationData } = await supabase
+        .from('installation_requests')
+        .select('id')
+        .eq('email', user.email)
+        .or(`automation_id.eq.${data.item_id},bundle_id.eq.${data.item_id}`)
+        .order('created_at', { ascending: false })
+        .maybeSingle();
+      
+      if (activationData) {
+        setActivationRequestId(activationData.id);
+      }
+      
       return true;
     }
     return false;
@@ -447,12 +462,21 @@ const PurchaseSuccess = () => {
               </div>
               
               <div className="flex flex-col sm:flex-row items-center gap-4 mt-6 pt-4 border-t border-border">
-                <Button asChild className="w-full sm:w-auto">
-                  <Link to="/activation-setup">
-                    Start Activation Setup
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Link>
-                </Button>
+                {activationRequestId ? (
+                  <Button asChild className="w-full sm:w-auto">
+                    <Link to={`/connect/${activationRequestId}`}>
+                      Connect Your Tools
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Link>
+                  </Button>
+                ) : (
+                  <Button asChild className="w-full sm:w-auto">
+                    <Link to="/activation-setup">
+                      Start Activation Setup
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Link>
+                  </Button>
+                )}
                 <Button asChild variant="outline" className="w-full sm:w-auto">
                   <Link to="/activation-walkthrough">
                     View Activation Walkthrough

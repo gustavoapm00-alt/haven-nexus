@@ -285,9 +285,11 @@ export type Database = {
           id: string
           important_notes: string[]
           includes: string[]
+          n8n_template_ids: string[] | null
           name: string
           price_cents: number
           published_at: string | null
+          required_integrations: Json | null
           requirements: string[]
           sectors: string[]
           setup_time_max: number
@@ -312,9 +314,11 @@ export type Database = {
           id?: string
           important_notes?: string[]
           includes?: string[]
+          n8n_template_ids?: string[] | null
           name: string
           price_cents?: number
           published_at?: string | null
+          required_integrations?: Json | null
           requirements?: string[]
           sectors?: string[]
           setup_time_max?: number
@@ -339,9 +343,11 @@ export type Database = {
           id?: string
           important_notes?: string[]
           includes?: string[]
+          n8n_template_ids?: string[] | null
           name?: string
           price_cents?: number
           published_at?: string | null
+          required_integrations?: Json | null
           requirements?: string[]
           sectors?: string[]
           setup_time_max?: number
@@ -921,6 +927,135 @@ export type Database = {
           status_updated_at?: string | null
         }
         Relationships: []
+      }
+      integration_connections: {
+        Row: {
+          activation_request_id: string | null
+          connected_email: string | null
+          created_at: string
+          encrypted_payload: string | null
+          encryption_iv: string | null
+          encryption_tag: string | null
+          expires_at: string | null
+          granted_scopes: string[] | null
+          id: string
+          provider: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          activation_request_id?: string | null
+          connected_email?: string | null
+          created_at?: string
+          encrypted_payload?: string | null
+          encryption_iv?: string | null
+          encryption_tag?: string | null
+          expires_at?: string | null
+          granted_scopes?: string[] | null
+          id?: string
+          provider: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          activation_request_id?: string | null
+          connected_email?: string | null
+          created_at?: string
+          encrypted_payload?: string | null
+          encryption_iv?: string | null
+          encryption_tag?: string | null
+          expires_at?: string | null
+          granted_scopes?: string[] | null
+          id?: string
+          provider?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_connections_activation_request_id_fkey"
+            columns: ["activation_request_id"]
+            isOneToOne: false
+            referencedRelation: "installation_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      n8n_mappings: {
+        Row: {
+          activation_request_id: string | null
+          automation_id: string | null
+          bundle_id: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          last_sync_at: string | null
+          metadata: Json | null
+          n8n_credential_ids: string[]
+          n8n_workflow_ids: string[]
+          provisioned_at: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          activation_request_id?: string | null
+          automation_id?: string | null
+          bundle_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          last_sync_at?: string | null
+          metadata?: Json | null
+          n8n_credential_ids?: string[]
+          n8n_workflow_ids?: string[]
+          provisioned_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          activation_request_id?: string | null
+          automation_id?: string | null
+          bundle_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          last_sync_at?: string | null
+          metadata?: Json | null
+          n8n_credential_ids?: string[]
+          n8n_workflow_ids?: string[]
+          provisioned_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "n8n_mappings_activation_request_id_fkey"
+            columns: ["activation_request_id"]
+            isOneToOne: false
+            referencedRelation: "installation_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "n8n_mappings_automation_id_fkey"
+            columns: ["automation_id"]
+            isOneToOne: false
+            referencedRelation: "automation_agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "n8n_mappings_bundle_id_fkey"
+            columns: ["bundle_id"]
+            isOneToOne: false
+            referencedRelation: "automation_bundles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {

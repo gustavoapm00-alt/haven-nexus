@@ -44,6 +44,7 @@ import ActivationRequestDetail from "./pages/library/ActivationRequestDetail";
 import CredentialIntake from "./pages/library/CredentialIntake";
 import PurchaseHistory from "./pages/library/PurchaseHistory";
 import UserDashboard from "./pages/library/UserDashboard";
+import ConnectorScreen from "./pages/library/ConnectorScreen";
 
 // Client Portal pages
 import ClientAuth from "./pages/portal/ClientAuth";
@@ -106,6 +107,7 @@ const UnlockedApp = () => (
     <Route path="/activation-walkthrough" element={<ActivationWalkthrough />} />
     <Route path="/activation-request/:id" element={<ActivationRequestDetail />} />
     <Route path="/credentials/:id" element={<CredentialIntake />} />
+    <Route path="/connect/:requestId" element={<ConnectorScreen />} />
     <Route path="/purchases" element={<PurchaseHistory />} />
     <Route path="/dashboard" element={<UserDashboard />} />
     <Route path="/careers" element={<Careers />} />
