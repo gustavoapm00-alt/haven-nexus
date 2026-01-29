@@ -48,5 +48,8 @@ verify_jwt = false
 [functions.n8n-provision]
 verify_jwt = false
 
+[functions.runtime-credentials]
+verify_jwt = false
+
 [functions.connect-integration]
 verify_jwt = false

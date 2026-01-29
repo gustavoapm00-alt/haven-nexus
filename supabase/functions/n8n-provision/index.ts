@@ -191,13 +191,11 @@ serve(async (req) => {
           mappingId = newMapping.id;
         }
 
-        // Build activation payload with integration_connection_ids
+        // Build activation payload per webhook contract
+        // n8n will call runtime-credentials endpoint to fetch actual credentials
         const activationPayload = {
-          user_id: userId,
-          automation_slug: automation.slug || automation.id,
-          n8n_workflow_id: automation.workflow_id ? parseInt(automation.workflow_id, 10) : null,
-          credentials_reference_id: credentialsReferenceId,
-          integration_connection_ids: integrationConnectionIds,
+          activation_id: activationRequestId,
+          automation_slug: automation.slug,
           config: (config as Record<string, unknown>) || {},
         };
 
