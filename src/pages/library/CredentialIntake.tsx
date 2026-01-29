@@ -257,7 +257,7 @@ export default function CredentialIntake() {
                 <p className="text-sm text-muted-foreground">
                   Sent securely via HTTPS and encrypted at rest with AES-256-GCM. 
                   Never logged, emailed, or shown again after submission. 
-                  Revocable anytime.
+                  Revocable at any time.
                 </p>
               </div>
             </div>
