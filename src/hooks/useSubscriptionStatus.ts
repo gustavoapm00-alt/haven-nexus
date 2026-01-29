@@ -46,7 +46,7 @@ export function useSubscriptionStatus() {
   const mountedRef = useRef(true);
 
   const checkSubscription = useCallback(async (forceRefresh = false) => {
-    if (!session?.access_token || !user) {
+    if (!user) {
       setState({
         status: 'inactive',
         subscribed: false,
@@ -69,6 +69,24 @@ export function useSubscriptionStatus() {
     setIsLoading(true);
     setState(prev => ({ ...prev, status: 'checking', error: null }));
 
+    // Always get fresh session to avoid stale token issues after refresh
+    const { data: sessionData } = await supabase.auth.getSession();
+    const currentAccessToken = sessionData?.session?.access_token;
+    
+    if (!currentAccessToken) {
+      setState({
+        status: 'inactive',
+        subscribed: false,
+        productId: null,
+        priceId: null,
+        subscriptionEnd: null,
+        checkedAt: null,
+        error: null,
+      });
+      setIsLoading(false);
+      return;
+    }
+
     let lastError: string | null = null;
     let response: SubscriptionStatusResponse | null = null;
 
@@ -77,7 +95,7 @@ export function useSubscriptionStatus() {
       try {
         const { data, error } = await supabase.functions.invoke<SubscriptionStatusResponse>('check-subscription', {
           headers: {
-            Authorization: `Bearer ${session.access_token}`,
+            Authorization: `Bearer ${currentAccessToken}`,
           },
         });
 
@@ -139,7 +157,7 @@ export function useSubscriptionStatus() {
     }
 
     setIsLoading(false);
-  }, [session?.access_token, user]);
+  }, [user]);
 
   const refresh = useCallback(() => {
     checkSubscription(true);
