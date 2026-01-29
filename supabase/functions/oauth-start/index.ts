@@ -1,17 +1,22 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
 /**
- * OAuth Start Handler
+ * OAuth Start Handler (HARDENED)
  * 
  * Initiates OAuth flow for supported providers.
- * Creates a CSRF state token, stores it in oauth_states, and redirects to provider.
+ * Creates a CSRF state token, stores it in oauth_states, and returns authorization URL.
+ * 
+ * SECURITY:
+ * - Uses getUser() for stable JWT verification (not getClaims)
+ * - Validates redirect_path to prevent open redirects
+ * - State stored server-side with short expiry
  * 
  * Supported providers: google, hubspot, slack, notion
  * 
  * Query params:
  * - provider: google | hubspot | slack | notion
  * - redirect_path: Optional path to redirect after callback (default: /integrations)
- * - activation_request_id: Optional activation to check after connecting
+ * - activation_request_id: Optional activation context for post-connect redirect
  */
 
 const corsHeaders = {
@@ -73,13 +78,58 @@ const PROVIDERS: Record<string, ProviderConfig> = {
   },
 };
 
+/**
+ * Validates redirect_path to prevent open redirect attacks.
+ * Only allows safe relative paths.
+ */
+function validateRedirectPath(path: string | null): string {
+  const defaultPath = "/integrations";
+  
+  if (!path) {
+    return defaultPath;
+  }
+  
+  // Must start with /
+  if (!path.startsWith("/")) {
+    console.warn(`Invalid redirect_path rejected (no leading /): ${path}`);
+    return defaultPath;
+  }
+  
+  // Disallow protocol handlers
+  if (path.includes("://") || path.toLowerCase().includes("http")) {
+    console.warn(`Invalid redirect_path rejected (protocol detected): ${path}`);
+    return defaultPath;
+  }
+  
+  // Disallow double slashes (could be protocol-relative URL)
+  if (path.includes("//")) {
+    console.warn(`Invalid redirect_path rejected (double slash): ${path}`);
+    return defaultPath;
+  }
+  
+  // Disallow path traversal
+  if (path.includes("..")) {
+    console.warn(`Invalid redirect_path rejected (path traversal): ${path}`);
+    return defaultPath;
+  }
+  
+  // Disallow javascript: or data: schemes that might slip through
+  const lowerPath = path.toLowerCase();
+  if (lowerPath.includes("javascript:") || lowerPath.includes("data:")) {
+    console.warn(`Invalid redirect_path rejected (script scheme): ${path}`);
+    return defaultPath;
+  }
+  
+  return path;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
   try {
-    // Authenticate user
+    // Authenticate user via JWT
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return new Response(
@@ -91,27 +141,31 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     
+    // Create client with user's token for authentication
     const supabase = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: authHeader } }
     });
 
-    const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) {
+    // Use getUser() - stable method in supabase-js v2
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    
+    if (userError || !userData?.user) {
+      console.warn("JWT verification failed:", userError?.message);
       return new Response(
-        JSON.stringify({ error: "Unauthorized" }),
+        JSON.stringify({ error: "Invalid or expired token" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const userId = claimsData.claims.sub as string;
+    const userId = userData.user.id;
 
     // Parse request
     const url = new URL(req.url);
     const provider = url.searchParams.get("provider")?.toLowerCase();
-    const redirectPath = url.searchParams.get("redirect_path") || "/integrations";
+    const rawRedirectPath = url.searchParams.get("redirect_path");
     const activationRequestId = url.searchParams.get("activation_request_id");
 
+    // Validate provider
     if (!provider || !PROVIDERS[provider]) {
       return new Response(
         JSON.stringify({ 
@@ -121,6 +175,9 @@ Deno.serve(async (req) => {
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    // Validate redirect_path (prevent open redirects)
+    const redirectPath = validateRedirectPath(rawRedirectPath);
 
     const config = PROVIDERS[provider];
     const clientId = Deno.env.get(config.clientIdEnv);
@@ -137,7 +194,7 @@ Deno.serve(async (req) => {
     // Generate CSRF state token
     const stateToken = crypto.randomUUID();
 
-    // Store state in database with service role
+    // Store state in database with service role (bypasses RLS)
     const supabaseAdmin = createClient(
       supabaseUrl,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
@@ -151,6 +208,7 @@ Deno.serve(async (req) => {
         state_token: stateToken,
         redirect_path: redirectPath,
         activation_request_id: activationRequestId || null,
+        // expires_at defaults to now() + 15 minutes via DB default
       });
 
     if (stateError) {
@@ -184,14 +242,21 @@ Deno.serve(async (req) => {
 
     const authorizationUrl = `${config.authUrl}?${authParams.toString()}`;
 
-    console.log(`OAuth started for user ${userId}, provider ${provider}`);
+    // Log only non-sensitive info
+    console.log(`OAuth started: user=${userId}, provider=${provider}`);
 
     return new Response(
       JSON.stringify({ 
         authorization_url: authorizationUrl,
         state: stateToken,
       }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { 
+        headers: { 
+          ...corsHeaders, 
+          "Content-Type": "application/json",
+          "Cache-Control": "no-store",
+        } 
+      }
     );
 
   } catch (error) {
