@@ -226,8 +226,8 @@ export function SecureCredentialForm({
       <Alert className="bg-primary/5 border-primary/30">
         <Shield className="w-4 h-4 text-primary" />
         <AlertDescription className="text-sm">
-          Your credentials are encrypted with AES-256-GCM before transmission and 
-          stored securely. They are never logged or exposed in plaintext.
+          Your credentials are sent securely via HTTPS and encrypted at rest with AES-256-GCM. 
+          They are never logged, emailed, or shown again after submission.
         </AlertDescription>
       </Alert>
 
@@ -246,7 +246,7 @@ export function SecureCredentialForm({
         <div className="flex items-center justify-between pt-4">
           <p className="text-xs text-muted-foreground flex items-center gap-1">
             <Lock className="w-3 h-3" />
-            Encrypted end-to-end
+            Sent securely and encrypted at rest
           </p>
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? (

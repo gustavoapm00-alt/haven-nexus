@@ -2,50 +2,21 @@ import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { toast } from '@/hooks/use-toast';
 import { 
-  Loader2, ArrowLeft, Shield, Mail, CheckCircle, Clock, 
-  AlertCircle, Key, UserPlus, Link as LinkIcon, MessageSquare,
-  Pause, Construction, FlaskConical, PlayCircle
+  Loader2, ArrowLeft, Shield, CheckCircle, Clock, 
+  AlertCircle, Key, MessageSquare, Pause, Construction, 
+  FlaskConical, PlayCircle, ExternalLink
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-
-const TOOLS_OPTIONS = [
-  'Gmail / Google Workspace',
-  'Slack',
-  'HubSpot',
-  'Shopify',
-  'WooCommerce',
-  'Twilio',
-  'Discord',
-  'Telegram',
-  'Notion',
-  'ClickUp',
-  'Airtable',
-  'Zapier',
-  'Make',
-  'Other',
-];
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
   received: { label: 'Request Received', color: 'bg-blue-500/20 text-blue-400', icon: <Clock className="w-4 h-4" /> },
   in_review: { label: 'In Review', color: 'bg-blue-500/20 text-blue-400', icon: <Clock className="w-4 h-4" /> },
-  awaiting_credentials: { label: 'Awaiting Access Info', color: 'bg-yellow-500/20 text-yellow-400', icon: <Key className="w-4 h-4" /> },
-  in_build: { label: 'Building', color: 'bg-purple-500/20 text-purple-400', icon: <Construction className="w-4 h-4" /> },
+  awaiting_credentials: { label: 'Awaiting Access', color: 'bg-yellow-500/20 text-yellow-400', icon: <Key className="w-4 h-4" /> },
+  in_build: { label: 'Activating', color: 'bg-purple-500/20 text-purple-400', icon: <Construction className="w-4 h-4" /> },
   testing: { label: 'Testing', color: 'bg-orange-500/20 text-orange-400', icon: <FlaskConical className="w-4 h-4" /> },
-  live: { label: 'Live', color: 'bg-green-500/20 text-green-400', icon: <PlayCircle className="w-4 h-4" /> },
+  live: { label: 'Active', color: 'bg-green-500/20 text-green-400', icon: <PlayCircle className="w-4 h-4" /> },
   paused: { label: 'Paused', color: 'bg-gray-500/20 text-gray-400', icon: <Pause className="w-4 h-4" /> },
   needs_attention: { label: 'Action Needed', color: 'bg-red-500/20 text-red-400', icon: <AlertCircle className="w-4 h-4" /> },
   completed: { label: 'Completed', color: 'bg-emerald-500/20 text-emerald-400', icon: <CheckCircle className="w-4 h-4" /> },
@@ -55,69 +26,10 @@ const TIMELINE_STEPS = [
   { status: 'received', label: 'Received' },
   { status: 'in_review', label: 'In Review' },
   { status: 'awaiting_credentials', label: 'Awaiting Access' },
-  { status: 'in_build', label: 'Building' },
+  { status: 'in_build', label: 'Activating' },
   { status: 'testing', label: 'Testing' },
-  { status: 'live', label: 'Live' },
+  { status: 'live', label: 'Active' },
 ];
-
-// Strong secret detection patterns - provider-specific prefixes
-const SECRET_PATTERNS = [
-  // OpenAI
-  /^sk-[a-zA-Z0-9]{20,}$/,
-  /^sk-proj-[a-zA-Z0-9-_]{20,}$/,
-  // Stripe
-  /^sk_live_[a-zA-Z0-9]{20,}$/,
-  /^sk_test_[a-zA-Z0-9]{20,}$/,
-  /^pk_live_[a-zA-Z0-9]{20,}$/,
-  /^pk_test_[a-zA-Z0-9]{20,}$/,
-  /^rk_live_[a-zA-Z0-9]{20,}$/,
-  /^rk_test_[a-zA-Z0-9]{20,}$/,
-  // Slack
-  /^xox[baprs]-[a-zA-Z0-9-]+$/,
-  // GitHub
-  /^ghp_[a-zA-Z0-9]{36,}$/,
-  /^gho_[a-zA-Z0-9]{36,}$/,
-  /^github_pat_[a-zA-Z0-9_]{22,}$/,
-  // AWS
-  /^AKIA[0-9A-Z]{16}$/,
-  /^ASIA[0-9A-Z]{16}$/,
-  // Google
-  /^AIza[0-9A-Za-z_-]{35}$/,
-  // Bearer tokens
-  /^Bearer\s+[a-zA-Z0-9._-]{20,}$/i,
-  // Twilio
-  /^SK[a-f0-9]{32}$/,
-  // SendGrid / Resend
-  /^SG\.[a-zA-Z0-9_-]{22}\.[a-zA-Z0-9_-]{43}$/,
-  /^re_[a-zA-Z0-9]{20,}$/,
-  // Generic but with high entropy requirement (40+ chars, mixed alphanumeric, not a URL)
-];
-
-function looksLikeSecret(value: string): boolean {
-  const trimmed = value.trim();
-  if (trimmed.length < 20) return false;
-  
-  // Check provider-specific patterns first
-  const hasSecretPattern = SECRET_PATTERNS.some(pattern => pattern.test(trimmed));
-  if (hasSecretPattern) return true;
-  
-  // Skip URLs - they are not secrets
-  if (/^https?:\/\//i.test(trimmed)) return false;
-  
-  // Skip UUIDs
-  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(trimmed)) return false;
-  
-  // High-entropy generic detection: 40+ chars, must have letters AND numbers, no spaces
-  if (trimmed.length >= 40 && /[a-zA-Z]/.test(trimmed) && /[0-9]/.test(trimmed) && !/\s/.test(trimmed)) {
-    // Additional check: if it's mostly alphanumeric with few special chars, might be a key
-    const alphanumericRatio = (trimmed.match(/[a-zA-Z0-9]/g) || []).length / trimmed.length;
-    if (alphanumericRatio > 0.85) {
-      return true;
-    }
-  }
-  
-  return false;
-}
 
 interface ActivationRequest {
   id: string;
@@ -129,6 +41,7 @@ interface ActivationRequest {
   status_updated_at: string;
   activation_eta: string | null;
   activation_notes_customer: string | null;
+  credentials_submitted_at: string | null;
 }
 
 export default function ActivationRequestDetail() {
@@ -138,16 +51,7 @@ export default function ActivationRequestDetail() {
   
   const [request, setRequest] = useState<ActivationRequest | null>(null);
   const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Form state
-  const [selectedTool, setSelectedTool] = useState('');
-  const [credentialMethod, setCredentialMethod] = useState<string>('');
-  const [message, setMessage] = useState('');
-  const [secureLink, setSecureLink] = useState('');
-  const [credentialReference, setCredentialReference] = useState('');
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -170,7 +74,7 @@ export default function ActivationRequestDetail() {
     // Query with BOTH id AND email for server-side enforcement
     const { data, error: fetchError } = await supabase
       .from('installation_requests')
-      .select('id, name, email, purchased_item, preferred_systems, customer_visible_status, status_updated_at, activation_eta, activation_notes_customer')
+      .select('id, name, email, purchased_item, preferred_systems, customer_visible_status, status_updated_at, activation_eta, activation_notes_customer, credentials_submitted_at')
       .eq('id', id)
       .eq('email', user.email)
       .maybeSingle();
@@ -189,127 +93,7 @@ export default function ActivationRequestDetail() {
     }
 
     setRequest(data as ActivationRequest);
-    
-    // Pre-populate tool from preferred_systems if available
-    if (data.preferred_systems) {
-      const tools = data.preferred_systems.split(',').map((t: string) => t.trim());
-      if (tools.length > 0) {
-        const matchedTool = TOOLS_OPTIONS.find(opt => 
-          tools.some((t: string) => opt.toLowerCase().includes(t.toLowerCase()))
-        );
-        if (matchedTool) setSelectedTool(matchedTool);
-      }
-    }
-    
     setLoading(false);
-  };
-
-  const validateForm = (): boolean => {
-    const errors: Record<string, string> = {};
-    
-    if (!selectedTool) {
-      errors.tool = 'Please select a tool to connect';
-    }
-    
-    if (!credentialMethod) {
-      errors.method = 'Please select a connection method';
-    }
-
-    // Check for secrets in text fields
-    const fieldsToCheck = [message, secureLink, credentialReference];
-    for (const field of fieldsToCheck) {
-      if (field && looksLikeSecret(field)) {
-        errors.secret = 'For security, do not paste API keys or secrets directly. Use the reference method to indicate where the key is stored (e.g., "1Password vault: AERELION/ClientName/Tool").';
-        break;
-      }
-    }
-
-    if (credentialMethod === 'api_key' && !credentialReference) {
-      errors.reference = 'Please specify where the API key is stored';
-    }
-
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  const handleSubmit = async () => {
-    if (!validateForm() || !request || !user?.email) return;
-
-    setSubmitting(true);
-
-    try {
-      // Insert the customer update
-      const { error: insertError } = await supabase
-        .from('activation_customer_updates')
-        .insert({
-          request_id: request.id,
-          customer_email: user.email,
-          update_type: 'credentials',
-          tool_name: selectedTool,
-          credential_method: credentialMethod,
-          message: message || null,
-          secure_link: secureLink || null,
-          credential_reference: credentialReference || null,
-          status: 'submitted',
-        });
-
-      if (insertError) throw insertError;
-
-      // Update the parent request status
-      const { error: updateError } = await supabase
-        .from('installation_requests')
-        .update({
-          customer_visible_status: 'in_review',
-          status: 'in_review',
-          status_updated_at: new Date().toISOString(),
-        })
-        .eq('id', request.id)
-        .eq('email', user.email); // Additional safety
-
-      if (updateError) throw updateError;
-
-      // Trigger notification (don't fail submission if this fails)
-      try {
-        await supabase.functions.invoke('notify-activation-customer-update', {
-          body: {
-            request_id: request.id,
-            customer_email: user.email,
-            business_name: request.name,
-            purchased_item: request.purchased_item,
-            tool_name: selectedTool,
-            credential_method: credentialMethod,
-            message: message,
-          },
-        });
-      } catch (notifyError) {
-        console.error('Notification error:', notifyError);
-      }
-
-      toast({
-        title: 'Access information submitted',
-        description: 'We received your connection details and will proceed with activation.',
-      });
-
-      // Reset form
-      setSelectedTool('');
-      setCredentialMethod('');
-      setMessage('');
-      setSecureLink('');
-      setCredentialReference('');
-      setFormErrors({});
-      
-      // Refresh request
-      fetchRequest();
-    } catch (err) {
-      console.error('Submission error:', err);
-      toast({
-        title: 'Submission failed',
-        description: 'Please try again or contact support.',
-        variant: 'destructive',
-      });
-    } finally {
-      setSubmitting(false);
-    }
   };
 
   const getCurrentStepIndex = () => {
@@ -349,6 +133,7 @@ export default function ActivationRequestDetail() {
   const statusConfig = STATUS_CONFIG[request.customer_visible_status] || STATUS_CONFIG.received;
   const currentStepIndex = getCurrentStepIndex();
   const needsCredentials = ['awaiting_credentials', 'needs_attention'].includes(request.customer_visible_status);
+  const hasSubmittedCredentials = !!request.credentials_submitted_at;
 
   return (
     <div className="min-h-screen bg-background">
@@ -362,7 +147,7 @@ export default function ActivationRequestDetail() {
         <div className="mb-8">
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div>
-              <h1 className="text-3xl font-display mb-2">Activation Request</h1>
+              <h1 className="text-3xl font-display mb-2">Activation Status</h1>
               <p className="text-muted-foreground">
                 {request.purchased_item || 'Hosted Automation'}
               </p>
@@ -423,7 +208,7 @@ export default function ActivationRequestDetail() {
                 <span>{request.name}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Item</span>
+                <span className="text-muted-foreground">Automation</span>
                 <span>{request.purchased_item || 'Automation'}</span>
               </div>
               {request.activation_eta && (
@@ -436,40 +221,77 @@ export default function ActivationRequestDetail() {
           </div>
 
           <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl p-6">
-            <h3 className="font-semibold mb-3">Tools to Connect</h3>
+            <h3 className="font-semibold mb-3">Required Connections</h3>
             {request.preferred_systems ? (
               <div className="flex flex-wrap gap-2">
                 {request.preferred_systems.split(',').map((tool, i) => (
-                  <Badge key={i} variant="secondary">{tool.trim()}</Badge>
+                  <Badge 
+                    key={i} 
+                    variant="secondary"
+                    className={hasSubmittedCredentials ? 'bg-emerald-500/10 text-emerald-400' : ''}
+                  >
+                    {hasSubmittedCredentials && <CheckCircle className="w-3 h-3 mr-1" />}
+                    {tool.trim()}
+                  </Badge>
                 ))}
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">No specific tools selected</p>
             )}
+            {hasSubmittedCredentials && (
+              <p className="text-xs text-emerald-400 mt-2">Access authorized</p>
+            )}
           </div>
         </div>
 
-        {/* Secure Credential Intake CTA */}
-        <div className="bg-primary/10 border border-primary/30 rounded-xl p-6 mb-8">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-              <Shield className="w-6 h-6 text-primary" />
-            </div>
-            <div className="flex-1">
-              <h3 className="font-semibold text-lg mb-1">Secure Credential Setup</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Use our encrypted credential intake to securely connect your tools. 
-                Your credentials are encrypted with AES-256-GCM and can be revoked anytime.
-              </p>
-              <Link to={`/credentials/${request.id}`}>
-                <Button className="gap-2">
-                  <Key className="w-4 h-4" />
-                  Connect Your Tools Securely
-                </Button>
-              </Link>
+        {/* Connect Securely CTA - Only shown when credentials needed */}
+        {needsCredentials && !hasSubmittedCredentials && (
+          <div className="bg-primary/10 border border-primary/30 rounded-xl p-6 mb-8">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                <Shield className="w-6 h-6 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-lg mb-1">Authorize Access</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  To activate your automation, we need secure access to your connected services. 
+                  Your credentials are encrypted with AES-256-GCM and can be revoked anytime.
+                </p>
+                <Link to={`/credentials/${request.id}`}>
+                  <Button className="gap-2">
+                    <Key className="w-4 h-4" />
+                    Connect Securely
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
-        </div>
+        )}
+
+        {/* Access Authorized - Status when credentials submitted */}
+        {hasSubmittedCredentials && (
+          <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-6 mb-8">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                <CheckCircle className="w-6 h-6 text-emerald-500" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-lg mb-1 text-emerald-400">Access Authorized</h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Your credentials have been securely stored. AERELION is now activating your automation.
+                </p>
+                <div className="flex gap-3">
+                  <Link to={`/credentials/${request.id}`}>
+                    <Button variant="outline" size="sm" className="gap-2">
+                      <Shield className="w-3.5 h-3.5" />
+                      Manage Access
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Customer Notes from AERELION */}
         {request.activation_notes_customer && (
@@ -484,234 +306,34 @@ export default function ActivationRequestDetail() {
           </div>
         )}
 
-        {/* Security Warning Banner */}
-        <div className="bg-destructive/5 border border-destructive/20 rounded-xl p-4 mb-6">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-destructive mt-0.5 flex-shrink-0" />
-            <div>
-              <p className="font-medium text-destructive">Do not paste API keys or secrets here</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Use the reference method to indicate where the key is stored (e.g., "1Password vault: AERELION/YourCompany/Tool").
-              </p>
+        {/* System Status Footer */}
+        <div className="bg-card/30 border border-border/30 rounded-xl p-6">
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
+              <Shield className="w-5 h-5 text-emerald-500" />
             </div>
-          </div>
-        </div>
-
-        {/* Credential Submission Form */}
-        <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <Key className="w-5 h-5 text-primary" />
-            </div>
-            <div>
-              <h2 className="text-xl font-semibold">Connect Your Tools</h2>
+            <div className="flex-1">
+              <h3 className="font-semibold text-sm mb-1">Hosted & Maintained by AERELION</h3>
               <p className="text-sm text-muted-foreground">
-                Provide access information securely. We never store plaintext credentials.
+                Your automation is hosted on AERELION's secure infrastructure. 
+                We handle all configuration, monitoring, and maintenance. 
+                You can revoke access at any time.
               </p>
-            </div>
-          </div>
-
-          {formErrors.secret && (
-            <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-4 mb-6">
-              <div className="flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-destructive mt-0.5" />
-                <p className="text-sm text-destructive">{formErrors.secret}</p>
+              
+              <div className="flex flex-wrap gap-4 mt-4">
+                <Link
+                  to="/contact"
+                  className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+                >
+                  Contact Support
+                </Link>
+                <Link
+                  to="/security"
+                  className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+                >
+                  Security Practices
+                </Link>
               </div>
-            </div>
-          )}
-
-          <div className="space-y-6">
-            {/* Tool Selection */}
-            <div>
-              <Label className="mb-2 block">
-                Which tool are you connecting? <span className="text-destructive">*</span>
-              </Label>
-              <Select value={selectedTool} onValueChange={setSelectedTool}>
-                <SelectTrigger className={formErrors.tool ? 'border-destructive' : ''}>
-                  <SelectValue placeholder="Select a tool..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {TOOLS_OPTIONS.map(tool => (
-                    <SelectItem key={tool} value={tool}>{tool}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {formErrors.tool && (
-                <p className="text-sm text-destructive mt-1">{formErrors.tool}</p>
-              )}
-            </div>
-
-            {/* Connection Method */}
-            <div>
-              <Label className="mb-3 block">
-                How would you like to connect? <span className="text-destructive">*</span>
-              </Label>
-              <RadioGroup value={credentialMethod} onValueChange={setCredentialMethod}>
-                <div className="grid gap-3">
-                  <label className={`flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-colors ${
-                    credentialMethod === 'oauth' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
-                  }`}>
-                    <RadioGroupItem value="oauth" id="oauth" className="mt-0.5" />
-                    <div>
-                      <div className="font-medium flex items-center gap-2">
-                        <LinkIcon className="w-4 h-4" />
-                        OAuth / Secure Link
-                      </div>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Provide a secure authorization link or OAuth flow URL
-                      </p>
-                    </div>
-                  </label>
-                  
-                  <label className={`flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-colors ${
-                    credentialMethod === 'invite_user' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
-                  }`}>
-                    <RadioGroupItem value="invite_user" id="invite_user" className="mt-0.5" />
-                    <div>
-                      <div className="font-medium flex items-center gap-2">
-                        <UserPlus className="w-4 h-4" />
-                        Invite AERELION User
-                      </div>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Add our service account to your workspace
-                      </p>
-                    </div>
-                  </label>
-                  
-                  <label className={`flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-colors ${
-                    credentialMethod === 'api_key' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
-                  }`}>
-                    <RadioGroupItem value="api_key" id="api_key" className="mt-0.5" />
-                    <div>
-                      <div className="font-medium flex items-center gap-2">
-                        <Key className="w-4 h-4" />
-                        API Key Reference
-                      </div>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Tell us where you've stored the key (e.g., 1Password vault)
-                      </p>
-                    </div>
-                  </label>
-                  
-                  <label className={`flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-colors ${
-                    credentialMethod === 'other' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
-                  }`}>
-                    <RadioGroupItem value="other" id="other" className="mt-0.5" />
-                    <div>
-                      <div className="font-medium flex items-center gap-2">
-                        <MessageSquare className="w-4 h-4" />
-                        Other Method
-                      </div>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Describe your preferred connection approach
-                      </p>
-                    </div>
-                  </label>
-                </div>
-              </RadioGroup>
-              {formErrors.method && (
-                <p className="text-sm text-destructive mt-2">{formErrors.method}</p>
-              )}
-            </div>
-
-            {/* Conditional Fields Based on Method */}
-            {credentialMethod === 'oauth' && (
-              <div>
-                <Label htmlFor="secureLink" className="mb-2 block">
-                  Authorization Link or OAuth URL
-                </Label>
-                <Input
-                  id="secureLink"
-                  value={secureLink}
-                  onChange={(e) => setSecureLink(e.target.value)}
-                  placeholder="https://..."
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Provide the link we should use to authorize access
-                </p>
-              </div>
-            )}
-
-            {credentialMethod === 'invite_user' && (
-              <div className="bg-secondary/50 rounded-lg p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Mail className="w-4 h-4 text-primary" />
-                  <span className="font-medium">Invite this email:</span>
-                </div>
-                <code className="text-sm bg-background px-3 py-1.5 rounded border block">
-                  contact@aerelion.systems
-                </code>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Add this email as an admin or team member in your tool, then let us know below.
-                </p>
-              </div>
-            )}
-
-            {credentialMethod === 'api_key' && (
-              <div>
-                <Label htmlFor="credentialReference" className="mb-2 block">
-                  Where is the API key stored? <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="credentialReference"
-                  value={credentialReference}
-                  onChange={(e) => setCredentialReference(e.target.value)}
-                  placeholder="e.g., 1Password vault: AERELION/YourCompany/HubSpot"
-                  className={formErrors.reference ? 'border-destructive' : ''}
-                />
-                {formErrors.reference && (
-                  <p className="text-sm text-destructive mt-1">{formErrors.reference}</p>
-                )}
-                <p className="text-xs text-muted-foreground mt-1">
-                  Do NOT paste the actual key. Describe where it's stored.
-                </p>
-              </div>
-            )}
-
-            {/* Message */}
-            <div>
-              <Label htmlFor="message" className="mb-2 block">
-                Additional Notes
-              </Label>
-              <Textarea
-                id="message"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder="Any specific instructions, workspace names, or details we should know..."
-                rows={3}
-              />
-            </div>
-
-            {/* Security Notice */}
-            <div className="flex items-start gap-3 p-4 bg-secondary/30 rounded-lg">
-              <Shield className="w-5 h-5 text-primary mt-0.5" />
-              <div className="text-sm">
-                <p className="font-medium mb-1">Your data is secure</p>
-                <p className="text-muted-foreground">
-                  We encrypt all access information at rest. You can{' '}
-                  <Link to="/security" className="text-primary hover:underline">
-                    revoke access at any time
-                  </Link>.
-                </p>
-              </div>
-            </div>
-
-            {/* Submit */}
-            <div className="flex gap-4 pt-4">
-              <Button 
-                onClick={handleSubmit} 
-                disabled={submitting}
-                className="flex-1"
-              >
-                {submitting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Submitting...
-                  </>
-                ) : (
-                  'Submit Access Information'
-                )}
-              </Button>
             </div>
           </div>
         </div>

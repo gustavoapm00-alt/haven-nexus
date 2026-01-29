@@ -1,4 +1,4 @@
-import { useState, useEffect, ComponentType } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { 
   Shield, 
@@ -8,7 +8,6 @@ import {
   ArrowLeft,
   Loader2,
   AlertCircle,
-  Plus,
   Key,
   Mail,
   MessageSquare,
@@ -96,7 +95,7 @@ export default function CredentialIntake() {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/auth?redirect=' + encodeURIComponent(`/credentials/${id}`));
+      navigate('/portal/auth?redirect=' + encodeURIComponent(`/credentials/${id}`));
     }
   }, [user, authLoading, navigate, id]);
 
@@ -190,7 +189,7 @@ export default function CredentialIntake() {
               <AlertCircle className="w-4 h-4" />
               <AlertDescription>{error || 'Request not found'}</AlertDescription>
             </Alert>
-            <Link to="/dashboard" className="mt-4 inline-block">
+            <Link to="/portal/dashboard" className="mt-4 inline-block">
               <Button variant="outline">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Dashboard
@@ -211,19 +210,19 @@ export default function CredentialIntake() {
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="mb-8">
-            <Link to={`/activation-request/${id}`} className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4">
+            <Link to="/portal/dashboard" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Activation Request
+              Back to Dashboard
             </Link>
             
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h1 className="text-2xl font-bold text-foreground mb-2 flex items-center gap-3">
                   <Shield className="w-6 h-6 text-primary" />
-                  Secure Credential Setup
+                  Authorize Access
                 </h1>
                 <p className="text-muted-foreground">
-                  {request.purchased_item || automation?.name || 'Automation Setup'}
+                  {request.purchased_item || automation?.name || 'Automation Activation'}
                 </p>
               </div>
               
@@ -243,8 +242,8 @@ export default function CredentialIntake() {
               <div>
                 <p className="font-medium text-foreground mb-1">Your credentials are protected</p>
                 <p className="text-sm text-muted-foreground">
-                  All credentials are encrypted with AES-256-GCM before transmission and stored securely. 
-                  They are never logged, exposed in plaintext, or accessible to unauthorized parties. 
+                  All credentials are sent securely via HTTPS and encrypted at rest with AES-256-GCM. 
+                  They are never logged, emailed, or shown again after submission. 
                   You can revoke access at any time.
                 </p>
               </div>
@@ -256,10 +255,19 @@ export default function CredentialIntake() {
             <Alert className="mb-8 bg-emerald-500/10 border-emerald-500/30">
               <CheckCircle className="w-4 h-4 text-emerald-500" />
               <AlertDescription className="text-emerald-400">
-                All credentials connected! Your activation is now in review.
+                All access authorized! AERELION will now activate your automation.
               </AlertDescription>
             </Alert>
           )}
+
+          {/* Purpose Statement */}
+          <div className="mb-6 p-4 bg-card/50 border border-border/50 rounded-lg">
+            <p className="text-sm text-muted-foreground">
+              <span className="font-medium text-foreground">Why we need access:</span>{' '}
+              To activate your {request.purchased_item || 'automation'}, AERELION requires secure authorization 
+              to the following services. Once connected, we handle all configuration and maintenance.
+            </p>
+          </div>
 
           {/* Credential Forms */}
           {requiredSchemas.length > 0 && (
@@ -316,31 +324,28 @@ export default function CredentialIntake() {
             </Tabs>
           )}
 
-          {/* Add Custom Credential */}
+          {/* Support Notice */}
           <div className="mt-8 p-4 bg-card/30 border border-border/30 rounded-lg">
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-medium text-foreground">Need to connect a different service?</p>
+                <p className="font-medium text-foreground">Need help connecting?</p>
                 <p className="text-sm text-muted-foreground">
-                  Use our custom API connector or contact support
+                  Our team can guide you through the authorization process
                 </p>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setActiveTab('custom_api')}
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Custom API
-              </Button>
+              <Link to="/contact">
+                <Button variant="outline" size="sm">
+                  Contact Support
+                </Button>
+              </Link>
             </div>
           </div>
 
           {/* Next Steps */}
           <div className="mt-8 flex justify-end">
-            <Link to={`/activation-request/${id}`}>
-              <Button>
-                View Activation Status
+            <Link to="/portal/dashboard">
+              <Button variant="outline">
+                Back to Dashboard
                 <ChevronRight className="w-4 h-4 ml-2" />
               </Button>
             </Link>
