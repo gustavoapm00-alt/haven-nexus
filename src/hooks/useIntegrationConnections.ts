@@ -2,6 +2,14 @@ import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
+/**
+ * CONNECT ONCE. RUN MANY.
+ * 
+ * This hook manages user-level integration connections.
+ * Credentials are stored at the user level, not per-activation.
+ * Users connect HubSpot once and reuse it across all automations.
+ */
+
 export interface IntegrationConnection {
   id: string;
   provider: string;
@@ -28,16 +36,19 @@ export function useIntegrationConnections(activationRequestId?: string) {
     isConnecting: false,
   });
 
+  // Fetch user's connections (user-level, not activation-specific)
   const fetchConnections = useCallback(async () => {
-    if (!activationRequestId || !user) return;
+    if (!user) return;
 
     setState(prev => ({ ...prev, isLoading: true, error: null }));
 
     try {
+      // CONNECT ONCE: Fetch by user_id only, not activation_request_id
       const { data, error } = await supabase
         .from('integration_connections')
         .select('*')
-        .eq('activation_request_id', activationRequestId)
+        .eq('user_id', user.id)
+        .neq('status', 'revoked')
         .order('created_at', { ascending: true });
 
       if (error) throw error;
@@ -55,7 +66,7 @@ export function useIntegrationConnections(activationRequestId?: string) {
         error: err instanceof Error ? err.message : 'Failed to load connections',
       }));
     }
-  }, [activationRequestId, user]);
+  }, [user]);
 
   useEffect(() => {
     fetchConnections();
@@ -69,8 +80,8 @@ export function useIntegrationConnections(activationRequestId?: string) {
       connectedEmail?: string;
     }
   ) => {
-    if (!activationRequestId || !user) {
-      return { error: 'Not authenticated or no activation request' };
+    if (!user) {
+      return { error: 'Not authenticated' };
     }
 
     setState(prev => ({ ...prev, isConnecting: true, error: null }));
@@ -79,7 +90,7 @@ export function useIntegrationConnections(activationRequestId?: string) {
       const response = await supabase.functions.invoke('connect-integration', {
         body: {
           action: 'connect',
-          activationRequestId,
+          activationRequestId, // Optional - for checking readiness
           provider,
           credentials,
           grantedScopes: options?.grantedScopes,
@@ -105,10 +116,10 @@ export function useIntegrationConnections(activationRequestId?: string) {
       }));
       return { error: errorMessage };
     }
-  }, [activationRequestId, user, fetchConnections]);
+  }, [user, activationRequestId, fetchConnections]);
 
   const revokeConnection = useCallback(async (provider: string) => {
-    if (!activationRequestId || !user) {
+    if (!user) {
       return { error: 'Not authenticated' };
     }
 
@@ -118,7 +129,6 @@ export function useIntegrationConnections(activationRequestId?: string) {
       const response = await supabase.functions.invoke('connect-integration', {
         body: {
           action: 'revoke',
-          activationRequestId,
           provider,
         },
       });
@@ -141,7 +151,37 @@ export function useIntegrationConnections(activationRequestId?: string) {
       }));
       return { error: errorMessage };
     }
-  }, [activationRequestId, user, fetchConnections]);
+  }, [user, fetchConnections]);
+
+  // Check if activation is ready (all required integrations connected)
+  const checkActivationReady = useCallback(async (): Promise<{
+    allConnected: boolean;
+    required: string[];
+    connected: string[];
+    missing: string[];
+  }> => {
+    if (!user || !activationRequestId) {
+      return { allConnected: false, required: [], connected: [], missing: [] };
+    }
+
+    try {
+      const response = await supabase.functions.invoke('connect-integration', {
+        body: {
+          action: 'check_ready',
+          activationRequestId,
+        },
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      return response.data;
+    } catch (err) {
+      console.error('Failed to check activation readiness:', err);
+      return { allConnected: false, required: [], connected: [], missing: [] };
+    }
+  }, [user, activationRequestId]);
 
   const getConnectionStatus = useCallback((provider: string): IntegrationConnection['status'] => {
     const connection = state.connections.find(
@@ -163,6 +203,7 @@ export function useIntegrationConnections(activationRequestId?: string) {
     fetchConnections,
     connectIntegration,
     revokeConnection,
+    checkActivationReady,
     getConnectionStatus,
     isProviderConnected,
     allRequiredConnected,
