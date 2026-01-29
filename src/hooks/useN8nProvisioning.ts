@@ -8,9 +8,9 @@ export interface N8nMapping {
   activation_request_id: string;
   automation_id?: string;
   bundle_id?: string;
-  n8n_workflow_ids: string[];
-  n8n_credential_ids: string[];
   status: 'pending' | 'provisioning' | 'active' | 'paused' | 'error' | 'deactivated';
+  credentials_reference_id?: string;
+  webhook_status?: 'pending' | 'success' | 'error';
   provisioned_at?: string;
   last_sync_at?: string;
   error_message?: string;
@@ -24,6 +24,15 @@ interface UseN8nProvisioningState {
   error: string | null;
 }
 
+interface ProvisioningResult {
+  error: string | null;
+  data?: {
+    success: boolean;
+    mappingId?: string;
+    message?: string;
+  };
+}
+
 export function useN8nProvisioning() {
   const { user } = useAuth();
   const [state, setState] = useState<UseN8nProvisioningState>({
@@ -31,7 +40,13 @@ export function useN8nProvisioning() {
     error: null,
   });
 
-  const provision = useCallback(async (activationRequestId: string) => {
+  /**
+   * Activate an automation by triggering its webhook
+   */
+  const activate = useCallback(async (
+    activationRequestId: string, 
+    config?: Record<string, unknown>
+  ): Promise<ProvisioningResult> => {
     if (!user) {
       return { error: 'Not authenticated' };
     }
@@ -39,27 +54,31 @@ export function useN8nProvisioning() {
     setState({ isProvisioning: true, error: null });
 
     try {
-      const response = await supabase.functions.invoke('n8n-provision', {
+      const { data, error } = await supabase.functions.invoke('n8n-provision', {
         body: {
-          action: 'provision',
+          action: 'activate',
           activationRequestId,
+          config,
         },
       });
 
-      if (response.error) {
-        throw new Error(response.error.message || 'Failed to provision automation');
+      if (error) {
+        throw new Error(error.message || 'Failed to activate automation');
       }
 
       setState({ isProvisioning: false, error: null });
-      return { error: null, data: response.data };
+      return { error: null, data };
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to provision';
+      const errorMessage = err instanceof Error ? err.message : 'Failed to activate';
       setState({ isProvisioning: false, error: errorMessage });
       return { error: errorMessage };
     }
   }, [user]);
 
-  const pause = useCallback(async (activationRequestId: string) => {
+  /**
+   * Pause an automation
+   */
+  const pause = useCallback(async (activationRequestId: string): Promise<ProvisioningResult> => {
     if (!user) {
       return { error: 'Not authenticated' };
     }
@@ -67,19 +86,19 @@ export function useN8nProvisioning() {
     setState({ isProvisioning: true, error: null });
 
     try {
-      const response = await supabase.functions.invoke('n8n-provision', {
+      const { data, error } = await supabase.functions.invoke('n8n-provision', {
         body: {
           action: 'pause',
           activationRequestId,
         },
       });
 
-      if (response.error) {
-        throw new Error(response.error.message || 'Failed to pause automation');
+      if (error) {
+        throw new Error(error.message || 'Failed to pause automation');
       }
 
       setState({ isProvisioning: false, error: null });
-      return { error: null };
+      return { error: null, data };
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to pause';
       setState({ isProvisioning: false, error: errorMessage });
@@ -87,7 +106,10 @@ export function useN8nProvisioning() {
     }
   }, [user]);
 
-  const resume = useCallback(async (activationRequestId: string) => {
+  /**
+   * Resume a paused automation
+   */
+  const resume = useCallback(async (activationRequestId: string): Promise<ProvisioningResult> => {
     if (!user) {
       return { error: 'Not authenticated' };
     }
@@ -95,19 +117,19 @@ export function useN8nProvisioning() {
     setState({ isProvisioning: true, error: null });
 
     try {
-      const response = await supabase.functions.invoke('n8n-provision', {
+      const { data, error } = await supabase.functions.invoke('n8n-provision', {
         body: {
           action: 'resume',
           activationRequestId,
         },
       });
 
-      if (response.error) {
-        throw new Error(response.error.message || 'Failed to resume automation');
+      if (error) {
+        throw new Error(error.message || 'Failed to resume automation');
       }
 
       setState({ isProvisioning: false, error: null });
-      return { error: null };
+      return { error: null, data };
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to resume';
       setState({ isProvisioning: false, error: errorMessage });
@@ -115,7 +137,10 @@ export function useN8nProvisioning() {
     }
   }, [user]);
 
-  const revoke = useCallback(async (activationRequestId: string) => {
+  /**
+   * Revoke an automation and all its credentials
+   */
+  const revoke = useCallback(async (activationRequestId: string): Promise<ProvisioningResult> => {
     if (!user) {
       return { error: 'Not authenticated' };
     }
@@ -123,19 +148,19 @@ export function useN8nProvisioning() {
     setState({ isProvisioning: true, error: null });
 
     try {
-      const response = await supabase.functions.invoke('n8n-provision', {
+      const { data, error } = await supabase.functions.invoke('n8n-provision', {
         body: {
           action: 'revoke',
           activationRequestId,
         },
       });
 
-      if (response.error) {
-        throw new Error(response.error.message || 'Failed to revoke automation');
+      if (error) {
+        throw new Error(error.message || 'Failed to revoke automation');
       }
 
       setState({ isProvisioning: false, error: null });
-      return { error: null };
+      return { error: null, data };
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to revoke';
       setState({ isProvisioning: false, error: errorMessage });
@@ -143,7 +168,45 @@ export function useN8nProvisioning() {
     }
   }, [user]);
 
-  const getMappings = useCallback(async (activationRequestId?: string) => {
+  /**
+   * Re-trigger the webhook for an automation
+   */
+  const retrigger = useCallback(async (
+    activationRequestId: string,
+    config?: Record<string, unknown>
+  ): Promise<ProvisioningResult> => {
+    if (!user) {
+      return { error: 'Not authenticated' };
+    }
+
+    setState({ isProvisioning: true, error: null });
+
+    try {
+      const { data, error } = await supabase.functions.invoke('n8n-provision', {
+        body: {
+          action: 'retrigger',
+          activationRequestId,
+          config,
+        },
+      });
+
+      if (error) {
+        throw new Error(error.message || 'Failed to retrigger automation');
+      }
+
+      setState({ isProvisioning: false, error: null });
+      return { error: null, data };
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to retrigger';
+      setState({ isProvisioning: false, error: errorMessage });
+      return { error: errorMessage };
+    }
+  }, [user]);
+
+  /**
+   * Get all mappings for a user, optionally filtered by activation request
+   */
+  const getMappings = useCallback(async (activationRequestId?: string): Promise<N8nMapping[]> => {
     if (!user) return [];
 
     let query = supabase
@@ -167,10 +230,13 @@ export function useN8nProvisioning() {
 
   return {
     ...state,
-    provision,
+    activate,
     pause,
     resume,
     revoke,
+    retrigger,
     getMappings,
+    // Legacy alias for backward compatibility
+    provision: activate,
   };
 }

@@ -276,6 +276,7 @@ export type Database = {
         Row: {
           capacity_recovered_max: number
           capacity_recovered_min: number
+          configuration_fields: Json | null
           created_at: string
           current_version: string | null
           description: string
@@ -299,12 +300,15 @@ export type Database = {
           status: string
           systems: string[]
           updated_at: string
+          webhook_url: string | null
           workflow_file_path: string | null
           workflow_file_url: string | null
+          workflow_id: string | null
         }
         Insert: {
           capacity_recovered_max?: number
           capacity_recovered_min?: number
+          configuration_fields?: Json | null
           created_at?: string
           current_version?: string | null
           description: string
@@ -328,12 +332,15 @@ export type Database = {
           status?: string
           systems?: string[]
           updated_at?: string
+          webhook_url?: string | null
           workflow_file_path?: string | null
           workflow_file_url?: string | null
+          workflow_id?: string | null
         }
         Update: {
           capacity_recovered_max?: number
           capacity_recovered_min?: number
+          configuration_fields?: Json | null
           created_at?: string
           current_version?: string | null
           description?: string
@@ -357,8 +364,10 @@ export type Database = {
           status?: string
           systems?: string[]
           updated_at?: string
+          webhook_url?: string | null
           workflow_file_path?: string | null
           workflow_file_url?: string | null
+          workflow_id?: string | null
         }
         Relationships: []
       }
@@ -990,9 +999,11 @@ export type Database = {
           automation_id: string | null
           bundle_id: string | null
           created_at: string
+          credentials_reference_id: string | null
           error_message: string | null
           id: string
           last_sync_at: string | null
+          last_webhook_response: Json | null
           metadata: Json | null
           n8n_credential_ids: string[]
           n8n_workflow_ids: string[]
@@ -1000,15 +1011,18 @@ export type Database = {
           status: string
           updated_at: string
           user_id: string
+          webhook_status: string | null
         }
         Insert: {
           activation_request_id?: string | null
           automation_id?: string | null
           bundle_id?: string | null
           created_at?: string
+          credentials_reference_id?: string | null
           error_message?: string | null
           id?: string
           last_sync_at?: string | null
+          last_webhook_response?: Json | null
           metadata?: Json | null
           n8n_credential_ids?: string[]
           n8n_workflow_ids?: string[]
@@ -1016,15 +1030,18 @@ export type Database = {
           status?: string
           updated_at?: string
           user_id: string
+          webhook_status?: string | null
         }
         Update: {
           activation_request_id?: string | null
           automation_id?: string | null
           bundle_id?: string | null
           created_at?: string
+          credentials_reference_id?: string | null
           error_message?: string | null
           id?: string
           last_sync_at?: string | null
+          last_webhook_response?: Json | null
           metadata?: Json | null
           n8n_credential_ids?: string[]
           n8n_workflow_ids?: string[]
@@ -1032,6 +1049,7 @@ export type Database = {
           status?: string
           updated_at?: string
           user_id?: string
+          webhook_status?: string | null
         }
         Relationships: [
           {
