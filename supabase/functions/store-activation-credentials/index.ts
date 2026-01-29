@@ -227,68 +227,36 @@ Deno.serve(async (req) => {
 
     console.log(`Credentials stored successfully for request ${requestId}`);
 
-    // Notify admin about credential submission
-    try {
-      const adminEmail = Deno.env.get("ADMIN_NOTIFICATION_EMAIL") || "contact@aerelion.systems";
-      const resendApiKey = Deno.env.get("RESEND_API_KEY");
-      
-      if (resendApiKey) {
-        await fetch("https://api.resend.com/emails", {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${resendApiKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            from: "AERELION Systems <noreply@aerelion.systems>",
-            to: [adminEmail],
-            subject: `🔑 Credentials Submitted - ${serviceName} | Request ${requestId.slice(0, 8)}`,
-            html: `
-              <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-                <h2 style="color: #3b82f6;">🔑 Credentials Submitted</h2>
-                <p>A customer has submitted credentials for their activation request.</p>
-                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
-                  <tr>
-                    <td style="padding: 8px; border-bottom: 1px solid #eee; color: #666;">Request ID</td>
-                    <td style="padding: 8px; border-bottom: 1px solid #eee;">${requestId}</td>
-                  </tr>
-                  <tr>
-                    <td style="padding: 8px; border-bottom: 1px solid #eee; color: #666;">Service</td>
-                    <td style="padding: 8px; border-bottom: 1px solid #eee;">${serviceName}</td>
-                  </tr>
-                  <tr>
-                    <td style="padding: 8px; border-bottom: 1px solid #eee; color: #666;">Type</td>
-                    <td style="padding: 8px; border-bottom: 1px solid #eee;">${credentialType}</td>
-                  </tr>
-                  <tr>
-                    <td style="padding: 8px; border-bottom: 1px solid #eee; color: #666;">Total Active</td>
-                    <td style="padding: 8px; border-bottom: 1px solid #eee;">${existingCreds?.length || 1}</td>
-                  </tr>
-                </table>
-                <p style="margin-top: 20px;">
-                  <a href="https://aerelion.systems/admin/activity" 
-                     style="display: inline-block; padding: 10px 20px; background: #3b82f6; color: white; text-decoration: none; border-radius: 6px;">
-                    View in Admin Dashboard
-                  </a>
-                </p>
-              </div>
-            `,
-          }),
-        });
-        console.log("Admin notification sent for credential submission");
-      }
-    } catch (notifyError) {
-      // Don't fail the request if notification fails
-      console.error("Failed to send admin notification:", notifyError);
-    }
-
-    // Create in-app notification for the client
+    // Create admin notification (in-app, no email dependency)
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     if (serviceRoleKey) {
       try {
         const adminClient = createClient(supabaseUrl, serviceRoleKey);
         
-        // Get user ID from email
+        // Insert admin notification
+        const { error: adminNotifyError } = await adminClient
+          .from("admin_notifications")
+          .insert({
+            type: "credential_submitted",
+            title: "Credentials Submitted",
+            body: `${serviceName} access authorized for request ${requestId.slice(0, 8)}...`,
+            severity: "info",
+            metadata: {
+              requestId,
+              serviceName,
+              credentialType,
+              customerEmail: userEmail,
+              credentialsCount: existingCreds?.length || 1,
+            },
+          });
+
+        if (adminNotifyError) {
+          console.error("Failed to create admin notification:", adminNotifyError.message);
+        } else {
+          console.log("Admin notification created for credential submission");
+        }
+
+        // Create in-app notification for the client
         const { data: profileData } = await adminClient
           .from("profiles")
           .select("id")
@@ -296,18 +264,52 @@ Deno.serve(async (req) => {
           .single();
         
         if (profileData) {
-          await adminClient.from("client_notifications").insert({
-            user_id: profileData.id,
-            type: "credential_submitted",
-            title: "Access Authorized",
-            body: `Your ${serviceName} credentials have been securely stored. AERELION is now activating your automation.`,
-            severity: "info",
-            metadata: { requestId, serviceName, credentialType },
-          });
-          console.log("Client notification created");
+          const { error: clientNotifyError } = await adminClient
+            .from("client_notifications")
+            .insert({
+              user_id: profileData.id,
+              type: "credential_submitted",
+              title: "Access Authorized",
+              body: `Your ${serviceName} credentials have been securely stored. AERELION is now activating your automation.`,
+              severity: "success",
+              metadata: { requestId, serviceName, credentialType },
+            });
+
+          if (clientNotifyError) {
+            console.error("Failed to create client notification:", clientNotifyError.message);
+          } else {
+            console.log("Client notification created");
+          }
         }
-      } catch (clientNotifyError) {
-        console.error("Failed to create client notification:", clientNotifyError);
+
+        // Optional: Send to Slack webhook if configured
+        const slackWebhookUrl = Deno.env.get("SLACK_WEBHOOK_URL");
+        if (slackWebhookUrl) {
+          try {
+            await fetch(slackWebhookUrl, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                text: `🔑 *Credentials Submitted*\n*Service:* ${serviceName}\n*Type:* ${credentialType}\n*Request:* ${requestId.slice(0, 8)}...`,
+                blocks: [
+                  {
+                    type: "section",
+                    text: {
+                      type: "mrkdwn",
+                      text: `🔑 *Credentials Submitted*\n*Service:* ${serviceName}\n*Type:* ${credentialType}\n*Request:* \`${requestId.slice(0, 8)}...\``,
+                    },
+                  },
+                ],
+              }),
+            });
+            console.log("Slack notification sent");
+          } catch (slackError) {
+            console.error("Slack notification failed (non-fatal):", slackError);
+          }
+        }
+      } catch (notifyError) {
+        // Don't fail the request if notification fails
+        console.error("Failed to send notifications:", notifyError);
       }
     }
 
