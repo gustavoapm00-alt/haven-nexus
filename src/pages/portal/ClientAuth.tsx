@@ -8,6 +8,7 @@ import { z } from 'zod';
 import PortalBackground from '@/components/portal/PortalBackground';
 import { GlassCard } from '@/components/portal/GlassCard';
 import { useClientProfile } from '@/hooks/useClientProfile';
+import { lovable } from '@/integrations/lovable/index';
 
 const emailSchema = z.object({
   email: z.string().trim().email('Please enter a valid email address').max(255),
@@ -155,11 +156,13 @@ const ClientAuth = () => {
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
     try {
-      const { error } = await signInWithGoogle();
-      if (error) {
+      const result = await lovable.auth.signInWithOAuth('google', {
+        redirect_uri: window.location.origin + '/portal/dashboard',
+      });
+      if (result.error) {
         toast({
           title: 'Error signing in with Google',
-          description: error.message,
+          description: result.error.message,
           variant: 'destructive',
         });
       }
