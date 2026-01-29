@@ -30,11 +30,15 @@ const Auth = () => {
   const { user, signIn, signUp, resetPassword, isLoading } = useAuth();
   const navigate = useNavigate();
 
+  // Get redirect destination from URL params, default to /dashboard
+  const searchParams = new URLSearchParams(window.location.search);
+  const redirectTo = searchParams.get('redirect') || '/dashboard';
+
   useEffect(() => {
     if (user) {
-      navigate('/admin');
+      navigate(redirectTo);
     }
-  }, [user, navigate]);
+  }, [user, navigate, redirectTo]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -213,13 +217,13 @@ const Auth = () => {
         <div className="w-full max-w-md">
           <div className="card-glow p-8 rounded-sm border border-border">
             <h1 className="font-display text-3xl md:text-4xl mb-2 text-center">
-              {viewMode === 'login' && 'ADMIN LOGIN'}
+              {viewMode === 'login' && 'SIGN IN'}
               {viewMode === 'signup' && 'CREATE ACCOUNT'}
               {viewMode === 'forgot' && 'RESET PASSWORD'}
             </h1>
             <p className="text-muted-foreground text-center mb-8">
-              {viewMode === 'login' && 'Sign in to access the dashboard'}
-              {viewMode === 'signup' && 'Register for admin access'}
+              {viewMode === 'login' && 'Sign in to access your dashboard'}
+              {viewMode === 'signup' && 'Create your account to get started'}
               {viewMode === 'forgot' && 'Enter your email to receive a reset link'}
             </p>
 
