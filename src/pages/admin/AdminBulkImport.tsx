@@ -10,7 +10,8 @@ import {
   ArrowLeft,
   Trash2,
   Plus,
-  Download
+  Download,
+  Shield
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -30,39 +31,35 @@ import {
 } from '@/components/ui/table';
 
 /**
- * Bulk Workflow Import Wizard
+ * Bulk Workflow Import Wizard (HARDENED)
  * 
  * Admin tool to import n8n workflow templates and register them as automation_agents.
- * Parses workflow JSON, detects providers, and creates/updates records.
+ * All DB writes are handled by the admin-import-workflows edge function.
+ * 
+ * SECURITY:
+ * - No direct DB writes from browser
+ * - Server-side admin verification via edge function
+ * - Validated input on both client and server
  */
 
-// Node type to provider mapping
+// Node type to provider mapping (for preview display only - server does actual detection)
 const NODE_TO_PROVIDER: Record<string, string> = {
-  // Google
   "n8n-nodes-base.gmail": "google",
   "n8n-nodes-base.googleSheets": "google",
   "n8n-nodes-base.googleCalendar": "google",
   "n8n-nodes-base.googleDrive": "google",
-  // HubSpot
   "n8n-nodes-base.hubspot": "hubspot",
   "n8n-nodes-base.hubspotTrigger": "hubspot",
-  // Slack
   "n8n-nodes-base.slack": "slack",
   "n8n-nodes-base.slackTrigger": "slack",
-  // Notion
   "n8n-nodes-base.notion": "notion",
   "n8n-nodes-base.notionTrigger": "notion",
-  // Airtable
   "n8n-nodes-base.airtable": "airtable",
-  // Stripe
   "n8n-nodes-base.stripe": "stripe",
   "n8n-nodes-base.stripeTrigger": "stripe",
-  // Twilio
   "n8n-nodes-base.twilio": "twilio",
-  // HTTP/Webhook
   "n8n-nodes-base.webhook": "webhook",
   "n8n-nodes-base.httpRequest": "http",
-  // Email
   "n8n-nodes-base.emailSend": "email",
   "n8n-nodes-base.emailReadImap": "email",
 };
@@ -75,8 +72,7 @@ interface ParsedWorkflow {
   nodeCount: number;
   triggerType: string | null;
   detectedProviders: string[];
-  rawJson: object;
-  fileHash: string;
+  rawContent: string;
   isValid: boolean;
   errors: string[];
 }
@@ -96,18 +92,10 @@ function generateSlug(name: string): string {
     .slice(0, 50);
 }
 
-async function hashContent(content: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(content);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 16);
-}
-
 function parseWorkflowJson(filename: string, content: string): ParsedWorkflow {
   const errors: string[] = [];
-  let rawJson: object = {};
   
+  let rawJson: Record<string, unknown>;
   try {
     rawJson = JSON.parse(content);
   } catch {
@@ -119,24 +107,20 @@ function parseWorkflowJson(filename: string, content: string): ParsedWorkflow {
       nodeCount: 0,
       triggerType: null,
       detectedProviders: [],
-      rawJson: {},
-      fileHash: '',
+      rawContent: content,
       isValid: false,
       errors: ['Invalid JSON'],
     };
   }
 
-  const workflow = rawJson as Record<string, unknown>;
-  const nodes = (workflow.nodes as Array<{ type?: string; name?: string }>) || [];
+  const nodes = (rawJson.nodes as Array<{ type?: string; name?: string }>) || [];
   
   if (!Array.isArray(nodes) || nodes.length === 0) {
     errors.push('No nodes found in workflow');
   }
 
-  // Extract workflow name
-  const name = (workflow.name as string) || filename.replace('.json', '');
+  const name = (rawJson.name as string) || filename.replace('.json', '');
   
-  // Detect trigger type
   let triggerType: string | null = null;
   const triggerNode = nodes.find(n => 
     n.type?.includes('Trigger') || 
@@ -147,7 +131,6 @@ function parseWorkflowJson(filename: string, content: string): ParsedWorkflow {
     triggerType = triggerNode.type || null;
   }
 
-  // Detect providers from nodes
   const detectedProviders = new Set<string>();
   for (const node of nodes) {
     const nodeType = node.type || '';
@@ -161,12 +144,11 @@ function parseWorkflowJson(filename: string, content: string): ParsedWorkflow {
     filename,
     name,
     slug: generateSlug(name),
-    description: (workflow.description as string) || '',
+    description: (rawJson.description as string) || '',
     nodeCount: nodes.length,
     triggerType,
     detectedProviders: Array.from(detectedProviders),
-    rawJson,
-    fileHash: '', // Will be set async
+    rawContent: content,
     isValid: errors.length === 0,
     errors,
   };
@@ -190,7 +172,6 @@ export default function AdminBulkImport() {
       
       const content = await file.text();
       const parsed = parseWorkflowJson(file.name, content);
-      parsed.fileHash = await hashContent(content);
       parsedWorkflows.push(parsed);
     }
 
@@ -202,7 +183,6 @@ export default function AdminBulkImport() {
     if (!jsonInput.trim()) return;
 
     const parsed = parseWorkflowJson('pasted-workflow.json', jsonInput);
-    parsed.fileHash = await hashContent(jsonInput);
     
     setWorkflows(prev => [...prev, parsed]);
     setJsonInput('');
@@ -221,124 +201,74 @@ export default function AdminBulkImport() {
 
   const importWorkflows = useCallback(async () => {
     setImporting(true);
-    const importResults: ImportResult[] = [];
+    setResults([]);
 
-    for (const workflow of workflows) {
-      if (!workflow.isValid) {
-        importResults.push({
-          slug: workflow.slug,
-          status: 'error',
-          message: workflow.errors.join(', '),
+    try {
+      // Prepare payload for edge function
+      const workflowPayload = workflows
+        .filter(w => w.isValid)
+        .map(w => ({
+          filename: w.filename,
+          content: w.rawContent,
+          override_slug: w.slug !== generateSlug(w.name) ? w.slug : undefined,
+        }));
+
+      if (workflowPayload.length === 0) {
+        toast({
+          title: 'No valid workflows',
+          description: 'Please add valid workflow JSON files to import.',
+          variant: 'destructive',
         });
-        continue;
+        setImporting(false);
+        return;
       }
 
-      try {
-        // Check if automation agent exists
-        const { data: existingAgent } = await supabase
-          .from('automation_agents')
-          .select('id')
-          .eq('slug', workflow.slug)
-          .maybeSingle();
+      // Call the secure edge function
+      const { data, error } = await supabase.functions.invoke('admin-import-workflows', {
+        body: { workflows: workflowPayload },
+      });
 
-        // Prepare required_integrations
-        const requiredIntegrations = workflow.detectedProviders.map(p => ({ provider: p }));
-
-        const agentData = {
-          name: workflow.name,
-          slug: workflow.slug,
-          description: workflow.description || `Imported workflow: ${workflow.name}`,
-          short_outcome: `Automates ${workflow.detectedProviders.join(', ')} integration`,
-          systems: workflow.detectedProviders,
-          required_integrations: requiredIntegrations,
-          status: 'draft',
-        };
-
-        let automationAgentId: string;
-
-        if (existingAgent) {
-          // Update existing
-          const { error: updateError } = await supabase
-            .from('automation_agents')
-            .update(agentData)
-            .eq('id', existingAgent.id);
-
-          if (updateError) throw updateError;
-          automationAgentId = existingAgent.id;
-
-          importResults.push({
-            slug: workflow.slug,
-            status: 'updated',
-            message: 'Automation agent updated',
-            automationAgentId,
-          });
-        } else {
-          // Create new
-          const { data: newAgent, error: insertError } = await supabase
-            .from('automation_agents')
-            .insert(agentData)
-            .select('id')
-            .single();
-
-          if (insertError) throw insertError;
-          automationAgentId = newAgent.id;
-
-          importResults.push({
-            slug: workflow.slug,
-            status: 'created',
-            message: 'Automation agent created',
-            automationAgentId,
-          });
-        }
-
-        // Store workflow template
-        const templateData = {
-          slug: workflow.slug,
-          name: workflow.name,
-          description: workflow.description,
-          workflow_json: JSON.parse(JSON.stringify(workflow.rawJson)),
-          detected_providers: workflow.detectedProviders,
-          node_count: workflow.nodeCount,
-          trigger_type: workflow.triggerType,
-          file_hash: workflow.fileHash,
-          original_filename: workflow.filename,
-          automation_agent_id: automationAgentId,
-        };
-
-        const { data: existingTemplate } = await supabase
-          .from('n8n_workflow_templates')
-          .select('id')
-          .eq('slug', workflow.slug)
-          .maybeSingle();
-
-        if (existingTemplate) {
-          await supabase
-            .from('n8n_workflow_templates')
-            .update(templateData)
-            .eq('id', existingTemplate.id);
-        } else {
-          await supabase
-            .from('n8n_workflow_templates')
-            .insert(templateData);
-        }
-
-      } catch (err) {
-        importResults.push({
-          slug: workflow.slug,
-          status: 'error',
-          message: err instanceof Error ? err.message : 'Unknown error',
+      if (error) {
+        console.error('Import error:', error);
+        toast({
+          title: 'Import Failed',
+          description: error.message || 'Failed to import workflows',
+          variant: 'destructive',
         });
+        setImporting(false);
+        return;
       }
+
+      // Handle results
+      const importResults: ImportResult[] = data?.results || [];
+      
+      // Add error results for invalid workflows that weren't sent
+      workflows.filter(w => !w.isValid).forEach(w => {
+        importResults.push({
+          slug: w.slug,
+          status: 'error',
+          message: w.errors.join(', '),
+        });
+      });
+
+      setResults(importResults);
+
+      const successCount = importResults.filter(r => r.status !== 'error').length;
+      toast({
+        title: 'Import Complete',
+        description: `${successCount} of ${importResults.length} workflows imported successfully`,
+      });
+
+    } catch (err) {
+      console.error('Import error:', err);
+      toast({
+        title: 'Import Failed',
+        description: err instanceof Error ? err.message : 'Unknown error',
+        variant: 'destructive',
+      });
+    } finally {
+      setImporting(false);
     }
-
-    setResults(importResults);
-    setImporting(false);
-
-    const successCount = importResults.filter(r => r.status !== 'error').length;
-    toast({
-      title: 'Import Complete',
-      description: `${successCount} of ${importResults.length} workflows imported successfully`,
-    });
   }, [workflows]);
 
   if (authLoading) {
@@ -354,8 +284,13 @@ export default function AdminBulkImport() {
       <div className="min-h-screen flex items-center justify-center">
         <Card>
           <CardHeader>
-            <CardTitle>Access Denied</CardTitle>
-            <CardDescription>You must be an admin to access this page.</CardDescription>
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5 text-destructive" />
+              Access Denied
+            </CardTitle>
+            <CardDescription>
+              You must be an admin to access this page. Admin status is verified server-side.
+            </CardDescription>
           </CardHeader>
         </Card>
       </div>
@@ -376,6 +311,10 @@ export default function AdminBulkImport() {
               Import n8n workflow templates and register them as automation agents
             </p>
           </div>
+          <Badge variant="outline" className="ml-auto flex items-center gap-1">
+            <Shield className="h-3 w-3" />
+            Server-side secured
+          </Badge>
         </div>
 
         {/* Upload Section */}
@@ -434,7 +373,7 @@ export default function AdminBulkImport() {
                 <div>
                   <CardTitle>Workflows to Import ({workflows.length})</CardTitle>
                   <CardDescription>
-                    Review and edit before importing
+                    Review and edit before importing. All writes are processed securely server-side.
                   </CardDescription>
                 </div>
                 <Button 
