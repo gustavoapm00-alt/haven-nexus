@@ -226,8 +226,8 @@ export function SecureCredentialForm({
       <Alert className="bg-primary/5 border-primary/30">
         <Shield className="w-4 h-4 text-primary" />
         <AlertDescription className="text-sm">
-          Your credentials are sent securely via HTTPS and encrypted at rest with AES-256-GCM. 
-          They are never logged, emailed, or shown again after submission.
+          Sent securely via HTTPS and encrypted at rest with AES-256-GCM. 
+          Never logged, emailed, or shown again after submission. Revocable at any time.
         </AlertDescription>
       </Alert>
 
