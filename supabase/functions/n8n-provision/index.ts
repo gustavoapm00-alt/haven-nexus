@@ -134,6 +134,12 @@ serve(async (req) => {
           );
         }
 
+        // Build integration_connection_ids mapping for n8n
+        const integrationConnectionIds: Record<string, string> = {};
+        for (const conn of connections) {
+          integrationConnectionIds[conn.provider] = conn.id;
+        }
+
         // Generate credentials reference ID for n8n
         const credentialsReferenceId = `cred_bundle_${activationRequestId}`;
 
@@ -185,12 +191,13 @@ serve(async (req) => {
           mappingId = newMapping.id;
         }
 
-        // Build activation payload
-        const activationPayload: ActivationPayload = {
-          customer_id: userId,
-          automation_id: automation.slug || automation.id,
-          workflow_id: automation.workflow_id || "",
+        // Build activation payload with integration_connection_ids
+        const activationPayload = {
+          user_id: userId,
+          automation_slug: automation.slug || automation.id,
+          n8n_workflow_id: automation.workflow_id ? parseInt(automation.workflow_id, 10) : null,
           credentials_reference_id: credentialsReferenceId,
+          integration_connection_ids: integrationConnectionIds,
           config: (config as Record<string, unknown>) || {},
         };
 
