@@ -11,6 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ActivationRequestsTable } from '@/components/admin/ActivationRequestsTable';
+import { AdminNotificationBell } from '@/components/admin/AdminNotificationBell';
 
 interface EmailSignup {
   id: string;
@@ -171,6 +172,7 @@ const Admin = () => {
             AERELION <span className="text-primary">ADMIN</span>
           </Link>
           <div className="flex items-center gap-4">
+            <AdminNotificationBell />
             <Link to="/">
               <Button variant="outline" size="sm">
                 <Package className="w-4 h-4 mr-2" />
