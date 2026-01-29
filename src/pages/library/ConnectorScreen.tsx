@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Shield, CheckCircle2, AlertCircle, Loader2, ExternalLink } from 'lucide-react';
+import { Shield, CheckCircle2, AlertCircle, Loader2, ExternalLink, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,6 +11,14 @@ import { useAuth } from '@/hooks/useAuth';
 import { useIntegrationConnections } from '@/hooks/useIntegrationConnections';
 import { useN8nProvisioning } from '@/hooks/useN8nProvisioning';
 import { toast } from '@/hooks/use-toast';
+
+interface ConfigurationField {
+  name: string;
+  label: string;
+  type: string;
+  placeholder?: string;
+  required?: boolean;
+}
 
 interface RequiredIntegration {
   provider: string;
@@ -131,6 +139,8 @@ export default function ConnectorScreen() {
   const [activation, setActivation] = useState<any>(null);
   const [automation, setAutomation] = useState<any>(null);
   const [requiredIntegrations, setRequiredIntegrations] = useState<RequiredIntegration[]>([]);
+  const [configFields, setConfigFields] = useState<ConfigurationField[]>([]);
+  const [configValues, setConfigValues] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [activeProvider, setActiveProvider] = useState<string | null>(null);
   const [credentials, setCredentials] = useState<Record<string, string>>({});
@@ -144,7 +154,7 @@ export default function ConnectorScreen() {
     fetchConnections,
   } = useIntegrationConnections(requestId);
 
-  const { provision, isProvisioning } = useN8nProvisioning();
+  const { activate, isProvisioning } = useN8nProvisioning();
 
   // Load activation request and automation details
   useEffect(() => {
@@ -183,21 +193,40 @@ export default function ConnectorScreen() {
           if (automationData) {
             setAutomation(automationData);
             
-            // Build required integrations from systems array
-            const systems = automationData.systems || [];
-            const integrations = systems
-              .map((system: string) => {
-                const config = INTEGRATION_CONFIGS[system.toLowerCase()];
-                return config || {
-                  provider: system.toLowerCase(),
-                  displayName: system,
-                  description: `Connect your ${system} account`,
-                  authType: 'api_key' as const,
-                  fields: [
-                    { key: 'api_key', label: 'API Key', placeholder: '••••••••', type: 'password' },
-                  ],
-                };
-              });
+            // Set configuration fields if defined
+            if (automationData.configuration_fields && Array.isArray(automationData.configuration_fields)) {
+              setConfigFields(automationData.configuration_fields as unknown as ConfigurationField[]);
+            }
+            
+            // Build required integrations from required_integrations or systems array
+            let integrations: RequiredIntegration[] = [];
+            
+            if (automationData.required_integrations && Array.isArray(automationData.required_integrations)) {
+              // Use structured required_integrations if available
+              integrations = automationData.required_integrations.map((ri: any) => ({
+                provider: ri.provider || ri,
+                displayName: INTEGRATION_CONFIGS[ri.provider?.toLowerCase?.()]?.displayName || ri.label || ri.provider,
+                description: ri.description || INTEGRATION_CONFIGS[ri.provider?.toLowerCase?.()]?.description || `Connect ${ri.provider}`,
+                authType: ri.type || INTEGRATION_CONFIGS[ri.provider?.toLowerCase?.()]?.authType || 'api_key',
+                fields: ri.fields || INTEGRATION_CONFIGS[ri.provider?.toLowerCase?.()]?.fields,
+              }));
+            } else {
+              // Fallback: Build from systems array
+              const systems = automationData.systems || [];
+              integrations = systems
+                .map((system: string) => {
+                  const config = INTEGRATION_CONFIGS[system.toLowerCase()];
+                  return config || {
+                    provider: system.toLowerCase(),
+                    displayName: system,
+                    description: `Connect your ${system} account`,
+                    authType: 'api_key' as const,
+                    fields: [
+                      { key: 'api_key', label: 'API Key', placeholder: '••••••••', type: 'password' },
+                    ],
+                  };
+                });
+            }
             
             setRequiredIntegrations(integrations);
           }
@@ -266,14 +295,28 @@ export default function ConnectorScreen() {
     }
   };
 
-  const handleProvisionAutomation = async () => {
+  const handleActivateAutomation = async () => {
     if (!requestId) return;
 
-    const result = await provision(requestId);
+    // Validate required config fields
+    const missingConfig = configFields
+      .filter(f => f.required)
+      .filter(f => !configValues[f.name]?.trim());
+    
+    if (missingConfig.length > 0) {
+      toast({
+        title: 'Missing configuration',
+        description: `Please fill in: ${missingConfig.map(f => f.label).join(', ')}`,
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const result = await activate(requestId, configValues);
 
     if (result.error) {
       toast({
-        title: 'Provisioning failed',
+        title: 'Activation failed',
         description: result.error,
         variant: 'destructive',
       });
@@ -284,6 +327,10 @@ export default function ConnectorScreen() {
       });
       navigate('/portal/dashboard');
     }
+  };
+
+  const handleRefresh = () => {
+    fetchConnections();
   };
 
   if (authLoading || isLoading) {
@@ -429,7 +476,7 @@ export default function ConnectorScreen() {
               <Button
                 size="lg"
                 className="w-full"
-                onClick={handleProvisionAutomation}
+                onClick={handleActivateAutomation}
                 disabled={isProvisioning}
               >
                 {isProvisioning ? (
