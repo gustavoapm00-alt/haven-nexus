@@ -26,20 +26,36 @@ const corsHeaders = {
 };
 
 // Encryption utilities using Web Crypto API
-async function encryptData(data: string, key: string): Promise<{ encrypted: string; iv: string; tag: string }> {
+async function encryptData(data: string, keyBase64: string): Promise<{ encrypted: string; iv: string; tag: string }> {
   const encoder = new TextEncoder();
   const dataBuffer = encoder.encode(data);
   
-  // Decode base64 key
-  const keyBytes = Uint8Array.from(atob(key), c => c.charCodeAt(0));
+  // Decode base64 key using standard base64 decoding that handles padding correctly
+  let keyBytes: Uint8Array;
+  try {
+    // Handle both standard and URL-safe base64
+    const normalizedKey = keyBase64.replace(/-/g, '+').replace(/_/g, '/');
+    const binaryString = atob(normalizedKey);
+    keyBytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      keyBytes[i] = binaryString.charCodeAt(i);
+    }
+  } catch (e) {
+    console.error("Failed to decode encryption key - ensure it's valid base64");
+    throw new Error("Invalid encryption key format");
+  }
   
-  // Generate IV
+  if (keyBytes.length !== 32) {
+    throw new Error(`Encryption key must be 32 bytes, got ${keyBytes.length}`);
+  }
+  
+  // Generate IV (12 bytes for GCM)
   const iv = crypto.getRandomValues(new Uint8Array(12));
   
-  // Import key
+  // Import key - use ArrayBuffer for compatibility
   const cryptoKey = await crypto.subtle.importKey(
     "raw",
-    keyBytes,
+    keyBytes.buffer as ArrayBuffer,
     { name: "AES-GCM" },
     false,
     ["encrypt"]
@@ -57,10 +73,19 @@ async function encryptData(data: string, key: string): Promise<{ encrypted: stri
   const ciphertext = encryptedArray.slice(0, -16);
   const tag = encryptedArray.slice(-16);
   
+  // Convert to base64 strings
+  const toBase64 = (arr: Uint8Array): string => {
+    let binary = '';
+    for (let i = 0; i < arr.length; i++) {
+      binary += String.fromCharCode(arr[i]);
+    }
+    return btoa(binary);
+  };
+  
   return {
-    encrypted: btoa(String.fromCharCode(...ciphertext)),
-    iv: btoa(String.fromCharCode(...iv)),
-    tag: btoa(String.fromCharCode(...tag)),
+    encrypted: toBase64(ciphertext),
+    iv: toBase64(iv),
+    tag: toBase64(tag),
   };
 }
 
@@ -270,17 +295,18 @@ serve(async (req) => {
       { global: { headers: { Authorization: authHeader } } }
     );
 
-    const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) {
+    // Use getUser() - stable method in supabase-js v2
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    if (userError || !userData?.user) {
+      console.warn("JWT verification failed:", userError?.message);
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const userId = claimsData.claims.sub;
-    const userEmail = claimsData.claims.email as string;
+    const userId = userData.user.id;
+    const userEmail = userData.user.email as string;
 
     const { 
       action, 
