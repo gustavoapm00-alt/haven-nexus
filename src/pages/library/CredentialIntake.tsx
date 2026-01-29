@@ -18,6 +18,7 @@ import {
   CreditCard,
   Receipt,
   Code,
+  Users,
   LucideIcon,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -31,8 +32,8 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
-  CREDENTIAL_SCHEMAS, 
   CredentialSchema,
+  getSchemasForSystems,
   getRequiredSchemasForAutomation,
 } from '@/lib/credential-schemas';
 
@@ -48,6 +49,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Receipt,
   Code,
   Key,
+  Users,
 };
 
 interface ActivationRequest {
@@ -57,6 +59,7 @@ interface ActivationRequest {
   purchased_item: string | null;
   customer_visible_status: string;
   automation_id: string | null;
+  bundle_id: string | null;
   credentials_count: number;
   credentials_submitted_at: string | null;
 }
@@ -90,7 +93,7 @@ export default function CredentialIntake() {
     isLoading: credentialsLoading,
   } = useActivationCredentials(id);
 
-  // Required schemas for this automation
+  // Required schemas for this automation - computed from real data
   const [requiredSchemas, setRequiredSchemas] = useState<CredentialSchema[]>([]);
 
   useEffect(() => {
@@ -116,7 +119,7 @@ export default function CredentialIntake() {
       // Fetch the installation request
       const { data: requestData, error: requestError } = await supabase
         .from('installation_requests')
-        .select('id, name, email, purchased_item, customer_visible_status, automation_id, credentials_count, credentials_submitted_at')
+        .select('id, name, email, purchased_item, customer_visible_status, automation_id, bundle_id, credentials_count, credentials_submitted_at')
         .eq('id', id)
         .single();
 
@@ -129,7 +132,7 @@ export default function CredentialIntake() {
 
       setRequest(requestData as ActivationRequest);
 
-      // Fetch automation details if available
+      // Fetch automation details to get real systems array
       if (requestData.automation_id) {
         const { data: automationData } = await supabase
           .from('automation_agents')
@@ -139,19 +142,29 @@ export default function CredentialIntake() {
 
         if (automationData) {
           setAutomation(automationData as AutomationInfo);
-          const schemas = getRequiredSchemasForAutomation(automationData.slug);
-          setRequiredSchemas(schemas.length > 0 ? schemas : Object.values(CREDENTIAL_SCHEMAS).slice(0, 4));
+          
+          // Get schemas from real automation.systems array
+          const schemas = getRequiredSchemasForAutomation(
+            automationData.slug, 
+            automationData.systems
+          );
+          
           if (schemas.length > 0) {
+            setRequiredSchemas(schemas);
             setActiveTab(schemas[0].credentialType);
+          } else if (automationData.systems && automationData.systems.length > 0) {
+            // Fallback: direct systems mapping
+            const systemSchemas = getSchemasForSystems(automationData.systems);
+            setRequiredSchemas(systemSchemas);
+            if (systemSchemas.length > 0) {
+              setActiveTab(systemSchemas[0].credentialType);
+            }
           }
         }
-      } else {
-        // Default to common schemas
-        const defaultSchemas = Object.values(CREDENTIAL_SCHEMAS).slice(0, 4);
-        setRequiredSchemas(defaultSchemas);
-        if (defaultSchemas.length > 0) {
-          setActiveTab(defaultSchemas[0].credentialType);
-        }
+      } else if (requestData.bundle_id) {
+        // For bundles, we'd need to aggregate systems from included agents
+        // For now, show a message to contact support
+        console.log('Bundle credential intake - requires aggregated systems');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load request');
@@ -242,20 +255,20 @@ export default function CredentialIntake() {
               <div>
                 <p className="font-medium text-foreground mb-1">Your credentials are protected</p>
                 <p className="text-sm text-muted-foreground">
-                  All credentials are sent securely via HTTPS and encrypted at rest with AES-256-GCM. 
-                  They are never logged, emailed, or shown again after submission. 
-                  You can revoke access at any time.
+                  Sent securely via HTTPS and encrypted at rest with AES-256-GCM. 
+                  Never logged, emailed, or shown again after submission. 
+                  Revocable anytime.
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Progress indicator */}
+          {/* All Complete Message */}
           {allComplete && (
             <Alert className="mb-8 bg-emerald-500/10 border-emerald-500/30">
               <CheckCircle className="w-4 h-4 text-emerald-500" />
               <AlertDescription className="text-emerald-400">
-                All access authorized! AERELION will now activate your automation.
+                Access authorized! AERELION is now activating your automation.
               </AlertDescription>
             </Alert>
           )}
@@ -265,12 +278,12 @@ export default function CredentialIntake() {
             <p className="text-sm text-muted-foreground">
               <span className="font-medium text-foreground">Why we need access:</span>{' '}
               To activate your {request.purchased_item || 'automation'}, AERELION requires secure authorization 
-              to the following services. Once connected, we handle all configuration and maintenance.
+              to the following services. Once connected, we handle all configuration, operation, and maintenance.
             </p>
           </div>
 
           {/* Credential Forms */}
-          {requiredSchemas.length > 0 && (
+          {requiredSchemas.length > 0 ? (
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
               <TabsList className="w-full justify-start flex-wrap h-auto gap-2 bg-transparent p-0">
                 {requiredSchemas.map((schema) => {
@@ -310,6 +323,15 @@ export default function CredentialIntake() {
                         <h3 className="text-lg font-semibold text-foreground">{schema.serviceName}</h3>
                       </div>
                       <p className="text-sm text-muted-foreground">{schema.description}</p>
+                      
+                      {/* Show auth method badge */}
+                      <div className="mt-2">
+                        <Badge variant="outline" className="text-xs">
+                          {schema.authMethod === 'oauth' ? '🔐 OAuth' : 
+                           schema.authMethod === 'webhook' ? '🔗 Webhook' : 
+                           '🔑 Secure Token'}
+                        </Badge>
+                      </div>
                     </div>
                     
                     <SecureCredentialForm
@@ -322,15 +344,26 @@ export default function CredentialIntake() {
                 );
               })}
             </Tabs>
+          ) : (
+            <div className="p-8 text-center bg-card/50 border border-border/50 rounded-xl">
+              <Shield className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">No connections required</h3>
+              <p className="text-muted-foreground mb-4">
+                This automation doesn't require any additional access. AERELION will activate it shortly.
+              </p>
+              <Link to="/portal/dashboard">
+                <Button>Return to Dashboard</Button>
+              </Link>
+            </div>
           )}
 
           {/* Support Notice */}
           <div className="mt-8 p-4 bg-card/30 border border-border/30 rounded-lg">
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-medium text-foreground">Need help connecting?</p>
+                <p className="font-medium text-foreground">Need help authorizing access?</p>
                 <p className="text-sm text-muted-foreground">
-                  Our team can guide you through the authorization process
+                  Our team can guide you through the process
                 </p>
               </div>
               <Link to="/contact">
@@ -341,7 +374,7 @@ export default function CredentialIntake() {
             </div>
           </div>
 
-          {/* Next Steps */}
+          {/* Back to Dashboard */}
           <div className="mt-8 flex justify-end">
             <Link to="/portal/dashboard">
               <Button variant="outline">
