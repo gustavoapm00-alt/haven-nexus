@@ -1,16 +1,27 @@
-import { useEffect } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useClientProfile } from '@/hooks/useClientProfile';
 import { useActivationStatus, ActiveAutomation } from '@/hooks/useActivationStatus';
+import { useN8nProvisioning } from '@/hooks/useN8nProvisioning';
 import { 
   Loader2, Package, Shield, CheckCircle, Clock, AlertTriangle, 
   PauseCircle, ChevronRight, ExternalLink, LogOut, User, 
-  HelpCircle, FileText, Lock, Bell
+  HelpCircle, FileText, Lock, Bell, Play, Pause, RotateCcw, XCircle, 
+  Settings
 } from 'lucide-react';
 import PortalBackground from '@/components/portal/PortalBackground';
 import { GlassCard } from '@/components/portal/GlassCard';
 import { NotificationBell } from '@/components/portal/NotificationBell';
+import { Button } from '@/components/ui/button';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuSeparator, 
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
+import { toast } from '@/hooks/use-toast';
 
 // Status display configuration
 const STATUS_CONFIG: Record<ActiveAutomation['status'], { 
@@ -58,9 +69,12 @@ const ClientDashboard = () => {
     activeAutomations, 
     requiredConnections, 
     hasIncompleteSetup,
-    loading: activationLoading 
+    loading: activationLoading,
+    refetch
   } = useActivationStatus();
+  const { pause, resume, revoke, isProvisioning } = useN8nProvisioning();
   const navigate = useNavigate();
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -72,6 +86,76 @@ const ClientDashboard = () => {
     await signOut();
     navigate('/portal/auth');
   };
+
+  const handlePause = useCallback(async (activationRequestId: string, automationName: string) => {
+    setActionLoading(activationRequestId);
+    try {
+      const result = await pause(activationRequestId);
+      if (result.error) {
+        toast({
+          title: 'Failed to pause',
+          description: result.error,
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Paused',
+          description: `${automationName} has been paused.`,
+        });
+        refetch();
+      }
+    } finally {
+      setActionLoading(null);
+    }
+  }, [pause, refetch]);
+
+  const handleResume = useCallback(async (activationRequestId: string, automationName: string) => {
+    setActionLoading(activationRequestId);
+    try {
+      const result = await resume(activationRequestId);
+      if (result.error) {
+        toast({
+          title: 'Failed to resume',
+          description: result.error,
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Resumed',
+          description: `${automationName} is now active.`,
+        });
+        refetch();
+      }
+    } finally {
+      setActionLoading(null);
+    }
+  }, [resume, refetch]);
+
+  const handleRevoke = useCallback(async (activationRequestId: string, automationName: string) => {
+    if (!confirm(`Are you sure you want to revoke access for ${automationName}? This will disconnect all integrations.`)) {
+      return;
+    }
+    
+    setActionLoading(activationRequestId);
+    try {
+      const result = await revoke(activationRequestId);
+      if (result.error) {
+        toast({
+          title: 'Failed to revoke',
+          description: result.error,
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Revoked',
+          description: `${automationName} access has been revoked.`,
+        });
+        refetch();
+      }
+    } finally {
+      setActionLoading(null);
+    }
+  }, [revoke, refetch]);
 
   if (authLoading || profileLoading || activationLoading) {
     return (
@@ -154,6 +238,7 @@ const ClientDashboard = () => {
                 {activeAutomations.map((automation) => {
                   const statusConfig = STATUS_CONFIG[automation.status];
                   const StatusIcon = statusConfig.icon;
+                  const isLoading = actionLoading === automation.activation_request_id;
                   
                   return (
                     <GlassCard key={automation.purchase_id} className="p-5">
@@ -190,16 +275,92 @@ const ClientDashboard = () => {
                           </div>
                         </div>
                         
-                        <Link
-                          to={automation.activation_request_id 
-                            ? `/activation-request/${automation.activation_request_id}` 
-                            : `/automations/${automation.id}`
-                          }
-                          className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-primary hover:bg-primary/10 rounded-lg transition-colors flex-shrink-0"
-                        >
-                          View Details
-                          <ChevronRight className="w-4 h-4" />
-                        </Link>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          {/* Automation Controls Dropdown */}
+                          {automation.activation_request_id && automation.status !== 'in_review' && (
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  disabled={isLoading}
+                                  className="px-2"
+                                >
+                                  {isLoading ? (
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                  ) : (
+                                    <Settings className="w-4 h-4" />
+                                  )}
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-48">
+                                {automation.status === 'active' && (
+                                  <DropdownMenuItem
+                                    onClick={() => handlePause(automation.activation_request_id!, automation.name)}
+                                  >
+                                    <Pause className="w-4 h-4 mr-2" />
+                                    Pause Automation
+                                  </DropdownMenuItem>
+                                )}
+                                
+                                {automation.status === 'paused' && (
+                                  <DropdownMenuItem
+                                    onClick={() => handleResume(automation.activation_request_id!, automation.name)}
+                                  >
+                                    <Play className="w-4 h-4 mr-2" />
+                                    Resume Automation
+                                  </DropdownMenuItem>
+                                )}
+                                
+                                {automation.status === 'pending_credentials' && (
+                                  <DropdownMenuItem asChild>
+                                    <Link to={`/portal/connect/${automation.id}?request_id=${automation.activation_request_id}`}>
+                                      <Lock className="w-4 h-4 mr-2" />
+                                      Connect Tools
+                                    </Link>
+                                  </DropdownMenuItem>
+                                )}
+
+                                {automation.status === 'needs_attention' && (
+                                  <DropdownMenuItem asChild>
+                                    <Link to={`/portal/connect/${automation.id}?request_id=${automation.activation_request_id}`}>
+                                      <RotateCcw className="w-4 h-4 mr-2" />
+                                      Reconnect Tools
+                                    </Link>
+                                  </DropdownMenuItem>
+                                )}
+                                
+                                <DropdownMenuItem asChild>
+                                  <Link to={`/portal/connect/${automation.id}?request_id=${automation.activation_request_id}`}>
+                                    <Settings className="w-4 h-4 mr-2" />
+                                    Manage Connections
+                                  </Link>
+                                </DropdownMenuItem>
+                                
+                                <DropdownMenuSeparator />
+                                
+                                <DropdownMenuItem
+                                  className="text-destructive focus:text-destructive"
+                                  onClick={() => handleRevoke(automation.activation_request_id!, automation.name)}
+                                >
+                                  <XCircle className="w-4 h-4 mr-2" />
+                                  Revoke Access
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          )}
+
+                          <Link
+                            to={automation.activation_request_id 
+                              ? `/activation-request/${automation.activation_request_id}` 
+                              : `/automations/${automation.id}`
+                            }
+                            className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                          >
+                            View Details
+                            <ChevronRight className="w-4 h-4" />
+                          </Link>
+                        </div>
                       </div>
                     </GlassCard>
                   );
