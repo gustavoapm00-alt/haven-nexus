@@ -44,3 +44,9 @@ verify_jwt = false
 
 [functions.send-activation-reminders]
 verify_jwt = false
+
+[functions.n8n-provision]
+verify_jwt = false
+
+[functions.connect-integration]
+verify_jwt = false
