@@ -149,10 +149,10 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Step 1: Fetch activation request
+    // Step 1: Fetch activation request (now includes user_id for direct lookup)
     const { data: activation, error: activationError } = await supabase
       .from("installation_requests")
-      .select("id, email, status, automation_id, bundle_id")
+      .select("id, email, status, automation_id, bundle_id, user_id")
       .eq("id", activationId)
       .maybeSingle();
 
@@ -177,19 +177,42 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Step 2: Resolve user_id from email
-    const { data: authUser } = await supabase.auth.admin.listUsers();
-    const user = authUser?.users?.find(u => u.email === activation.email);
+    // Step 2: Resolve user_id - prefer direct lookup, fallback to email-based search
+    let userId = activation.user_id;
     
-    if (!user) {
-      console.error(`No user found for email: ${activation.email}`);
+    if (!userId && activation.email) {
+      // Fallback: lookup by email using listUsers with filter (Supabase admin API)
+      const { data: usersData, error: userError } = await supabase.auth.admin.listUsers({
+        perPage: 1,
+        page: 1,
+      });
+      
+      // Find user by email in the results
+      const matchedUser = usersData?.users?.find(u => u.email === activation.email);
+      
+      if (userError || !matchedUser) {
+        console.error(`No user found for email: ${activation.email}`, userError);
+        return new Response(
+          JSON.stringify({ error: "User not found for activation" }),
+          { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      userId = matchedUser.id;
+      
+      // Backfill the user_id for future requests
+      await supabase
+        .from("installation_requests")
+        .update({ user_id: userId })
+        .eq("id", activationId);
+    }
+    
+    if (!userId) {
+      console.error(`No user_id could be resolved for activation: ${activationId}`);
       return new Response(
         JSON.stringify({ error: "User not found for activation" }),
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
-    
-    const userId = user.id;
 
     // Step 3: Get automation details and required integrations
     let automationSlug = "";
