@@ -876,6 +876,7 @@ export type Database = {
           setup_window: string | null
           status: string | null
           status_updated_at: string | null
+          user_id: string | null
         }
         Insert: {
           activation_eta?: string | null
@@ -905,6 +906,7 @@ export type Database = {
           setup_window?: string | null
           status?: string | null
           status_updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
           activation_eta?: string | null
@@ -934,6 +936,7 @@ export type Database = {
           setup_window?: string | null
           status?: string | null
           status_updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
