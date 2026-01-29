@@ -469,6 +469,13 @@ const ClientDashboard = () => {
                   
                   <div className="flex flex-wrap gap-4 mt-4">
                     <Link
+                      to="/integrations"
+                      className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+                    >
+                      <Settings className="w-4 h-4" />
+                      Manage Integrations
+                    </Link>
+                    <Link
                       to="/contact"
                       className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
                     >
