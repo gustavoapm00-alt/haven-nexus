@@ -3,6 +3,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 /**
  * Runtime Credentials Endpoint
  * 
+ * CONNECT ONCE. RUN MANY.
+ * 
  * Called by n8n at execution time to resolve tenant credentials.
  * This enables TRUE multi-tenancy: one workflow template → unlimited customers.
  * 
@@ -15,11 +17,17 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
  *   GET /functions/v1/runtime-credentials?activation_id=UUID
  *   Authorization: Bearer <N8N_API_KEY>
  * 
+ * Resolution Flow:
+ *   activation_id → installation_request → user_id (via email lookup)
+ *   automation_id → required_integrations
+ *   user_id + required_integrations → integration_connections
+ *   Decrypt and return only credentials for required providers
+ * 
  * Response:
  * {
  *   "activation_id": "uuid",
  *   "automation_slug": "client-onboarding-pack",
- *   "tenant_id": "user-uuid",
+ *   "tenant_email": "customer@example.com",
  *   "status": "active",
  *   "credentials": {
  *     "hubspot": { "access_token": "...", "refresh_token": "..." },
@@ -141,7 +149,7 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Fetch activation request
+    // Step 1: Fetch activation request
     const { data: activation, error: activationError } = await supabase
       .from("installation_requests")
       .select("id, email, status, automation_id, bundle_id")
@@ -169,18 +177,44 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Fetch automation details for slug
+    // Step 2: Resolve user_id from email
+    const { data: authUser } = await supabase.auth.admin.listUsers();
+    const user = authUser?.users?.find(u => u.email === activation.email);
+    
+    if (!user) {
+      console.error(`No user found for email: ${activation.email}`);
+      return new Response(
+        JSON.stringify({ error: "User not found for activation" }),
+        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    
+    const userId = user.id;
+
+    // Step 3: Get automation details and required integrations
     let automationSlug = "";
+    let requiredProviders: string[] = [];
+    
     if (activation.automation_id) {
       const { data: automation } = await supabase
         .from("automation_agents")
-        .select("slug")
+        .select("slug, systems, required_integrations")
         .eq("id", activation.automation_id)
         .maybeSingle();
+      
       automationSlug = automation?.slug || "";
+      
+      // Extract required providers from automation
+      if (automation?.required_integrations && Array.isArray(automation.required_integrations)) {
+        requiredProviders = automation.required_integrations.map((ri: { provider?: string }) => 
+          (ri.provider || '').toLowerCase()
+        ).filter(Boolean);
+      } else if (automation?.systems) {
+        requiredProviders = automation.systems.map((s: string) => s.toLowerCase());
+      }
     }
 
-    // Fetch n8n mapping for config
+    // Step 4: Fetch n8n mapping for config
     const { data: mapping } = await supabase
       .from("n8n_mappings")
       .select("metadata")
@@ -189,11 +223,11 @@ Deno.serve(async (req) => {
 
     const config = (mapping?.metadata as Record<string, unknown>)?.config || {};
 
-    // Fetch all connected integration connections for this activation
+    // Step 5: CONNECT ONCE - Fetch user's integration connections (user-level, not activation-level)
     const { data: connections, error: connError } = await supabase
       .from("integration_connections")
       .select("id, provider, encrypted_payload, encryption_iv, encryption_tag, status")
-      .eq("activation_request_id", activationId)
+      .eq("user_id", userId)
       .eq("status", "connected");
 
     if (connError) {
@@ -204,33 +238,38 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Decrypt each connection's credentials
+    // Step 6: Decrypt ONLY credentials for required providers
     const credentials: Record<string, unknown> = {};
     
     for (const conn of connections || []) {
-      if (conn.encrypted_payload && conn.encryption_iv && conn.encryption_tag) {
-        try {
-          const decryptedJson = await decryptCredentials(
-            conn.encrypted_payload,
-            conn.encryption_iv,
-            conn.encryption_tag,
-            encryptionKey
-          );
-          credentials[conn.provider] = JSON.parse(decryptedJson);
-        } catch (decryptError) {
-          console.error(`Failed to decrypt credentials for ${conn.provider}:`, decryptError);
-          credentials[conn.provider] = { error: "decryption_failed" };
+      // Only include credentials for providers required by this automation
+      const providerLower = conn.provider.toLowerCase();
+      if (requiredProviders.length === 0 || requiredProviders.includes(providerLower)) {
+        if (conn.encrypted_payload && conn.encryption_iv && conn.encryption_tag) {
+          try {
+            const decryptedJson = await decryptCredentials(
+              conn.encrypted_payload,
+              conn.encryption_iv,
+              conn.encryption_tag,
+              encryptionKey
+            );
+            credentials[conn.provider] = JSON.parse(decryptedJson);
+          } catch (decryptError) {
+            console.error(`Failed to decrypt credentials for ${conn.provider}:`, decryptError);
+            credentials[conn.provider] = { error: "decryption_failed" };
+          }
         }
       }
     }
 
     // Log access for audit trail
-    console.log(`Runtime credentials accessed for activation ${activationId}`);
+    console.log(`Runtime credentials accessed for activation ${activationId}, user ${userId}, providers: ${Object.keys(credentials).join(", ")}`);
 
     return new Response(
       JSON.stringify({
         activation_id: activationId,
         automation_slug: automationSlug,
+        tenant_id: userId,
         tenant_email: activation.email,
         status: activation.status,
         credentials,

@@ -120,23 +120,46 @@ serve(async (req) => {
           );
         }
 
-        // Check all required connections are ready
-        const { data: connections } = await supabaseAdmin
+        // CONNECT ONCE: Check user's connections (user-level, not activation-level)
+        const { data: userConnections } = await supabaseAdmin
           .from("integration_connections")
           .select("id, provider, status")
-          .eq("activation_request_id", activationRequestId)
+          .eq("user_id", userId)
           .eq("status", "connected");
 
-        if (!connections || connections.length === 0) {
+        // Get required integrations from automation
+        let requiredProviders: string[] = [];
+        if (automation.required_integrations && Array.isArray(automation.required_integrations)) {
+          requiredProviders = (automation.required_integrations as { provider?: string }[])
+            .map(ri => (ri.provider || '').toLowerCase())
+            .filter(Boolean);
+        }
+
+        // Check if all required providers are connected
+        const connectedProviders = new Set(
+          (userConnections || []).map(c => c.provider.toLowerCase())
+        );
+        const missingProviders = requiredProviders.filter(p => !connectedProviders.has(p));
+
+        if (requiredProviders.length > 0 && missingProviders.length > 0) {
+          return new Response(
+            JSON.stringify({ 
+              error: `Missing required integrations: ${missingProviders.join(", ")}. Please connect all required tools first.` 
+            }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        if (!userConnections || userConnections.length === 0) {
           return new Response(
             JSON.stringify({ error: "No connected integrations found. Please connect all required tools first." }),
             { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
           );
         }
 
-        // Build integration_connection_ids mapping for n8n
+        // Build integration_connection_ids mapping (for reference only, n8n fetches via runtime-credentials)
         const integrationConnectionIds: Record<string, string> = {};
-        for (const conn of connections) {
+        for (const conn of userConnections) {
           integrationConnectionIds[conn.provider] = conn.id;
         }
 
@@ -385,15 +408,9 @@ serve(async (req) => {
           .eq("activation_request_id", activationRequestId)
           .eq("user_id", userId);
 
-        // Mark connections as revoked
-        await supabaseAdmin
-          .from("integration_connections")
-          .update({ 
-            status: "revoked", 
-            updated_at: new Date().toISOString() 
-          })
-          .eq("activation_request_id", activationRequestId)
-          .eq("user_id", userId);
+        // CONNECT ONCE: Do NOT revoke user-level credentials here
+        // User credentials are shared across all activations
+        // Users can revoke credentials separately via the connections management UI
 
         await supabaseAdmin
           .from("installation_requests")

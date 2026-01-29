@@ -1,6 +1,21 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
+/**
+ * Integration Connection Manager
+ * 
+ * CONNECT ONCE. RUN MANY.
+ * 
+ * Credentials are stored at the USER LEVEL, not per-activation.
+ * This allows users to connect HubSpot once and use it across all automations.
+ * 
+ * Schema: integration_connections
+ * - user_id: Owner of the credential
+ * - provider: hubspot, gmail, etc.
+ * - encrypted_payload: AES-256-GCM encrypted credentials
+ * - activation_request_id: NULL (legacy) or optionally set for tracking
+ */
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -80,7 +95,7 @@ serve(async (req) => {
 
     const { 
       action, 
-      activationRequestId, 
+      activationRequestId,  // Optional - for checking required integrations
       provider, 
       credentials, 
       grantedScopes,
@@ -91,21 +106,6 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
-
-    // Verify user owns this activation request
-    const { data: activation, error: activationError } = await supabaseAdmin
-      .from("installation_requests")
-      .select("id, email, automation_id, bundle_id")
-      .eq("id", activationRequestId)
-      .eq("email", userEmail)
-      .maybeSingle();
-
-    if (activationError || !activation) {
-      return new Response(
-        JSON.stringify({ error: "Activation request not found" }),
-        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
 
     switch (action) {
       case "connect": {
@@ -124,14 +124,20 @@ serve(async (req) => {
           encryptionKey
         );
 
-        // Upsert integration connection
-        const { data: connection, error: upsertError } = await supabaseAdmin
+        // CONNECT ONCE: Upsert by user_id + provider only (no activation_request_id)
+        // Check for existing connection for this user + provider
+        const { data: existingConnection } = await supabaseAdmin
           .from("integration_connections")
-          .upsert(
-            {
-              user_id: userId,
-              activation_request_id: activationRequestId,
-              provider,
+          .select("id")
+          .eq("user_id", userId)
+          .eq("provider", provider)
+          .maybeSingle();
+
+        if (existingConnection) {
+          // Update existing connection
+          const { error: updateError } = await supabaseAdmin
+            .from("integration_connections")
+            .update({
               status: "connected",
               encrypted_payload: encrypted,
               encryption_iv: iv,
@@ -139,21 +145,23 @@ serve(async (req) => {
               granted_scopes: grantedScopes || [],
               connected_email: connectedEmail || null,
               updated_at: new Date().toISOString(),
-            },
-            {
-              onConflict: "user_id,activation_request_id,provider",
-            }
-          )
-          .select()
-          .single();
+            })
+            .eq("id", existingConnection.id);
 
-        if (upsertError) {
-          // If onConflict fails, try insert without it
+          if (updateError) {
+            console.error("Failed to update connection:", updateError);
+            return new Response(
+              JSON.stringify({ error: "Failed to update connection" }),
+              { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+          }
+        } else {
+          // Insert new connection (user-level, no activation binding)
           const { error: insertError } = await supabaseAdmin
             .from("integration_connections")
             .insert({
               user_id: userId,
-              activation_request_id: activationRequestId,
+              activation_request_id: null,  // CONNECT ONCE: No activation binding
               provider,
               status: "connected",
               encrypted_payload: encrypted,
@@ -172,37 +180,62 @@ serve(async (req) => {
           }
         }
 
-        // Check if all required integrations are now connected
-        const { data: automation } = await supabaseAdmin
-          .from("automation_agents")
-          .select("systems")
-          .eq("id", activation.automation_id)
-          .maybeSingle();
-
-        const requiredSystems = automation?.systems || [];
-        
-        const { data: connections } = await supabaseAdmin
-          .from("integration_connections")
-          .select("provider")
-          .eq("activation_request_id", activationRequestId)
-          .eq("status", "connected");
-
-        const connectedProviders = new Set((connections || []).map(c => c.provider.toLowerCase()));
-        const allConnected = requiredSystems.every((s: string) => 
-          connectedProviders.has(s.toLowerCase())
-        );
-
-        if (allConnected && requiredSystems.length > 0) {
-          // Update activation status to in_build (ready for provisioning)
-          await supabaseAdmin
+        // If activation request provided, check if all required integrations are now connected
+        let allConnected = false;
+        if (activationRequestId) {
+          // Get activation and its automation
+          const { data: activation } = await supabaseAdmin
             .from("installation_requests")
-            .update({
-              status: "in_build",
-              customer_visible_status: "in_build",
-              credentials_submitted_at: new Date().toISOString(),
-              status_updated_at: new Date().toISOString(),
-            })
-            .eq("id", activationRequestId);
+            .select("automation_id")
+            .eq("id", activationRequestId)
+            .eq("email", userEmail)
+            .maybeSingle();
+
+          if (activation?.automation_id) {
+            // Get required integrations from automation
+            const { data: automation } = await supabaseAdmin
+              .from("automation_agents")
+              .select("systems, required_integrations")
+              .eq("id", activation.automation_id)
+              .maybeSingle();
+
+            // Determine required providers
+            let requiredProviders: string[] = [];
+            if (automation?.required_integrations && Array.isArray(automation.required_integrations)) {
+              requiredProviders = automation.required_integrations.map((ri: { provider?: string }) => 
+                (ri.provider || '').toLowerCase()
+              ).filter(Boolean);
+            } else if (automation?.systems) {
+              requiredProviders = automation.systems.map((s: string) => s.toLowerCase());
+            }
+
+            // Get user's connected integrations (user-level)
+            const { data: userConnections } = await supabaseAdmin
+              .from("integration_connections")
+              .select("provider")
+              .eq("user_id", userId)
+              .eq("status", "connected");
+
+            const connectedProviders = new Set(
+              (userConnections || []).map(c => c.provider.toLowerCase())
+            );
+
+            allConnected = requiredProviders.length > 0 && 
+              requiredProviders.every(p => connectedProviders.has(p));
+
+            if (allConnected) {
+              // Update activation status to ready for provisioning
+              await supabaseAdmin
+                .from("installation_requests")
+                .update({
+                  status: "in_build",
+                  customer_visible_status: "in_build",
+                  credentials_submitted_at: new Date().toISOString(),
+                  status_updated_at: new Date().toISOString(),
+                })
+                .eq("id", activationRequestId);
+            }
+          }
         }
 
         // Create admin notification
@@ -211,12 +244,13 @@ serve(async (req) => {
           .insert({
             type: "integration_connected",
             title: `Integration Connected: ${provider}`,
-            body: `Customer connected ${provider} for activation ${activationRequestId}`,
+            body: `User ${userEmail} connected ${provider} (account-level credential)`,
             severity: "info",
             metadata: {
-              activation_request_id: activationRequestId,
+              user_id: userId,
               provider,
               customer_email: userEmail,
+              activation_request_id: activationRequestId || null,
             },
           });
 
@@ -231,16 +265,15 @@ serve(async (req) => {
       }
 
       case "revoke": {
-        // Mark connection as revoked
+        // Revoke user's connection for this provider
         await supabaseAdmin
           .from("integration_connections")
           .update({
             status: "revoked",
             updated_at: new Date().toISOString(),
           })
-          .eq("activation_request_id", activationRequestId)
-          .eq("provider", provider)
-          .eq("user_id", userId);
+          .eq("user_id", userId)
+          .eq("provider", provider);
 
         return new Response(
           JSON.stringify({ success: true }),
@@ -249,15 +282,81 @@ serve(async (req) => {
       }
 
       case "status": {
-        // Get connection status
+        // Get all user's connections (account-level)
         const { data: connections } = await supabaseAdmin
           .from("integration_connections")
           .select("provider, status, connected_email, granted_scopes, created_at, updated_at")
-          .eq("activation_request_id", activationRequestId)
-          .eq("user_id", userId);
+          .eq("user_id", userId)
+          .neq("status", "revoked");
 
         return new Response(
           JSON.stringify({ connections: connections || [] }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      case "check_ready": {
+        // Check if all required integrations for an activation are connected
+        if (!activationRequestId) {
+          return new Response(
+            JSON.stringify({ error: "activationRequestId required" }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        // Get activation and verify ownership
+        const { data: activation } = await supabaseAdmin
+          .from("installation_requests")
+          .select("automation_id")
+          .eq("id", activationRequestId)
+          .eq("email", userEmail)
+          .maybeSingle();
+
+        if (!activation?.automation_id) {
+          return new Response(
+            JSON.stringify({ error: "Activation not found" }),
+            { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        // Get required integrations
+        const { data: automation } = await supabaseAdmin
+          .from("automation_agents")
+          .select("systems, required_integrations")
+          .eq("id", activation.automation_id)
+          .maybeSingle();
+
+        let requiredProviders: string[] = [];
+        if (automation?.required_integrations && Array.isArray(automation.required_integrations)) {
+          requiredProviders = automation.required_integrations.map((ri: { provider?: string }) => 
+            (ri.provider || '').toLowerCase()
+          ).filter(Boolean);
+        } else if (automation?.systems) {
+          requiredProviders = automation.systems.map((s: string) => s.toLowerCase());
+        }
+
+        // Get user's connected integrations
+        const { data: userConnections } = await supabaseAdmin
+          .from("integration_connections")
+          .select("provider, status, connected_email")
+          .eq("user_id", userId)
+          .eq("status", "connected");
+
+        const connectedProviders = new Set(
+          (userConnections || []).map(c => c.provider.toLowerCase())
+        );
+
+        const missing = requiredProviders.filter(p => !connectedProviders.has(p));
+        const allConnected = missing.length === 0 && requiredProviders.length > 0;
+
+        return new Response(
+          JSON.stringify({
+            allConnected,
+            required: requiredProviders,
+            connected: Array.from(connectedProviders),
+            missing,
+            connections: userConnections || [],
+          }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
