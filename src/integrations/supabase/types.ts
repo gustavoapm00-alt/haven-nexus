@@ -1015,6 +1015,7 @@ export type Database = {
           updated_at: string
           user_id: string
           webhook_status: string | null
+          webhook_url: string | null
         }
         Insert: {
           activation_request_id?: string | null
@@ -1034,6 +1035,7 @@ export type Database = {
           updated_at?: string
           user_id: string
           webhook_status?: string | null
+          webhook_url?: string | null
         }
         Update: {
           activation_request_id?: string | null
@@ -1053,6 +1055,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
           webhook_status?: string | null
+          webhook_url?: string | null
         }
         Relationships: [
           {

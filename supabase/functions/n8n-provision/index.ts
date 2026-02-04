@@ -14,48 +14,49 @@ const corsHeaders = {
  * Actions:
  * - activate: Calls duplicate-and-activate to create per-client workflow
  * - pause: Update status to paused (n8n checks status at runtime)
- * - resume: Re-activate the workflow
- * - revoke: Deactivate workflow and mark as completed
- * - retrigger: Re-run provisioning for debugging
+ * - resume: Re-trigger the workflow via n8n_mappings.webhook_url
+ * - revoke: Deactivate workflow in n8n and mark as revoked
+ * - retrigger: Re-trigger webhook for debugging
+ * 
+ * WEBHOOK ISOLATION:
+ * - Runtime webhook URLs are stored per-activation in n8n_mappings.webhook_url
+ * - automation_agents.webhook_url is DEPRECATED for runtime use
+ * - Format: {N8N_BASE_URL}/webhook/aerelion/{activation_request_id}
  * 
  * Templates are NEVER executed directly. Each activation creates an 
  * ISOLATED per-client workflow instance via the n8n API.
  */
 
-interface ActivationPayload {
-  customer_id: string;
-  automation_id: string;
-  workflow_id: string;
-  credentials_reference_id: string;
-  config: Record<string, unknown>;
+// n8n API helper - normalized base URL
+function getN8nBaseUrl(): string | null {
+  let n8nBaseUrl = Deno.env.get("N8N_BASE_URL");
+  if (!n8nBaseUrl) return null;
+  
+  try {
+    const urlObj = new URL(n8nBaseUrl);
+    return urlObj.origin;
+  } catch {
+    return n8nBaseUrl.replace(/\/+$/, "");
+  }
 }
 
-interface AutomationAgent {
-  id: string;
-  slug: string;
-  name: string;
-  workflow_id: string | null;
-  webhook_url: string | null;
-  n8n_template_ids: string[] | null;
-  configuration_fields: unknown[] | null;
-  required_integrations: unknown[] | null;
-}
-
-// n8n API helpers
 async function n8nApiCall<T>(
   method: string,
   endpoint: string,
   body?: unknown
 ): Promise<{ data?: T; error?: string }> {
-  const n8nBaseUrl = Deno.env.get("N8N_BASE_URL");
+  const n8nBaseUrl = getN8nBaseUrl();
   const n8nApiKey = Deno.env.get("N8N_API_KEY");
   
   if (!n8nBaseUrl || !n8nApiKey) {
     return { error: "n8n API not configured" };
   }
   
+  const fullUrl = `${n8nBaseUrl}/api/v1${endpoint}`;
+  console.log(`n8n API call: ${method} ${fullUrl}`);
+  
   try {
-    const response = await fetch(`${n8nBaseUrl}/api/v1${endpoint}`, {
+    const response = await fetch(fullUrl, {
       method,
       headers: {
         "Content-Type": "application/json",
@@ -74,6 +75,44 @@ async function n8nApiCall<T>(
   } catch (err) {
     return { error: err instanceof Error ? err.message : "n8n API request failed" };
   }
+}
+
+// Deactivate workflow in n8n
+async function deactivateWorkflowInN8n(workflowId: string): Promise<{ success: boolean; error?: string }> {
+  // Try POST /workflows/{id}/deactivate first (preferred)
+  const deactivateResult = await n8nApiCall<{ active: boolean }>(
+    "POST",
+    `/workflows/${workflowId}/deactivate`
+  );
+  
+  if (!deactivateResult.error) {
+    console.log(`Deactivated workflow ${workflowId} via /deactivate endpoint`);
+    return { success: true };
+  }
+  
+  // Fallback: PATCH workflow with active: false
+  console.log(`/deactivate failed, trying PATCH fallback for ${workflowId}`);
+  const patchResult = await n8nApiCall<{ id: string; active: boolean }>(
+    "PATCH",
+    `/workflows/${workflowId}`,
+    { active: false }
+  );
+  
+  if (patchResult.error) {
+    return { success: false, error: patchResult.error };
+  }
+  
+  console.log(`Deactivated workflow ${workflowId} via PATCH`);
+  return { success: true };
+}
+
+interface N8nMappingRow {
+  id: string;
+  n8n_workflow_ids: string[] | null;
+  webhook_url: string | null;
+  status: string;
+  credentials_reference_id: string | null;
+  metadata: Record<string, unknown> | null;
 }
 
 serve(async (req) => {
@@ -97,17 +136,16 @@ serve(async (req) => {
       { global: { headers: { Authorization: authHeader } } }
     );
 
-    const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const userId = claimsData.claims.sub as string;
-    const userEmail = claimsData.claims.email as string;
+    const userId = user.id;
+    const userEmail = user.email!;
 
     const { action, activationRequestId, config } = await req.json();
 
@@ -116,7 +154,7 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    // Get activation request
+    // Get activation request - just verify it exists and belongs to user
     const { data: activationData, error: activationError } = await supabaseAdmin
       .from("installation_requests")
       .select("id, email, name, company, automation_id, bundle_id")
@@ -131,205 +169,32 @@ serve(async (req) => {
       );
     }
 
-    // Get automation details separately
-    let automation: AutomationAgent | null = null;
-    if (activationData.automation_id) {
-      const { data: automationData } = await supabaseAdmin
-        .from("automation_agents")
-        .select("id, slug, name, workflow_id, webhook_url, n8n_template_ids, configuration_fields, required_integrations")
-        .eq("id", activationData.automation_id)
-        .maybeSingle();
-      automation = automationData as AutomationAgent | null;
-    }
-
-    if (!automation) {
-      return new Response(
-        JSON.stringify({ error: "Automation not found" }),
-        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
     switch (action) {
       case "activate": {
-        // Verify automation has required webhook config
-        if (!automation.webhook_url) {
-          return new Response(
-            JSON.stringify({ error: "Automation webhook not configured" }),
-            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
-        }
-
-        // CONNECT ONCE: Check user's connections (user-level, not activation-level)
-        const { data: userConnections } = await supabaseAdmin
-          .from("integration_connections")
-          .select("id, provider, status")
-          .eq("user_id", userId)
-          .eq("status", "connected");
-
-        // Get required integrations from automation
-        let requiredProviders: string[] = [];
-        if (automation.required_integrations && Array.isArray(automation.required_integrations)) {
-          requiredProviders = (automation.required_integrations as { provider?: string }[])
-            .map(ri => (ri.provider || '').toLowerCase())
-            .filter(Boolean);
-        }
-
-        // Check if all required providers are connected
-        const connectedProviders = new Set(
-          (userConnections || []).map(c => c.provider.toLowerCase())
-        );
-        const missingProviders = requiredProviders.filter(p => !connectedProviders.has(p));
-
-        if (requiredProviders.length > 0 && missingProviders.length > 0) {
-          return new Response(
-            JSON.stringify({ 
-              error: `Missing required integrations: ${missingProviders.join(", ")}. Please connect all required tools first.` 
-            }),
-            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
-        }
-
-        if (!userConnections || userConnections.length === 0) {
-          return new Response(
-            JSON.stringify({ error: "No connected integrations found. Please connect all required tools first." }),
-            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
-        }
-
-        // Build integration_connection_ids mapping (for reference only, n8n fetches via runtime-credentials)
-        const integrationConnectionIds: Record<string, string> = {};
-        for (const conn of userConnections) {
-          integrationConnectionIds[conn.provider] = conn.id;
-        }
-
-        // Generate credentials reference ID for n8n
-        const credentialsReferenceId = `cred_bundle_${activationRequestId}`;
-
-        // Create or update n8n mapping record
-        const { data: existingMapping } = await supabaseAdmin
-          .from("n8n_mappings")
-          .select("id")
-          .eq("activation_request_id", activationRequestId)
-          .eq("user_id", userId)
-          .maybeSingle();
-
-        const mappingData = {
-          user_id: userId,
-          activation_request_id: activationRequestId,
-          automation_id: activationData.automation_id,
-          bundle_id: activationData.bundle_id,
-          status: "provisioning",
-          credentials_reference_id: credentialsReferenceId,
-          webhook_status: "pending",
-          metadata: {
-            customer_email: userEmail,
-            customer_name: activationData.name,
-            company: activationData.company,
-          },
-          updated_at: new Date().toISOString(),
-        };
-
-        let mappingId: string;
-        if (existingMapping) {
-          await supabaseAdmin
-            .from("n8n_mappings")
-            .update(mappingData)
-            .eq("id", existingMapping.id);
-          mappingId = existingMapping.id;
-        } else {
-          const { data: newMapping, error: mappingError } = await supabaseAdmin
-            .from("n8n_mappings")
-            .insert(mappingData)
-            .select("id")
-            .single();
-
-          if (mappingError || !newMapping) {
-            console.error("Failed to create mapping:", mappingError);
-            return new Response(
-              JSON.stringify({ error: "Failed to start activation" }),
-              { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-            );
-          }
-          mappingId = newMapping.id;
-        }
-
-        // Build activation payload per webhook contract
-        // n8n will call runtime-credentials endpoint to fetch actual credentials
-        const activationPayload = {
-          activation_id: activationRequestId,
-          automation_slug: automation.slug,
-          config: (config as Record<string, unknown>) || {},
-        };
-
-        // POST to automation webhook
-        console.log(`Triggering webhook: ${automation.webhook_url}`);
-        let webhookResponse: Response;
-        let webhookSuccess = false;
-        let webhookError: string | null = null;
-
-        try {
-          webhookResponse = await fetch(automation.webhook_url, {
+        // Delegate to duplicate-and-activate edge function
+        const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+        
+        console.log(`Delegating activation for ${activationRequestId} to duplicate-and-activate`);
+        
+        const duplicateResponse = await fetch(
+          `${supabaseUrl}/functions/v1/duplicate-and-activate`,
+          {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
+              "Authorization": authHeader,
             },
-            body: JSON.stringify(activationPayload),
-          });
-
-          webhookSuccess = webhookResponse.ok;
-          if (!webhookSuccess) {
-            webhookError = await webhookResponse.text();
-            console.error(`Webhook failed: ${webhookResponse.status} - ${webhookError}`);
+            body: JSON.stringify({ activationRequestId }),
           }
-        } catch (err) {
-          webhookError = err instanceof Error ? err.message : "Webhook request failed";
-          console.error("Webhook error:", webhookError);
-        }
+        );
 
-        // Update mapping with webhook result
-        await supabaseAdmin
-          .from("n8n_mappings")
-          .update({
-            status: webhookSuccess ? "active" : "error",
-            webhook_status: webhookSuccess ? "success" : "error",
-            provisioned_at: webhookSuccess ? new Date().toISOString() : null,
-            error_message: webhookError,
-            last_webhook_response: webhookSuccess 
-              ? { status: "success", timestamp: new Date().toISOString() }
-              : { status: "error", error: webhookError, timestamp: new Date().toISOString() },
-          })
-          .eq("id", mappingId);
-
-        // Update activation request status
-        await supabaseAdmin
-          .from("installation_requests")
-          .update({
-            status: webhookSuccess ? "live" : "needs_attention",
-            customer_visible_status: webhookSuccess ? "live" : "needs_attention",
-            status_updated_at: new Date().toISOString(),
-          })
-          .eq("id", activationRequestId);
-
-        if (!webhookSuccess) {
-          // Create admin notification for failed activation
-          await supabaseAdmin
-            .from("admin_notifications")
-            .insert({
-              type: "activation_failed",
-              title: "Activation Failed",
-              body: `Webhook activation failed for ${userEmail}: ${webhookError}`,
-              severity: "error",
-              metadata: {
-                activation_request_id: activationRequestId,
-                automation_id: automation.id,
-                error: webhookError,
-              },
-            });
-
+        const duplicateResult = await duplicateResponse.json();
+        
+        if (!duplicateResponse.ok || !duplicateResult.success) {
           return new Response(
             JSON.stringify({ 
               success: false, 
-              error: "Activation webhook failed. Our team has been notified.",
+              error: duplicateResult.error || "Activation failed",
             }),
             { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
           );
@@ -338,15 +203,35 @@ serve(async (req) => {
         return new Response(
           JSON.stringify({ 
             success: true, 
-            mappingId,
-            message: "Automation activated successfully" 
+            workflowId: duplicateResult.workflowId,
+            webhookUrl: duplicateResult.webhookUrl,
+            message: duplicateResult.message || "Automation activated successfully",
           }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
       case "pause": {
-        // Update status to paused (n8n will check status on next execution)
+        // Get mapping to find workflow
+        const { data: mappingData } = await supabaseAdmin
+          .from("n8n_mappings")
+          .select("id, n8n_workflow_ids, status")
+          .eq("activation_request_id", activationRequestId)
+          .eq("user_id", userId)
+          .maybeSingle();
+
+        const mapping = mappingData as N8nMappingRow | null;
+
+        // Deactivate workflow in n8n if we have one
+        if (mapping?.n8n_workflow_ids?.length) {
+          const workflowId = mapping.n8n_workflow_ids[0];
+          const { error: deactivateError } = await deactivateWorkflowInN8n(workflowId);
+          if (deactivateError) {
+            console.warn(`Failed to deactivate workflow in n8n: ${deactivateError}`);
+          }
+        }
+
+        // Update mapping status
         await supabaseAdmin
           .from("n8n_mappings")
           .update({ 
@@ -372,76 +257,97 @@ serve(async (req) => {
       }
 
       case "resume": {
-        // Get existing mapping
-        const { data: mapping } = await supabaseAdmin
+        // Get mapping with webhook_url
+        const { data: mappingData } = await supabaseAdmin
           .from("n8n_mappings")
-          .select("*")
+          .select("id, n8n_workflow_ids, webhook_url, status, metadata")
           .eq("activation_request_id", activationRequestId)
           .eq("user_id", userId)
           .maybeSingle();
 
-        if (!mapping || !automation.webhook_url) {
+        const mapping = mappingData as N8nMappingRow | null;
+
+        if (!mapping || !mapping.n8n_workflow_ids?.length) {
           return new Response(
-            JSON.stringify({ error: "Cannot resume - no active mapping found" }),
+            JSON.stringify({ error: "Activation not provisioned yet (no workflow)" }),
             { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
           );
         }
 
-        // Re-trigger webhook with existing credentials reference
-        const metadataConfig = (mapping.metadata as Record<string, unknown>)?.config;
-        const resumePayload: ActivationPayload = {
-          customer_id: userId,
-          automation_id: automation.slug || automation.id,
-          workflow_id: automation.workflow_id || "",
-          credentials_reference_id: mapping.credentials_reference_id || "",
-          config: (metadataConfig as Record<string, unknown>) || {},
-        };
+        // First, re-activate the workflow in n8n
+        const workflowId = mapping.n8n_workflow_ids[0];
+        const activateResult = await n8nApiCall<{ active: boolean }>(
+          "POST",
+          `/workflows/${workflowId}/activate`
+        );
 
-        let webhookSuccess = false;
-        try {
-          const response = await fetch(automation.webhook_url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(resumePayload),
-          });
-          webhookSuccess = response.ok;
-        } catch (err) {
-          console.error("Resume webhook failed:", err);
+        if (activateResult.error) {
+          console.error(`Failed to reactivate workflow: ${activateResult.error}`);
+          return new Response(
+            JSON.stringify({ 
+              success: false, 
+              error: `Failed to reactivate workflow: ${activateResult.error}` 
+            }),
+            { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
         }
 
+        // Update status
         await supabaseAdmin
           .from("n8n_mappings")
           .update({ 
-            status: webhookSuccess ? "active" : "error",
-            webhook_status: webhookSuccess ? "success" : "error",
+            status: "active",
             updated_at: new Date().toISOString(),
           })
-          .eq("activation_request_id", activationRequestId);
+          .eq("id", mapping.id);
 
         await supabaseAdmin
           .from("installation_requests")
           .update({
-            status: webhookSuccess ? "live" : "needs_attention",
-            customer_visible_status: webhookSuccess ? "live" : "needs_attention",
+            status: "live",
+            customer_visible_status: "live",
             status_updated_at: new Date().toISOString(),
           })
           .eq("id", activationRequestId);
 
         return new Response(
           JSON.stringify({ 
-            success: webhookSuccess, 
-            message: webhookSuccess ? "Automation resumed" : "Failed to resume - please try again" 
+            success: true, 
+            message: "Automation resumed",
+            webhookUrl: mapping.webhook_url,
           }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
       case "revoke": {
-        // Mark mapping as deactivated
+        // Get mapping
+        const { data: mappingData } = await supabaseAdmin
+          .from("n8n_mappings")
+          .select("id, n8n_workflow_ids, status")
+          .eq("activation_request_id", activationRequestId)
+          .eq("user_id", userId)
+          .maybeSingle();
+
+        const mapping = mappingData as N8nMappingRow | null;
+
+        // Deactivate workflow in n8n if we have one
+        if (mapping?.n8n_workflow_ids?.length) {
+          const workflowId = mapping.n8n_workflow_ids[0];
+          console.log(`Revoking: deactivating workflow ${workflowId} in n8n`);
+          
+          const { success: deactivated, error: deactivateError } = await deactivateWorkflowInN8n(workflowId);
+          if (!deactivated) {
+            console.warn(`Failed to deactivate workflow in n8n: ${deactivateError}`);
+            // Continue with revocation even if n8n deactivation fails
+          }
+        }
+
+        // Mark mapping as revoked
         await supabaseAdmin
           .from("n8n_mappings")
           .update({ 
-            status: "deactivated",
+            status: "revoked",
             updated_at: new Date().toISOString(),
           })
           .eq("activation_request_id", activationRequestId)
@@ -461,43 +367,55 @@ serve(async (req) => {
           .eq("id", activationRequestId);
 
         return new Response(
-          JSON.stringify({ success: true, message: "Automation and credentials revoked" }),
+          JSON.stringify({ success: true, message: "Automation revoked and workflow deactivated" }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
       case "retrigger": {
-        // Re-trigger webhook (for debugging/recovery)
-        const { data: mapping } = await supabaseAdmin
+        // Get mapping with webhook_url from dedicated column
+        const { data: mappingData } = await supabaseAdmin
           .from("n8n_mappings")
-          .select("*")
+          .select("id, n8n_workflow_ids, webhook_url, status, metadata")
           .eq("activation_request_id", activationRequestId)
           .eq("user_id", userId)
           .maybeSingle();
 
-        if (!mapping || !automation.webhook_url) {
+        const mapping = mappingData as N8nMappingRow | null;
+
+        if (!mapping) {
           return new Response(
-            JSON.stringify({ error: "No mapping found to retrigger" }),
+            JSON.stringify({ error: "Activation not provisioned yet (no mapping)" }),
             { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
           );
         }
 
-        const metadataConfigRetrigger = (mapping.metadata as Record<string, unknown>)?.config;
-        const retriggerPayload: ActivationPayload = {
-          customer_id: userId,
-          automation_id: automation.slug || automation.id,
-          workflow_id: automation.workflow_id || "",
-          credentials_reference_id: mapping.credentials_reference_id || "",
-          config: (config as Record<string, unknown>) || (metadataConfigRetrigger as Record<string, unknown>) || {},
-        };
+        // Use webhook_url from n8n_mappings (NOT automation_agents)
+        const webhookUrl = mapping.webhook_url;
+        
+        if (!webhookUrl) {
+          return new Response(
+            JSON.stringify({ error: "Activation not provisioned yet (no webhook_url). Run 'activate' first." }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
 
+        // Trigger the webhook
+        console.log(`Retriggering webhook: POST ${webhookUrl}`);
+        
         let webhookSuccess = false;
         let webhookError: string | null = null;
+        
         try {
-          const response = await fetch(automation.webhook_url, {
+          const response = await fetch(webhookUrl, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(retriggerPayload),
+            body: JSON.stringify({
+              activation_id: activationRequestId,
+              config: config || {},
+              triggered_by: "retrigger",
+              timestamp: new Date().toISOString(),
+            }),
           });
           webhookSuccess = response.ok;
           if (!webhookSuccess) {
@@ -507,6 +425,7 @@ serve(async (req) => {
           webhookError = err instanceof Error ? err.message : "Request failed";
         }
 
+        // Update mapping with result
         await supabaseAdmin
           .from("n8n_mappings")
           .update({ 
@@ -523,7 +442,8 @@ serve(async (req) => {
         return new Response(
           JSON.stringify({ 
             success: webhookSuccess, 
-            message: webhookSuccess ? "Webhook retriggered successfully" : `Webhook failed: ${webhookError}` 
+            webhookUrl,
+            message: webhookSuccess ? "Webhook triggered successfully" : `Webhook failed: ${webhookError}` 
           }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
