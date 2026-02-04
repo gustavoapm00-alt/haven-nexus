@@ -65,3 +65,6 @@ verify_jwt = false
 
 [functions.import-n8n-templates]
 verify_jwt = false
+
+[functions.duplicate-and-activate]
+verify_jwt = false

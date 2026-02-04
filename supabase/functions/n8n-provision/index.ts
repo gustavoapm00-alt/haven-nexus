@@ -9,14 +9,17 @@ const corsHeaders = {
 /**
  * n8n Provisioning Edge Function
  * 
- * This function is a CONTROL PANEL, not an automation engine.
- * It collects credentials, stores them securely, and triggers webhooks.
+ * ORCHESTRATION LAYER for automation lifecycle management.
  * 
  * Actions:
- * - activate: POST to automation's webhook with credentials_reference_id
- * - pause: Update status to paused
- * - resume: Re-trigger webhook to resume
- * - revoke: Mark credentials as revoked and notify n8n
+ * - activate: Calls duplicate-and-activate to create per-client workflow
+ * - pause: Update status to paused (n8n checks status at runtime)
+ * - resume: Re-activate the workflow
+ * - revoke: Deactivate workflow and mark as completed
+ * - retrigger: Re-run provisioning for debugging
+ * 
+ * Templates are NEVER executed directly. Each activation creates an 
+ * ISOLATED per-client workflow instance via the n8n API.
  */
 
 interface ActivationPayload {
@@ -33,8 +36,44 @@ interface AutomationAgent {
   name: string;
   workflow_id: string | null;
   webhook_url: string | null;
+  n8n_template_ids: string[] | null;
   configuration_fields: unknown[] | null;
   required_integrations: unknown[] | null;
+}
+
+// n8n API helpers
+async function n8nApiCall<T>(
+  method: string,
+  endpoint: string,
+  body?: unknown
+): Promise<{ data?: T; error?: string }> {
+  const n8nBaseUrl = Deno.env.get("N8N_BASE_URL");
+  const n8nApiKey = Deno.env.get("N8N_API_KEY");
+  
+  if (!n8nBaseUrl || !n8nApiKey) {
+    return { error: "n8n API not configured" };
+  }
+  
+  try {
+    const response = await fetch(`${n8nBaseUrl}/api/v1${endpoint}`, {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+        "X-N8N-API-KEY": n8nApiKey,
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      return { error: `n8n API error: ${response.status} - ${errorText}` };
+    }
+    
+    const data = await response.json();
+    return { data: data as T };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "n8n API request failed" };
+  }
 }
 
 serve(async (req) => {
@@ -97,10 +136,10 @@ serve(async (req) => {
     if (activationData.automation_id) {
       const { data: automationData } = await supabaseAdmin
         .from("automation_agents")
-        .select("id, slug, name, workflow_id, webhook_url, configuration_fields, required_integrations")
+        .select("id, slug, name, workflow_id, webhook_url, n8n_template_ids, configuration_fields, required_integrations")
         .eq("id", activationData.automation_id)
         .maybeSingle();
-      automation = automationData;
+      automation = automationData as AutomationAgent | null;
     }
 
     if (!automation) {
