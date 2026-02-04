@@ -1,5 +1,5 @@
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+import LibraryNavbar from '@/components/library/LibraryNavbar';
+import LibraryFooter from '@/components/library/LibraryFooter';
 import ScrollReveal from '@/components/ScrollReveal';
 import SEO, { schemas } from '@/components/SEO';
 
@@ -16,9 +16,9 @@ const Terms = () => {
           { name: 'Terms of Service', url: '/terms' }
         ])}
       />
-      <Navbar />
+      <LibraryNavbar />
       
-      <main className="pt-24">
+      <main className="pt-12">
         <section className="section-padding">
           <div className="container-main max-w-3xl">
             <ScrollReveal>
@@ -113,7 +113,7 @@ const Terms = () => {
         </section>
       </main>
 
-      <Footer />
+      <LibraryFooter />
     </div>
   );
 };
