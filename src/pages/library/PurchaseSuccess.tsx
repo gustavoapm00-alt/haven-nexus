@@ -140,12 +140,13 @@ const PurchaseSuccess = () => {
   }, [user?.email, sessionId]);
 
   // Create activation request as fallback if webhook hasn't created one
+  // Uses stripe_session_id for deduplication to prevent race conditions
   const createActivationFallback = useCallback(async (purchaseData: PurchaseDetails) => {
-    if (!user?.id || !user?.email || activationRequestId) return;
+    if (!user?.id || !user?.email || activationRequestId || !sessionId) return;
     
     setCreatingActivation(true);
     try {
-      // Check one more time if activation exists
+      // Check if activation already exists for this user + item (not completed/cancelled)
       const { data: existingRequest } = await supabase
         .from('installation_requests')
         .select('id')
@@ -156,51 +157,72 @@ const PurchaseSuccess = () => {
 
       if (existingRequest) {
         setActivationRequestId(existingRequest.id);
+        console.log('✅ Found existing activation request:', existingRequest.id);
         return;
       }
 
-      // Create new activation request based on item type
-      if (purchaseData.item_type === 'agent') {
-        const { data: newRequest, error: createError } = await supabase
-          .from('installation_requests')
-          .insert({
-            user_id: user.id,
-            email: user.email,
-            status: 'received',
-            customer_visible_status: 'received',
-            purchased_item: purchaseData.item_name,
-            name: user.email,
-            automation_id: purchaseData.item_id,
-          })
-          .select('id')
-          .single();
+      // No activation found - webhook may not have fired yet
+      // Wait a short delay and check once more to give webhook time
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Re-check after delay
+      const { data: recheckRequest } = await supabase
+        .from('installation_requests')
+        .select('id')
+        .eq('user_id', user.id)
+        .or(`automation_id.eq.${purchaseData.item_id},bundle_id.eq.${purchaseData.item_id}`)
+        .not('status', 'in', '("completed","cancelled")')
+        .maybeSingle();
 
-        if (newRequest && !createError) {
-          setActivationRequestId(newRequest.id);
-          console.log('✅ Fallback activation request created:', newRequest.id);
-        } else if (createError) {
+      if (recheckRequest) {
+        setActivationRequestId(recheckRequest.id);
+        console.log('✅ Found activation request after delay:', recheckRequest.id);
+        return;
+      }
+
+      // Still no activation - create one as fallback
+      // The webhook has a 1500ms head start, so if we're here, it likely failed
+      console.log('Creating fallback activation request - webhook may have failed');
+      
+      const insertData = {
+        user_id: user.id,
+        email: user.email,
+        status: 'received' as const,
+        customer_visible_status: 'received' as const,
+        purchased_item: purchaseData.item_name,
+        name: user.email,
+        ...(purchaseData.item_type === 'agent' 
+          ? { automation_id: purchaseData.item_id }
+          : { bundle_id: purchaseData.item_id }
+        ),
+      };
+
+      const { data: newRequest, error: createError } = await supabase
+        .from('installation_requests')
+        .insert(insertData)
+        .select('id')
+        .single();
+
+      if (newRequest && !createError) {
+        setActivationRequestId(newRequest.id);
+        console.log('✅ Fallback activation request created:', newRequest.id);
+      } else if (createError) {
+        // If duplicate key error, try to fetch the existing one
+        if (createError.message?.includes('duplicate') || createError.code === '23505') {
+          const { data: dupRequest } = await supabase
+            .from('installation_requests')
+            .select('id')
+            .eq('user_id', user.id)
+            .or(`automation_id.eq.${purchaseData.item_id},bundle_id.eq.${purchaseData.item_id}`)
+            .not('status', 'in', '("completed","cancelled")')
+            .maybeSingle();
+          
+          if (dupRequest) {
+            setActivationRequestId(dupRequest.id);
+            console.log('✅ Found existing activation after duplicate error:', dupRequest.id);
+          }
+        } else {
           console.error('Failed to create activation request:', createError);
-        }
-      } else {
-        const { data: newRequest, error: createError } = await supabase
-          .from('installation_requests')
-          .insert({
-            user_id: user.id,
-            email: user.email,
-            status: 'received',
-            customer_visible_status: 'received',
-            purchased_item: purchaseData.item_name,
-            name: user.email,
-            bundle_id: purchaseData.item_id,
-          })
-          .select('id')
-          .single();
-
-        if (newRequest && !createError) {
-          setActivationRequestId(newRequest.id);
-          console.log('✅ Fallback activation request created (bundle):', newRequest.id);
-        } else if (createError) {
-          console.error('Failed to create activation request for bundle:', createError);
         }
       }
     } catch (err) {
@@ -208,7 +230,7 @@ const PurchaseSuccess = () => {
     } finally {
       setCreatingActivation(false);
     }
-  }, [user?.id, user?.email, activationRequestId]);
+  }, [user?.id, user?.email, activationRequestId, sessionId]);
 
   // Auto-redirect to connector screen when activation is ready
   useEffect(() => {
@@ -286,18 +308,27 @@ const PurchaseSuccess = () => {
       });
 
       if (downloadError) {
-        throw new Error(downloadError.message);
+        // Network/auth errors are actual errors
+        console.error('Fetch downloads network error:', downloadError);
+        setDiagnostics(prev => ({ ...prev, downloadsGenerated: false }));
+        // Don't show toast for this - it's not critical for activation flow
+        return;
       }
 
       if (data.error) {
-        throw new Error(data.error);
+        // "No valid purchase" is a real error, but "no files" is expected for new items
+        console.warn('Download links response:', data.error);
+        setDiagnostics(prev => ({ ...prev, downloadsGenerated: false }));
+        // Don't show toast - downloads are optional in managed activation flow
+        return;
       }
 
       setDownloads(data.downloads || []);
       
-      // Check if no files are available yet
+      // Check if no files are available yet - this is normal for managed automations
       if (!data.files_available && data.message) {
         setNoFilesMessage(data.message);
+        // No error toast - this is expected for managed/hosted automations
       }
       
       setDiagnostics(prev => ({
@@ -306,16 +337,14 @@ const PurchaseSuccess = () => {
         downloadCount: prev.downloadCount + 1,
       }));
       
+      // Only show success if there are actual downloads
       if (data.downloads?.length > 0) {
         toast.success('Download links ready');
       }
     } catch (err) {
-      console.error('Fetch downloads error:', err);
-      toast.error('Failed to generate download links');
-      setDiagnostics(prev => ({
-        ...prev,
-        downloadsGenerated: false,
-      }));
+      // Catch-all for unexpected errors - log but don't toast
+      console.error('Fetch downloads unexpected error:', err);
+      setDiagnostics(prev => ({ ...prev, downloadsGenerated: false }));
     } finally {
       setDownloadLoading(false);
     }

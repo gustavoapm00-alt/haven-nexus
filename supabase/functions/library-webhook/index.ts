@@ -197,6 +197,7 @@ serve(async (req) => {
         }
 
         // Create installation_request for self-serve activation (idempotent)
+        // Use upsert-like pattern with conflict detection
         if (metadata.user_id && metadata.item_type === "agent") {
           // Check if activation already exists for this user + automation (not completed/cancelled)
           const { data: existingRequest } = await supabaseAdmin
@@ -208,29 +209,45 @@ serve(async (req) => {
             .maybeSingle();
 
           if (!existingRequest) {
-            const { error: activationError } = await supabaseAdmin
+            // Use a short unique constraint check with the purchase_id to prevent duplicates
+            const { data: byPurchaseId } = await supabaseAdmin
               .from("installation_requests")
-              .insert({
-                user_id: metadata.user_id,
-                email: customerEmail,
-                automation_id: metadata.item_id,
-                status: "received",
-                customer_visible_status: "received",
-                purchased_item: itemName || "Automation",
-                name: customerEmail,
-              });
+              .select("id")
+              .eq("purchase_id", session.id)
+              .maybeSingle();
 
-            if (activationError) {
-              console.error("Failed to create installation_request:", activationError);
-              // Don't throw - purchase was already recorded
+            if (!byPurchaseId) {
+              const { error: activationError } = await supabaseAdmin
+                .from("installation_requests")
+                .insert({
+                  user_id: metadata.user_id,
+                  email: customerEmail,
+                  automation_id: metadata.item_id,
+                  status: "received",
+                  customer_visible_status: "received",
+                  purchased_item: itemName || "Automation",
+                  name: customerEmail,
+                  purchase_id: session.id,
+                });
+
+              if (activationError) {
+                // Check for unique constraint violation (duplicate)
+                if (activationError.code === '23505' || activationError.message?.includes('duplicate')) {
+                  console.log("Installation request already exists (concurrent creation)");
+                } else {
+                  console.error("Failed to create installation_request:", activationError);
+                }
+              } else {
+                console.log("✅ Installation request created for automation:", metadata.item_id);
+              }
             } else {
-              console.log("✅ Installation request created for automation:", metadata.item_id);
+              console.log("Installation request already exists for purchase:", byPurchaseId.id);
             }
           } else {
             console.log("Installation request already exists:", existingRequest.id);
           }
         } else if (metadata.user_id && metadata.item_type === "bundle") {
-          // Handle bundle activation
+          // Handle bundle activation with same idempotency pattern
           const { data: existingRequest } = await supabaseAdmin
             .from("installation_requests")
             .select("id")
@@ -240,22 +257,37 @@ serve(async (req) => {
             .maybeSingle();
 
           if (!existingRequest) {
-            const { error: activationError } = await supabaseAdmin
+            const { data: byPurchaseId } = await supabaseAdmin
               .from("installation_requests")
-              .insert({
-                user_id: metadata.user_id,
-                email: customerEmail,
-                bundle_id: metadata.item_id,
-                status: "received",
-                customer_visible_status: "received",
-                purchased_item: itemName || "Bundle",
-                name: customerEmail,
-              });
+              .select("id")
+              .eq("purchase_id", session.id)
+              .maybeSingle();
 
-            if (activationError) {
-              console.error("Failed to create installation_request for bundle:", activationError);
+            if (!byPurchaseId) {
+              const { error: activationError } = await supabaseAdmin
+                .from("installation_requests")
+                .insert({
+                  user_id: metadata.user_id,
+                  email: customerEmail,
+                  bundle_id: metadata.item_id,
+                  status: "received",
+                  customer_visible_status: "received",
+                  purchased_item: itemName || "Bundle",
+                  name: customerEmail,
+                  purchase_id: session.id,
+                });
+
+              if (activationError) {
+                if (activationError.code === '23505' || activationError.message?.includes('duplicate')) {
+                  console.log("Installation request already exists (concurrent creation)");
+                } else {
+                  console.error("Failed to create installation_request for bundle:", activationError);
+                }
+              } else {
+                console.log("✅ Installation request created for bundle:", metadata.item_id);
+              }
             } else {
-              console.log("✅ Installation request created for bundle:", metadata.item_id);
+              console.log("Installation request already exists for purchase:", byPurchaseId.id);
             }
           } else {
             console.log("Installation request already exists for bundle:", existingRequest.id);
