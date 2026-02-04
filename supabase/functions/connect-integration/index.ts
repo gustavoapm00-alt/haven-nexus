@@ -100,7 +100,7 @@ interface Automation {
   slug: string;
   systems: string[] | null;
   required_integrations: { provider?: string }[] | null;
-  webhook_url: string | null;
+  n8n_template_ids: string[] | null;
 }
 
 interface UserConnection {
@@ -138,7 +138,7 @@ async function checkAndAutoActivate(
   // Get automation details
   const { data: automation } = await supabaseAdmin
     .from("automation_agents")
-    .select("id, slug, systems, required_integrations, webhook_url")
+    .select("id, slug, systems, required_integrations, n8n_template_ids")
     .eq("id", activation.automation_id)
     .maybeSingle() as { data: Automation | null };
 
@@ -174,10 +174,28 @@ async function checkAndAutoActivate(
     return { triggered: false };
   }
 
-  // All required integrations connected - auto-activate!
-  console.log(`Auto-activating: All required integrations connected for activation ${activationRequestId}`);
+  // All required integrations connected - ready for activation!
+  console.log(`Ready for activation: All required integrations connected for activation ${activationRequestId}`);
 
-  // Update activation status
+  // Verify automation has templates configured (template-based model)
+  if (!automation.n8n_template_ids || automation.n8n_template_ids.length === 0) {
+    console.log(`No n8n_template_ids configured for automation ${automation.id}, marking ready but not auto-activating`);
+    
+    // Update to indicate ready for manual activation
+    await supabaseAdmin
+      .from("installation_requests")
+      .update({
+        status: "awaiting_activation",
+        customer_visible_status: "awaiting_activation",
+        credentials_submitted_at: new Date().toISOString(),
+        status_updated_at: new Date().toISOString(),
+      })
+      .eq("id", activationRequestId);
+    
+    return { triggered: false, error: "No template linked to automation" };
+  }
+
+  // Update activation status - mark as ready for provisioning
   await supabaseAdmin
     .from("installation_requests")
     .update({
@@ -188,72 +206,37 @@ async function checkAndAutoActivate(
     })
     .eq("id", activationRequestId);
 
-  // Check if webhook_url is configured
-  if (!automation.webhook_url) {
-    console.log(`No webhook_url configured for automation ${automation.id}, skipping auto-trigger`);
-    return { triggered: false };
-  }
-
-  // Trigger the provisioning webhook
-  const activationPayload = {
-    activation_id: activationRequestId,
-    automation_slug: automation.slug,
-    config: {},
-  };
-
+  // AUTO-ACTIVATE: Call the n8n-provision edge function to duplicate and activate
+  // This uses the template-based model (no deprecated automation_agents.webhook_url)
   try {
-    console.log(`Triggering auto-activation webhook: ${automation.webhook_url}`);
-    const response = await fetch(automation.webhook_url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(activationPayload),
-    });
-
-    const webhookSuccess = response.ok;
-
-    // Create or update n8n mapping
-    const credentialsReferenceId = `cred_bundle_${activationRequestId}`;
-    const { data: existingMapping } = await supabaseAdmin
-      .from("n8n_mappings")
-      .select("id")
-      .eq("activation_request_id", activationRequestId)
-      .eq("user_id", userId)
-      .maybeSingle() as { data: { id: string } | null };
-
-    const mappingData = {
-      user_id: userId,
-      activation_request_id: activationRequestId,
-      automation_id: automation.id,
-      status: webhookSuccess ? "active" : "error",
-      credentials_reference_id: credentialsReferenceId,
-      webhook_status: webhookSuccess ? "success" : "error",
-      provisioned_at: webhookSuccess ? new Date().toISOString() : null,
-      metadata: { auto_activated: true, customer_email: userEmail },
-      updated_at: new Date().toISOString(),
-    };
-
-    if (existingMapping) {
-      await supabaseAdmin
-        .from("n8n_mappings")
-        .update(mappingData)
-        .eq("id", existingMapping.id);
-    } else {
-      await supabaseAdmin
-        .from("n8n_mappings")
-        .insert(mappingData);
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    
+    if (!supabaseUrl || !serviceRoleKey) {
+      console.error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
+      return { triggered: false, error: "Server configuration error" };
     }
 
-    // Update activation status based on webhook result
-    await supabaseAdmin
-      .from("installation_requests")
-      .update({
-        status: webhookSuccess ? "live" : "needs_attention",
-        customer_visible_status: webhookSuccess ? "live" : "needs_attention",
-        status_updated_at: new Date().toISOString(),
-      })
-      .eq("id", activationRequestId);
+    console.log(`Auto-activating via n8n-provision for activation ${activationRequestId}`);
+    
+    const response = await fetch(`${supabaseUrl}/functions/v1/n8n-provision`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${serviceRoleKey}`,
+      },
+      body: JSON.stringify({
+        action: "activate",
+        activationRequestId,
+        userId,
+        config: {},
+      }),
+    });
 
-    if (webhookSuccess) {
+    const result = await response.json();
+    const provisionSuccess = response.ok && result.success;
+
+    if (provisionSuccess) {
       // Create success notification
       await supabaseAdmin
         .from("client_notifications")
@@ -263,14 +246,44 @@ async function checkAndAutoActivate(
           title: "Automation Activated!",
           body: "All required integrations connected. Your automation is now live.",
           severity: "success",
-          metadata: { activation_request_id: activationRequestId },
+          metadata: { 
+            activation_request_id: activationRequestId,
+            webhook_url: result.webhookUrl,
+          },
         });
+
+      console.log(`Auto-activation successful: ${result.webhookUrl}`);
+    } else {
+      console.error("Auto-activation failed:", result.error || result.message);
+      
+      // Update status to needs_attention
+      await supabaseAdmin
+        .from("installation_requests")
+        .update({
+          status: "needs_attention",
+          customer_visible_status: "needs_attention",
+          activation_notes_internal: `Auto-activation failed: ${result.error || result.message || "Unknown error"}`,
+          status_updated_at: new Date().toISOString(),
+        })
+        .eq("id", activationRequestId);
     }
 
-    return { triggered: true };
+    return { triggered: provisionSuccess, error: provisionSuccess ? undefined : (result.error || "Provisioning failed") };
   } catch (err) {
-    console.error("Auto-activation webhook failed:", err);
-    return { triggered: false, error: err instanceof Error ? err.message : "Webhook failed" };
+    console.error("Auto-activation call failed:", err);
+    
+    // Update status to needs_attention
+    await supabaseAdmin
+      .from("installation_requests")
+      .update({
+        status: "needs_attention",
+        customer_visible_status: "needs_attention",
+        activation_notes_internal: `Auto-activation exception: ${err instanceof Error ? err.message : "Unknown error"}`,
+        status_updated_at: new Date().toISOString(),
+      })
+      .eq("id", activationRequestId);
+    
+    return { triggered: false, error: err instanceof Error ? err.message : "Activation failed" };
   }
 }
 

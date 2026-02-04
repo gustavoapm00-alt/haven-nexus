@@ -99,7 +99,7 @@ Example:
 |--------|---------|
 | `n8n_template_ids` | References n8n_workflow_templates |
 | `required_integrations` | Providers needed for activation |
-| `webhook_url` | **DEPRECATED** - not used for runtime |
+| `webhook_url` | **REMOVED** - Set to NULL, not used for runtime |
 
 ## Lifecycle Actions
 
@@ -147,9 +147,13 @@ Calls `duplicate-and-activate` to provision isolated workflow.
 
 ## Migration Notes
 
-`automation_agents.webhook_url` is deprecated for runtime. All runtime webhook URLs are now stored per-activation in `n8n_mappings.webhook_url`.
+`automation_agents.webhook_url` has been **cleared to NULL** for all automations. All runtime webhook URLs are now stored per-activation in `n8n_mappings.webhook_url`.
 
 ```sql
--- Added column
-ALTER TABLE n8n_mappings ADD COLUMN webhook_url TEXT;
+-- Cleanup completed 2026-02-04
+UPDATE automation_agents SET webhook_url = NULL;
 ```
+
+---
+
+**See Also:** [AERELION_ARCHITECTURE.md](./AERELION_ARCHITECTURE.md) - Canonical reference document

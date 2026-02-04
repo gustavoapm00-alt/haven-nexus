@@ -314,6 +314,7 @@ Deno.serve(async (req) => {
           updated_at: new Date().toISOString(),
         };
 
+        let templateId: string;
         const { data: existingTemplate } = await supabaseAdmin
           .from("n8n_workflow_templates")
           .select("id")
@@ -325,11 +326,26 @@ Deno.serve(async (req) => {
             .from("n8n_workflow_templates")
             .update(templateData)
             .eq("id", existingTemplate.id);
+          templateId = existingTemplate.id;
         } else {
-          await supabaseAdmin
+          const { data: newTemplate, error: templateError } = await supabaseAdmin
             .from("n8n_workflow_templates")
-            .insert(templateData);
+            .insert(templateData)
+            .select("id")
+            .single();
+          if (templateError) throw templateError;
+          templateId = newTemplate.id;
         }
+
+        // CRITICAL: Auto-link template to automation agent via n8n_template_ids
+        // This ensures the template-based provisioning model works correctly
+        await supabaseAdmin
+          .from("automation_agents")
+          .update({ 
+            n8n_template_ids: [templateId],
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", automationAgentId);
       } catch (err) {
         results.push({
           slug,
