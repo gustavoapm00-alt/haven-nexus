@@ -102,8 +102,8 @@ const Privacy = () => {
                   <h2 className="text-xl font-semibold text-foreground mb-3">Contact</h2>
                   <p className="text-muted-foreground">
                     Privacy questions? Contact us at{' '}
-                    <a href="mailto:contact@aerlion.systems" className="text-primary hover:underline">
-                      contact@aerlion.systems
+                    <a href="mailto:contact@aerelion.systems" className="text-primary hover:underline">
+                      contact@aerelion.systems
                     </a>
                   </p>
                 </section>

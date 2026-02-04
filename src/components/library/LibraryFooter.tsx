@@ -6,7 +6,7 @@ const LibraryFooter = () => {
   return (
     <footer className="border-t border-border bg-muted/30">
       <div className="container-main section-padding !py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
           {/* Brand */}
           <div>
             <Link to="/" className="font-semibold text-lg text-foreground tracking-tight">
