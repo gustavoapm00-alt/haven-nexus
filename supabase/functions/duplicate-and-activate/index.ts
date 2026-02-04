@@ -8,10 +8,16 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
  * This function implements the core activation pipeline:
  * 1. Fetch immutable template from n8n_workflow_templates
  * 2. Create per-client workflow instance via n8n API
- * 3. Create n8n credentials from decrypted Supabase credentials
- * 4. Patch workflow nodes to reference new credentials
- * 5. Activate the workflow in n8n
- * 6. Store workflow_id, webhook_url in n8n_mappings
+ * 3. Patch webhook node with deterministic path: aerelion/{activation_id}
+ * 4. Create n8n credentials from decrypted Supabase credentials
+ * 5. Patch workflow nodes to reference new credentials
+ * 6. Activate the workflow in n8n
+ * 7. Store workflow_id, webhook_url in n8n_mappings
+ * 
+ * WEBHOOK ISOLATION:
+ * - Each activation gets a unique webhook path: aerelion/{activation_request_id}
+ * - Webhook URL format: {N8N_BASE_URL}/webhook/aerelion/{activation_request_id}
+ * - Path is set as string literal (not expression) in webhook node parameters
  * 
  * Security:
  * - Service role only (internal or admin-initiated)
@@ -59,6 +65,19 @@ interface ProvisioningResult {
   webhookUrl?: string;
   credentialIds?: string[];
   error?: string;
+}
+
+// Get normalized n8n base URL (origin only)
+function getN8nBaseUrl(): string | null {
+  let n8nBaseUrl = Deno.env.get("N8N_BASE_URL");
+  if (!n8nBaseUrl) return null;
+  
+  try {
+    const urlObj = new URL(n8nBaseUrl);
+    return urlObj.origin;
+  } catch {
+    return n8nBaseUrl.replace(/\/+$/, "");
+  }
 }
 
 // AES-256-GCM decryption
@@ -119,21 +138,11 @@ async function n8nApiCall<T>(
   endpoint: string,
   body?: unknown
 ): Promise<{ data?: T; error?: string }> {
-  let n8nBaseUrl = Deno.env.get("N8N_BASE_URL");
+  const n8nBaseUrl = getN8nBaseUrl();
   const n8nApiKey = Deno.env.get("N8N_API_KEY");
   
   if (!n8nBaseUrl || !n8nApiKey) {
     return { error: "n8n API not configured" };
-  }
-  
-  // Normalize base URL: remove trailing slashes and any path components
-  // n8nBaseUrl should be just the origin (e.g., https://n8n.example.com)
-  try {
-    const urlObj = new URL(n8nBaseUrl);
-    n8nBaseUrl = urlObj.origin; // Get just protocol + host
-  } catch {
-    // If parsing fails, just remove trailing slashes
-    n8nBaseUrl = n8nBaseUrl.replace(/\/+$/, "");
   }
   
   const fullUrl = `${n8nBaseUrl}/api/v1${endpoint}`;
@@ -163,12 +172,26 @@ async function n8nApiCall<T>(
   }
 }
 
-// Create workflow in n8n
+// Compute deterministic webhook path for an activation
+function computeWebhookPath(activationId: string): string {
+  return `aerelion/${activationId}`;
+}
+
+// Compute full webhook URL
+function computeWebhookUrl(activationId: string): string | null {
+  const baseUrl = getN8nBaseUrl();
+  if (!baseUrl) return null;
+  return `${baseUrl}/webhook/${computeWebhookPath(activationId)}`;
+}
+
+// Create workflow in n8n with deterministic webhook path
 async function createWorkflow(
   templateJson: N8nWorkflow,
   clientName: string,
   activationId: string
 ): Promise<{ workflowId?: string; error?: string }> {
+  const webhookPath = computeWebhookPath(activationId);
+  
   // Clone and customize the template
   const workflow: N8nWorkflow = {
     ...templateJson,
@@ -183,12 +206,26 @@ async function createWorkflow(
     },
   };
   
-  // Remove node IDs so n8n generates new ones
-  workflow.nodes = workflow.nodes.map(node => ({
-    ...node,
-    // Clear any credential references - we'll patch these after creating credentials
-    credentials: undefined,
-  }));
+  // Process nodes: set webhook path and clear credentials
+  workflow.nodes = workflow.nodes.map(node => {
+    const processedNode = {
+      ...node,
+      // Clear any credential references - we'll patch these after creating credentials
+      credentials: undefined,
+    };
+    
+    // CRITICAL: Set deterministic webhook path for webhook nodes
+    if (node.type === "n8n-nodes-base.webhook") {
+      processedNode.parameters = {
+        ...node.parameters,
+        // Set path as string literal (not expression)
+        path: webhookPath,
+      };
+      console.log(`Set webhook node path to: ${webhookPath}`);
+    }
+    
+    return processedNode;
+  });
   
   const result = await n8nApiCall<{ id: string }>("POST", "/workflows", workflow);
   
@@ -292,29 +329,6 @@ async function activateWorkflow(
   return { success: true };
 }
 
-// Get webhook URL from workflow
-async function getWorkflowWebhookUrl(
-  workflowId: string
-): Promise<string | null> {
-  const result = await n8nApiCall<N8nWorkflow>("GET", `/workflows/${workflowId}`);
-  
-  if (result.error || !result.data) {
-    return null;
-  }
-  
-  // Find webhook trigger node
-  const webhookNode = result.data.nodes.find(
-    node => node.type === "n8n-nodes-base.webhook"
-  );
-  
-  if (webhookNode && webhookNode.parameters?.path) {
-    const n8nBaseUrl = Deno.env.get("N8N_BASE_URL");
-    return `${n8nBaseUrl}/webhook/${webhookNode.parameters.path}`;
-  }
-  
-  return null;
-}
-
 // Types for database rows
 interface ActivationRow {
   id: string;
@@ -347,9 +361,19 @@ interface ConnectionRow {
   encryption_tag: string | null;
 }
 
+// deno-lint-ignore no-explicit-any
+type SupabaseClient = any;
+
+interface ExistingMappingRow {
+  id: string;
+  n8n_workflow_ids: string[] | null;
+  webhook_url: string | null;
+  status: string;
+}
+
 // Main provisioning function
 async function provisionActivation(
-  supabase: any,
+  supabase: SupabaseClient,
   activationId: string,
   userId: string,
   userEmail: string
@@ -360,6 +384,13 @@ async function provisionActivation(
   }
   
   console.log(`Starting provisioning for activation: ${activationId}`);
+  
+  // Compute deterministic webhook URL upfront
+  const webhookUrl = computeWebhookUrl(activationId);
+  if (!webhookUrl) {
+    return { success: false, error: "Cannot compute webhook URL - N8N_BASE_URL not configured" };
+  }
+  console.log(`Target webhook URL: ${webhookUrl}`);
   
   // Step 1: Get activation and linked automation
   const { data: activationData, error: activationError } = await supabase
@@ -448,7 +479,7 @@ async function provisionActivation(
     console.log("No required integrations - proceeding without credentials");
   }
   
-  // Step 5: Create workflow in n8n
+  // Step 5: Create workflow in n8n with deterministic webhook path
   const clientName = activation.company || activation.name || userEmail.split("@")[0];
   const { workflowId, error: workflowError } = await createWorkflow(
     templateJson,
@@ -514,15 +545,17 @@ async function provisionActivation(
   }
   
   // Step 7: Patch workflow with credentials
-  const { success: patchSuccess, error: patchError } = await patchWorkflowCredentials(
-    workflowId,
-    templateJson,
-    credentialMap
-  );
-  
-  if (!patchSuccess) {
-    console.error("Failed to patch workflow credentials:", patchError);
-    // Continue anyway - workflow can be manually configured
+  if (Object.keys(credentialMap).length > 0) {
+    const { success: patchSuccess, error: patchError } = await patchWorkflowCredentials(
+      workflowId,
+      templateJson,
+      credentialMap
+    );
+    
+    if (!patchSuccess) {
+      console.error("Failed to patch workflow credentials:", patchError);
+      // Continue anyway - workflow can be manually configured
+    }
   }
   
   // Step 8: Activate the workflow
@@ -533,15 +566,12 @@ async function provisionActivation(
     // Don't fail - workflow was created, can be activated manually
   }
   
-  // Step 9: Get webhook URL if applicable
-  const webhookUrl = await getWorkflowWebhookUrl(workflowId);
-  
-  console.log(`Provisioning complete. Workflow: ${workflowId}, Active: ${activateSuccess}`);
+  console.log(`Provisioning complete. Workflow: ${workflowId}, Webhook: ${webhookUrl}, Active: ${activateSuccess}`);
   
   return {
     success: true,
     workflowId,
-    webhookUrl: webhookUrl || undefined,
+    webhookUrl,
     credentialIds: createdCredentialIds,
   };
 }
@@ -594,21 +624,27 @@ Deno.serve(async (req) => {
     }
     
     // Check for existing mapping (idempotency)
-    const { data: existingMapping } = await supabase
+    const { data: existingMappingData } = await supabase
       .from("n8n_mappings")
-      .select("id, n8n_workflow_ids, status")
+      .select("id, n8n_workflow_ids, webhook_url, status")
       .eq("activation_request_id", activationRequestId)
       .eq("user_id", userId)
       .maybeSingle();
     
-    if (existingMapping && existingMapping.n8n_workflow_ids?.length > 0) {
+    const existingMapping = existingMappingData as ExistingMappingRow | null;
+    
+    // IDEMPOTENCY: If already provisioned and active, return existing data
+    const workflowIds = existingMapping?.n8n_workflow_ids;
+    if (existingMapping && workflowIds && workflowIds.length > 0) {
       const existingStatus = existingMapping.status;
       if (["active", "provisioning"].includes(existingStatus)) {
+        console.log(`Idempotency hit: returning existing mapping for ${activationRequestId}`);
         return new Response(
           JSON.stringify({ 
             success: true, 
             message: "Already provisioned",
-            workflowId: existingMapping.n8n_workflow_ids[0],
+            workflowId: workflowIds[0],
+            webhookUrl: existingMapping.webhook_url,
           }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
@@ -659,10 +695,11 @@ Deno.serve(async (req) => {
           status: "active",
           n8n_workflow_ids: result.workflowId ? [result.workflowId] : [],
           n8n_credential_ids: result.credentialIds || [],
+          webhook_url: result.webhookUrl, // Dedicated column
           provisioned_at: new Date().toISOString(),
           metadata: {
-            webhook_url: result.webhookUrl,
             provisioned_at: new Date().toISOString(),
+            webhook_path: computeWebhookPath(activationRequestId),
           },
           updated_at: new Date().toISOString(),
         })
@@ -690,6 +727,7 @@ Deno.serve(async (req) => {
           metadata: { 
             activation_request_id: activationRequestId,
             workflow_id: result.workflowId,
+            webhook_url: result.webhookUrl,
           },
         });
     } else {
