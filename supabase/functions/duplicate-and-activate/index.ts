@@ -204,6 +204,8 @@ async function createWorkflow(
       saveDataSuccessExecution: "all",
       saveDataErrorExecution: "all",
     },
+    // CRITICAL: n8n API requires 'connections' field even if empty
+    connections: templateJson.connections || {},
   };
   
   // Process nodes: set webhook path and clear credentials
@@ -226,6 +228,8 @@ async function createWorkflow(
     
     return processedNode;
   });
+  
+  console.log(`Creating workflow with ${workflow.nodes.length} nodes, connections: ${Object.keys(workflow.connections).length} keys`);
   
   const result = await n8nApiCall<{ id: string }>("POST", "/workflows", workflow);
   

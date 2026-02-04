@@ -77,33 +77,64 @@ async function n8nApiCall<T>(
   }
 }
 
-// Deactivate workflow in n8n
-async function deactivateWorkflowInN8n(workflowId: string): Promise<{ success: boolean; error?: string }> {
+// Deactivate workflow in n8n with verification
+interface DeactivationResult {
+  success: boolean;
+  attempted: boolean;
+  verified: boolean;
+  error?: string;
+}
+
+async function deactivateWorkflowInN8n(workflowId: string): Promise<DeactivationResult> {
+  console.log(`Attempting to deactivate workflow ${workflowId}`);
+  
   // Try POST /workflows/{id}/deactivate first (preferred)
   const deactivateResult = await n8nApiCall<{ active: boolean }>(
     "POST",
     `/workflows/${workflowId}/deactivate`
   );
   
-  if (!deactivateResult.error) {
+  let attempted = true;
+  let deactivationError: string | undefined;
+  
+  if (deactivateResult.error) {
+    console.log(`/deactivate failed, trying PATCH fallback for ${workflowId}`);
+    // Fallback: PATCH workflow with active: false
+    const patchResult = await n8nApiCall<{ id: string; active: boolean }>(
+      "PATCH",
+      `/workflows/${workflowId}`,
+      { active: false }
+    );
+    
+    if (patchResult.error) {
+      deactivationError = patchResult.error;
+      console.error(`Both deactivation methods failed: ${deactivationError}`);
+    } else {
+      console.log(`Deactivated workflow ${workflowId} via PATCH`);
+    }
+  } else {
     console.log(`Deactivated workflow ${workflowId} via /deactivate endpoint`);
-    return { success: true };
   }
   
-  // Fallback: PATCH workflow with active: false
-  console.log(`/deactivate failed, trying PATCH fallback for ${workflowId}`);
-  const patchResult = await n8nApiCall<{ id: string; active: boolean }>(
-    "PATCH",
-    `/workflows/${workflowId}`,
-    { active: false }
+  // CRITICAL: Verify deactivation via GET
+  let verified = false;
+  const verifyResult = await n8nApiCall<{ id: string; active: boolean }>(
+    "GET",
+    `/workflows/${workflowId}`
   );
   
-  if (patchResult.error) {
-    return { success: false, error: patchResult.error };
+  if (verifyResult.data) {
+    verified = verifyResult.data.active === false;
+    console.log(`Deactivation verification for ${workflowId}: active=${verifyResult.data.active}, verified=${verified}`);
+  } else {
+    console.warn(`Could not verify workflow state: ${verifyResult.error}`);
   }
   
-  console.log(`Deactivated workflow ${workflowId} via PATCH`);
-  return { success: true };
+  if (deactivationError) {
+    return { success: false, attempted, verified, error: deactivationError };
+  }
+  
+  return { success: true, attempted, verified };
 }
 
 interface N8nMappingRow {
@@ -324,31 +355,48 @@ serve(async (req) => {
         // Get mapping
         const { data: mappingData } = await supabaseAdmin
           .from("n8n_mappings")
-          .select("id, n8n_workflow_ids, status")
+          .select("id, n8n_workflow_ids, webhook_url, status")
           .eq("activation_request_id", activationRequestId)
           .eq("user_id", userId)
           .maybeSingle();
 
         const mapping = mappingData as N8nMappingRow | null;
+        
+        let deactivationAttempted = false;
+        let deactivationVerified = false;
+        let workflowId: string | null = null;
 
         // Deactivate workflow in n8n if we have one
         if (mapping?.n8n_workflow_ids?.length) {
-          const workflowId = mapping.n8n_workflow_ids[0];
+          workflowId = mapping.n8n_workflow_ids[0];
           console.log(`Revoking: deactivating workflow ${workflowId} in n8n`);
           
-          const { success: deactivated, error: deactivateError } = await deactivateWorkflowInN8n(workflowId);
-          if (!deactivated) {
-            console.warn(`Failed to deactivate workflow in n8n: ${deactivateError}`);
+          const deactivateResult = await deactivateWorkflowInN8n(workflowId);
+          deactivationAttempted = deactivateResult.attempted;
+          deactivationVerified = deactivateResult.verified;
+          
+          if (!deactivateResult.success) {
+            console.warn(`Failed to deactivate workflow in n8n: ${deactivateResult.error}`);
             // Continue with revocation even if n8n deactivation fails
           }
+          
+          console.log(`Deactivation result: attempted=${deactivationAttempted}, verified=${deactivationVerified}`);
         }
 
         // Mark mapping as revoked
+        const revokedAt = new Date().toISOString();
         await supabaseAdmin
           .from("n8n_mappings")
           .update({ 
             status: "revoked",
-            updated_at: new Date().toISOString(),
+            updated_at: revokedAt,
+            metadata: {
+              ...(mapping?.metadata || {}),
+              revoked_at: revokedAt,
+              revoked_by: userEmail,
+              deactivation_attempted: deactivationAttempted,
+              deactivation_verified: deactivationVerified,
+            },
           })
           .eq("activation_request_id", activationRequestId)
           .eq("user_id", userId);
@@ -362,12 +410,18 @@ serve(async (req) => {
           .update({
             status: "completed",
             customer_visible_status: "completed",
-            status_updated_at: new Date().toISOString(),
+            status_updated_at: revokedAt,
           })
           .eq("id", activationRequestId);
 
         return new Response(
-          JSON.stringify({ success: true, message: "Automation revoked and workflow deactivated" }),
+          JSON.stringify({ 
+            success: true, 
+            message: "Automation revoked and workflow deactivated",
+            workflowId,
+            deactivation_attempted: deactivationAttempted,
+            deactivation_verified: deactivationVerified,
+          }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
@@ -387,6 +441,15 @@ serve(async (req) => {
           return new Response(
             JSON.stringify({ error: "Activation not provisioned yet (no mapping)" }),
             { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        
+        // CRITICAL: Block retriggering revoked activations
+        if (mapping.status === "revoked") {
+          console.log(`Blocked retrigger for revoked activation: ${activationRequestId}`);
+          return new Response(
+            JSON.stringify({ error: "Activation revoked" }),
+            { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
           );
         }
 
