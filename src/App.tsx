@@ -58,6 +58,7 @@ import AdminLibraryHome from "./pages/admin/library/AdminLibraryHome";
 import AdminAgentsList from "./pages/admin/library/AdminAgentsList";
 import AdminAgentEditor from "./pages/admin/library/AdminAgentEditor";
 import AdminAgentImport from "./pages/admin/library/AdminAgentImport";
+import AdminTemplateImport from "./pages/admin/library/AdminTemplateImport";
 import AdminBundlesList from "./pages/admin/library/AdminBundlesList";
 import AdminBundleEditor from "./pages/admin/library/AdminBundleEditor";
 import AdminSetup from "./pages/admin/AdminSetup";
@@ -165,6 +166,7 @@ const AppRoutes = () => (
     <Route path="/admin/library/agents/new" element={<AdminAgentEditor mode="create" />} />
     <Route path="/admin/library/agents/import" element={<AdminAgentImport />} />
     <Route path="/admin/library/agents/:id" element={<AdminAgentEditor mode="edit" />} />
+    <Route path="/admin/library/templates" element={<AdminTemplateImport />} />
     <Route path="/admin/library/bundles" element={<AdminBundlesList />} />
     <Route path="/admin/library/bundles/new" element={<AdminBundleEditor mode="create" />} />
     <Route path="/admin/library/bundles/:id" element={<AdminBundleEditor mode="edit" />} />

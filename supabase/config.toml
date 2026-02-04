@@ -62,3 +62,6 @@ verify_jwt = false
 
 [functions.admin-import-workflows]
 verify_jwt = false
+
+[functions.import-n8n-templates]
+verify_jwt = false
