@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { 
   Loader2, LogOut, Mail, MessageSquare, Trash2, RefreshCw, 
-  ArrowRight, Settings, LayoutDashboard, Activity, Package, Zap, Users
+  ArrowRight, Settings, LayoutDashboard, Activity, Package, Zap, Users, Workflow
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -262,6 +262,21 @@ const Admin = () => {
                 <div>
                   <h3 className="font-display text-xl mb-1 group-hover:text-primary transition-colors">Engagement Requests</h3>
                   <p className="text-muted-foreground text-sm">Manage intake & leads</p>
+                </div>
+              </div>
+            </Link>
+
+            <Link 
+              to="/admin/n8n-mappings" 
+              className="group card-glass p-6 rounded-xl border-2 border-transparent hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5"
+            >
+              <div className="flex items-start gap-4">
+                <div className="p-4 bg-primary/10 rounded-xl group-hover:bg-primary/20 group-hover:scale-105 transition-all">
+                  <Workflow className="w-8 h-8 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-display text-xl mb-1 group-hover:text-primary transition-colors">n8n Mappings</h3>
+                  <p className="text-muted-foreground text-sm">Manage workflows & lifecycle</p>
                 </div>
               </div>
             </Link>

@@ -65,6 +65,7 @@ import AdminSetup from "./pages/admin/AdminSetup";
 import AdminActivity from "./pages/admin/AdminActivity";
 import AdminEngagementRequests from "./pages/admin/AdminEngagementRequests";
 import AdminBulkImport from "./pages/admin/AdminBulkImport";
+import AdminN8nMappings from "./pages/admin/AdminN8nMappings";
 
 const queryClient = new QueryClient();
 
@@ -174,6 +175,7 @@ const AppRoutes = () => (
     <Route path="/admin/activity" element={<AdminActivity />} />
     <Route path="/admin/engagement-requests" element={<AdminEngagementRequests />} />
     <Route path="/admin/import" element={<AdminBulkImport />} />
+    <Route path="/admin/n8n-mappings" element={<AdminN8nMappings />} />
 
     <Route path="*" element={<NotFound />} />
   </Routes>
