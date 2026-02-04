@@ -119,15 +119,28 @@ async function n8nApiCall<T>(
   endpoint: string,
   body?: unknown
 ): Promise<{ data?: T; error?: string }> {
-  const n8nBaseUrl = Deno.env.get("N8N_BASE_URL");
+  let n8nBaseUrl = Deno.env.get("N8N_BASE_URL");
   const n8nApiKey = Deno.env.get("N8N_API_KEY");
   
   if (!n8nBaseUrl || !n8nApiKey) {
     return { error: "n8n API not configured" };
   }
   
+  // Normalize base URL: remove trailing slashes and any path components
+  // n8nBaseUrl should be just the origin (e.g., https://n8n.example.com)
   try {
-    const response = await fetch(`${n8nBaseUrl}/api/v1${endpoint}`, {
+    const urlObj = new URL(n8nBaseUrl);
+    n8nBaseUrl = urlObj.origin; // Get just protocol + host
+  } catch {
+    // If parsing fails, just remove trailing slashes
+    n8nBaseUrl = n8nBaseUrl.replace(/\/+$/, "");
+  }
+  
+  const fullUrl = `${n8nBaseUrl}/api/v1${endpoint}`;
+  console.log(`n8n API call: ${method} ${fullUrl}`);
+  
+  try {
+    const response = await fetch(fullUrl, {
       method,
       headers: {
         "Content-Type": "application/json",
@@ -405,27 +418,34 @@ async function provisionActivation(
     .map(ri => ri.provider.toLowerCase())
     .filter(Boolean);
   
-  const { data: connectionsData, error: connError } = await supabase
-    .from("integration_connections")
-    .select("id, provider, encrypted_payload, encryption_iv, encryption_tag")
-    .eq("user_id", userId)
-    .eq("status", "connected");
+  let connections: ConnectionRow[] = [];
   
-  const connections = connectionsData as ConnectionRow[] | null;
-  
-  if (connError || !connections || connections.length === 0) {
-    return { success: false, error: "No connected integrations found" };
-  }
-  
-  // Verify all required providers are connected
-  const connectedProviders = new Set(connections.map(c => c.provider.toLowerCase()));
-  const missingProviders = requiredProviders.filter(p => !connectedProviders.has(p));
-  
-  if (missingProviders.length > 0) {
-    return { 
-      success: false, 
-      error: `Missing integrations: ${missingProviders.join(", ")}` 
-    };
+  // Only fetch connections if there are required integrations
+  if (requiredProviders.length > 0) {
+    const { data: connectionsData, error: connError } = await supabase
+      .from("integration_connections")
+      .select("id, provider, encrypted_payload, encryption_iv, encryption_tag")
+      .eq("user_id", userId)
+      .eq("status", "connected");
+    
+    connections = (connectionsData as ConnectionRow[] | null) || [];
+    
+    if (connError || connections.length === 0) {
+      return { success: false, error: "No connected integrations found" };
+    }
+    
+    // Verify all required providers are connected
+    const connectedProviders = new Set(connections.map(c => c.provider.toLowerCase()));
+    const missingProviders = requiredProviders.filter(p => !connectedProviders.has(p));
+    
+    if (missingProviders.length > 0) {
+      return { 
+        success: false, 
+        error: `Missing integrations: ${missingProviders.join(", ")}` 
+      };
+    }
+  } else {
+    console.log("No required integrations - proceeding without credentials");
   }
   
   // Step 5: Create workflow in n8n
