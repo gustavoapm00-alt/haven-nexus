@@ -297,46 +297,70 @@ export default function PortalConnectorScreen() {
       return;
     }
 
-    // Build OAuth URL based on provider
-    const redirectUri = 'https://aerelion.systems/oauth/google/callback';
-    const scopes = config.scopes?.join(' ') || '';
-    const state = JSON.stringify({
-      provider,
-      activation_request_id: activation.id,
-      user_id: user?.id,
-    });
-
-    let authUrl = '';
-    
-    if (provider === 'gmail' || provider === 'google_calendar') {
-      const clientId = ''; // Will be set via environment/secrets
-      authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
-        `client_id=${clientId}&` +
-        `redirect_uri=${encodeURIComponent(redirectUri)}&` +
-        `response_type=code&` +
-        `scope=${encodeURIComponent(scopes)}&` +
-        `access_type=offline&` +
-        `prompt=consent&` +
-        `state=${encodeURIComponent(btoa(state))}`;
-    } else if (provider === 'hubspot') {
-      authUrl = `https://app.hubspot.com/oauth/authorize?` +
-        `client_id=&` +
-        `redirect_uri=${encodeURIComponent(redirectUri)}&` +
-        `scope=${encodeURIComponent(scopes)}&` +
-        `state=${encodeURIComponent(btoa(state))}`;
+    // Normalize provider for the oauth-start edge function
+    // Google services (gmail, google_calendar) all use "google" as the OAuth provider
+    let oauthProvider = provider;
+    if (provider === 'gmail' || provider === 'google_calendar' || provider === 'google_drive' || provider === 'google_sheets') {
+      oauthProvider = 'google';
     }
 
-    if (authUrl) {
-      // For now, show a message that OAuth is being set up
-      toast({
-        title: 'OAuth Configuration Required',
-        description: `${config.displayName} OAuth will be available once configured. Please use API key authentication if available.`,
+    // Call the oauth-start edge function to get the authorization URL
+    try {
+      const { data, error } = await supabase.functions.invoke('oauth-start', {
+        body: null, // Query params are passed via URL, not body
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
-      return;
-    }
 
-    // Redirect to OAuth provider
-    window.location.href = authUrl;
+      // The oauth-start function expects query params, so we need to make a direct fetch call
+      const session = await supabase.auth.getSession();
+      const token = session.data.session?.access_token;
+      
+      if (!token) {
+        toast({
+          title: 'Authentication Required',
+          description: 'Please log in to connect integrations.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      const baseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const redirectPath = `/portal/connect/${automation?.slug || activation.id}?request_id=${activation.id}`;
+      
+      const oauthStartUrl = `${baseUrl}/functions/v1/oauth-start?` +
+        `provider=${encodeURIComponent(oauthProvider)}&` +
+        `redirect_path=${encodeURIComponent(redirectPath)}&` +
+        `activation_request_id=${encodeURIComponent(activation.id)}`;
+      
+      const response = await fetch(oauthStartUrl, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || result.error) {
+        throw new Error(result.error || 'Failed to start OAuth flow');
+      }
+
+      // Redirect to the authorization URL
+      if (result.authorization_url) {
+        window.location.href = result.authorization_url;
+      } else {
+        throw new Error('No authorization URL returned');
+      }
+    } catch (err) {
+      console.error('OAuth start failed:', err);
+      toast({
+        title: 'OAuth Error',
+        description: err instanceof Error ? err.message : 'Failed to start OAuth flow',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleConnect = async (provider: string) => {

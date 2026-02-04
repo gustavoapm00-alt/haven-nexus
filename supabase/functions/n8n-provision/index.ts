@@ -176,7 +176,14 @@ serve(async (req) => {
     }
 
     const userId = user.id;
-    const userEmail = user.email!;
+    const userEmail = user.email;
+
+    if (!userEmail) {
+      return new Response(
+        JSON.stringify({ error: "User email not found" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     const { action, activationRequestId, config } = await req.json();
 

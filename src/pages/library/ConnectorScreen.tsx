@@ -246,18 +246,81 @@ export default function ConnectorScreen() {
     if (!config) return;
 
     if (config.authType === 'oauth') {
-      // For OAuth, we'd redirect to the OAuth flow
-      // For now, show a placeholder
+      // Use the oauth-start edge function for proper CSRF-protected OAuth flow
+      await handleOAuthConnect(provider);
+      return;
+    }
+
+    // Show credential form for API key / token auth
+    setActiveProvider(provider);
+    setCredentials({});
+  };
+
+  const handleOAuthConnect = async (provider: string) => {
+    if (!requestId || !user) {
       toast({
-        title: 'OAuth Coming Soon',
-        description: 'OAuth connections will be available shortly. Please use API key authentication if available.',
+        title: 'Setup Required',
+        description: 'Please complete your purchase first.',
+        variant: 'destructive',
       });
       return;
     }
 
-    // Show credential form
-    setActiveProvider(provider);
-    setCredentials({});
+    // Normalize provider for the oauth-start edge function
+    // Google services (gmail, calendar, sheets) all use "google" as the OAuth provider
+    let oauthProvider = provider;
+    if (provider === 'gmail' || provider === 'email' || provider === 'calendar' || provider === 'sheets' || provider === 'google_calendar' || provider === 'google_drive' || provider === 'google_sheets') {
+      oauthProvider = 'google';
+    }
+
+    try {
+      const session = await supabase.auth.getSession();
+      const token = session.data.session?.access_token;
+      
+      if (!token) {
+        toast({
+          title: 'Authentication Required',
+          description: 'Please log in to connect integrations.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      const baseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const redirectPath = `/connect/${requestId}`;
+      
+      const oauthStartUrl = `${baseUrl}/functions/v1/oauth-start?` +
+        `provider=${encodeURIComponent(oauthProvider)}&` +
+        `redirect_path=${encodeURIComponent(redirectPath)}&` +
+        `activation_request_id=${encodeURIComponent(requestId)}`;
+      
+      const response = await fetch(oauthStartUrl, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || result.error) {
+        throw new Error(result.error || 'Failed to start OAuth flow');
+      }
+
+      // Redirect to the authorization URL
+      if (result.authorization_url) {
+        window.location.href = result.authorization_url;
+      } else {
+        throw new Error('No authorization URL returned');
+      }
+    } catch (err) {
+      console.error('OAuth start failed:', err);
+      toast({
+        title: 'OAuth Error',
+        description: err instanceof Error ? err.message : 'Failed to start OAuth flow',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleSubmitCredentials = async () => {
