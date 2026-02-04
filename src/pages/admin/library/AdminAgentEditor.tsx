@@ -42,6 +42,15 @@ interface AgentFile {
   updated_at: string;
 }
 
+interface WorkflowTemplate {
+  id: string;
+  name: string;
+  slug: string;
+  original_filename: string | null;
+  detected_providers: string[] | null;
+  node_count: number | null;
+}
+
 interface AgentFormData {
   name: string;
   slug: string;
@@ -63,6 +72,7 @@ interface AgentFormData {
   workflow_file_path: string | null;
   guide_file_path: string | null;
   current_version: string;
+  n8n_template_ids: string[];
 }
 
 const initialFormData: AgentFormData = {
@@ -86,6 +96,7 @@ const initialFormData: AgentFormData = {
   workflow_file_path: null,
   guide_file_path: null,
   current_version: 'v1',
+  n8n_template_ids: [],
 };
 
 interface AdminAgentEditorProps {
@@ -115,6 +126,10 @@ const AdminAgentEditor = ({ mode }: AdminAgentEditorProps) => {
   const [previewType, setPreviewType] = useState<'markdown' | 'pdf' | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
+  
+  // Workflow templates state
+  const [availableTemplates, setAvailableTemplates] = useState<WorkflowTemplate[]>([]);
+  const [loadingTemplates, setLoadingTemplates] = useState(true);
 
   useEffect(() => {
     if (!isCreate && urlId) {
@@ -122,6 +137,23 @@ const AdminAgentEditor = ({ mode }: AdminAgentEditorProps) => {
       fetchAgent(urlId);
     }
   }, [urlId, isCreate]);
+
+  // Fetch available workflow templates
+  useEffect(() => {
+    const fetchTemplates = async () => {
+      setLoadingTemplates(true);
+      const { data, error } = await supabase
+        .from('n8n_workflow_templates')
+        .select('id, name, slug, original_filename, detected_providers, node_count')
+        .order('name');
+      
+      if (!error && data) {
+        setAvailableTemplates(data);
+      }
+      setLoadingTemplates(false);
+    };
+    fetchTemplates();
+  }, []);
 
   useEffect(() => {
     if (agentId) {
@@ -164,6 +196,7 @@ const AdminAgentEditor = ({ mode }: AdminAgentEditorProps) => {
       workflow_file_path: data.workflow_file_path || null,
       guide_file_path: data.guide_file_path || null,
       current_version: data.current_version || 'v1',
+      n8n_template_ids: data.n8n_template_ids || [],
     });
     setLoading(false);
   };
@@ -472,6 +505,7 @@ const AdminAgentEditor = ({ mode }: AdminAgentEditorProps) => {
         workflow_file_path: formData.workflow_file_path,
         guide_file_path: formData.guide_file_path,
         current_version: formData.current_version,
+        n8n_template_ids: formData.n8n_template_ids,
         published_at: formData.status === 'published' ? new Date().toISOString() : null,
       };
 
@@ -667,6 +701,128 @@ const AdminAgentEditor = ({ mode }: AdminAgentEditorProps) => {
                     rows={4}
                   />
                 </div>
+              </section>
+
+              {/* n8n Template Selection */}
+              <section className="space-y-4">
+                <h2 className="text-lg font-semibold">Workflow Templates</h2>
+                <p className="text-sm text-muted-foreground">
+                  Link imported n8n workflow templates to this agent. These templates will be duplicated for each client activation.
+                </p>
+                
+                <Card>
+                  <CardContent className="pt-4 space-y-4">
+                    <div className="space-y-2">
+                      <Label>Linked Templates</Label>
+                      {loadingTemplates ? (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Loading templates...
+                        </div>
+                      ) : availableTemplates.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">
+                          No templates imported yet.{' '}
+                          <Link to="/admin/library/templates" className="text-primary underline">
+                            Import templates
+                          </Link>
+                        </p>
+                      ) : (
+                        <>
+                          <Select
+                            value=""
+                            onValueChange={(templateId) => {
+                              if (!formData.n8n_template_ids.includes(templateId)) {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  n8n_template_ids: [...prev.n8n_template_ids, templateId]
+                                }));
+                              }
+                            }}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Add a template..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {availableTemplates
+                                .filter(t => !formData.n8n_template_ids.includes(t.id))
+                                .map((template) => (
+                                  <SelectItem key={template.id} value={template.id}>
+                                    <div className="flex items-center gap-2">
+                                      <FileJson className="w-4 h-4 text-primary" />
+                                      <span>{template.name}</span>
+                                      {template.node_count && (
+                                        <span className="text-xs text-muted-foreground">
+                                          ({template.node_count} nodes)
+                                        </span>
+                                      )}
+                                    </div>
+                                  </SelectItem>
+                                ))}
+                            </SelectContent>
+                          </Select>
+
+                          {formData.n8n_template_ids.length > 0 && (
+                            <div className="space-y-2 mt-4">
+                              {formData.n8n_template_ids.map((templateId) => {
+                                const template = availableTemplates.find(t => t.id === templateId);
+                                if (!template) return null;
+                                return (
+                                  <div
+                                    key={templateId}
+                                    className="flex items-center justify-between p-3 border border-border rounded-lg bg-muted/30"
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <FileJson className="w-5 h-5 text-primary" />
+                                      <div>
+                                        <p className="font-medium">{template.name}</p>
+                                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                          <span className="font-mono">{template.slug}</span>
+                                          {template.original_filename && (
+                                            <>
+                                              <span>•</span>
+                                              <span>{template.original_filename}</span>
+                                            </>
+                                          )}
+                                          {template.node_count && (
+                                            <>
+                                              <span>•</span>
+                                              <span>{template.node_count} nodes</span>
+                                            </>
+                                          )}
+                                        </div>
+                                        {template.detected_providers && template.detected_providers.length > 0 && (
+                                          <div className="flex items-center gap-1 mt-1">
+                                            {template.detected_providers.map(provider => (
+                                              <Badge key={provider} variant="outline" className="text-xs">
+                                                {provider}
+                                              </Badge>
+                                            ))}
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => {
+                                        setFormData(prev => ({
+                                          ...prev,
+                                          n8n_template_ids: prev.n8n_template_ids.filter(id => id !== templateId)
+                                        }));
+                                      }}
+                                    >
+                                      <Trash2 className="w-4 h-4 text-destructive" />
+                                    </Button>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
               </section>
 
               {/* Metrics */}
