@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, Clock, TrendingUp } from 'lucide-react';
 import SystemIcon from './SystemIcon';
 import { motion } from 'framer-motion';
@@ -29,12 +29,18 @@ const WorkflowExampleCard = ({
   variant = 'light',
 }: WorkflowExampleCardProps) => {
   const isDark = variant === 'dark';
+  const navigate = useNavigate();
+
+  const handleCardClick = () => {
+    navigate(`/automations/${slug}`);
+  };
 
   return (
     <motion.div
       whileHover={{ y: -4 }}
       transition={{ duration: 0.2 }}
-      className={`p-6 flex flex-col h-full rounded-lg ${
+      onClick={handleCardClick}
+      className={`p-6 flex flex-col h-full rounded-lg cursor-pointer ${
         isDark 
           ? 'card-panel-dark' 
           : 'card-panel'
@@ -134,8 +140,7 @@ const WorkflowExampleCard = ({
         <span className={`text-xs ${isDark ? 'text-white/50' : 'text-muted-foreground'}`}>
           We operate this for you
         </span>
-        <Link
-          to={`/automations/${slug}`}
+        <span
           className={`inline-flex items-center gap-1.5 text-sm font-medium transition-colors ${
             isDark 
               ? 'text-primary-foreground bg-primary/80 hover:bg-primary px-3 py-1.5 rounded-md' 
@@ -144,7 +149,7 @@ const WorkflowExampleCard = ({
         >
           Learn More
           <ArrowRight className="w-4 h-4" />
-        </Link>
+        </span>
       </div>
     </motion.div>
   );

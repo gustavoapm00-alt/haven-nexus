@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { 
   CheckCircle, Loader2, AlertCircle, ArrowLeft, ArrowRight,
   FileText, Package, ChevronDown, ChevronUp, Copy, Check,
@@ -55,6 +55,7 @@ interface DiagnosticsState {
 
 const PurchaseSuccess = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const { user, isLoading: authLoading } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -65,6 +66,7 @@ const PurchaseSuccess = () => {
   const [copied, setCopied] = useState(false);
   const [noFilesMessage, setNoFilesMessage] = useState<string | null>(null);
   const [activationRequestId, setActivationRequestId] = useState<string | null>(null);
+  const [creatingActivation, setCreatingActivation] = useState(false);
   const [diagnostics, setDiagnostics] = useState<DiagnosticsState>({
     sessionId: null,
     sessionVerified: false,
@@ -129,12 +131,94 @@ const PurchaseSuccess = () => {
       
       if (activationData) {
         setActivationRequestId(activationData.id);
+        return true;
       }
       
-      return true;
+      return true; // Purchase found, but no activation yet
     }
     return false;
   }, [user?.email, sessionId]);
+
+  // Create activation request as fallback if webhook hasn't created one
+  const createActivationFallback = useCallback(async (purchaseData: PurchaseDetails) => {
+    if (!user?.id || !user?.email || activationRequestId) return;
+    
+    setCreatingActivation(true);
+    try {
+      // Check one more time if activation exists
+      const { data: existingRequest } = await supabase
+        .from('installation_requests')
+        .select('id')
+        .eq('user_id', user.id)
+        .or(`automation_id.eq.${purchaseData.item_id},bundle_id.eq.${purchaseData.item_id}`)
+        .not('status', 'in', '("completed","cancelled")')
+        .maybeSingle();
+
+      if (existingRequest) {
+        setActivationRequestId(existingRequest.id);
+        return;
+      }
+
+      // Create new activation request based on item type
+      if (purchaseData.item_type === 'agent') {
+        const { data: newRequest, error: createError } = await supabase
+          .from('installation_requests')
+          .insert({
+            user_id: user.id,
+            email: user.email,
+            status: 'received',
+            customer_visible_status: 'received',
+            purchased_item: purchaseData.item_name,
+            name: user.email,
+            automation_id: purchaseData.item_id,
+          })
+          .select('id')
+          .single();
+
+        if (newRequest && !createError) {
+          setActivationRequestId(newRequest.id);
+          console.log('✅ Fallback activation request created:', newRequest.id);
+        } else if (createError) {
+          console.error('Failed to create activation request:', createError);
+        }
+      } else {
+        const { data: newRequest, error: createError } = await supabase
+          .from('installation_requests')
+          .insert({
+            user_id: user.id,
+            email: user.email,
+            status: 'received',
+            customer_visible_status: 'received',
+            purchased_item: purchaseData.item_name,
+            name: user.email,
+            bundle_id: purchaseData.item_id,
+          })
+          .select('id')
+          .single();
+
+        if (newRequest && !createError) {
+          setActivationRequestId(newRequest.id);
+          console.log('✅ Fallback activation request created (bundle):', newRequest.id);
+        } else if (createError) {
+          console.error('Failed to create activation request for bundle:', createError);
+        }
+      }
+    } catch (err) {
+      console.error('Error creating fallback activation:', err);
+    } finally {
+      setCreatingActivation(false);
+    }
+  }, [user?.id, user?.email, activationRequestId]);
+
+  // Auto-redirect to connector screen when activation is ready
+  useEffect(() => {
+    if (activationRequestId && !loading && !creatingActivation) {
+      const timer = setTimeout(() => {
+        navigate(`/connect/${activationRequestId}`);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [activationRequestId, loading, creatingActivation, navigate]);
 
   const verifyPurchase = async (retryCount = 0) => {
     setLoading(true);
@@ -171,6 +255,11 @@ const PurchaseSuccess = () => {
 
       setPurchase(data);
       setError(null);
+      
+      // If no activation found from webhook, create one as fallback
+      if (!activationRequestId) {
+        await createActivationFallback(data);
+      }
       
       // Automatically fetch download links
       await fetchDownloads(data.item_type, data.item_id);
@@ -437,8 +526,8 @@ const PurchaseSuccess = () => {
                     1
                   </div>
                   <div>
-                    <p className="font-medium text-foreground">We'll contact you shortly</p>
-                    <p className="text-sm text-muted-foreground">Our team will reach out to guide you through the setup process.</p>
+                    <p className="font-medium text-foreground">Connect your tools securely</p>
+                    <p className="text-sm text-muted-foreground">Securely authorize access to the tools your automation needs.</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
@@ -446,8 +535,8 @@ const PurchaseSuccess = () => {
                     2
                   </div>
                   <div>
-                    <p className="font-medium text-foreground">Connect your tools securely</p>
-                    <p className="text-sm text-muted-foreground">We'll help you securely connect the required tools and credentials.</p>
+                    <p className="font-medium text-foreground">Automatic activation</p>
+                    <p className="text-sm text-muted-foreground">Once connected, your automation is automatically activated and configured.</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
@@ -455,31 +544,45 @@ const PurchaseSuccess = () => {
                     3
                   </div>
                   <div>
-                    <p className="font-medium text-foreground">We activate and maintain it</p>
-                    <p className="text-sm text-muted-foreground">Your automation will run on our infrastructure. We handle everything from here.</p>
+                    <p className="font-medium text-foreground">We maintain it for you</p>
+                    <p className="text-sm text-muted-foreground">Your automation runs on our infrastructure. We handle everything from here.</p>
                   </div>
                 </div>
               </div>
+              
+              {activationRequestId && (
+                <div className="bg-primary/10 rounded-lg p-4 mt-6 text-center">
+                  <p className="text-sm text-foreground mb-2">
+                    Redirecting you to connect your tools...
+                  </p>
+                  <Loader2 className="w-5 h-5 animate-spin mx-auto text-primary" />
+                </div>
+              )}
               
               <div className="flex flex-col sm:flex-row items-center gap-4 mt-6 pt-4 border-t border-border">
                 {activationRequestId ? (
                   <Button asChild className="w-full sm:w-auto">
                     <Link to={`/connect/${activationRequestId}`}>
-                      Connect Your Tools
+                      Connect Your Tools Now
                       <ArrowRight className="w-4 h-4 ml-2" />
                     </Link>
                   </Button>
+                ) : creatingActivation ? (
+                  <Button disabled className="w-full sm:w-auto">
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Setting up activation...
+                  </Button>
                 ) : (
                   <Button asChild className="w-full sm:w-auto">
-                    <Link to="/activation-setup">
-                      Start Activation Setup
+                    <Link to="/portal/dashboard">
+                      View Dashboard
                       <ArrowRight className="w-4 h-4 ml-2" />
                     </Link>
                   </Button>
                 )}
                 <Button asChild variant="outline" className="w-full sm:w-auto">
                   <Link to="/activation-walkthrough">
-                    View Activation Walkthrough
+                    View Activation Guide
                   </Link>
                 </Button>
               </div>
@@ -597,23 +700,25 @@ const PurchaseSuccess = () => {
               </Collapsible>
             )}
 
-            {/* Start Activation Setup CTA */}
-            <div className="card-enterprise p-6 bg-primary/5 border-primary/20">
-              <div className="text-center">
-                <h3 className="text-lg font-semibold text-foreground mb-2">
-                  Ready to Activate?
-                </h3>
-                <p className="text-muted-foreground mb-4">
-                  Complete your activation setup so we can configure and activate your automation.
-                </p>
-                <Button asChild size="lg">
-                  <Link to="/activation-setup">
-                    Start Activation Setup
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Link>
-                </Button>
+            {/* Connect Tools CTA - only show if activation is ready */}
+            {activationRequestId && (
+              <div className="card-enterprise p-6 bg-primary/5 border-primary/20">
+                <div className="text-center">
+                  <h3 className="text-lg font-semibold text-foreground mb-2">
+                    Ready to Connect Your Tools?
+                  </h3>
+                  <p className="text-muted-foreground mb-4">
+                    Connect your tools now to activate your automation instantly.
+                  </p>
+                  <Button asChild size="lg">
+                    <Link to={`/connect/${activationRequestId}`}>
+                      Connect Your Tools
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Link>
+                  </Button>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Actions */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10">
