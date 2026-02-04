@@ -147,8 +147,10 @@ serve(async (req) => {
         item_type,
         item_id,
         item_slug: itemSlug,
+        item_name: itemName,
         user_id: user.id,
         user_email: user.email,
+        mode: "self_serve",
       },
     });
 

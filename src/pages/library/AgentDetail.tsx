@@ -1,5 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Clock, TrendingUp, Check, ArrowRight } from 'lucide-react';
+import { ArrowLeft, Clock, TrendingUp, Check, ArrowRight, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Accordion,
@@ -11,11 +11,24 @@ import LibraryNavbar from '@/components/library/LibraryNavbar';
 import LibraryFooter from '@/components/library/LibraryFooter';
 import SystemIcon from '@/components/library/SystemIcon';
 import { useAgent } from '@/hooks/useAgents';
+import { usePurchase } from '@/hooks/usePurchase';
 import SEO, { schemas } from '@/components/SEO';
 
 const AgentDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const { agent, loading, error } = useAgent(slug || '');
+  const { initiateCheckout, loading: checkoutLoading } = usePurchase();
+
+  const isPublished = agent?.status === 'published';
+  const priceDisplay = agent?.price_cents && agent.price_cents > 0 
+    ? `$${(agent.price_cents / 100).toFixed(2)}` 
+    : 'Free';
+
+  const handleActivateNow = () => {
+    if (agent) {
+      initiateCheckout('agent', agent.id);
+    }
+  };
 
   const faqs = [
     {
@@ -284,20 +297,54 @@ const AgentDetail = () => {
                   <h3 className="text-lg font-semibold text-foreground mb-2">
                     Have This Operated for You
                   </h3>
-                  <p className="text-sm text-muted-foreground mb-6">
-                    AERELION configures, hosts, and operates this automation on your behalf. Schedule a call to discuss your operational needs.
+                  <p className="text-sm text-muted-foreground mb-4">
+                    AERELION configures, hosts, and operates this automation on your behalf.
                   </p>
 
-                  <Button 
-                    asChild
-                    className="w-full mb-3" 
-                    size="lg"
-                  >
-                    <Link to="/contact">
-                      Schedule Discovery Call
-                      <ArrowRight className="w-4 h-4 ml-2" />
-                    </Link>
-                  </Button>
+                  {isPublished ? (
+                    <>
+                      <div className="text-center mb-4">
+                        <span className="text-3xl font-bold text-primary">{priceDisplay}</span>
+                        {agent.price_cents === 0 && (
+                          <p className="text-xs text-muted-foreground mt-1">One-time activation</p>
+                        )}
+                      </div>
+                      <Button 
+                        onClick={handleActivateNow}
+                        disabled={checkoutLoading}
+                        className="w-full mb-3" 
+                        size="lg"
+                      >
+                        {checkoutLoading ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Processing...
+                          </>
+                        ) : (
+                          <>
+                            Activate Now
+                            <ArrowRight className="w-4 h-4 ml-2" />
+                          </>
+                        )}
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Schedule a call to discuss your operational needs.
+                      </p>
+                      <Button 
+                        asChild
+                        className="w-full mb-3" 
+                        size="lg"
+                      >
+                        <Link to="/contact">
+                          Schedule Discovery Call
+                          <ArrowRight className="w-4 h-4 ml-2" />
+                        </Link>
+                      </Button>
+                    </>
+                  )}
 
                   <p className="text-center text-xs text-muted-foreground">
                     No technical experience required

@@ -196,6 +196,72 @@ serve(async (req) => {
           }
         }
 
+        // Create installation_request for self-serve activation (idempotent)
+        if (metadata.user_id && metadata.item_type === "agent") {
+          // Check if activation already exists for this user + automation (not completed/cancelled)
+          const { data: existingRequest } = await supabaseAdmin
+            .from("installation_requests")
+            .select("id")
+            .eq("user_id", metadata.user_id)
+            .eq("automation_id", metadata.item_id)
+            .not("status", "in", '("completed","cancelled")')
+            .maybeSingle();
+
+          if (!existingRequest) {
+            const { error: activationError } = await supabaseAdmin
+              .from("installation_requests")
+              .insert({
+                user_id: metadata.user_id,
+                email: customerEmail,
+                automation_id: metadata.item_id,
+                status: "received",
+                customer_visible_status: "received",
+                purchased_item: itemName || "Automation",
+                name: customerEmail,
+              });
+
+            if (activationError) {
+              console.error("Failed to create installation_request:", activationError);
+              // Don't throw - purchase was already recorded
+            } else {
+              console.log("✅ Installation request created for automation:", metadata.item_id);
+            }
+          } else {
+            console.log("Installation request already exists:", existingRequest.id);
+          }
+        } else if (metadata.user_id && metadata.item_type === "bundle") {
+          // Handle bundle activation
+          const { data: existingRequest } = await supabaseAdmin
+            .from("installation_requests")
+            .select("id")
+            .eq("user_id", metadata.user_id)
+            .eq("bundle_id", metadata.item_id)
+            .not("status", "in", '("completed","cancelled")')
+            .maybeSingle();
+
+          if (!existingRequest) {
+            const { error: activationError } = await supabaseAdmin
+              .from("installation_requests")
+              .insert({
+                user_id: metadata.user_id,
+                email: customerEmail,
+                bundle_id: metadata.item_id,
+                status: "received",
+                customer_visible_status: "received",
+                purchased_item: itemName || "Bundle",
+                name: customerEmail,
+              });
+
+            if (activationError) {
+              console.error("Failed to create installation_request for bundle:", activationError);
+            } else {
+              console.log("✅ Installation request created for bundle:", metadata.item_id);
+            }
+          } else {
+            console.log("Installation request already exists for bundle:", existingRequest.id);
+          }
+        }
+
         // Send purchase confirmation email (async, don't block webhook response)
         sendPurchaseEmail(
           customerEmail,
