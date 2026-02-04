@@ -11,9 +11,6 @@ import { SubscriptionProvider } from "@/hooks/useSubscription";
 // TODO: For pre-launch protection, use hosting-layer protection (Cloudflare Access, Netlify, Vercel)
 // Do NOT implement client-side password gates
 
-// Access gate - set to false to allow public marketplace browsing
-const SITE_LOCKED = false;
-
 import RequestAccess from "./pages/RequestAccess";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
@@ -80,18 +77,7 @@ const ScrollToTop = () => {
   return null;
 };
 
-// Locked site shows only request access page (except auth/admin routes)
-const LockedApp = () => (
-  <Routes>
-    <Route path="/" element={<RequestAccess />} />
-    <Route path="/auth" element={<Auth />} />
-    <Route path="/admin" element={<Admin />} />
-    <Route path="/reset-password" element={<ResetPassword />} />
-    <Route path="*" element={<RequestAccess />} />
-  </Routes>
-);
-
-const UnlockedApp = () => (
+const AppRoutes = () => (
   <Routes>
     {/* Primary Site Routes */}
     <Route path="/" element={<LibraryHome />} />
@@ -191,23 +177,6 @@ const UnlockedApp = () => (
   </Routes>
 );
 
-// Smart gate: admins see full site, public sees locked
-const SiteGate = () => {
-  const { user, isAdmin, isLoading } = useAuth();
-  
-  // While loading auth, show locked routes (they handle their own auth)
-  if (isLoading) {
-    return <LockedApp />;
-  }
-  
-  // If site is locked but user is admin, show full site
-  if (SITE_LOCKED && !isAdmin) {
-    return <LockedApp />;
-  }
-  
-  return <UnlockedApp />;
-};
-
 const App = () => (
   <HelmetProvider>
     <QueryClientProvider client={queryClient}>
@@ -219,7 +188,7 @@ const App = () => (
           <ScrollToTop />
           <AuthProvider>
             <SubscriptionProvider>
-              <SiteGate />
+              <AppRoutes />
             </SubscriptionProvider>
           </AuthProvider>
         </BrowserRouter>
