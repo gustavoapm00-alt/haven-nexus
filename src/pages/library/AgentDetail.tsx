@@ -20,9 +20,8 @@ const AgentDetail = () => {
   const { initiateCheckout, loading: checkoutLoading } = usePurchase();
 
   const isPublished = agent?.status === 'published';
-  const priceDisplay = agent?.price_cents && agent.price_cents > 0 
-    ? `$${(agent.price_cents / 100).toFixed(2)}` 
-    : 'Free';
+  const cents = agent?.price_cents ?? 0;
+  const priceDisplay = cents > 0 ? `$${(cents / 100).toFixed(2)}` : 'Free';
 
   const handleActivateNow = () => {
     if (agent) {
@@ -305,7 +304,7 @@ const AgentDetail = () => {
                     <>
                       <div className="text-center mb-4">
                         <span className="text-3xl font-bold text-primary">{priceDisplay}</span>
-                        {agent.price_cents === 0 && (
+                        {cents === 0 && (
                           <p className="text-xs text-muted-foreground mt-1">One-time activation</p>
                         )}
                       </div>

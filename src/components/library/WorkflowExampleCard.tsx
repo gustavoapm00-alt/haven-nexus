@@ -40,7 +40,10 @@ const WorkflowExampleCard = ({
       whileHover={{ y: -4 }}
       transition={{ duration: 0.2 }}
       onClick={handleCardClick}
-      className={`p-6 flex flex-col h-full rounded-lg cursor-pointer ${
+      onKeyDown={(e) => e.key === 'Enter' && handleCardClick()}
+      role="button"
+      tabIndex={0}
+      className={`p-6 flex flex-col h-full rounded-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/50 ${
         isDark 
           ? 'card-panel-dark' 
           : 'card-panel'
