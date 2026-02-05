@@ -162,7 +162,8 @@ export default function PortalConnectorScreen() {
   // Load automation by slug and find/create activation request
   useEffect(() => {
     async function loadData() {
-      if (!user) return;
+      // Wait for auth to fully initialize before loading data
+      if (authLoading || !user) return;
 
       setIsLoading(true);
       try {
@@ -466,7 +467,11 @@ export default function PortalConnectorScreen() {
   }
 
   if (!user) {
-    navigate('/portal/auth');
+    // Use redirect parameter so user returns here after login
+    const redirectPath = automationSlug 
+      ? `/portal/connect/${automationSlug}${requestId ? `?request_id=${requestId}` : ''}`
+      : `/portal/connect?request_id=${requestId}`;
+    navigate(`/portal/auth?redirect=${encodeURIComponent(redirectPath)}`);
     return null;
   }
 
