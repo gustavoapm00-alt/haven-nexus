@@ -8,7 +8,7 @@ import { useN8nProvisioning } from '@/hooks/useN8nProvisioning';
 import { useIntegrationConnections } from '@/hooks/useIntegrationConnections';
 import { 
   Loader2, Package, Shield, CheckCircle, Clock, AlertTriangle, 
-  PauseCircle, ChevronRight, ExternalLink, LogOut, User, 
+  PauseCircle, ChevronRight, ExternalLink, LogOut, User, Link2,
   HelpCircle, FileText, Lock, Bell, Play, Pause, RotateCcw, XCircle, 
   Settings
 } from 'lucide-react';
@@ -17,6 +17,7 @@ import { GlassCard } from '@/components/portal/GlassCard';
 import { NotificationBell } from '@/components/portal/NotificationBell';
 import { Button } from '@/components/ui/button';
 import { IntegrationConnectWizard } from '@/components/portal/IntegrationConnectWizard';
+import { Badge } from '@/components/ui/badge';
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -87,6 +88,11 @@ const ClientDashboard = () => {
     const connectedProviders = connections.filter(c => c.status === 'connected');
     return connectedProviders.length === 0;
   }, [connections, connectionsLoading]);
+
+  // Count of connected integrations
+  const connectedCount = useMemo(() => {
+    return connections.filter(c => c.status === 'connected').length;
+  }, [connections]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -211,6 +217,22 @@ const ClientDashboard = () => {
               </div>
               
               <div className="flex items-center gap-3">
+                {/* Connected Integrations Badge */}
+                <button
+                  onClick={() => setShowConnectWizard(true)}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/50 hover:bg-muted transition-colors text-sm"
+                  title="Manage integrations"
+                >
+                  <Link2 className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-muted-foreground hidden sm:inline">Integrations</span>
+                  <Badge 
+                    variant={connectedCount > 0 ? "default" : "secondary"}
+                    className="h-5 min-w-5 flex items-center justify-center px-1.5"
+                  >
+                    {connectedCount}
+                  </Badge>
+                </button>
+
                 <NotificationBell />
                 
                 <div className="flex items-center gap-2 text-sm">
