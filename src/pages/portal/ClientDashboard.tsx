@@ -1,9 +1,11 @@
 import { useEffect, useState, useCallback } from 'react';
+import { useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useClientProfile } from '@/hooks/useClientProfile';
 import { useActivationStatus, ActiveAutomation } from '@/hooks/useActivationStatus';
 import { useN8nProvisioning } from '@/hooks/useN8nProvisioning';
+import { useIntegrationConnections } from '@/hooks/useIntegrationConnections';
 import { 
   Loader2, Package, Shield, CheckCircle, Clock, AlertTriangle, 
   PauseCircle, ChevronRight, ExternalLink, LogOut, User, 
@@ -14,6 +16,7 @@ import PortalBackground from '@/components/portal/PortalBackground';
 import { GlassCard } from '@/components/portal/GlassCard';
 import { NotificationBell } from '@/components/portal/NotificationBell';
 import { Button } from '@/components/ui/button';
+import { IntegrationConnectWizard } from '@/components/portal/IntegrationConnectWizard';
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -73,14 +76,32 @@ const ClientDashboard = () => {
     refetch
   } = useActivationStatus();
   const { pause, resume, revoke, isProvisioning } = useN8nProvisioning();
+  const { connections, isLoading: connectionsLoading } = useIntegrationConnections();
   const navigate = useNavigate();
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [showConnectWizard, setShowConnectWizard] = useState(false);
+
+  // Check if user should see the connect wizard prompt
+  const shouldShowWizardPrompt = useMemo(() => {
+    if (connectionsLoading) return false;
+    const connectedProviders = connections.filter(c => c.status === 'connected');
+    return connectedProviders.length === 0;
+  }, [connections, connectionsLoading]);
 
   useEffect(() => {
     if (!authLoading && !user) {
       navigate('/portal/auth');
     }
   }, [user, authLoading, navigate]);
+
+  // Check for OAuth success redirect
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const connected = params.get('connected');
+    if (connected) {
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
 
   const handleSignOut = async () => {
     await signOut();
@@ -157,7 +178,7 @@ const ClientDashboard = () => {
     }
   }, [revoke, refetch]);
 
-  if (authLoading || profileLoading || activationLoading) {
+  if (authLoading || profileLoading || activationLoading || connectionsLoading) {
     return (
       <PortalBackground>
         <div className="min-h-screen flex items-center justify-center">
@@ -170,6 +191,12 @@ const ClientDashboard = () => {
   return (
     <PortalBackground>
       <div className="min-h-screen">
+        {/* Integration Connect Wizard */}
+        <IntegrationConnectWizard
+          open={showConnectWizard}
+          onClose={() => setShowConnectWizard(false)}
+        />
+
         {/* Header */}
         <header className="border-b border-border/20 bg-background/50 backdrop-blur-sm sticky top-0 z-40">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -208,6 +235,31 @@ const ClientDashboard = () => {
         </header>
 
         <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+          {/* Connect Tools Prompt - Shows when user has no connections */}
+          {shouldShowWizardPrompt && (
+            <section>
+              <div 
+                onClick={() => setShowConnectWizard(true)}
+                className="cursor-pointer group p-5 rounded-xl border border-primary/30 bg-primary/5 hover:bg-primary/10 transition-colors"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                      <Shield className="w-6 h-6 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-foreground">Connect Your Tools</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Link Google, HubSpot, Slack & Notion in one click
+                      </p>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                </div>
+              </div>
+            </section>
+          )}
+
           {/* Welcome Message */}
           <div>
             <h1 className="text-2xl font-semibold">
