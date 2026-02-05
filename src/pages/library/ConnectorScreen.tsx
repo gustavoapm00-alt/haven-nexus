@@ -159,7 +159,8 @@ export default function ConnectorScreen() {
   // Load activation request and automation details
   useEffect(() => {
     async function loadData() {
-      if (!requestId || !user) return;
+      // Wait for auth to fully initialize before loading data
+      if (!requestId || authLoading || !user) return;
 
       setIsLoading(true);
       try {
@@ -239,7 +240,7 @@ export default function ConnectorScreen() {
     }
 
     loadData();
-  }, [requestId, user, navigate]);
+  }, [requestId, user, authLoading, navigate]);
 
   const handleConnect = async (provider: string) => {
     const config = requiredIntegrations.find(i => i.provider === provider);
@@ -417,7 +418,8 @@ export default function ConnectorScreen() {
   }
 
   if (!user) {
-    navigate('/portal/auth');
+    // Use redirect parameter so user returns here after login
+    navigate(`/portal/auth?redirect=/connect/${requestId}`);
     return null;
   }
 
