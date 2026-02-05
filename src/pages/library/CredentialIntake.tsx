@@ -96,18 +96,28 @@ export default function CredentialIntake() {
   // Required schemas for this automation - computed from real data
   const [requiredSchemas, setRequiredSchemas] = useState<CredentialSchema[]>([]);
 
+  // Only redirect to auth AFTER auth has finished loading AND user is definitively null
   useEffect(() => {
-    if (!authLoading && !user) {
-      navigate('/portal/auth?redirect=' + encodeURIComponent(`/credentials/${id}`));
+    // Wait for auth to fully initialize before making any redirect decisions
+    if (authLoading) return;
+    
+    // Only redirect if auth is complete AND there's no user
+    if (!user) {
+      // Use replace to prevent back-button loops
+      navigate('/portal/auth?redirect=' + encodeURIComponent(`/credentials/${id}`), { replace: true });
     }
   }, [user, authLoading, navigate, id]);
 
+  // Only fetch data when auth is ready AND user exists
   useEffect(() => {
+    // Don't fetch until auth is fully loaded
+    if (authLoading) return;
+    
     if (id && user) {
       fetchRequest();
       fetchCredentials();
     }
-  }, [id, user]);
+  }, [id, user, authLoading]);
 
   const fetchRequest = async () => {
     if (!id) return;

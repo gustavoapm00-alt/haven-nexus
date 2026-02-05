@@ -22,38 +22,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        // Check admin role with setTimeout to prevent deadlock
-        if (session?.user) {
-          setTimeout(() => {
-            checkAdminRole(session.user.id);
-          }, 0);
-        } else {
-          setIsAdmin(false);
-        }
-      }
-    );
-
-    // THEN check for existing session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        await checkAdminRole(session.user.id);
-      }
-      setIsLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const checkAdminRole = async (userId: string) => {
     // SECURITY: Admin status is determined ONLY via user_roles table
@@ -67,6 +36,63 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
     setIsAdmin(!!data);
   };
+
+  useEffect(() => {
+    let isMounted = true;
+
+    // Listener for ONGOING auth changes (does NOT control isLoading after init)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (!isMounted) return;
+        
+        // Only update state, don't affect loading after initialization
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          // Use setTimeout to prevent Supabase auth deadlock
+          setTimeout(() => {
+            if (isMounted) {
+              checkAdminRole(session.user.id);
+            }
+          }, 0);
+        } else {
+          setIsAdmin(false);
+        }
+      }
+    );
+
+    // INITIAL load - this controls isLoading
+    const initializeAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!isMounted) return;
+        
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        // Await admin role check BEFORE setting loading to false
+        if (session?.user) {
+          await checkAdminRole(session.user.id);
+        }
+      } catch (error) {
+        console.error('Auth initialization error:', error);
+      } finally {
+        if (isMounted) {
+          setIsInitialized(true);
+          setIsLoading(false);
+        }
+      }
+    };
+
+    initializeAuth();
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({
