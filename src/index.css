@@ -23,92 +23,93 @@ html {
 
 @layer base {
   :root {
-    /* Enterprise palette: charcoal, off-white, steel gray with deep blue accent */
-    --background: 220 15% 97%;
-    --foreground: 220 25% 12%;
+    /* Orbital Dark Mode - default palette */
+    --background: 0 0% 4%;
+    --foreground: 0 0% 91%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 220 25% 12%;
+    --card: 0 0% 7%;
+    --card-foreground: 0 0% 91%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 220 25% 12%;
+    --popover: 0 0% 7%;
+    --popover-foreground: 0 0% 91%;
 
-    --primary: 220 65% 35%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 180 60% 40%;
+    --primary-foreground: 0 0% 4%;
 
-    --secondary: 220 10% 92%;
-    --secondary-foreground: 220 25% 12%;
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 91%;
 
-    --muted: 220 10% 94%;
-    --muted-foreground: 220 10% 45%;
+    --muted: 0 0% 14%;
+    --muted-foreground: 0 0% 45%;
 
-    --accent: 220 65% 35%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 25 90% 50%;
+    --accent-foreground: 0 0% 4%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 15% 88%;
-    --input: 220 15% 88%;
-    --ring: 220 65% 35%;
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
+    --ring: 180 60% 40%;
 
-    --radius: 0.375rem;
+    --radius: 0.25rem;
 
     /* Custom tokens */
-    --steel: 220 10% 60%;
-    --charcoal: 220 25% 12%;
-    --off-white: 220 15% 97%;
+    --steel: 0 0% 35%;
+    --charcoal: 0 0% 4%;
+    --off-white: 0 0% 91%;
     
     /* Control desk tokens */
-    --ink: 220 30% 10%;
-    --ink-foreground: 220 15% 92%;
-    --glow: 220 65% 50%;
-    --grid-line: 220 15% 90%;
+    --ink: 220 30% 5%;
+    --ink-foreground: 0 0% 91%;
+    --glow: 180 60% 50%;
+    --grid-line: 0 0% 12%;
 
-    --sidebar-background: 220 25% 12%;
-    --sidebar-foreground: 220 15% 97%;
-    --sidebar-primary: 220 65% 35%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 20% 20%;
-    --sidebar-accent-foreground: 220 15% 97%;
-    --sidebar-border: 220 20% 25%;
-    --sidebar-ring: 220 65% 35%;
+    --sidebar-background: 0 0% 6%;
+    --sidebar-foreground: 0 0% 91%;
+    --sidebar-primary: 180 60% 40%;
+    --sidebar-primary-foreground: 0 0% 4%;
+    --sidebar-accent: 0 0% 12%;
+    --sidebar-accent-foreground: 0 0% 91%;
+    --sidebar-border: 0 0% 15%;
+    --sidebar-ring: 180 60% 40%;
   }
 
   .dark {
-    --background: 220 25% 8%;
-    --foreground: 220 10% 92%;
+    /* Same as root for this dark-first design */
+    --background: 0 0% 4%;
+    --foreground: 0 0% 91%;
 
-    --card: 220 20% 12%;
-    --card-foreground: 220 10% 92%;
+    --card: 0 0% 7%;
+    --card-foreground: 0 0% 91%;
 
-    --popover: 220 20% 12%;
-    --popover-foreground: 220 10% 92%;
+    --popover: 0 0% 7%;
+    --popover-foreground: 0 0% 91%;
 
-    --primary: 220 65% 55%;
-    --primary-foreground: 220 25% 8%;
+    --primary: 180 60% 45%;
+    --primary-foreground: 0 0% 4%;
 
-    --secondary: 220 15% 18%;
-    --secondary-foreground: 220 10% 92%;
+    --secondary: 0 0% 14%;
+    --secondary-foreground: 0 0% 91%;
 
-    --muted: 220 15% 20%;
-    --muted-foreground: 220 10% 55%;
+    --muted: 0 0% 16%;
+    --muted-foreground: 0 0% 50%;
 
-    --accent: 220 65% 55%;
-    --accent-foreground: 220 25% 8%;
+    --accent: 25 90% 55%;
+    --accent-foreground: 0 0% 4%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 15% 22%;
-    --input: 220 15% 22%;
-    --ring: 220 65% 55%;
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 180 60% 45%;
     
     /* Control desk tokens (dark) */
-    --ink: 220 25% 6%;
-    --ink-foreground: 220 15% 92%;
-    --glow: 220 70% 60%;
-    --grid-line: 220 20% 18%;
+    --ink: 0 0% 3%;
+    --ink-foreground: 0 0% 91%;
+    --glow: 180 70% 55%;
+    --grid-line: 0 0% 14%;
   }
 }
 
