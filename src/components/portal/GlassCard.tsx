@@ -9,19 +9,19 @@ interface GlassCardProps extends React.HTMLAttributes<HTMLDivElement> {
 const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
   ({ className, variant = "default", hover = true, ...props }, ref) => {
     const variants = {
-      default: "bg-card/60 border-border/50",
-      dark: "bg-ink/80 border-border/30",
-      accent: "bg-primary/5 border-primary/20",
+      default: "bg-white/[0.03] border-white/10",
+      dark: "bg-black/60 border-white/5",
+      accent: "bg-cyan-500/5 border-cyan-500/20",
     };
 
     return (
       <div
         ref={ref}
         className={cn(
-          "backdrop-blur-xl rounded-xl border shadow-lg",
+          "backdrop-blur-xl border-[0.5px]",
           "transition-all duration-300",
           variants[variant],
-          hover && "hover:shadow-xl hover:border-primary/30 hover:-translate-y-0.5",
+          hover && "hover:border-cyan-500/30 hover:shadow-[0_0_20px_hsl(187_100%_50%/0.08)]",
           className
         )}
         {...props}

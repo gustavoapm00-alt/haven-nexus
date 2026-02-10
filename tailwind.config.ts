@@ -14,9 +14,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ['"Playfair Display"', 'Georgia', 'serif'],
+        display: ['"Space Grotesk"', 'system-ui', 'sans-serif'],
         mono: ['"JetBrains Mono"', 'monospace'],
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['"Space Grotesk"', 'system-ui', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",

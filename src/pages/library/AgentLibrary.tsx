@@ -3,8 +3,6 @@ import { Link } from 'react-router-dom';
 import { Search, Filter, ArrowRight } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import LibraryNavbar from '@/components/library/LibraryNavbar';
-import LibraryFooter from '@/components/library/LibraryFooter';
 import WorkflowExampleCard from '@/components/library/WorkflowExampleCard';
 import { useAgents } from '@/hooks/useAgents';
 import SEO, { schemas } from '@/components/SEO';
@@ -15,175 +13,140 @@ const AgentLibrary = () => {
   const [selectedSector, setSelectedSector] = useState<string | null>(null);
   const [selectedSystem, setSelectedSystem] = useState<string | null>(null);
 
-  // Extract unique sectors and systems
   const { sectors, systems } = useMemo(() => {
     const sectorsSet = new Set<string>();
     const systemsSet = new Set<string>();
-
     agents.forEach((agent) => {
       agent.sectors.forEach((s) => sectorsSet.add(s));
       agent.systems.forEach((s) => systemsSet.add(s));
     });
-
-    return {
-      sectors: Array.from(sectorsSet).sort(),
-      systems: Array.from(systemsSet).sort(),
-    };
+    return { sectors: Array.from(sectorsSet).sort(), systems: Array.from(systemsSet).sort() };
   }, [agents]);
 
-  // Filter agents
   const filteredAgents = useMemo(() => {
     return agents.filter((agent) => {
-      const matchesSearch =
-        !searchQuery ||
-        agent.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        agent.short_outcome.toLowerCase().includes(searchQuery.toLowerCase());
-
-      const matchesSector =
-        !selectedSector || agent.sectors.includes(selectedSector);
-
-      const matchesSystem =
-        !selectedSystem || agent.systems.includes(selectedSystem);
-
+      const matchesSearch = !searchQuery || agent.name.toLowerCase().includes(searchQuery.toLowerCase()) || agent.short_outcome.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSector = !selectedSector || agent.sectors.includes(selectedSector);
+      const matchesSystem = !selectedSystem || agent.systems.includes(selectedSystem);
       return matchesSearch && matchesSector && matchesSystem;
     });
   }, [agents, searchQuery, selectedSector, selectedSystem]);
 
-  const clearFilters = () => {
-    setSearchQuery('');
-    setSelectedSector(null);
-    setSelectedSystem(null);
-  };
-
+  const clearFilters = () => { setSearchQuery(''); setSelectedSector(null); setSelectedSystem(null); };
   const hasFilters = searchQuery || selectedSector || selectedSystem;
 
   const catalogStructuredData = [
-    schemas.service(
-      "Hosted Automation Catalog",
-      "Browse operational automations AERELION configures, operates, and maintains. No software to install, no workflows to manage.",
-      "/automations"
-    ),
-    schemas.breadcrumb([
-      { name: 'Home', url: '/' },
-      { name: 'Automations', url: '/automations' }
-    ])
+    schemas.service("Hosted Automation Catalog", "Browse operational automations AERELION operates.", "/automations"),
+    schemas.breadcrumb([{ name: 'Home', url: '/' }, { name: 'Protocols', url: '/automations' }])
   ];
 
   return (
     <>
       <SEO
-        title="Hosted Automation Catalog – Managed Business Automations | AERELION"
-        description="Browse 20+ operational automations AERELION configures, operates, and maintains on your behalf. Lead follow-up, client onboarding, reporting, compliance workflows. No software to install."
-        keywords="hosted automation, managed automation catalog, business automation services, lead follow-up automation, client onboarding automation, compliance automation, CRM automation, professional services workflow"
+        title="Active Protocols – Managed Automations | AERELION"
+        description="Browse operational automations AERELION configures, operates, and maintains."
         canonicalUrl="/automations"
         structuredData={catalogStructuredData}
       />
 
-      <div className="min-h-screen bg-background">
-        <LibraryNavbar />
-
+      <main className="min-h-screen">
         <section className="section-padding !pt-12 !pb-8">
           <div className="container-main">
+            {/* Header */}
             <div className="mb-8">
-              <span className="text-xs font-semibold text-primary uppercase tracking-wide mb-2 block">
-                Automation Catalog
+              <span className="font-mono text-[10px] text-cyan-500/60 uppercase tracking-[0.2em] mb-2 block">
+                // PROTOCOL_DATABASE
               </span>
-              <h1 className="text-3xl font-semibold text-foreground mb-3">
-                Automations We Operate
+              <h1 className="text-3xl md:text-4xl font-display font-semibold text-foreground mb-3">
+                Active Protocols
               </h1>
-              <p className="text-muted-foreground max-w-2xl">
-                Each automation below is configured, hosted, and operated by AERELION on your behalf. 
-                No technical work required from you—we take responsibility for execution and outcomes.
+              <p className="text-white/40 font-mono text-sm max-w-2xl">
+                Each protocol below is configured, hosted, and operated by AERELION on your behalf.
               </p>
             </div>
 
             {/* CTA Banner */}
-            <div className="card-enterprise p-6 mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="card-enterprise p-5 mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
               <div>
-                <h3 className="font-semibold text-foreground mb-1">Ready to get started?</h3>
-                <p className="text-sm text-muted-foreground">Schedule a discovery call to discuss which automations fit your operations.</p>
+                <h3 className="font-display font-semibold text-foreground mb-1">Ready to deploy?</h3>
+                <p className="text-sm font-mono text-white/30">Schedule a discovery call to scope your engagement.</p>
               </div>
               <Button asChild>
                 <Link to="/contact">
-                  Schedule Discovery Call
+                  Initialize Uplink
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Link>
               </Button>
             </div>
 
-            {/* Filters */}
-            <div className="flex flex-col md:flex-row gap-4 mb-8">
-              <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Search automations..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
+            {/* Data table header */}
+            <div className="border-[0.5px] border-white/10 mb-0">
+              <div className="flex flex-col md:flex-row items-stretch">
+                {/* Search */}
+                <div className="flex-1 border-b md:border-b-0 md:border-r border-white/10 p-3">
+                  <div className="relative">
+                    <Search className="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
+                    <input
+                      type="text"
+                      placeholder="SEARCH_PROTOCOLS..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full bg-transparent border-0 pl-6 py-1 font-mono text-xs text-foreground placeholder:text-white/15 focus:outline-none"
+                    />
+                  </div>
+                </div>
+                {/* Filters */}
+                <div className="flex items-center gap-2 p-3">
+                  <select
+                    value={selectedSector || ''}
+                    onChange={(e) => setSelectedSector(e.target.value || null)}
+                    className="px-2 py-1 bg-transparent border-[0.5px] border-white/10 font-mono text-[10px] text-white/40 uppercase tracking-wider focus:outline-none focus:border-cyan-500/50"
+                  >
+                    <option value="">ALL_SECTORS</option>
+                    {sectors.map((sector) => <option key={sector} value={sector}>{sector}</option>)}
+                  </select>
 
-              <div className="flex flex-wrap gap-2">
-                <select
-                  value={selectedSector || ''}
-                  onChange={(e) => setSelectedSector(e.target.value || null)}
-                  className="px-3 py-2 border border-border rounded-md bg-background text-sm"
-                >
-                  <option value="">All Use Cases</option>
-                  {sectors.map((sector) => (
-                    <option key={sector} value={sector}>
-                      {sector}
-                    </option>
-                  ))}
-                </select>
+                  <select
+                    value={selectedSystem || ''}
+                    onChange={(e) => setSelectedSystem(e.target.value || null)}
+                    className="px-2 py-1 bg-transparent border-[0.5px] border-white/10 font-mono text-[10px] text-white/40 uppercase tracking-wider focus:outline-none focus:border-cyan-500/50"
+                  >
+                    <option value="">ALL_SYSTEMS</option>
+                    {systems.map((system) => <option key={system} value={system}>{system}</option>)}
+                  </select>
 
-                <select
-                  value={selectedSystem || ''}
-                  onChange={(e) => setSelectedSystem(e.target.value || null)}
-                  className="px-3 py-2 border border-border rounded-md bg-background text-sm"
-                >
-                  <option value="">All Tools</option>
-                  {systems.map((system) => (
-                    <option key={system} value={system}>
-                      {system}
-                    </option>
-                  ))}
-                </select>
-
-                {hasFilters && (
-                  <Button variant="ghost" size="sm" onClick={clearFilters}>
-                    Clear filters
-                  </Button>
-                )}
+                  {hasFilters && (
+                    <button onClick={clearFilters} className="font-mono text-[10px] text-white/20 hover:text-white/40 uppercase tracking-wider">
+                      CLEAR
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
 
-            {/* Results count */}
-            <p className="text-sm text-muted-foreground mb-6">
-              {filteredAgents.length} automation{filteredAgents.length !== 1 ? 's' : ''} available
-            </p>
+            {/* Results count bar */}
+            <div className="border-x-[0.5px] border-b-[0.5px] border-white/10 px-3 py-2 mb-6">
+              <span className="font-mono text-[10px] text-white/20 uppercase tracking-wider">
+                RESULTS: {filteredAgents.length} PROTOCOL{filteredAgents.length !== 1 ? 'S' : ''} FOUND
+              </span>
+            </div>
 
             {/* Agent Grid */}
             {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {[...Array(6)].map((_, i) => (
-                  <div key={i} className="card-enterprise p-6 h-64 animate-pulse bg-muted" />
+                  <div key={i} className="card-enterprise p-6 h-48 animate-pulse" />
                 ))}
               </div>
             ) : filteredAgents.length === 0 ? (
-              <div className="text-center py-16">
-                <Filter className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="font-medium text-foreground mb-2">No automations found</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Try adjusting your filters or search query.
-                </p>
-                <Button variant="outline" onClick={clearFilters}>
-                  Clear all filters
-                </Button>
+              <div className="text-center py-16 border-[0.5px] border-white/10">
+                <Filter className="w-8 h-8 text-white/15 mx-auto mb-4" />
+                <h3 className="font-mono text-sm text-white/40 mb-2">NO_PROTOCOLS_FOUND</h3>
+                <p className="text-xs font-mono text-white/20 mb-4">Adjust filters or search query.</p>
+                <Button variant="outline" onClick={clearFilters}>Clear Filters</Button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredAgents.map((agent) => (
                   <WorkflowExampleCard
                     key={agent.id}
@@ -203,10 +166,27 @@ const AgentLibrary = () => {
           </div>
         </section>
 
-        <LibraryFooter />
-      </div>
+        <LandingFooterSection />
+      </main>
     </>
   );
 };
+
+// Minimal page footer that respects persistent terminal bar
+const LandingFooterSection = () => (
+  <footer className="border-t-[0.5px] border-white/5 py-12">
+    <div className="container-main px-6">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <span className="font-mono text-[10px] text-white/15 tracking-wider">
+          AERELION SYSTEMS © 2026. ALL SYSTEMS NOMINAL.
+        </span>
+        <div className="flex items-center gap-2">
+          <span className="w-1.5 h-1.5 rounded-full bg-green-500/50" />
+          <span className="font-mono text-[9px] text-white/15 uppercase tracking-widest">Operational</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+);
 
 export default AgentLibrary;
