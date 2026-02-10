@@ -1,4 +1,5 @@
 import SEO, { schemas } from '@/components/SEO';
+import LibraryNavbar from '@/components/library/LibraryNavbar';
 import SystemStatusTicker from '@/components/landing/SystemStatusTicker';
 import CommandCenterHero from '@/components/landing/CommandCenterHero';
 import ManifestoSection from '@/components/landing/ManifestoSection';
@@ -40,6 +41,7 @@ const LibraryHome = () => {
       />
 
       <div className="min-h-screen bg-[#0a0a0a]">
+        <LibraryNavbar />
         <SystemStatusTicker />
         <CommandCenterHero />
         <ManifestoSection />
