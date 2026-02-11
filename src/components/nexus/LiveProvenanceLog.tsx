@@ -20,9 +20,9 @@ export default function LiveProvenanceLog() {
   };
 
   return (
-    <section>
+    <section className="px-4 py-3">
       <h2
-        className="text-xs tracking-[0.3em] mb-4"
+        className="text-[10px] tracking-[0.3em] mb-2"
         style={{ fontFamily: 'JetBrains Mono, monospace', color: '#39FF14' }}
       >
         LIVE_PROVENANCE // TERMINAL_FEED
@@ -32,16 +32,13 @@ export default function LiveProvenanceLog() {
         ref={scrollRef}
         className="overflow-y-auto"
         style={{
-          background: '#0A0A0A',
-          border: '1px solid #39FF14',
-          borderRadius: 0,
-          height: 360,
-          padding: '12px 16px',
+          background: 'transparent',
+          height: 200,
         }}
       >
         {isLoading && (
           <p
-            className="text-xs animate-pulse"
+            className="text-[10px] animate-pulse"
             style={{ fontFamily: 'JetBrains Mono, monospace', color: '#39FF14' }}
           >
             LOADING_FEED...
@@ -50,7 +47,7 @@ export default function LiveProvenanceLog() {
 
         {!isLoading && logs.length === 0 && (
           <p
-            className="text-xs opacity-40"
+            className="text-[10px] opacity-40"
             style={{ fontFamily: 'JetBrains Mono, monospace', color: '#39FF14' }}
           >
             NO_ENTRIES // AWAITING_SIGNAL
@@ -58,20 +55,24 @@ export default function LiveProvenanceLog() {
         )}
 
         {logs.map((log) => (
-          <div key={log.id} className="flex gap-3 text-[11px] leading-relaxed mb-0.5" style={{ fontFamily: 'JetBrains Mono, monospace' }}>
-            <span style={{ color: '#555', minWidth: 150, flexShrink: 0 }}>
+          <div
+            key={log.id}
+            className="flex gap-3 text-[10px] leading-relaxed mb-px"
+            style={{ fontFamily: 'JetBrains Mono, monospace' }}
+          >
+            <span style={{ color: '#444', minWidth: 145, flexShrink: 0 }}>
               {new Date(log.created_at).toISOString().replace('T', ' ').slice(0, 19)}
             </span>
             <span
               className="uppercase"
-              style={{ color: levelColor(log.level), minWidth: 42, flexShrink: 0 }}
+              style={{ color: levelColor(log.level), minWidth: 40, flexShrink: 0 }}
             >
               {log.level}
             </span>
-            <span style={{ color: '#FFBF00', minWidth: 160, flexShrink: 0 }}>
+            <span style={{ color: '#FFBF00', minWidth: 155, flexShrink: 0 }}>
               {log.function_name}
             </span>
-            <span style={{ color: '#39FF14', flex: 1 }}>
+            <span style={{ color: '#39FF14', flex: 1, opacity: 0.8 }}>
               {log.message}
             </span>
             {log.status_code != null && (
