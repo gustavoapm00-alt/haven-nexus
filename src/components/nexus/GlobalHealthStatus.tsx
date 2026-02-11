@@ -1,10 +1,12 @@
 import { motion } from 'framer-motion';
 import { type AgentState, type AgentStatusEnum } from '@/hooks/useAgentStatus';
+import { type OperationalMode, MODE_CONFIG } from '@/hooks/useNexusMode';
 
 type SystemState = 'OPERATIONAL' | 'WARNING' | 'CRITICAL';
 
 interface GlobalHealthStatusProps {
   agentStatuses: Record<string, AgentState>;
+  mode?: OperationalMode;
 }
 
 function deriveSystemState(statuses: Record<string, AgentState>): SystemState {
@@ -20,9 +22,10 @@ const STATE_CONFIG: Record<SystemState, { border: string; bg: string; pulse: str
   CRITICAL: { border: '#FF4444', bg: 'rgba(255,68,68,0.06)', pulse: '#FF4444', label: 'CRITICAL // MODULE_FAILURE' },
 };
 
-export default function GlobalHealthStatus({ agentStatuses }: GlobalHealthStatusProps) {
+export default function GlobalHealthStatus({ agentStatuses, mode = 'STEALTH' }: GlobalHealthStatusProps) {
   const systemState = deriveSystemState(agentStatuses);
-  const config = STATE_CONFIG[systemState];
+  const sc = STATE_CONFIG[systemState];
+  const mc = MODE_CONFIG[mode];
   const values = Object.values(agentStatuses);
   const nominalCount = values.filter(a => a.status === 'NOMINAL' || a.status === 'PROCESSING').length;
   const driftCount = values.filter(a => a.status === 'DRIFT').length;
@@ -32,17 +35,17 @@ export default function GlobalHealthStatus({ agentStatuses }: GlobalHealthStatus
     <motion.section
       className="relative overflow-hidden"
       style={{
-        background: config.bg,
-        borderBottom: `1px solid ${config.border}`,
+        background: sc.bg,
+        borderBottom: `1px solid ${sc.border}`,
         fontFamily: 'JetBrains Mono, monospace',
       }}
-      animate={{ borderColor: config.border }}
+      animate={{ borderColor: sc.border }}
       transition={{ duration: 0.6 }}
     >
       {/* Pulse glow line */}
       <motion.div
         className="absolute bottom-0 left-0 right-0 h-[1px]"
-        style={{ background: config.pulse }}
+        style={{ background: sc.pulse }}
         animate={{ opacity: [0.3, 1, 0.3] }}
         transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
       />
@@ -53,22 +56,22 @@ export default function GlobalHealthStatus({ agentStatuses }: GlobalHealthStatus
           <div>
             <p
               className="text-[8px] tracking-[0.4em] uppercase mb-1"
-              style={{ color: config.pulse, opacity: 0.5 }}
+              style={{ color: sc.pulse, opacity: 0.5 }}
             >
-              NEXUS_CORE // GLOBAL_HEALTH_INDEX
+              NEXUS_CORE // GLOBAL_HEALTH_INDEX // MODE:{mc.label}
             </p>
             <h1
               className="text-2xl md:text-3xl tracking-tight uppercase mb-1"
               style={{ color: '#FFFFFF', fontWeight: 900, letterSpacing: '-0.02em' }}
             >
               NEXUS STATE:{' '}
-              <span style={{ color: config.pulse }}>{config.label}</span>
+              <span style={{ color: sc.pulse }}>{sc.label}</span>
             </h1>
             <p
               className="text-[9px] tracking-[0.2em] uppercase"
-              style={{ color: config.pulse, opacity: 0.4 }}
+              style={{ color: sc.pulse, opacity: 0.4 }}
             >
-              AERELION // SYS.OPS.V2.06 // PROVENANCE_SYNC_ACTIVE
+              AERELION // SYS.OPS.V3.00 // PROVENANCE_SYNC_ACTIVE
             </p>
           </div>
 
@@ -76,7 +79,7 @@ export default function GlobalHealthStatus({ agentStatuses }: GlobalHealthStatus
           <div className="text-right">
             <div
               className="text-3xl md:text-4xl"
-              style={{ color: config.pulse, fontWeight: 900, lineHeight: 1 }}
+              style={{ color: sc.pulse, fontWeight: 900, lineHeight: 1 }}
             >
               {nominalCount}/7
             </div>

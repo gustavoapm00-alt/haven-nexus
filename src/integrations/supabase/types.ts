@@ -1167,6 +1167,27 @@ export type Database = {
           },
         ]
       }
+      nexus_config: {
+        Row: {
+          id: string
+          operational_mode: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          id?: string
+          operational_mode?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          id?: string
+          operational_mode?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       oauth_states: {
         Row: {
           activation_request_id: string | null
