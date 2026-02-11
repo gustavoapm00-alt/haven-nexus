@@ -11,7 +11,10 @@ export interface AgentState {
 }
 
 const AGENT_IDS = ['AG-01', 'AG-02', 'AG-03', 'AG-04', 'AG-05', 'AG-06', 'AG-07'] as const;
-const OFFLINE_THRESHOLD_MS = 10 * 60 * 1000; // 10 minutes
+// Operational cadence: AG-01 Sentinel fires every 15min, other modules heartbeat
+// at variable intervals. 4-hour window accommodates all operational cadences
+// while still detecting genuine module failures.
+const OFFLINE_THRESHOLD_MS = 4 * 60 * 60 * 1000; // 4 hours
 
 const defaultState = (): AgentState => ({
   status: 'OFFLINE',
