@@ -54,7 +54,7 @@ const AgentLibrary = () => {
           <div className="container-main">
             {/* Header */}
             <div className="mb-8">
-              <span className="font-mono text-[10px] text-cyan-500/60 uppercase tracking-[0.2em] mb-2 block">
+              <span className="font-mono text-[10px] text-[#39FF14]/60 uppercase tracking-[0.2em] mb-2 block">
                 // PROTOCOL_DATABASE
               </span>
               <h1 className="text-3xl md:text-4xl font-display font-semibold text-foreground mb-3">
@@ -100,7 +100,7 @@ const AgentLibrary = () => {
                   <select
                     value={selectedSector || ''}
                     onChange={(e) => setSelectedSector(e.target.value || null)}
-                    className="px-2 py-1 bg-transparent border-[0.5px] border-white/10 font-mono text-[10px] text-white/40 uppercase tracking-wider focus:outline-none focus:border-cyan-500/50"
+                    className="px-2 py-1 bg-transparent border border-white/10 font-mono text-[10px] text-white/40 uppercase tracking-wider focus:outline-none focus:border-[rgba(57,255,20,0.4)]"
                   >
                     <option value="">ALL_SECTORS</option>
                     {sectors.map((sector) => <option key={sector} value={sector}>{sector}</option>)}
@@ -109,7 +109,7 @@ const AgentLibrary = () => {
                   <select
                     value={selectedSystem || ''}
                     onChange={(e) => setSelectedSystem(e.target.value || null)}
-                    className="px-2 py-1 bg-transparent border-[0.5px] border-white/10 font-mono text-[10px] text-white/40 uppercase tracking-wider focus:outline-none focus:border-cyan-500/50"
+                    className="px-2 py-1 bg-transparent border border-white/10 font-mono text-[10px] text-white/40 uppercase tracking-wider focus:outline-none focus:border-[rgba(57,255,20,0.4)]"
                   >
                     <option value="">ALL_SYSTEMS</option>
                     {systems.map((system) => <option key={system} value={system}>{system}</option>)}
@@ -181,7 +181,7 @@ const LandingFooterSection = () => (
           AERELION SYSTEMS © 2026. ALL SYSTEMS NOMINAL.
         </span>
         <div className="flex items-center gap-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-green-500/50" />
+          <span className="w-1.5 h-1.5 bg-[#39FF14]/50" />
           <span className="font-mono text-[9px] text-white/15 uppercase tracking-widest">Operational</span>
         </div>
       </div>

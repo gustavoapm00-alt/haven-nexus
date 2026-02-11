@@ -1,9 +1,5 @@
 import { useEffect, useRef } from 'react';
 
-/**
- * Global ambient effects layer: reactive grid + sector scans
- * Renders behind all content on every page
- */
 const AmbientEffects = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mouseRef = useRef({ x: -1000, y: -1000 });
@@ -36,11 +32,10 @@ const AmbientEffects = () => {
       const mx = mouseRef.current.x;
       const my = mouseRef.current.y;
 
-      // Draw grid with magnetic distortion
-      ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+      // Grid — Operational Green tint
+      ctx.strokeStyle = 'rgba(57, 255, 20, 0.025)';
       ctx.lineWidth = 0.5;
 
-      // Vertical lines
       for (let x = 0; x < canvas.width; x += GRID_SIZE) {
         ctx.beginPath();
         for (let y = 0; y <= canvas.height; y += 4) {
@@ -55,7 +50,6 @@ const AmbientEffects = () => {
         ctx.stroke();
       }
 
-      // Horizontal lines
       for (let y = 0; y < canvas.height; y += GRID_SIZE) {
         ctx.beginPath();
         for (let x = 0; x <= canvas.width; x += 4) {
@@ -70,7 +64,7 @@ const AmbientEffects = () => {
         ctx.stroke();
       }
 
-      // Sector scan (radar sweep) - top right corner
+      // Radar sweep — Operational Green
       angle += 0.008;
       const scanX = canvas.width - 80;
       const scanY = 80;
@@ -83,14 +77,13 @@ const AmbientEffects = () => {
       ctx.arc(scanX, scanY, scanR, angle, angle + 0.5);
       ctx.closePath();
       const grad = ctx.createRadialGradient(scanX, scanY, 0, scanX, scanY, scanR);
-      grad.addColorStop(0, 'rgba(0,200,255,0.3)');
-      grad.addColorStop(1, 'rgba(0,200,255,0)');
+      grad.addColorStop(0, 'rgba(57, 255, 20, 0.3)');
+      grad.addColorStop(1, 'rgba(57, 255, 20, 0)');
       ctx.fillStyle = grad;
       ctx.fill();
 
-      // Scan ring
       ctx.globalAlpha = 0.06;
-      ctx.strokeStyle = 'rgba(0,200,255,0.3)';
+      ctx.strokeStyle = 'rgba(57, 255, 20, 0.3)';
       ctx.lineWidth = 0.5;
       ctx.beginPath();
       ctx.arc(scanX, scanY, scanR, 0, Math.PI * 2);
@@ -116,7 +109,7 @@ const AmbientEffects = () => {
     <canvas
       ref={canvasRef}
       className="fixed inset-0 z-0 pointer-events-none"
-      style={{ background: '#000000' }}
+      style={{ background: '#0F0F0F' }}
     />
   );
 };

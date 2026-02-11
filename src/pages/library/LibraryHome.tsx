@@ -1,8 +1,10 @@
 import SEO, { schemas } from '@/components/SEO';
 import CommandCenterHero from '@/components/landing/CommandCenterHero';
-import ManifestoSection from '@/components/landing/ManifestoSection';
-import ProtocolGrid from '@/components/landing/ProtocolGrid';
-import BlueprintsFeed from '@/components/landing/BlueprintsFeed';
+import DoctrineGrid from '@/components/landing/DoctrineGrid';
+import OperationalParameters from '@/components/landing/OperationalParameters';
+import BriefingArchives from '@/components/landing/BriefingArchives';
+import AerelionLayerDiagram from '@/components/landing/AerelionLayerDiagram';
+import BriefingRequestCTA from '@/components/landing/BriefingRequestCTA';
 import LandingFooter from '@/components/landing/LandingFooter';
 
 const LibraryHome = () => {
@@ -10,8 +12,8 @@ const LibraryHome = () => {
     schemas.organization,
     schemas.localBusiness,
     schemas.service(
-      "Managed Automation Services",
-      "We configure, host, operate, and maintain business automation systems for professional services firms.",
+      "System Stabilization & Operational Governance",
+      "Engineering the foundational logic for enterprise-scale autonomous systems. We configure, host, operate, and maintain operational infrastructure.",
       "/"
     ),
   ];
@@ -19,18 +21,20 @@ const LibraryHome = () => {
   return (
     <>
       <SEO
-        title="AERELION Systems – Infrastructure for the Agent Era"
-        description="AERELION is a managed automation operator. We configure, host, operate, and maintain business automation systems for professional services firms."
-        keywords="managed automation operator, hosted automation services, business process automation"
+        title="AERELION Systems – System Stabilization & Operational Governance"
+        description="AERELION is a managed automation operator engineering foundational logic for enterprise-scale autonomous systems. Standardized infrastructure for operational governance."
+        keywords="operational governance, system stabilization, managed automation operator, enterprise automation"
         canonicalUrl="/"
         structuredData={homeStructuredData}
       />
 
       <main>
         <CommandCenterHero />
-        <ManifestoSection />
-        <ProtocolGrid />
-        <BlueprintsFeed />
+        <DoctrineGrid />
+        <OperationalParameters />
+        <AerelionLayerDiagram />
+        <BriefingArchives />
+        <BriefingRequestCTA />
         <LandingFooter />
       </main>
     </>
