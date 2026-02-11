@@ -71,7 +71,7 @@ const HUDNavbar = () => {
       <div className="max-w-[1600px] mx-auto px-4 md:px-6">
         <div className="flex items-center justify-between h-12">
           <Link to="/" className="font-mono text-[11px] tracking-[0.15em] text-white/60 hover:text-[#39FF14] transition-colors whitespace-nowrap">
-            AERELION <span className="text-white/20">//</span> <span className="text-white/30">SYS.OPS.V2.06</span>
+            AERELION <span className="text-white/20">//</span> <span className="text-white/30">SYS.OPS.V2.06</span> <span className="text-[#FFBF00]/40">//</span> <span className="text-[#FFBF00]/30">GOVCON_READY</span>
           </Link>
 
           <div className="hidden lg:block font-mono text-[10px] tracking-[0.12em] text-white/25">
