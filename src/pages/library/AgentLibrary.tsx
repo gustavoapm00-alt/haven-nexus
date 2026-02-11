@@ -65,15 +65,15 @@ const AgentLibrary = () => {
               </p>
             </div>
 
-            {/* CTA Banner */}
+            {/* Status Banner */}
             <div className="card-enterprise p-5 mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
               <div>
-                <h3 className="font-display font-semibold text-foreground mb-1">Ready to deploy?</h3>
-                <p className="text-sm font-mono text-white/30">Schedule a discovery call to scope your engagement.</p>
+                <h3 className="font-display font-semibold text-foreground mb-1">Protocol Registry</h3>
+                <p className="text-sm font-mono text-white/30">All protocols below are configured, hosted, and maintained by AERELION.</p>
               </div>
               <Button asChild>
                 <Link to="/contact">
-                  Initialize Uplink
+                  INITIATE BRIEFING REQUEST
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Link>
               </Button>

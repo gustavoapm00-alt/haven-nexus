@@ -42,8 +42,8 @@ const BriefingArchives = () => {
         <div className="hidden md:grid grid-cols-12 gap-4 px-4 py-2 border-b border-white/10 mb-0">
           <span className="col-span-2 font-mono text-[9px] text-white/20 uppercase tracking-wider">REF-ID</span>
           <span className="col-span-5 font-mono text-[9px] text-white/20 uppercase tracking-wider">TITLE</span>
-          <span className="col-span-2 font-mono text-[9px] text-white/20 uppercase tracking-wider">STATUS</span>
-          <span className="col-span-3 font-mono text-[9px] text-white/20 uppercase tracking-wider">IMPACT-SCORE</span>
+          <span className="col-span-2 font-mono text-[9px] text-white/20 uppercase tracking-wider">AUTHORIZATION</span>
+          <span className="col-span-3 font-mono text-[9px] text-white/20 uppercase tracking-wider">SYSTEM_IMPACT</span>
         </div>
 
         <div className="space-y-0">

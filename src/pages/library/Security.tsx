@@ -37,12 +37,12 @@ const Security = () => {
               Security & Governance Practices
             </h1>
             <p className="font-sans text-base text-white/40 leading-relaxed mb-4">
-              AERELION Systems is a managed automation operator. We configure, run, and maintain
-              automations on our own infrastructure so you don't have to.
+              AERELION Systems is a managed infrastructure operator. We configure, stabilize, and maintain
+              operational protocols on governed infrastructure.
             </p>
             <p className="font-sans text-base text-white/40 leading-relaxed mb-12">
-              Because we operate systems on your behalf, we take the security of your credentials
-              and data seriously. Here's how we protect what matters.
+              Because we operate systems under authorization, the integrity of credential handling
+              and data governance is foundational to the operational doctrine.
             </p>
 
             <div className="space-y-6">
@@ -95,9 +95,9 @@ const Security = () => {
               <div className="flex items-start gap-4">
                 <Mail className="w-5 h-5 text-[#39FF14]/40 flex-shrink-0 mt-0.5" />
                 <div>
-                  <h3 className="font-mono text-sm font-semibold text-[#E0E0E0] mb-1">Security Questions?</h3>
+                  <h3 className="font-mono text-sm font-semibold text-[#E0E0E0] mb-1">Governance Inquiries</h3>
                   <p className="font-sans text-sm text-white/35 mb-2">
-                    Have questions about our security practices or how we handle credentials?
+                    For questions regarding credential handling protocols or data governance practices.
                   </p>
                   <a href="/contact" className="font-mono text-xs text-[#39FF14]/60 hover:text-[#39FF14] transition-colors uppercase tracking-wider">
                     Request briefing →
