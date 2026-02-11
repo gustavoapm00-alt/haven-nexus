@@ -19,6 +19,13 @@ export default function LiveProvenanceLog() {
     }
   };
 
+  const messageColor = (msg: string) => {
+    const upper = msg.toUpperCase();
+    if (upper.includes('SCANNING') || upper.includes('AUDITING')) return '#39FF14';
+    if (upper.includes('ENFORCING') || upper.includes('VERIFYING')) return '#FFBF00';
+    return '#39FF14';
+  };
+
   return (
     <section className="px-4 py-2">
       <style>{`
@@ -58,34 +65,41 @@ export default function LiveProvenanceLog() {
           </p>
         )}
 
-        {logs.map((log) => (
-          <div
-            key={log.id}
-            className="flex gap-3 text-[9px] leading-relaxed mb-px"
-            style={{ fontFamily: 'JetBrains Mono, monospace' }}
-          >
-            <span style={{ color: '#333', minWidth: 135, flexShrink: 0 }}>
-              {new Date(log.created_at).toISOString().replace('T', ' ').slice(0, 19)}
-            </span>
-            <span
-              className="uppercase"
-              style={{ color: levelColor(log.level), minWidth: 36, flexShrink: 0 }}
+        {logs.map((log, index) => {
+          const total = logs.length;
+          // Ghosting: older logs fade to 30% opacity
+          const age = total - index; // 1 = newest
+          const opacity = age <= 5 ? 1 : age <= 15 ? 0.6 : 0.3;
+
+          return (
+            <div
+              key={log.id}
+              className="flex gap-3 text-[9px] leading-relaxed mb-px transition-opacity duration-500"
+              style={{ fontFamily: 'JetBrains Mono, monospace', opacity }}
             >
-              {log.level}
-            </span>
-            <span style={{ color: '#FFBF00', minWidth: 140, flexShrink: 0, opacity: 0.7 }}>
-              {log.function_name}
-            </span>
-            <span style={{ color: '#39FF14', flex: 1, opacity: 0.6 }}>
-              {log.message}
-            </span>
-            {log.status_code != null && (
-              <span style={{ color: log.status_code >= 400 ? '#FF4444' : '#333', flexShrink: 0 }}>
-                [{log.status_code}]
+              <span style={{ color: '#333', minWidth: 135, flexShrink: 0 }}>
+                {new Date(log.created_at).toISOString().replace('T', ' ').slice(0, 19)}
               </span>
-            )}
-          </div>
-        ))}
+              <span
+                className="uppercase"
+                style={{ color: levelColor(log.level), minWidth: 36, flexShrink: 0 }}
+              >
+                {log.level}
+              </span>
+              <span style={{ color: '#FFBF00', minWidth: 140, flexShrink: 0, opacity: 0.7 }}>
+                {log.function_name}
+              </span>
+              <span style={{ color: messageColor(log.message), flex: 1, opacity: 0.6 }}>
+                {log.message}
+              </span>
+              {log.status_code != null && (
+                <span style={{ color: log.status_code >= 400 ? '#FF4444' : '#333', flexShrink: 0 }}>
+                  [{log.status_code}]
+                </span>
+              )}
+            </div>
+          );
+        })}
       </div>
     </section>
   );
