@@ -1,22 +1,31 @@
-// Stripe product and price configuration
+// Stripe Dual-Scope Revenue Engine — System Access Levels
 export const STRIPE_TIERS = {
-  starter: {
-    name: 'Starter',
-    price: '$19',
-    priceId: 'price_1Sd4tsPtWRTkeYvMl8V6tB1w',
-    productId: 'prod_TaFOLiPNkW3N1A',
-  },
-  pro: {
-    name: 'Pro',
-    price: '$49',
-    priceId: 'price_1Sd4u0PtWRTkeYvMgSlP5kTm',
-    productId: 'prod_TaFOpvfmSYBAyI',
-  },
-  elite: {
-    name: 'AERELION Elite',
+  pulse: {
+    name: 'The Pulse',
+    codename: 'TIER-01',
+    priceDisplay: '$99 – $250',
     price: '$99',
-    priceId: 'price_1Sd4u2PtWRTkeYvMNd6MKUe0',
-    productId: 'prod_TaFOa9MluLIaFI',
+    priceId: 'price_1SzdaCJAQcpzy6vVzFLVYkgd',
+    productId: 'prod_TxYhnRbOluZBaB',
+    mode: 'subscription' as const,
+  },
+  operator: {
+    name: 'The Operator',
+    codename: 'TIER-02',
+    priceDisplay: '$2,500 – $5,000',
+    price: '$2,500',
+    priceId: 'price_1SzdaEJAQcpzy6vVucQakAuA',
+    productId: 'prod_TxYhoVock3Bxgb',
+    mode: 'subscription' as const,
+  },
+  ghost: {
+    name: 'The Ghost',
+    codename: 'TIER-03',
+    priceDisplay: '$25K – $50K',
+    price: '$25,000',
+    priceId: 'price_1SzdaGJAQcpzy6vVyMmTifQW',
+    productId: 'prod_TxYhXs1DPZsWtZ',
+    mode: 'payment' as const,
   },
 } as const;
 

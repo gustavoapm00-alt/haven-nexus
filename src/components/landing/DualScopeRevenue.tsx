@@ -1,11 +1,25 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
-import { ArrowRight, Shield, Zap, Ghost } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowRight, Shield, Zap, Ghost, Loader2 } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import { STRIPE_TIERS, type TierKey } from '@/lib/stripe-config';
+import { toast } from 'sonner';
 
-const tiers = [
-  {
-    id: 'TIER-01',
-    codename: 'THE PULSE',
+const tierMeta: Record<TierKey, {
+  scope: string;
+  priceRange: string;
+  interval: string;
+  description: string;
+  includes: string[];
+  sla: string;
+  designation: string;
+  cta: string;
+  icon: typeof Zap;
+  highlight: boolean;
+}> = {
+  pulse: {
     scope: 'SCOPE_1 // SELF-SERVE SYSTEM ACCESS',
     priceRange: '$99 – $250',
     interval: '/MO',
@@ -21,13 +35,10 @@ const tiers = [
     sla: '72H',
     designation: 'SENTINEL_ACCESS',
     cta: 'INITIATE SYSTEM HANDOFF',
-    ctaLink: '/contact',
     icon: Zap,
     highlight: false,
   },
-  {
-    id: 'TIER-02',
-    codename: 'THE OPERATOR',
+  operator: {
     scope: 'SCOPE_2 // ENTERPRISE GOVERNANCE',
     priceRange: '$2,500 – $5,000',
     interval: '/MO',
@@ -45,13 +56,10 @@ const tiers = [
     sla: '8H',
     designation: 'COMMAND_ACCESS',
     cta: 'REQUEST SCOPING',
-    ctaLink: '/contact',
     icon: Shield,
     highlight: true,
   },
-  {
-    id: 'TIER-03',
-    codename: 'THE GHOST',
+  ghost: {
     scope: 'SCOPE_2+ // BESPOKE ENGAGEMENT',
     priceRange: '$25K – $50K',
     interval: 'FIXED',
@@ -70,13 +78,54 @@ const tiers = [
     sla: 'DEDICATED',
     designation: 'GHOST_CLEARANCE',
     cta: 'REQUEST GHOST BRIEFING',
-    ctaLink: '/contact',
     icon: Ghost,
     highlight: false,
   },
-];
+};
 
 const DualScopeRevenue = () => {
+  const { user, session } = useAuth();
+  const navigate = useNavigate();
+  const [loadingTier, setLoadingTier] = useState<TierKey | null>(null);
+
+  const handleCheckout = async (tierKey: TierKey) => {
+    if (!user || !session?.access_token) {
+      toast.info('Authentication required', {
+        description: 'Sign in to initiate system handoff.',
+        action: {
+          label: 'Sign In',
+          onClick: () => navigate('/auth?redirect=/'),
+        },
+      });
+      return;
+    }
+
+    const tier = STRIPE_TIERS[tierKey];
+    setLoadingTier(tierKey);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: { priceId: tier.priceId, mode: tier.mode },
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+
+      if (error) throw new Error(error.message);
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error('No checkout URL received');
+      }
+    } catch (err) {
+      toast.error('Checkout initiation failed', {
+        description: err instanceof Error ? err.message : 'Please retry.',
+      });
+    } finally {
+      setLoadingTier(null);
+    }
+  };
+
+  const tierKeys: TierKey[] = ['pulse', 'operator', 'ghost'];
+
   return (
     <section className="section-padding bg-[#0A0A0A] relative overflow-hidden">
       {/* Subtle grid overlay */}
@@ -106,23 +155,26 @@ const DualScopeRevenue = () => {
 
         {/* Tier cards */}
         <div className="grid lg:grid-cols-3 gap-6">
-          {tiers.map((tier, i) => {
-            const Icon = tier.icon;
+          {tierKeys.map((tierKey, i) => {
+            const stripe = STRIPE_TIERS[tierKey];
+            const meta = tierMeta[tierKey];
+            const Icon = meta.icon;
+            const isLoading = loadingTier === tierKey;
+
             return (
               <motion.div
-                key={tier.id}
+                key={stripe.codename}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.12, duration: 0.6 }}
                 className={`relative flex flex-col border p-0 transition-all duration-300 group ${
-                  tier.highlight
+                  meta.highlight
                     ? 'border-[#39FF14]/40 shadow-[0_0_30px_rgba(57,255,20,0.08)]'
                     : 'border-white/10 hover:border-[rgba(57,255,20,0.25)]'
                 }`}
               >
-                {/* Highlight badge */}
-                {tier.highlight && (
+                {meta.highlight && (
                   <div className="absolute -top-px left-0 right-0 h-[2px] bg-[#39FF14]" />
                 )}
 
@@ -131,9 +183,9 @@ const DualScopeRevenue = () => {
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
                       <span className="font-mono text-[9px] text-[#39FF14]/40 tracking-wider">
-                        {tier.id}
+                        {stripe.codename}
                       </span>
-                      {tier.highlight && (
+                      {meta.highlight && (
                         <span className="font-mono text-[8px] text-black bg-[#39FF14] px-1.5 py-0.5 tracking-wider">
                           RECOMMENDED
                         </span>
@@ -143,28 +195,26 @@ const DualScopeRevenue = () => {
                   </div>
 
                   <h3 className="font-mono text-lg font-bold text-[#E0E0E0] tracking-wide mb-1">
-                    {tier.codename}
+                    {stripe.name.toUpperCase()}
                   </h3>
                   <span className="font-mono text-[9px] text-[#FFBF00]/40 tracking-[0.15em] block mb-5">
-                    {tier.scope}
+                    {meta.scope}
                   </span>
 
-                  {/* Price */}
                   <div className="mb-5">
                     <span className="font-mono text-2xl md:text-3xl font-bold text-[#E0E0E0]">
-                      {tier.priceRange}
+                      {meta.priceRange}
                     </span>
                     <span className="font-mono text-xs text-white/25 ml-1">
-                      {tier.interval}
+                      {meta.interval}
                     </span>
                   </div>
 
                   <p className="font-sans text-xs text-white/35 leading-relaxed">
-                    {tier.description}
+                    {meta.description}
                   </p>
                 </div>
 
-                {/* Divider */}
                 <div className="mx-6 border-t border-white/5" />
 
                 {/* Includes */}
@@ -173,11 +223,8 @@ const DualScopeRevenue = () => {
                     SYSTEM_INCLUDES:
                   </span>
                   <ul className="space-y-2.5">
-                    {tier.includes.map((item) => (
-                      <li
-                        key={item}
-                        className="flex items-start gap-2 text-xs font-mono text-white/40"
-                      >
+                    {meta.includes.map((item) => (
+                      <li key={item} className="flex items-start gap-2 text-xs font-mono text-white/40">
                         <span className="text-[#39FF14]/50 mt-0.5 shrink-0">▸</span>
                         {item}
                       </li>
@@ -189,23 +236,30 @@ const DualScopeRevenue = () => {
                 <div className="p-6 pt-0">
                   <div className="flex items-center justify-between mb-4">
                     <span className="font-mono text-[9px] text-white/15 tracking-wider">
-                      SLA: {tier.sla}
+                      SLA: {meta.sla}
                     </span>
                     <span className="font-mono text-[9px] text-[#FFBF00]/25 tracking-wider">
-                      {tier.designation}
+                      {meta.designation}
                     </span>
                   </div>
-                  <Link
-                    to={tier.ctaLink}
-                    className={`w-full flex items-center justify-center gap-2 px-5 py-3 font-mono text-[11px] uppercase tracking-[0.12em] font-medium transition-all duration-200 ${
-                      tier.highlight
+                  <button
+                    onClick={() => handleCheckout(tierKey)}
+                    disabled={isLoading}
+                    className={`w-full flex items-center justify-center gap-2 px-5 py-3 font-mono text-[11px] uppercase tracking-[0.12em] font-medium transition-all duration-200 disabled:opacity-50 ${
+                      meta.highlight
                         ? 'bg-[#39FF14] text-black border border-[#39FF14] hover:bg-[#4dff2e] hover:shadow-[0_0_24px_rgba(57,255,20,0.3)]'
                         : 'bg-transparent border border-[rgba(57,255,20,0.3)] text-[#39FF14] hover:bg-[rgba(57,255,20,0.06)] hover:border-[#39FF14]'
                     }`}
                   >
-                    {tier.cta}
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
+                    {isLoading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <>
+                        {meta.cta}
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </>
+                    )}
+                  </button>
                 </div>
               </motion.div>
             );
