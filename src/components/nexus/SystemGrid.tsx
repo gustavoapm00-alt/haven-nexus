@@ -93,12 +93,12 @@ export default function SystemGrid() {
                 />
               </span>
 
-              {/* Protocol ID */}
+              {/* Protocol ID + live task */}
               <p
-                className="text-[8px] tracking-[0.25em] mb-0.5 uppercase"
-                style={{ fontFamily: 'JetBrains Mono, monospace', color: colors.text, opacity: 0.4 }}
+                className="text-[8px] tracking-[0.25em] mb-0.5 uppercase truncate"
+                style={{ fontFamily: 'JetBrains Mono, monospace', color: colors.text, opacity: 0.4, maxWidth: '100%' }}
               >
-                {a.id}
+                {state?.message ? `${a.id}: ${state.message}` : a.id}
               </p>
 
               {/* Codename */}
