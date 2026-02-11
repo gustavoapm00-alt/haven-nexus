@@ -1,140 +1,64 @@
-import { Link } from 'react-router-dom';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 import ScrollReveal from '@/components/ScrollReveal';
 import SEO, { schemas } from '@/components/SEO';
 
 const Refund = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#0F0F0F]">
       <SEO 
         title="Refund Policy – AERELION Systems"
-        description="Refund Policy for AERELION managed automation services. Learn about our refund eligibility, process, and terms for hosted automation engagements."
-        keywords="refund policy, automation refund, service refund, cancellation policy, money back guarantee"
+        description="Refund Policy for AERELION managed automation services."
         canonicalUrl="/refund"
         structuredData={schemas.breadcrumb([
           { name: 'Home', url: '/' },
           { name: 'Refund Policy', url: '/refund' }
         ])}
       />
-      <Navbar />
       
-      <main className="pt-24">
+      <main className="pt-8">
         <section className="section-padding">
-          <div className="container-main max-w-4xl">
+          <div className="container-main max-w-3xl">
             <ScrollReveal>
-              <h1 className="font-display text-5xl md:text-6xl mb-8">
-                REFUND <span className="text-gradient">POLICY</span>
+              <span className="font-mono text-[10px] text-[#39FF14]/50 uppercase tracking-[0.25em] mb-3 block">
+                // FINANCIAL GOVERNANCE
+              </span>
+              <h1 className="font-mono text-3xl md:text-4xl font-semibold text-[#E0E0E0] mb-2">
+                Refund Policy
               </h1>
-              <p className="text-muted-foreground mb-8">
+              <p className="font-mono text-xs text-white/20 mb-10">
                 Last updated: December 2024
               </p>
             </ScrollReveal>
 
             <ScrollReveal delay={0.1}>
-              <div className="prose prose-invert max-w-none space-y-8">
-                <section>
-                  <h2 className="font-display text-2xl mb-4">1. Free Trial Period</h2>
-                  <p className="text-muted-foreground">
-                    We offer a 14-day free trial for our services. During this period, you have 
-                    full access to evaluate our platform. No payment is required during the trial, 
-                    and you may cancel at any time without obligation.
-                  </p>
-                </section>
-
-                <section>
-                  <h2 className="font-display text-2xl mb-4">2. Subscription Services</h2>
-                  <p className="text-muted-foreground">
-                    For subscription-based services, you may cancel your subscription at any time. 
-                    Cancellations take effect at the end of the current billing period. We do not 
-                    provide prorated refunds for partial months.
-                  </p>
-                </section>
-
-                <section>
-                  <h2 className="font-display text-2xl mb-4">3. Hosted Automation Services</h2>
-                  <p className="text-muted-foreground">
-                    Hosted automations and system bundles are activated and maintained by AERELION. 
-                    Due to the nature of hosted services:
-                  </p>
-                  <ul className="list-disc list-inside text-muted-foreground space-y-2 mt-4">
-                    <li>All sales of hosted automations are final once activation begins</li>
-                    <li>Refunds are not available once the automation has been configured</li>
-                    <li>We recommend reviewing product details before purchase</li>
-                  </ul>
-                </section>
-
-                <section>
-                  <h2 className="font-display text-2xl mb-4">4. Refund Eligibility</h2>
-                  <p className="text-muted-foreground mb-4">
-                    Refunds may be considered in the following circumstances:
-                  </p>
-                  <ul className="list-disc list-inside text-muted-foreground space-y-2">
-                    <li>Service was unavailable for an extended period due to our fault</li>
-                    <li>Billing errors resulting in overcharges</li>
-                    <li>Services were not delivered as specified in the agreement</li>
-                  </ul>
-                </section>
-
-                <section>
-                  <h2 className="font-display text-2xl mb-4">5. Refund Process</h2>
-                  <p className="text-muted-foreground">
-                    To request a refund, contact us at{' '}
-                    <a href="mailto:contact@aerlion.systems" className="text-primary hover:underline">
-                      contact@aerlion.systems
-                    </a>{' '}
-                    with your account details and reason for the request. We will review all 
-                    requests within 5-7 business days and respond with our decision.
-                  </p>
-                </section>
-
-                <section>
-                  <h2 className="font-display text-2xl mb-4">6. Processing Time</h2>
-                  <p className="text-muted-foreground">
-                    Approved refunds are processed within 10 business days. The time for funds 
-                    to appear in your account depends on your payment provider and may take an 
-                    additional 5-10 business days.
-                  </p>
-                </section>
-
-                <section>
-                  <h2 className="font-display text-2xl mb-4">7. Non-Refundable Items</h2>
-                  <p className="text-muted-foreground mb-4">The following are not eligible for refunds:</p>
-                  <ul className="list-disc list-inside text-muted-foreground space-y-2">
-                    <li>Activated automation systems once configuration has begun</li>
-                    <li>Activation and setup services already rendered</li>
-                    <li>Third-party costs incurred on your behalf</li>
-                  </ul>
-                </section>
-
-                <section>
-                  <h2 className="font-display text-2xl mb-4">8. Disputes</h2>
-                  <p className="text-muted-foreground">
-                    If you dispute a charge, please contact us first at{' '}
-                    <a href="mailto:contact@aerlion.systems" className="text-primary hover:underline">
-                      contact@aerlion.systems
-                    </a>
-                    . We commit to resolving disputes fairly and promptly before escalation to 
-                    payment providers.
-                  </p>
-                </section>
-
-                <section>
-                  <h2 className="font-display text-2xl mb-4">9. Contact</h2>
-                  <p className="text-muted-foreground">
-                    For questions about this Refund Policy, contact us at{' '}
-                    <a href="mailto:contact@aerlion.systems" className="text-primary hover:underline">
-                      contact@aerlion.systems
-                    </a>
-                  </p>
-                </section>
+              <div className="space-y-8">
+                {[
+                  { title: '1. Activated Protocols', content: 'Activated automation protocols are final once deployment begins. Due to the nature of managed infrastructure, refunds are not available once protocol configuration has been initiated.' },
+                  { title: '2. Refund Eligibility', content: null, list: ['Infrastructure was unavailable for an extended period due to AERELION fault.', 'Billing errors resulting in overcharges.', 'Protocols were not delivered as specified in the engagement authorization.'] },
+                  { title: '3. Process', content: 'To request a refund, contact contact@aerelion.systems with engagement details and reason. All requests reviewed within 5-7 operational days.' },
+                  { title: '4. Processing', content: 'Approved refunds processed within 10 operational days. Additional time depends on payment provider.' },
+                  { title: '5. Non-Refundable', content: null, list: ['Activated protocol systems once configuration has begun.', 'Activation and deployment services already rendered.', 'Third-party costs incurred on your behalf.'] },
+                  { title: '6. Disputes', content: 'Contact contact@aerelion.systems before escalation to payment providers.' },
+                ].map((section, i) => (
+                  <div key={i} className="border-b border-white/5 pb-6">
+                    <h2 className="font-mono text-sm font-semibold text-[#E0E0E0] mb-3">{section.title}</h2>
+                    {section.content && <p className="font-sans text-sm text-white/35 leading-relaxed">{section.content}</p>}
+                    {section.list && (
+                      <ul className="space-y-2">
+                        {section.list.map((item, j) => (
+                          <li key={j} className="flex items-start gap-2 text-sm text-white/35 font-sans">
+                            <span className="font-mono text-[10px] text-[#39FF14]/30 mt-1">▸</span>
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                ))}
               </div>
             </ScrollReveal>
           </div>
         </section>
       </main>
-
-      <Footer />
     </div>
   );
 };

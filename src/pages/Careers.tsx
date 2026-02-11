@@ -1,20 +1,11 @@
-import { Link } from 'react-router-dom';
 import { ExternalLink } from 'lucide-react';
-import LibraryNavbar from '@/components/library/LibraryNavbar';
-import LibraryFooter from '@/components/library/LibraryFooter';
 import SEO, { schemas } from '@/components/SEO';
-import { Button } from '@/components/ui/button';
 
-// Breezy careers page URL
 const BREEZY_CAREERS_URL = 'https://aerelion-systems-llc.breezy.hr/p/69e13036d878-automation-operations-specialist';
 
 const Careers = () => {
   const careersStructuredData = [
-    schemas.webPage(
-      "Careers at AERELION",
-      "Join our team of automation operators",
-      "/careers"
-    ),
+    schemas.webPage("Careers at AERELION", "Join our team of automation operators", "/careers"),
     schemas.breadcrumb([
       { name: 'Home', url: '/' },
       { name: 'Careers', url: '/careers' }
@@ -32,10 +23,7 @@ const Careers = () => {
       "employmentType": "FULL_TIME",
       "jobLocation": {
         "@type": "Place",
-        "address": {
-          "@type": "PostalAddress",
-          "addressCountry": "US"
-        }
+        "address": { "@type": "PostalAddress", "addressCountry": "US" }
       }
     }
   ];
@@ -43,74 +31,51 @@ const Careers = () => {
   return (
     <>
       <SEO
-        title="Careers at AERELION – Join Our Automation Operations Team"
-        description="We're building a team that operates and maintains automation systems for professional services firms. We hire operators who value reliability, accountability, and clear scope. View open positions."
-        keywords="automation jobs, operations careers, automation operator jobs, professional services careers, remote automation jobs, workflow operations"
+        title="Careers at AERELION – Operational Infrastructure Team"
+        description="AERELION is building a team of operators who value reliability, accountability, and clear scope. View open positions."
+        keywords="automation jobs, operations careers, automation operator jobs"
         canonicalUrl="/careers"
         structuredData={careersStructuredData}
       />
       
-      <div className="min-h-screen bg-background flex flex-col">
-        <LibraryNavbar />
-
-        <main className="flex-1">
-          {/* Hero Section */}
-          <section className="section-padding bg-background">
+      <div className="min-h-screen bg-[#0F0F0F]">
+        <main className="pt-8">
+          <section className="section-padding">
             <div className="container-main max-w-3xl">
-              <h1 className="text-4xl md:text-5xl font-semibold text-foreground tracking-tight mb-6">
-                Careers at AERELION
+              <span className="font-mono text-[10px] text-[#39FF14]/50 uppercase tracking-[0.25em] mb-3 block">
+                // PERSONNEL REGISTRY
+              </span>
+              <h1 className="font-mono text-3xl md:text-4xl font-semibold text-[#E0E0E0] mb-4">
+                Operational Infrastructure Team
               </h1>
-              <p className="text-xl text-muted-foreground leading-relaxed">
-                We're building a team that operates and maintains automation systems for professional services firms and compliance-driven organizations.
+              <p className="font-sans text-base text-white/40 leading-relaxed mb-12">
+                AERELION is building a team of operators who value reliability, accountability, and clear scope. We hire operators, not hobbyists.
               </p>
-            </div>
-          </section>
 
-          {/* Body Section */}
-          <section className="section-padding !pt-0">
-            <div className="container-main max-w-3xl">
-              <div className="prose prose-lg max-w-none">
-                <p className="text-muted-foreground leading-relaxed mb-6">
-                  AERELION is a managed automation operator. We configure, run, and maintain automation systems on our infrastructure so our clients don't have to.
-                </p>
-                <p className="text-muted-foreground leading-relaxed">
-                  We hire operators, not hobbyists. People who value reliability, accountability, and clear scope.
-                </p>
-              </div>
-            </div>
-          </section>
-
-          {/* Open Roles Section */}
-          <section className="section-padding !pt-8">
-            <div className="container-main max-w-3xl">
-              <div className="bg-muted/30 border border-border rounded-lg p-8 md:p-12 text-center">
-                <h2 className="text-2xl font-semibold text-foreground mb-4">
-                  Open Roles
+              <div className="border border-white/10 p-8 md:p-12 text-center">
+                <span className="font-mono text-[9px] text-[#39FF14]/40 uppercase tracking-[0.2em] mb-4 block">
+                  ACTIVE_REQUISITIONS
+                </span>
+                <h2 className="font-mono text-xl font-semibold text-[#E0E0E0] mb-4">
+                  Open Positions
                 </h2>
-                <p className="text-muted-foreground mb-8">
+                <p className="font-sans text-sm text-white/30 mb-8">
                   All open positions are managed through our hiring platform.
                 </p>
                 
-                <Button asChild size="lg" className="gap-2">
-                  <a 
-                    href={BREEZY_CAREERS_URL} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                  >
-                    View Open Positions
-                    <ExternalLink className="w-4 h-4" />
-                  </a>
-                </Button>
-
-                <p className="text-sm text-muted-foreground/70 mt-6">
-                  Hiring powered by Breezy
-                </p>
+                <a 
+                  href={BREEZY_CAREERS_URL} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="btn-launch inline-flex items-center gap-2"
+                >
+                  VIEW_POSITIONS
+                  <ExternalLink className="w-4 h-4" />
+                </a>
               </div>
             </div>
           </section>
         </main>
-
-        <LibraryFooter />
       </div>
     </>
   );
