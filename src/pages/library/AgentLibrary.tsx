@@ -61,7 +61,7 @@ const AgentLibrary = () => {
                 Active Protocols
               </h1>
               <p className="text-white/40 font-mono text-sm max-w-2xl">
-                Each protocol below is configured, hosted, and operated by AERELION on your behalf.
+                Active protocols under AERELION governance. Authenticated data provisioning.
               </p>
             </div>
 
@@ -80,7 +80,7 @@ const AgentLibrary = () => {
             </div>
 
             {/* Data table header */}
-            <div className="border-[0.5px] border-white/10 mb-0">
+            <div className="border border-white/10 mb-0">
               <div className="flex flex-col md:flex-row items-stretch">
                 {/* Search */}
                 <div className="flex-1 border-b md:border-b-0 md:border-r border-white/10 p-3">
@@ -125,7 +125,7 @@ const AgentLibrary = () => {
             </div>
 
             {/* Results count bar */}
-            <div className="border-x-[0.5px] border-b-[0.5px] border-white/10 px-3 py-2 mb-6">
+            <div className="border-x border-b border-white/10 px-3 py-2 mb-6">
               <span className="font-mono text-[10px] text-white/20 uppercase tracking-wider">
                 RESULTS: {filteredAgents.length} PROTOCOL{filteredAgents.length !== 1 ? 'S' : ''} FOUND
               </span>
@@ -139,7 +139,7 @@ const AgentLibrary = () => {
                 ))}
               </div>
             ) : filteredAgents.length === 0 ? (
-              <div className="text-center py-16 border-[0.5px] border-white/10">
+              <div className="text-center py-16 border border-white/10">
                 <Filter className="w-8 h-8 text-white/15 mx-auto mb-4" />
                 <h3 className="font-mono text-sm text-white/40 mb-2">NO_PROTOCOLS_FOUND</h3>
                 <p className="text-xs font-mono text-white/20 mb-4">Adjust filters or search query.</p>
@@ -174,7 +174,7 @@ const AgentLibrary = () => {
 
 // Minimal page footer that respects persistent terminal bar
 const LandingFooterSection = () => (
-  <footer className="border-t-[0.5px] border-white/5 py-12">
+  <footer className="border-t border-white/5 py-12">
     <div className="container-main px-6">
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
         <span className="font-mono text-[10px] text-white/15 tracking-wider">
