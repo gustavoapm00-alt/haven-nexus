@@ -12,77 +12,80 @@ export default function SystemGrid() {
   return (
     <section>
       <h2
-        className="text-xs tracking-[0.3em] mb-6"
-        style={{ fontFamily: 'JetBrains Mono, monospace', color: '#39FF14' }}
+        className="text-[9px] tracking-[0.3em] mb-4 uppercase"
+        style={{ fontFamily: 'JetBrains Mono, monospace', color: '#39FF14', opacity: 0.6 }}
       >
         ELITE_7 // AGENT_GRID
       </h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-[1px]">
         {AGENTS.map((a) => (
           <div
             key={a.id}
-            className="relative p-5 transition-colors"
+            className="group relative p-3 transition-colors"
             style={{
-              background: '#0F0F0F',
-              border: '1px solid #333333',
+              background: '#050505',
+              border: '1px solid #1a1a1a',
               borderRadius: 0,
             }}
           >
-            {/* Pulse indicator */}
-            <span className="absolute top-4 right-4 flex h-2.5 w-2.5">
+            {/* Pulse indicator — attenuated 40% */}
+            <span className="absolute top-3 right-3 flex h-2 w-2">
               <span
-                className="animate-ping absolute inline-flex h-full w-full opacity-75"
+                className="animate-ping absolute inline-flex h-full w-full opacity-40"
                 style={{ background: '#39FF14', borderRadius: '50%' }}
               />
               <span
-                className="relative inline-flex h-2.5 w-2.5"
-                style={{ background: '#39FF14', borderRadius: '50%', boxShadow: '0 0 6px #39FF14' }}
+                className="relative inline-flex h-2 w-2"
+                style={{ background: '#39FF14', borderRadius: '50%', boxShadow: '0 0 10px #39FF1433' }}
               />
             </span>
 
             {/* Protocol ID */}
             <p
-              className="text-[10px] tracking-[0.25em] mb-1 opacity-60"
-              style={{ fontFamily: 'JetBrains Mono, monospace', color: '#39FF14' }}
+              className="text-[8px] tracking-[0.25em] mb-0.5 uppercase"
+              style={{ fontFamily: 'JetBrains Mono, monospace', color: '#39FF14', opacity: 0.4 }}
             >
               {a.id}
             </p>
 
             {/* Codename */}
             <h3
-              className="text-sm font-bold tracking-wide mb-2"
-              style={{ fontFamily: 'JetBrains Mono, monospace', color: '#FFFFFF' }}
+              className="text-xs tracking-wide mb-1 uppercase"
+              style={{ fontFamily: 'JetBrains Mono, monospace', color: '#FFFFFF', fontWeight: 500 }}
             >
               {a.codename}
             </h3>
 
             {/* Function */}
-            <p className="text-xs leading-relaxed mb-4" style={{ color: '#888888' }}>
+            <p
+              className="text-[10px] leading-relaxed mb-3"
+              style={{ color: '#666', fontFamily: 'JetBrains Mono, monospace' }}
+            >
               {a.fn}
             </p>
 
-            {/* Metadata */}
-            <div className="space-y-1 mb-4">
+            {/* Metadata — flush left */}
+            <div className="space-y-px mb-3">
               <code
-                className="block text-[10px] px-2 py-1"
+                className="block text-[8px] px-2 py-0.5"
                 style={{
                   fontFamily: 'JetBrains Mono, monospace',
                   color: '#39FF14',
-                  background: 'rgba(57,255,20,0.05)',
-                  border: '1px solid rgba(57,255,20,0.15)',
+                  background: 'rgba(57,255,20,0.03)',
+                  border: '1px solid rgba(57,255,20,0.1)',
                   borderRadius: 0,
                 }}
               >
                 [REF-ID] {a.refId}
               </code>
               <code
-                className="block text-[10px] px-2 py-1"
+                className="block text-[8px] px-2 py-0.5"
                 style={{
                   fontFamily: 'JetBrains Mono, monospace',
                   color: '#FFBF00',
-                  background: 'rgba(255,191,0,0.05)',
-                  border: '1px solid rgba(255,191,0,0.15)',
+                  background: 'rgba(255,191,0,0.03)',
+                  border: '1px solid rgba(255,191,0,0.1)',
                   borderRadius: 0,
                 }}
               >
@@ -90,28 +93,42 @@ export default function SystemGrid() {
               </code>
             </div>
 
-            {/* Action */}
-            <button
-              className="w-full text-[10px] tracking-[0.2em] py-2 font-bold transition-all"
-              style={{
-                fontFamily: 'JetBrains Mono, monospace',
-                color: '#39FF14',
-                background: 'transparent',
-                border: '1px solid #39FF14',
-                borderRadius: 0,
-                cursor: 'pointer',
-              }}
-              onMouseEnter={(e) => {
-                (e.target as HTMLButtonElement).style.boxShadow = '0 0 15px rgba(57,255,20,0.4), inset 0 0 15px rgba(57,255,20,0.1)';
-                (e.target as HTMLButtonElement).style.background = 'rgba(57,255,20,0.08)';
-              }}
-              onMouseLeave={(e) => {
-                (e.target as HTMLButtonElement).style.boxShadow = 'none';
-                (e.target as HTMLButtonElement).style.background = 'transparent';
-              }}
+            {/* Action — visible only on hover */}
+            <div
+              className="transition-opacity duration-200 opacity-0 group-hover:opacity-100"
             >
-              [FORCE_STABILIZATION]
-            </button>
+              <button
+                className="w-full text-[8px] tracking-[0.2em] py-1.5 uppercase transition-all"
+                style={{
+                  fontFamily: 'JetBrains Mono, monospace',
+                  color: '#39FF14',
+                  background: 'transparent',
+                  border: '1px solid #39FF14',
+                  borderRadius: 0,
+                  cursor: 'pointer',
+                  fontWeight: 500,
+                }}
+                onMouseEnter={(e) => {
+                  (e.target as HTMLButtonElement).style.boxShadow = '0 0 15px rgba(57,255,20,0.4), inset 0 0 15px rgba(57,255,20,0.1)';
+                  (e.target as HTMLButtonElement).style.background = 'rgba(57,255,20,0.06)';
+                }}
+                onMouseLeave={(e) => {
+                  (e.target as HTMLButtonElement).style.boxShadow = 'none';
+                  (e.target as HTMLButtonElement).style.background = 'transparent';
+                }}
+              >
+                [FORCE_STABILIZATION]
+              </button>
+            </div>
+            {/* Inactive wireframe placeholder when button hidden */}
+            <div
+              className="transition-opacity duration-200 opacity-100 group-hover:opacity-0 absolute bottom-3 left-3 right-3"
+            >
+              <div
+                className="w-full py-1.5"
+                style={{ border: '1px solid #111', borderRadius: 0 }}
+              />
+            </div>
           </div>
         ))}
       </div>
