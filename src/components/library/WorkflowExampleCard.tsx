@@ -1,5 +1,5 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, Clock, TrendingUp } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
 import SystemIcon from './SystemIcon';
 import { motion } from 'framer-motion';
 
@@ -22,10 +22,6 @@ const WorkflowExampleCard = ({
   shortOutcome,
   sectors,
   systems,
-  setupTimeMin,
-  setupTimeMax,
-  capacityRecoveredMin,
-  capacityRecoveredMax,
   variant = 'light',
 }: WorkflowExampleCardProps) => {
   const isDark = variant === 'dark';
@@ -43,65 +39,42 @@ const WorkflowExampleCard = ({
       onKeyDown={(e) => e.key === 'Enter' && handleCardClick()}
       role="button"
       tabIndex={0}
-      className={`p-6 flex flex-col h-full rounded-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/50 ${
-        isDark 
-          ? 'card-panel-dark' 
-          : 'card-panel'
-      }`}
+      className={`p-6 flex flex-col h-full cursor-pointer focus:outline-none focus:ring-2 focus:ring-[rgba(57,255,20,0.3)] border border-white/10 bg-[#0F0F0F] transition-all duration-300 hover:border-[rgba(57,255,20,0.3)] hover:shadow-[0_0_20px_rgba(57,255,20,0.04)]`}
     >
       {/* Header */}
       <div className="flex-1">
         <div className="mb-2">
-          <span className={`text-xs font-medium uppercase tracking-wide ${
-            isDark ? 'text-primary/80' : 'text-primary'
-          }`}>
-            Operated by AERELION
+          <span className="font-mono text-[9px] text-[#39FF14]/50 uppercase tracking-[0.2em]">
+            MANAGED_PROTOCOL
           </span>
         </div>
         
-        <h3 className={`font-semibold text-base leading-snug mb-2 ${
-          isDark ? 'text-white' : 'text-foreground'
-        }`}>
+        <h3 className="font-mono text-sm font-semibold text-[#E0E0E0] leading-snug mb-2 tracking-wide">
           {name}
         </h3>
         
-        {/* Outcome */}
-        <div className="mb-4">
-          <p className={`text-xs font-medium uppercase tracking-wide mb-1 ${
-            isDark ? 'text-white/50' : 'text-muted-foreground'
-          }`}>
-            Problem Solved
-          </p>
-          <p className={`text-sm ${isDark ? 'text-white/80' : 'text-muted-foreground'}`}>
-            {shortOutcome}
-          </p>
-        </div>
+        {/* Protocol Description */}
+        <p className="text-sm text-white/40 leading-relaxed mb-4">
+          {shortOutcome}
+        </p>
 
-        {/* Best for (sectors) */}
+        {/* Sector Classification */}
         {sectors.length > 0 && (
           <div className="mb-4">
-            <p className={`text-xs font-medium uppercase tracking-wide mb-1.5 ${
-              isDark ? 'text-white/50' : 'text-muted-foreground'
-            }`}>
-              Common Use Cases
-            </p>
+            <span className="font-mono text-[9px] text-white/20 uppercase tracking-[0.2em] mb-1.5 block">
+              SECTOR_CLASSIFICATION
+            </span>
             <div className="flex flex-wrap gap-1.5">
               {sectors.slice(0, 2).map((sector) => (
                 <span 
                   key={sector} 
-                  className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full ${
-                    isDark 
-                      ? 'bg-white/10 text-white/70' 
-                      : 'bg-secondary text-muted-foreground'
-                  }`}
+                  className="inline-flex items-center px-2 py-0.5 text-[10px] font-mono text-white/40 border border-white/10 uppercase tracking-wider"
                 >
                   {sector}
                 </span>
               ))}
               {sectors.length > 2 && (
-                <span className={`inline-flex items-center px-2 py-0.5 text-xs rounded-full ${
-                  isDark ? 'bg-white/10 text-white/50' : 'bg-secondary text-muted-foreground'
-                }`}>
+                <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-mono text-white/20 border border-white/5">
                   +{sectors.length - 2}
                 </span>
               )}
@@ -115,43 +88,21 @@ const WorkflowExampleCard = ({
             <SystemIcon key={system} name={system} variant={variant} />
           ))}
           {systems.length > 4 && (
-            <span className={`system-badge ${isDark ? 'bg-white/10 text-white/60' : ''}`}>
+            <span className="font-mono text-[10px] text-white/20 border border-white/5 px-2 py-0.5">
               +{systems.length - 4}
             </span>
           )}
         </div>
-
-        {/* Metrics */}
-        <div className={`flex items-center gap-4 text-xs ${
-          isDark ? 'text-white/60' : 'text-muted-foreground'
-        }`}>
-          <div className="flex items-center gap-1.5">
-            <Clock className="w-3.5 h-3.5" />
-            <span>{setupTimeMin}–{setupTimeMax} hrs activation</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <TrendingUp className="w-3.5 h-3.5" />
-            <span>+{capacityRecoveredMin}–{capacityRecoveredMax} hrs/wk</span>
-          </div>
-        </div>
       </div>
 
       {/* Footer */}
-      <div className={`flex items-center justify-between mt-6 pt-4 border-t ${
-        isDark ? 'border-white/10' : 'border-border'
-      }`}>
-        <span className={`text-xs ${isDark ? 'text-white/50' : 'text-muted-foreground'}`}>
-          We operate this for you
+      <div className="flex items-center justify-between mt-6 pt-4 border-t border-white/5">
+        <span className="font-mono text-[9px] text-white/20 uppercase tracking-[0.2em]">
+          MANAGED_PROTOCOL
         </span>
-        <span
-          className={`inline-flex items-center gap-1.5 text-sm font-medium transition-colors ${
-            isDark 
-              ? 'text-primary-foreground bg-primary/80 hover:bg-primary px-3 py-1.5 rounded-md' 
-              : 'text-primary hover:underline'
-          }`}
-        >
-          Learn More
-          <ArrowRight className="w-4 h-4" />
+        <span className="inline-flex items-center gap-1.5 font-mono text-[10px] text-[#39FF14]/70 uppercase tracking-wider hover:text-[#39FF14] transition-colors">
+          VIEW_SPECIFICATIONS
+          <ArrowRight className="w-3.5 h-3.5" />
         </span>
       </div>
     </motion.div>

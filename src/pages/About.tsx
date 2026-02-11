@@ -1,8 +1,6 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Shield, Users, Target, Zap, Building2, Handshake } from 'lucide-react';
+import { ArrowRight, Shield, Target, Zap, Building2, Handshake } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import LibraryNavbar from '@/components/library/LibraryNavbar';
-import LibraryFooter from '@/components/library/LibraryFooter';
 import SEO, { schemas } from '@/components/SEO';
 import { motion } from 'framer-motion';
 
@@ -10,49 +8,49 @@ const About = () => {
   const principles = [
     {
       icon: Target,
-      title: 'Outcome-Driven',
-      description: 'We focus on operational results, not feature checklists. Every engagement delivers measurable capacity recovery.',
+      title: 'Outcome Accountability',
+      description: 'Every engagement delivers measurable stabilization. Metrics are structural, not aspirational.',
     },
     {
       icon: Shield,
-      title: 'Operator Accountability',
-      description: "We take responsibility for execution. When something breaks, we fix it—not you.",
+      title: 'Operator Liability',
+      description: 'Execution failures are absorbed internally. The authorizing entity is shielded from operational variance.',
     },
     {
       icon: Handshake,
-      title: 'Transparent Partnership',
-      description: "No hidden complexity. You know exactly what we're doing, when, and why.",
+      title: 'Governance Transparency',
+      description: 'All protocol parameters, execution timelines, and system dependencies are documented and accessible.',
     },
   ];
 
   const capabilities = [
     {
       icon: Building2,
-      title: 'Infrastructure We Manage',
+      title: 'Infrastructure Under Governance',
       points: [
-        'Secure automation environments',
-        'Credential storage and rotation',
-        'Monitoring and alerting systems',
-        'Backup and recovery procedures',
+        'Hardened protocol environments',
+        'AES-256-GCM credential governance',
+        'Continuous monitoring and alerting',
+        'Redundancy and recovery procedures',
       ],
     },
     {
       icon: Zap,
-      title: 'Operations We Handle',
+      title: 'Operational Execution',
       points: [
         'System configuration and deployment',
-        'Ongoing maintenance and updates',
-        'Issue detection and resolution',
-        'Performance optimization',
+        'Ongoing stabilization and maintenance',
+        'Anomaly detection and resolution',
+        'Performance optimization cycles',
       ],
     },
     {
-      icon: Users,
-      title: 'Support We Provide',
+      icon: Shield,
+      title: 'Governance Provisions',
       points: [
-        'Dedicated operator for each engagement',
-        'Regular status updates and reporting',
-        'Responsive issue escalation',
+        'Dedicated operator per engagement',
+        'Periodic status reporting',
+        'Escalation and intervention protocols',
         'Knowledge transfer on handoff',
       ],
     },
@@ -66,7 +64,7 @@ const About = () => {
     ]),
     schemas.webPage(
       "About AERELION Systems",
-      "Learn about AERELION's managed operator model for professional services automation",
+      "Operational doctrine and provenance of AERELION's regulator model",
       "/about"
     )
   ];
@@ -74,16 +72,14 @@ const About = () => {
   return (
     <>
       <SEO
-        title="About AERELION – The Managed Automation Operator Model"
-        description="AERELION Systems is a managed automation operator for professional services firms. We configure, host, and operate automation systems so you can focus on serving clients. Learn about our operating principles."
-        keywords="about AERELION, managed automation operator, automation as a service, professional services automation, business operations partner, workflow automation company"
+        title="Operational Doctrine & Provenance – AERELION Systems"
+        description="AERELION Systems operates as a governed infrastructure layer for institutional operations. The Regulator Model: configuration, deployment, and stabilization under permanent oversight."
+        keywords="AERELION, operational doctrine, regulator model, managed infrastructure, governance protocols"
         canonicalUrl="/about"
         structuredData={aboutStructuredData}
       />
 
-      <div className="min-h-screen bg-background">
-        <LibraryNavbar />
-
+      <div className="min-h-screen bg-[#0F0F0F]">
         {/* Hero */}
         <section className="section-padding !pt-12">
           <div className="container-main max-w-3xl text-center">
@@ -92,61 +88,60 @@ const About = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <span className="text-xs font-semibold text-primary uppercase tracking-wide mb-3 block">
-                About AERELION
+              <span className="font-mono text-[9px] text-[#39FF14]/50 uppercase tracking-[0.25em] mb-3 block">
+                // PROVENANCE
               </span>
-              <h1 className="text-4xl font-semibold text-foreground mb-4">
-                Your Operational Systems Partner
+              <h1 className="font-mono text-3xl md:text-4xl font-semibold text-[#E0E0E0] mb-4">
+                OPERATIONAL DOCTRINE & PROVENANCE
               </h1>
-              <p className="text-lg text-muted-foreground leading-relaxed">
-                AERELION Systems builds automation platforms that replace repetitive work 
-                and give business owners clarity and control. We're not a software vendor—we're 
-                the team that makes automation actually work for your business.
+              <p className="text-white/40 text-sm leading-relaxed max-w-xl mx-auto">
+                AERELION Systems operates as a governed infrastructure layer—configuring, 
+                deploying, and stabilizing operational protocols under permanent oversight. 
+                Complexity is managed, not delegated.
               </p>
             </motion.div>
           </div>
         </section>
 
-        {/* What We Do */}
+        {/* The Regulator Model */}
         <section className="section-padding !pt-0">
           <div className="container-main max-w-4xl">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="card-enterprise p-8 md:p-10"
+              className="border border-white/10 bg-[#0F0F0F] p-8 md:p-10"
             >
-              <h2 className="text-2xl font-semibold text-foreground mb-4">
-                The Managed Operator Model
+              <h2 className="font-mono text-sm text-[#E0E0E0] uppercase tracking-[0.2em] mb-4">
+                THE REGULATOR MODEL
               </h2>
-              <p className="text-muted-foreground mb-6 leading-relaxed">
-                Most automation tools require you to become a technologist. You need to learn 
-                the platform, build the workflows, maintain the connections, and troubleshoot 
-                when things break. AERELION takes a different approach.
+              <p className="text-white/40 text-sm mb-6 leading-relaxed">
+                Standard automation tooling requires the authorizing entity to assume 
+                operational burden—learning platforms, building logic, maintaining connections, 
+                and troubleshooting failure states. AERELION inverts this architecture.
               </p>
-              <p className="text-muted-foreground mb-6 leading-relaxed">
-                We operate automation systems on your behalf. You tell us what operational 
-                outcomes you need—less time on data entry, faster client onboarding, 
-                automated compliance checks—and we configure, deploy, and maintain the 
-                systems that deliver those outcomes.
+              <p className="text-white/40 text-sm mb-6 leading-relaxed">
+                We operate protocol infrastructure on behalf of the authorizing entity. 
+                Operational outcomes are defined during the briefing phase—AERELION configures, 
+                deploys, and maintains the systems that deliver those outcomes under governed oversight.
               </p>
-              <p className="text-foreground font-medium">
-                You buy results. We handle execution.
+              <p className="font-mono text-xs text-[#E0E0E0]/80">
+                Authorization provisions outcomes. AERELION governs execution.
               </p>
             </motion.div>
           </div>
         </section>
 
         {/* Principles */}
-        <section className="section-padding bg-muted/20">
+        <section className="section-padding border-t border-white/5">
           <div className="container-main max-w-4xl">
             <div className="text-center mb-10">
-              <h2 className="text-2xl font-semibold text-foreground mb-3">
-                Our Operating Principles
+              <span className="font-mono text-[9px] text-[#39FF14]/50 uppercase tracking-[0.25em] mb-2 block">
+                // OPERATING_PRINCIPLES
+              </span>
+              <h2 className="font-mono text-xl text-[#E0E0E0] mb-3">
+                Governance Framework
               </h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
-                These principles guide every engagement and shape how we work with clients.
-              </p>
             </div>
 
             <div className="grid md:grid-cols-3 gap-6">
@@ -157,30 +152,29 @@ const About = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1 }}
-                  className="card-enterprise p-6"
+                  className="border border-white/10 bg-[#0F0F0F] p-6"
                 >
-                  <div className="w-10 h-10 rounded-md bg-primary/10 flex items-center justify-center mb-4">
-                    <principle.icon className="w-5 h-5 text-primary" />
+                  <div className="w-10 h-10 border border-[rgba(57,255,20,0.15)] flex items-center justify-center mb-4">
+                    <principle.icon className="w-5 h-5 text-[#39FF14]/50" />
                   </div>
-                  <h3 className="font-semibold text-foreground mb-2">{principle.title}</h3>
-                  <p className="text-sm text-muted-foreground">{principle.description}</p>
+                  <h3 className="font-mono text-xs text-[#E0E0E0] mb-2 uppercase tracking-wider">{principle.title}</h3>
+                  <p className="text-[10px] text-white/30 leading-relaxed">{principle.description}</p>
                 </motion.div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* What We Provide */}
-        <section className="section-padding">
+        {/* SYSTEM_SCHEMATICS */}
+        <section className="section-padding border-t border-white/5">
           <div className="container-main max-w-5xl">
             <div className="text-center mb-10">
-              <h2 className="text-2xl font-semibold text-foreground mb-3">
-                What You Get With AERELION
+              <span className="font-mono text-[9px] text-[#39FF14]/50 uppercase tracking-[0.25em] mb-2 block">
+                // CAPABILITIES
+              </span>
+              <h2 className="font-mono text-xl text-[#E0E0E0] mb-3">
+                SYSTEM_SCHEMATICS
               </h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
-                A complete operational layer—infrastructure, operations, and support—so you 
-                can focus on your clients instead of your systems.
-              </p>
             </div>
 
             <div className="grid md:grid-cols-3 gap-6">
@@ -191,16 +185,16 @@ const About = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1 }}
-                  className="card-enterprise p-6"
+                  className="border border-white/10 bg-[#0F0F0F] p-6"
                 >
-                  <div className="w-10 h-10 rounded-md bg-primary/10 flex items-center justify-center mb-4">
-                    <capability.icon className="w-5 h-5 text-primary" />
+                  <div className="w-10 h-10 border border-[rgba(57,255,20,0.15)] flex items-center justify-center mb-4">
+                    <capability.icon className="w-5 h-5 text-[#39FF14]/50" />
                   </div>
-                  <h3 className="font-semibold text-foreground mb-4">{capability.title}</h3>
+                  <h3 className="font-mono text-xs text-[#E0E0E0] mb-4 uppercase tracking-wider">{capability.title}</h3>
                   <ul className="space-y-2">
                     {capability.points.map((point) => (
-                      <li key={point} className="text-sm text-muted-foreground flex items-start gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 flex-shrink-0" />
+                      <li key={point} className="text-[10px] text-white/30 flex items-start gap-2">
+                        <span className="w-1 h-1 bg-[#39FF14]/30 mt-1.5 flex-shrink-0" />
                         {point}
                       </li>
                     ))}
@@ -212,52 +206,48 @@ const About = () => {
         </section>
 
         {/* Who We Serve */}
-        <section className="section-padding bg-muted/20">
+        <section className="section-padding border-t border-white/5">
           <div className="container-main max-w-3xl text-center">
-            <h2 className="text-2xl font-semibold text-foreground mb-4">
-              Built for Professional Services
+            <span className="font-mono text-[9px] text-[#39FF14]/50 uppercase tracking-[0.25em] mb-2 block">
+              // SECTOR_ALIGNMENT
+            </span>
+            <h2 className="font-mono text-xl text-[#E0E0E0] mb-4">
+              Institutional Infrastructure
             </h2>
-            <p className="text-muted-foreground mb-6 leading-relaxed">
-              AERELION is purpose-built for professional services firms, government contractors, 
-              and compliance-driven organizations. These businesses share common characteristics: 
-              high operational complexity, strict data requirements, and limited technical staff.
-            </p>
-            <p className="text-muted-foreground leading-relaxed">
-              We understand that your focus is on serving clients—not managing software. 
-              That's why we take on the operational burden so you don't have to.
+            <p className="text-white/40 text-sm mb-6 leading-relaxed">
+              AERELION is architected for professional services firms, government contractors, 
+              and compliance-governed organizations—entities characterized by high operational 
+              complexity, strict data governance, and constrained technical resources.
             </p>
           </div>
         </section>
 
         {/* CTA */}
-        <section className="section-padding">
+        <section className="section-padding border-t border-white/5">
           <div className="container-main max-w-3xl">
-            <div className="card-enterprise p-8 md:p-10 text-center">
-              <h2 className="text-2xl font-semibold text-foreground mb-3">
-                Ready to Work With a Systems Partner?
+            <div className="border border-white/10 bg-[#0F0F0F] p-8 md:p-10 text-center">
+              <h2 className="font-mono text-sm text-[#E0E0E0] uppercase tracking-[0.2em] mb-3">
+                INITIATE_HANDOFF
               </h2>
-              <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
-                Schedule a discovery call to discuss your operational challenges and see if 
-                AERELION is the right fit for your organization.
+              <p className="font-mono text-[10px] text-white/30 mb-6 max-w-xl mx-auto">
+                Submit an authorization request to scope operational parameters and determine system alignment.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Button asChild size="lg">
+                <Button asChild size="lg" className="bg-[#39FF14]/10 text-[#39FF14] border border-[rgba(57,255,20,0.3)] hover:bg-[#39FF14]/20 font-mono text-[10px] uppercase tracking-wider">
                   <Link to="/contact">
-                    Schedule Discovery Call
+                    REQUEST OPERATIONAL BRIEFING
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Link>
                 </Button>
-                <Button asChild variant="outline" size="lg">
+                <Button asChild variant="outline" size="lg" className="border-white/10 font-mono text-[10px] uppercase tracking-wider text-white/40 hover:text-white/60">
                   <Link to="/how-it-works">
-                    See How It Works
+                    VIEW DEPLOYMENT DOCTRINE
                   </Link>
                 </Button>
               </div>
             </div>
           </div>
         </section>
-
-        <LibraryFooter />
       </div>
     </>
   );
