@@ -1,6 +1,7 @@
 import SEO, { schemas } from '@/components/SEO';
 import CommandCenterHero from '@/components/landing/CommandCenterHero';
 import DoctrineGrid from '@/components/landing/DoctrineGrid';
+import DualScopeRevenue from '@/components/landing/DualScopeRevenue';
 import OperationalParameters from '@/components/landing/OperationalParameters';
 import BriefingArchives from '@/components/landing/BriefingArchives';
 import AerelionLayerDiagram from '@/components/landing/AerelionLayerDiagram';
@@ -31,6 +32,7 @@ const LibraryHome = () => {
       <main>
         <CommandCenterHero />
         <DoctrineGrid />
+        <DualScopeRevenue />
         <OperationalParameters />
         <AerelionLayerDiagram />
         <BriefingArchives />
