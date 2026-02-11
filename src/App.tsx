@@ -20,7 +20,7 @@ import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import Refund from "./pages/Refund";
 import Auth from "./pages/Auth";
-import Admin from "./pages/Admin";
+// Admin decommissioned — all routes redirect to /nexus/cmd
 import ResetPassword from "./pages/ResetPassword";
 import Sanctuary from "./pages/Sanctuary";
 import NotFound from "./pages/NotFound";
@@ -59,18 +59,7 @@ import PortalRouteGuard from "./components/portal/PortalRouteGuard";
 import PortalConnectorScreen from "./pages/portal/ConnectorScreen";
 
 // Admin pages
-import AdminLibraryHome from "./pages/admin/library/AdminLibraryHome";
-import AdminAgentsList from "./pages/admin/library/AdminAgentsList";
-import AdminAgentEditor from "./pages/admin/library/AdminAgentEditor";
-import AdminAgentImport from "./pages/admin/library/AdminAgentImport";
-import AdminTemplateImport from "./pages/admin/library/AdminTemplateImport";
-import AdminBundlesList from "./pages/admin/library/AdminBundlesList";
-import AdminBundleEditor from "./pages/admin/library/AdminBundleEditor";
-import AdminSetup from "./pages/admin/AdminSetup";
-import AdminActivity from "./pages/admin/AdminActivity";
-import AdminEngagementRequests from "./pages/admin/AdminEngagementRequests";
-import AdminBulkImport from "./pages/admin/AdminBulkImport";
-import AdminN8nMappings from "./pages/admin/AdminN8nMappings";
+// Admin page imports decommissioned — Nexus Command is the sole admin interface
 
 // Nexus (Shadow Command)
 import NexusGuard from "./components/nexus/NexusGuard";
@@ -146,22 +135,9 @@ const AppRoutes = () => (
       <Route path="/sanctuary" element={<Sanctuary />} />
       <Route path="/reset-password" element={<ResetPassword />} />
 
-      {/* Admin routes */}
-      <Route path="/admin" element={<Admin />} />
-      <Route path="/admin/library" element={<AdminLibraryHome />} />
-      <Route path="/admin/library/agents" element={<AdminAgentsList />} />
-      <Route path="/admin/library/agents/new" element={<AdminAgentEditor mode="create" />} />
-      <Route path="/admin/library/agents/import" element={<AdminAgentImport />} />
-      <Route path="/admin/library/agents/:id" element={<AdminAgentEditor mode="edit" />} />
-      <Route path="/admin/library/templates" element={<AdminTemplateImport />} />
-      <Route path="/admin/library/bundles" element={<AdminBundlesList />} />
-      <Route path="/admin/library/bundles/new" element={<AdminBundleEditor mode="create" />} />
-      <Route path="/admin/library/bundles/:id" element={<AdminBundleEditor mode="edit" />} />
-      <Route path="/admin/setup" element={<AdminSetup />} />
-      <Route path="/admin/activity" element={<AdminActivity />} />
-      <Route path="/admin/engagement-requests" element={<AdminEngagementRequests />} />
-      <Route path="/admin/import" element={<AdminBulkImport />} />
-      <Route path="/admin/n8n-mappings" element={<AdminN8nMappings />} />
+      {/* Admin routes — decommissioned, force-redirect to Nexus Command Node */}
+      <Route path="/admin" element={<Navigate to="/nexus/cmd" replace />} />
+      <Route path="/admin/*" element={<Navigate to="/nexus/cmd" replace />} />
 
       {/* Shadow Command — hidden, admin-only */}
       <Route path="/nexus/cmd" element={<NexusGuard><NexusCommand /></NexusGuard>} />
