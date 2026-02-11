@@ -26,6 +26,7 @@ import Sanctuary from "./pages/Sanctuary";
 import NotFound from "./pages/NotFound";
 import Careers from "./pages/Careers";
 import About from "./pages/About";
+import Enterprise from "./pages/Enterprise";
 
 // Library pages
 import LibraryHome from "./pages/library/LibraryHome";
@@ -100,6 +101,7 @@ const AppRoutes = () => (
       <Route path="/purchases" element={<PurchaseHistory />} />
       <Route path="/dashboard" element={<UserDashboard />} />
       <Route path="/integrations" element={<AccountIntegrations />} />
+      <Route path="/enterprise" element={<Enterprise />} />
       <Route path="/careers" element={<Careers />} />
 
       {/* Client Portal routes */}
