@@ -1316,6 +1316,33 @@ export type Database = {
         }
         Relationships: []
       }
+      sovereign_bridge: {
+        Row: {
+          created_at: string
+          id: string
+          is_human_verified: boolean
+          updated_at: string
+          user_id: string
+          verification_source: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_human_verified?: boolean
+          updated_at?: string
+          user_id: string
+          verification_source?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_human_verified?: boolean
+          updated_at?: string
+          user_id?: string
+          verification_source?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string

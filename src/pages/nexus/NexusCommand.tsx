@@ -72,7 +72,7 @@ export default function NexusCommand() {
         }}
       >
         <div className="text-[9px] tracking-[0.4em] uppercase" style={{ color: '#FFBF00' }}>
-          AERELION // SYS.OPS.V2.06 // NEXUS_GOVERNANCE
+          AERELION // SYS.OPS.V3.00 // GHOST_OPERATOR
         </div>
         <div className="flex items-center gap-6">
           <span className="text-[9px] tracking-wider" style={{ color: '#39FF14', opacity: 0.7 }}>{clock}</span>
