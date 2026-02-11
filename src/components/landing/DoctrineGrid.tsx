@@ -3,24 +3,27 @@ import { motion } from 'framer-motion';
 const protocols = [
   {
     id: 'PRTCL-001',
-    title: 'PROTOCOL HARDENING',
-    description: 'We identify ambiguity and install hardened logic gates to ensure architectural stability.',
+    title: 'COOP LOGIC STABILIZATION',
+    description: 'Ensuring mission-critical resilience through hardened logic gates. Continuity of Operations compliance for federal and defense-adjacent entities.',
     status: 'ACTIVE',
     complexity: 'HIGH',
+    designation: 'NIST 800-34',
   },
   {
     id: 'PRTCL-002',
-    title: 'DATA ONTOLOGY',
-    description: 'Establishing a universal truth through a singular, governed schema for fragmented information.',
+    title: 'AUDITABLE DATA ONTOLOGY',
+    description: 'Establishing a Universal Truth for federal audits via a singular, governed schema. CUI handoff integrity between subcontractors and Primes.',
     status: 'ACTIVE',
     complexity: 'CRITICAL',
+    designation: 'NIST 800-171',
   },
   {
     id: 'PRTCL-003',
-    title: 'GOVERNANCE LOGIC',
-    description: 'Automating stabilization and oversight through a permanent regulatory layer.',
+    title: 'EXECUTIVE DECISION INTEGRITY',
+    description: 'Filtering raw operational noise into The Regulator schema for Program Managers. Automated stabilization and oversight through a permanent regulatory layer.',
     status: 'ACTIVE',
     complexity: 'HIGH',
+    designation: 'CMMC L2',
   },
 ];
 
@@ -59,9 +62,12 @@ const DoctrineGrid = () => {
                 {protocol.description}
               </p>
 
-              <div className="pt-3 border-t border-white/5">
+              <div className="pt-3 border-t border-white/5 flex items-center justify-between">
                 <span className="font-mono text-[9px] text-white/20 tracking-wider">
                   COMPLEXITY_LVL: {protocol.complexity}
+                </span>
+                <span className="font-mono text-[9px] text-[#FFBF00]/30 tracking-wider">
+                  {protocol.designation}
                 </span>
               </div>
             </motion.div>
