@@ -6,35 +6,35 @@ import SEO, { schemas } from '@/components/SEO';
 
 const DeploymentOverview = () => {
   const phases = [
-    { number: 1, title: 'Diagnose', duration: 'Days 1–5', icon: Eye, description: 'We map your operations and identify where time leaks.',
-      bullets: ['Review current tools, workflows, and handoff points', 'Identify repetitive tasks draining capacity', 'Prioritize high-impact automation targets', 'Define success criteria for the engagement'] },
-    { number: 2, title: 'Install', duration: 'Days 6–20', icon: Wrench, description: 'We configure and deploy workflows on your infrastructure.',
-      bullets: ['Connect your tools securely (CRM, email, scheduling, etc.)', 'Build and test automation logic end-to-end', 'Configure triggers, actions, and exception handling', 'Validate outputs match your operational standards'] },
-    { number: 3, title: 'Stabilize', duration: 'Days 21–30', icon: HeartPulse, description: 'We monitor, adjust, and confirm everything runs reliably.',
-      bullets: ['Monitor live workflows for errors or edge cases', 'Fine-tune logic based on real-world data', 'Document operational handoff and escalation paths', "Confirm you're seeing the expected outcomes"] },
+    { number: 1, title: 'Diagnose', duration: 'Days 1–5', icon: Eye, description: 'Map operational topology and identify structural friction points.',
+      bullets: ['Audit current systems, handoff points, and data flows', 'Identify redundant processes consuming operational capacity', 'Prioritize high-impact stabilization targets', 'Define success criteria and authorization boundaries'] },
+    { number: 2, title: 'Activate', duration: 'Days 6–20', icon: Wrench, description: 'AERELION configures and deploys operational protocols on managed infrastructure.',
+      bullets: ['Establish secure connections to authorized systems', 'Build and validate protocol logic end-to-end', 'Configure triggers, exception handlers, and redundancy layers', 'Verify outputs against operational standards'] },
+    { number: 3, title: 'Stabilize', duration: 'Days 21–30', icon: HeartPulse, description: 'Monitor, adjust, and harden all protocols for sustained operation.',
+      bullets: ['Monitor live protocols for anomalies or edge conditions', 'Refine logic based on operational data', 'Document handoff procedures and escalation paths', 'Confirm operational integrity across all nodes'] },
   ];
 
   const clientRequirements = [
-    { title: 'Tool access', description: "Admin credentials or OAuth authorization for the systems we'll connect." },
-    { title: 'Operational context', description: 'A 30-minute call to walk us through your current process and pain points.' },
-    { title: 'Decision availability', description: 'Respond to questions within 24–48 hours so we can keep the engagement on track.' },
+    { title: 'System Authorization', description: "OAuth authorization or secure credential handoff for systems within engagement scope." },
+    { title: 'Operational Context', description: 'A 30-minute briefing to map current process topology and friction vectors.' },
+    { title: 'Decision Availability', description: 'Respond to authorization requests within 24–48 hours to maintain deployment cadence.' },
   ];
 
   const outcomes = [
-    'Hours recovered weekly from repetitive admin tasks',
-    'Faster response times to leads, clients, or internal requests',
-    'Consistent execution of workflows that used to depend on memory',
-    "Clear visibility into what's running and what's not",
-    'Confidence that operational gaps are closed',
+    'Operational capacity recovered from redundant manual processes',
+    'Reduced latency in system handoffs and response protocols',
+    'Standardized execution of processes previously dependent on individual operators',
+    "Full visibility into protocol status and operational integrity",
+    'Structural closure of operational gaps and friction points',
   ];
 
   const faqs = [
-    { question: 'How is pricing determined?', answer: 'Pricing is scoped per engagement, not per workflow. After our initial call, we provide a fixed quote based on operational complexity. No hourly billing, no surprise invoices.' },
-    { question: 'Do I need technical experience?', answer: "No. You provide access and context—we handle all configuration, testing, and maintenance." },
-    { question: 'How are my credentials handled?', answer: "Credentials are encrypted at rest and in transit. We use least privilege—only accessing what's required. You can revoke access at any time." },
-    { question: 'What if something breaks after the 30 days?', answer: 'We build for resilience—error handling, logging, and alerts. After Day 30, you can continue with optional ongoing monitoring or receive handoff documentation.' },
-    { question: 'Who owns the workflows?', answer: "You do. Everything runs on your infrastructure or accounts. We're operators, not landlords." },
-    { question: 'What if my needs change mid-engagement?', answer: "Scope changes happen. Major expansions may require a revised quote, but we'll always discuss before proceeding." },
+    { question: 'How is engagement scope defined?', answer: 'Scope is fixed at authorization. Operational complexity determines the engagement parameters. No variable billing. No scope drift without revised authorization.' },
+    { question: 'What operational context is required from us?', answer: "Access credentials and a 30-minute operational walkthrough. All configuration, testing, and stabilization is handled by AERELION." },
+    { question: 'How are credentials handled?', answer: "All credentials are encrypted at rest (AES-256-GCM) and in transit (TLS 1.3). Least-privilege access only. Authorization is revocable at any point." },
+    { question: 'What happens after the stabilization window?', answer: 'All protocols are live and hardened. From there: self-govern with full handoff documentation, or extend with ongoing monitoring under a maintenance retainer.' },
+    { question: 'Who retains ownership of operational infrastructure?', answer: "Full ownership remains with the authorizing entity. AERELION operates on your behalf — nothing more." },
+    { question: 'What if operational requirements shift mid-cycle?', answer: "Scope adjustments require revised authorization. No unilateral changes are made without formal approval from the authorizing entity." },
   ];
 
   const howItWorksStructuredData = [
@@ -59,7 +59,7 @@ const DeploymentOverview = () => {
               A 30-Day Scoped Engagement
             </h1>
             <p className="font-sans text-base text-white/40 leading-relaxed max-w-2xl mx-auto">
-              We diagnose operational friction, install workflows that eliminate it, and stabilize everything before handoff. Fixed scope. Outcome-owned. No technical work required from you.
+              Diagnose operational friction. Activate stabilization protocols. Harden infrastructure before handoff. Fixed scope. Outcome-governed. No technical labor required from the authorizing entity.
             </p>
           </div>
         </section>
@@ -102,8 +102,8 @@ const DeploymentOverview = () => {
         {/* What We Need */}
         <section className="section-padding !py-12 bg-[#0a0a0a]">
           <div className="container-main max-w-3xl">
-            <h2 className="font-mono text-2xl font-semibold text-[#E0E0E0] text-center mb-3">What We Need From You</h2>
-            <p className="font-sans text-sm text-white/30 text-center mb-8">Access and context—not technical work.</p>
+            <h2 className="font-mono text-2xl font-semibold text-[#E0E0E0] text-center mb-3">Authorization Requirements</h2>
+            <p className="font-sans text-sm text-white/30 text-center mb-8">Access and operational context. No technical labor required from the authorizing entity.</p>
             <div className="grid gap-6">
               {clientRequirements.map((req, i) => (
                 <div key={i} className="flex items-start gap-4">
@@ -123,8 +123,8 @@ const DeploymentOverview = () => {
         {/* Outcomes */}
         <section className="section-padding !py-12">
           <div className="container-main max-w-3xl">
-            <h2 className="font-mono text-2xl font-semibold text-[#E0E0E0] text-center mb-3">What You Get</h2>
-            <p className="font-sans text-sm text-white/30 text-center mb-8">Operational outcomes, not just software.</p>
+            <h2 className="font-mono text-2xl font-semibold text-[#E0E0E0] text-center mb-3">Operational Deliverables</h2>
+            <p className="font-sans text-sm text-white/30 text-center mb-8">Infrastructure outcomes. Not software licenses.</p>
             <div className="border border-white/10 p-6 md:p-8">
               <ul className="space-y-4">
                 {outcomes.map((outcome, i) => (
@@ -172,7 +172,7 @@ const DeploymentOverview = () => {
         {/* FAQs */}
         <section className="section-padding !py-12">
           <div className="container-main max-w-3xl">
-            <h2 className="font-mono text-2xl font-semibold text-[#E0E0E0] text-center mb-8">Frequently Asked Questions</h2>
+            <h2 className="font-mono text-2xl font-semibold text-[#E0E0E0] text-center mb-8">Operational Clarifications</h2>
             <Accordion type="single" collapsible className="space-y-3">
               {faqs.map((faq, i) => (
                 <AccordionItem key={i} value={`faq-${i}`} className="border border-white/10 px-6">
@@ -204,8 +204,8 @@ const DeploymentOverview = () => {
         {/* CTA */}
         <section className="section-padding !py-12">
           <div className="container-main max-w-3xl text-center">
-            <h2 className="font-mono text-2xl font-semibold text-[#E0E0E0] mb-4">Ready to recover capacity?</h2>
-            <p className="font-sans text-sm text-white/30 mb-6">Tell us where operational friction exists. We'll scope the engagement.</p>
+            <h2 className="font-mono text-2xl font-semibold text-[#E0E0E0] mb-4">Initiate Operational Engagement</h2>
+            <p className="font-sans text-sm text-white/30 mb-6">Submit a briefing request. Identify operational friction. Receive a scoped engagement authorization.</p>
             <Button asChild size="lg">
               <Link to="/contact">
                 REQUEST OPERATIONAL BRIEFING

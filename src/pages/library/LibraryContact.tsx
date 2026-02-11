@@ -48,11 +48,11 @@ const TOOLS = [
 ];
 
 const TRUST_POINTS = [
-  { icon: Shield, text: 'No subscriptions' },
-  { icon: Users, text: 'Pricing is scoped per engagement, not per workflow' },
-  { icon: Wrench, text: 'No technical experience required' },
-  { icon: Clock, text: 'We install, operate, and maintain workflows' },
-  { icon: Shield, text: 'You can revoke access any time' },
+  { icon: Shield, text: 'All transmissions encrypted via TLS 1.3' },
+  { icon: Users, text: 'Engagement scope defined at authorization — no drift' },
+  { icon: Wrench, text: 'AERELION operates all infrastructure on your behalf' },
+  { icon: Clock, text: 'Deployment window: 30 calendar days from handoff' },
+  { icon: Shield, text: 'Authorization revocable at any point in the lifecycle' },
 ];
 
 const LibraryContact = () => {
@@ -289,9 +289,9 @@ const LibraryContact = () => {
                       POST_SUBMISSION_SEQUENCE
                     </h4>
                     <ol className="space-y-2 font-mono text-xs text-white/30">
-                      <li className="flex gap-2"><span className="text-[#39FF14]/50">[01]</span> Stack review initiated</li>
-                      <li className="flex gap-2"><span className="text-[#39FF14]/50">[02]</span> Automation scope analysis</li>
-                      <li className="flex gap-2"><span className="text-[#39FF14]/50">[03]</span> Proposal + pricing transmitted</li>
+                      <li className="flex gap-2"><span className="text-[#39FF14]/50">[01]</span> Operational stack review initiated</li>
+                      <li className="flex gap-2"><span className="text-[#39FF14]/50">[02]</span> Friction analysis and scope definition</li>
+                      <li className="flex gap-2"><span className="text-[#39FF14]/50">[03]</span> Engagement authorization transmitted</li>
                     </ol>
                   </div>
                 </div>
