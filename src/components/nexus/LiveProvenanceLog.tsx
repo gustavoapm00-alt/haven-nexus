@@ -90,7 +90,9 @@ export default function LiveProvenanceLog() {
                 {log.function_name}
               </span>
               <span style={{ color: messageColor(log.message), flex: 1, opacity: 0.6 }}>
-                {log.message}
+                {log.function_name === 'agent-heartbeat' && log.details
+                  ? `[${(log.details as Record<string, string>).agent_id || 'SYS'}] // ${log.message}`
+                  : log.message}
               </span>
               {log.status_code != null && (
                 <span style={{ color: log.status_code >= 400 ? '#FF4444' : '#333', flexShrink: 0 }}>

@@ -83,6 +83,15 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Log to edge_function_logs with agent_id in details for terminal prefixing
+    await supabase.from("edge_function_logs").insert({
+      function_name: "agent-heartbeat",
+      level: status === "ERROR" ? "error" : status === "DRIFT" ? "warn" : "info",
+      message: `${agent_id}: ${message || status}`,
+      status_code: 200,
+      details: { agent_id, status, message },
+    });
+
     return new Response(JSON.stringify({ success: true, heartbeat: data }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

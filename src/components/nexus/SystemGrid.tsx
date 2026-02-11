@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { useAgentStatus, type AgentStatusEnum } from '@/hooks/useAgentStatus';
+import { SentinelGauge, AuditorLastCommit, EnvoyReportButton } from './AgentSpecializedWidgets';
 
 const AGENTS = [
   { id: 'AG-01', codename: 'THE SENTINEL', fn: 'CUI Handoff & NIST/CMMC Scanning', refId: 'REF-SENTINEL-800171', impact: 'NIST_800-171_COMPLIANCE' },
@@ -146,7 +147,7 @@ export default function SystemGrid() {
               </div>
 
               {/* Live state readout */}
-              <div className="mb-3 space-y-px">
+              <div className="mb-1 space-y-px">
                 <code
                   className="block text-[7px] px-2 py-0.5 uppercase"
                   style={{
@@ -170,6 +171,11 @@ export default function SystemGrid() {
                   </code>
                 )}
               </div>
+
+              {/* Specialized per-agent widgets */}
+              {a.id === 'AG-01' && <SentinelGauge state={state} />}
+              {a.id === 'AG-05' && <AuditorLastCommit state={state} />}
+              {a.id === 'AG-07' && <EnvoyReportButton />}
 
               {/* FORCE_STABILIZATION — always visible on DRIFT, hover-only otherwise */}
               <div className={`transition-opacity duration-200 ${isDrift ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
