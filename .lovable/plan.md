@@ -1,221 +1,173 @@
-# AERELION SYSTEMS — "Industrial Digital" Global Design System Rollout
+
+# AERELION Internalization and Infrastructure Directive
 
 ## Objective
-
-Apply the "Industrial Digital" aesthetic across the entire site: a disciplined, rectilinear, high-contrast interface that communicates technical authority and operational governance. All backend functionality (auth, engagement forms, portal, admin) remains untouched.
-
----
-
-## 1. Design Token Overhaul
-
-**Color Profile Update** (`src/index.css`):
-
-* Background: Deep Obsidian `#0F0F0F` (replacing current `#000000`)
-* Foreground text: Cool Grey `#E0E0E0`
-* Primary accent: Operational Green `#39FF14` (replacing Signal Cyan)
-* Secondary accent: High-Alert Amber `#FFBF00` (replacing Mission Orange)
-* All `--primary`, `--accent`, `--ring`, `--glow` CSS variables updated accordingly
-
-**Geometry** (`tailwind.config.ts` + `src/index.css`):
-
-* Confirm `--radius: 0rem` (already set)
-* Standardize all containers to `border-[1px]` wireframe borders (replacing current `0.5px`)
-* Remove any remaining `rounded-*` classes across components
-
-**Typography** (`index.html` + `tailwind.config.ts`):
-
-* Keep **JetBrains Mono** for navigation, data labels, metadata, form labels
-* Replace **Space Grotesk** with **Inter** (geometric sans-serif) for long-form body text and section descriptions
-* Headers remain monospaced for the "system" voice
+Total de-commercialization: purge all consumer-grade language, labor-centric metrics, and marketing CTAs. Transition the site into a Technical Anthology and Doctrine-Led Portfolio with hardened infrastructure copy.
 
 ---
 
-## 2. Persistent HUD Updates
+## 1. WorkflowExampleCard.tsx -- Full Restyle
 
-**HUDNavbar** (`src/components/landing/HUDNavbar.tsx`):
+**Current violations:**
+- "Problem Solved" label (line 73)
+- "Common Use Cases" label (line 87)
+- "hrs activation" and "+X hrs/wk" metrics (lines 130-134)
+- "We operate this for you" footer copy (line 143)
+- "Learn More" CTA (line 153)
+- `rounded-lg` and `rounded-full` classes (lines 46, 93, 103)
 
-* System identifier becomes: `AERELION // SYS.OPS.V2.06`
-* Accent colors shift from cyan to Operational Green
-* `NET.LATENCY` indicator uses Green for normal, Amber for elevated
-* **Logical Intent:** The `V2.xx` suffix signals a version-controlled, audited operational doctrine.
-
-**TerminalFooter** (`src/components/landing/TerminalFooter.tsx`):
-
-* Status dot changes from green-500 to `#39FF14`
-* Add "System Health Ticker" log entries that cycle through simulated heartbeat messages (e.g., `[HB-001] HEARTBEAT: NOMINAL`, `[HB-002] LATENCY: 11ms`)
-
-**SystemStatusTicker** (`src/components/landing/SystemStatusTicker.tsx`):
-
-* Update accent color from cyan to Operational Green
-* Replace messages with governance-appropriate language: `STANDARDIZATION: ACTIVE`, `FRAMEWORK: DEPLOYED`, `INTEGRITY CHECK: PASSED`
-
----
-
-## 3. Landing Page Sections (`src/pages/library/LibraryHome.tsx`)
-
-### A. Hero Module — "System Stabilization"
-
-**File**: `src/components/landing/CommandCenterHero.tsx`
-
-* Headline: **"SYSTEM STABILIZATION & OPERATIONAL GOVERNANCE."**
-* Subheadline: *"Engineering the foundational logic for enterprise-scale autonomous systems."*
-* CTA button label: **"REQUEST BRIEFING"** (links to `/contact`)
-* Secondary CTA: **"VIEW DOCTRINE"** (links to `/how-it-works`)
-* Background: Retain `ConstellationCanvas` but shift node colors from cyan to Operational Green
-* Remove "Managed Automation Operator" label; replace with `// OPERATIONAL INFRASTRUCTURE`
-
-### B. "Doctrine Grid" — Replacing Manifesto + Protocol Grid
-
-**Replace**: `ManifestoSection.tsx` and `ProtocolGrid.tsx` with a single new **`DoctrineGrid.tsx`**
-
-* Section label: `// METHODOLOGY`
-* Headline: **"The Doctrine Grid"**
-* Three protocol cards in a strict wireframe grid:
-1. **PROTOCOL HARDENING** — "Identifying and neutralizing operational friction."
-2. **DATA ONTOLOGY** — "Establishing a universal schema for fragmented information environments."
-3. **GOVERNANCE LOGIC** — "Installing automated oversight layers to maintain system integrity."
-
-
-* Card style: `bg-[#0F0F0F]` with 1px `#39FF14/20` borders, Green glow on hover
-* Each card has a `PROTOCOL_ID`, `STATUS: ACTIVE`, and `COMPLEXITY_LVL` metadata row
-
-### C. "Operational Parameters" Section — New
-
-**New file**: `src/components/landing/OperationalParameters.tsx`
-
-* Section label: `// CONSTRAINTS & BOUNDARIES`
-* Headline: **"Operational Parameters"**
-* A high-authority list defining scope constraints:
-* "Engagement scope is fixed at inception. No mid-cycle feature additions without revised authorization."
-* "All credential handoffs must pass through encrypted intake channels."
-* "Maximum deployment window: 30 calendar days from authorization."
-* "Redundancy protocols require a minimum of two integration points per workflow."
-
-
-* Styled as a numbered list with Amber `[PARAM-001]` reference IDs
-
-### D. "Technical Briefing Archives" — Replacing BlueprintsFeed
-
-**Replace**: `BlueprintsFeed.tsx` with **`BriefingArchives.tsx`**
-
-* Section label: `// OPERATIONAL REPORTS`
-* Headline: **"Technical Briefing Archives"**
-* Entries styled as report rows (not horizontal scroll cards):
-* Each row has: `[REF-ID]` (e.g., `OPS-2026-004`), Title, `[STATUS: RESOLVED]`, `[IMPACT-SCORE: 8.2]`
-* 1px border rows, monospaced metadata
-* Hover: border shifts to Operational Green
-
-
-
-### E. Structural Schema Diagram — New
-
-**New file**: `src/components/landing/AerelionLayerDiagram.tsx`
-
-* **Visual Logic:** Depict the AERELION LAYER as a "Regulator/Filter" gate.
-* **Architecture**:
-* Left (Input): `[RAW DATA / OPERATIONAL CHAOS]` — Fragmented, thin lines.
-* Center (The Core): `[AERELION REGULATOR]` — Thick 1px green-glow wireframe box with `[FILTER_STATUS: ACTIVE]` tag.
-* Right (Output): `[EXECUTIVE OVERSIGHT]` — Stabilized, singular bold lines.
-
-
-* **Label**: `// STRUCTURAL SCHEMA: REGULATORY FLOW`
-
-### F. "Briefing Request Interface" — New CTA Section
-
-**New file**: `src/components/landing/BriefingRequestCTA.tsx`
-
-* A compact form-styled CTA before the footer.
-* Label: `// INITIATE BRIEFING REQUEST`
-* Styled like a technical intake document with field labels in mono.
-* **Added Field:** `SYSTEM_CRITICALITY` (Selector: LOW, MED, HIGH).
-* Fields: `DESIGNATION` (Name), `COMM_CHANNEL` (Email), `SUBJECT` (dropdown).
-* Submit: **"TRANSMIT REQUEST"**
-* On submit, redirects to `/contact` with pre-filled data.
+**Changes:**
+- Remove "Problem Solved" section entirely -- replace with just the `shortOutcome` as a protocol description
+- Remove "Common Use Cases" section -- replace sector chips with a simple `SECTOR_CLASSIFICATION` mono label
+- Remove all time/hours metrics (Clock, TrendingUp icons and associated text)
+- Replace footer: "We operate this for you" becomes `MANAGED_PROTOCOL`
+- Replace "Learn More" with `VIEW_SPECIFICATIONS`
+- Remove all `rounded-*` classes, use sharp corners
+- Adapt styling to Industrial Digital wireframe aesthetic (1px borders, mono labels)
 
 ---
 
-## 4. Inner Page Restyling
+## 2. AgentDetail.tsx -- Full Overhaul
 
-### Contact Page (`src/pages/library/LibraryContact.tsx`)
+**Current violations:**
+- Uses `LibraryNavbar` and `LibraryFooter` (double-nav bug)
+- "What This Automation Delivers" section header
+- "Who This Is For" section header
+- "Typical Engagement Profile" with hours metrics (lines 183-207)
+- "How We Operate This Automation" (consumer voice)
+- "What's Included" section
+- "What We Need From You" section
+- "Frequently Asked Questions" header
+- FAQ copy: "Schedule a discovery call" (line 39), "No technical experience required" (lines 52, 349)
+- Sidebar: "Have This Operated for You" (line 297), "Schedule Discovery Call" (line 341), "Activate Now" (line 323)
+- `rounded-full` on step numbers (line 217)
 
-* Remove `LibraryNavbar` / `LibraryFooter` references.
-* Restyle form labels to mono uppercase: `TRANSMISSION_SOURCE`, `FREQUENCY`, `PAYLOAD`, etc.
-* Add Metadata header: `INCIDENT_ID: [AUTO_GEN_HEX]` and `PROTOCOL_VERSION: SYS.OPS.V2`.
-* Submit button: **`INITIATE SYSTEM HANDOFF`** with Amber highlight.
-* Success state: `[STATUS: PACKET RECEIVED // REF: ENG-{timestamp}]`
-
-### Security/Governance Page (`src/pages/library/Security.tsx`)
-
-* Add `watermark-confidential` overlay and `scanline-overlay` class.
-* Practice items styled as terminal rows with `[SEC-001]` reference IDs.
-* Credential handling section bordered with Amber (high-alert accent).
-
-### How It Works / Deployment (`src/pages/library/DeploymentOverview.tsx`)
-
-* Phase numbers become `[PHASE_01]`, `[PHASE_02]`, `[PHASE_03]` in mono.
-* CTA button: `REQUEST OPERATIONAL BRIEFING`.
-
-### Automations / Protocols Page (`src/pages/library/AgentLibrary.tsx`)
-
-* Update accent from cyan to Operational Green.
-* Filter chips use Green active state.
-
----
-
-## 5. Global Component Updates
-
-### Buttons (`src/components/ui/button.tsx`)
-
-* Primary variant: `bg-[#39FF14]` with `text-black`, sharp corners.
-* Outline variant: 1px `#39FF14/50` border, Green text.
-* Hover glow: `box-shadow: 0 0 20px rgba(57, 255, 20, 0.15)`
-
-### Inputs (`src/components/ui/input.tsx`)
-
-* Bottom-border-only style with Green focus state.
+**Changes:**
+- Remove `LibraryNavbar` and `LibraryFooter` imports and usage (HUD shell handles this)
+- Section headers renamed:
+  - "What This Automation Delivers" -> "PROTOCOL SPECIFICATION"
+  - "Who This Is For" -> "SECTOR_CLASSIFICATION"
+  - "Tools Commonly Involved" -> "SYSTEM_DEPENDENCIES"
+  - "Typical Engagement Profile" -> DELETE entirely (removes hours saved metrics)
+  - "How We Operate This Automation" -> "EXECUTION_SEQUENCE"
+  - "What's Included" -> "PROTOCOL_DELIVERABLES"
+  - "What We Need From You" -> "AUTHORIZATION_REQUIREMENTS"
+  - "Important Notes" -> "OPERATIONAL_CONSTRAINTS"
+  - "Frequently Asked Questions" -> "OPERATIONAL CLARIFICATIONS"
+- FAQ copy rewritten to remove "discovery call," "pricing," "no technical experience"
+- Sidebar: "Have This Operated for You" -> "PROTOCOL_AUTHORIZATION"; "Schedule Discovery Call" / "Activate Now" -> "INITIATE_HANDOFF"; "No technical experience required" -> removed
+- Back link: "Back to Automations" -> "RETURN_TO_REGISTRY"
+- All `rounded-*` classes removed
+- Apply Industrial Digital styling (mono headers, 1px borders)
 
 ---
 
-## 6. Ambient Effects Update
+## 3. BundleDetail.tsx -- Full Overhaul
 
-**File**: `src/components/landing/AmbientEffects.tsx`
+**Current violations:**
+- Uses `LibraryNavbar` and `LibraryFooter` (double-nav)
+- "Schedule Discovery Call" CTA (line 189)
+- "Back to Automations" (line 75)
+- "What This System Delivers" (line 101)
+- "Automations in This System" (line 111)
+- "Who This Is For" (line 141)
+- "How We Deliver This System" with consumer engagement steps (lines 154-169)
+- "Have This System Operated for You" (line 176)
+- "No technical experience required" (line 195)
+- `rounded-md` and `rounded-full` classes
 
-* Grid line color: `rgba(57, 255, 20, 0.03)` (Green tint).
-* Radar sweep gradient: Green.
-
-**File**: `src/components/landing/ConstellationCanvas.tsx`
-
-* Node and connection colors shift to Operational Green.
-
----
-
-## 7. Lexicon Enforcement (Copy Updates)
-
-Across all visible pages, replace consumer-grade language:
-
-* "seamless" -> "standardized"
-* "easy" -> "structured"
-* "Book an AI Ops Installation" -> "Request Operational Briefing"
-* "Initialize System" -> "Request Briefing"
-* "Live Intelligence" -> "Technical Briefing Archives"
-
----
-
-## 8. Files Changed Summary
-
-| Action | File |
-| --- | --- |
-| Edit | `src/index.css`, `tailwind.config.ts`, `index.html` |
-| Edit | `HUDNavbar.tsx`, `TerminalFooter.tsx`, `SystemStatusTicker.tsx` |
-| Edit | `CommandCenterHero.tsx`, `AmbientEffects.tsx`, `ConstellationCanvas.tsx` |
-| Edit | `LibraryHome.tsx`, `LibraryContact.tsx`, `Security.tsx`, `DeploymentOverview.tsx` |
-| Create | `DoctrineGrid.tsx`, `OperationalParameters.tsx`, `BriefingArchives.tsx`, `AerelionLayerDiagram.tsx`, `BriefingRequestCTA.tsx` |
-| Remove | `ManifestoSection.tsx`, `ProtocolGrid.tsx`, `BlueprintsFeed.tsx` |
+**Changes:**
+- Remove `LibraryNavbar` and `LibraryFooter`
+- Section headers renamed to mono uppercase (SYSTEM_SPECIFICATION, INCLUDED_PROTOCOLS, SECTOR_CLASSIFICATION, DEPLOYMENT_SEQUENCE)
+- Engagement steps rewritten to technical: "Submit authorization request" / "AERELION scopes protocol parameters" / "Infrastructure deployed and stabilized"
+- Sidebar: "Have This System Operated for You" -> "SYSTEM_AUTHORIZATION"; CTA: "Schedule Discovery Call" -> "INITIATE_HANDOFF"
+- "No technical experience required" -> removed
+- All `rounded-*` removed, Industrial Digital styling applied
 
 ---
 
-## 9. What Remains Untouched
+## 4. About.tsx -- Full Restyle
 
-* All backend functions (Edge Functions, Supabase queries, auth flows).
-* All portal and admin pages functional logic.
-* Database schema, RLS policies, and API integrations.
+**Current violations:**
+- Uses `LibraryNavbar` and `LibraryFooter` (double-nav)
+- "Your Operational Systems Partner" -- consumer headline
+- "Schedule Discovery Call" (lines 246, 249)
+- "See How It Works" (line 252)
+- "Ready to Work With a Systems Partner?" -- marketing CTA
+- Multiple `rounded-md` classes
+- Consumer copy: "makes automation actually work for your business," "No hidden complexity"
+
+**Changes:**
+- Remove `LibraryNavbar` and `LibraryFooter`
+- Hero: "Your Operational Systems Partner" -> "OPERATIONAL DOCTRINE & PROVENANCE"
+- Section "The Managed Operator Model" -> "THE REGULATOR MODEL"
+- Rewrite principle descriptions using hardened language (no "focus," "breaks," consumer adjectives)
+- "What You Get With AERELION" -> "SYSTEM_SCHEMATICS"
+- CTA: "Ready to Work..." -> "INITIATE_HANDOFF"; "Schedule Discovery Call" -> "REQUEST OPERATIONAL BRIEFING"
+- Remove all `rounded-*` classes
+- Apply mono headers, Industrial Digital borders
+
+---
+
+## 5. Pricing.tsx -- DELETE
+
+This page is dead code (redirected to `/contact` in routing). Will be deleted entirely.
+
+---
+
+## 6. AgentLibrary.tsx -- Minor Updates
+
+Already mostly compliant. Changes:
+- "Each protocol below is configured, hosted, and operated by AERELION on your behalf" -> "Active protocols under AERELION governance. Authenticated data provisioning."
+- Fix border widths from `0.5px` to `1px` for consistency
+
+---
+
+## 7. Doctrine Grid Content Update (DoctrineGrid.tsx)
+
+Update pillar descriptions per directive:
+- Protocol Hardening: "We identify ambiguity and install hardened logic gates to ensure architectural stability."
+- Data Ontology: "Establishing a universal truth through a singular, governed schema for fragmented information."
+- Governance Logic: "Automating stabilization and oversight through a permanent regulatory layer."
+
+---
+
+## 8. CommandCenterHero.tsx -- Minor Copy
+
+Already compliant. No changes needed.
+
+---
+
+## 9. DeploymentOverview.tsx -- Minor Copy
+
+Already mostly compliant. Change:
+- "No technical labor required from the authorizing entity" -- keep (compliant)
+- Verify no "hours saved" or consumer metrics remain
+
+---
+
+## Technical Details
+
+### Files to Edit
+| File | Scope |
+|---|---|
+| `src/components/library/WorkflowExampleCard.tsx` | Full restyle: remove metrics, consumer labels, rounded corners |
+| `src/pages/library/AgentDetail.tsx` | Full overhaul: remove LibraryNavbar/Footer, restyle all sections |
+| `src/pages/library/BundleDetail.tsx` | Full overhaul: remove LibraryNavbar/Footer, restyle all sections |
+| `src/pages/About.tsx` | Full restyle: remove LibraryNavbar/Footer, hardened copy |
+| `src/components/landing/DoctrineGrid.tsx` | Update pillar descriptions |
+| `src/pages/library/AgentLibrary.tsx` | Minor copy and border fixes |
+
+### Files to Delete
+| File | Reason |
+|---|---|
+| `src/pages/Pricing.tsx` | Dead code, already redirected |
+
+### What Remains Untouched
+- All backend functions, Edge Functions, and database logic
+- All portal pages (`/portal/*`) functional logic
+- All admin pages (`/admin/*`) functional logic
+- Route structure in `App.tsx`
+- Auth flows, RLS policies, credential handling
+- HUD shell (HUDNavbar, TerminalFooter, AmbientEffects)
+- Landing page components (CommandCenterHero, BriefingArchives, OperationalParameters, AerelionLayerDiagram, BriefingRequestCTA)
