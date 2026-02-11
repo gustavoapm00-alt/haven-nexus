@@ -1,14 +1,9 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Mail, Send, ArrowRight, Phone, Calendar } from 'lucide-react';
+import { Send, ArrowRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { contactFormSchema } from '@/lib/validations';
-import LibraryNavbar from '@/components/library/LibraryNavbar';
-import LibraryFooter from '@/components/library/LibraryFooter';
-import ScrollReveal from '@/components/ScrollReveal';
 import SEO, { schemas } from '@/components/SEO';
-import { Button } from '@/components/ui/button';
 
 interface FormErrors {
   name?: string;
@@ -18,11 +13,7 @@ interface FormErrors {
 
 const Contact = () => {
   const { toast } = useToast();
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    message: ''
-  });
+  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -42,223 +33,162 @@ const Contact = () => {
     if (!result.success) {
       const fieldErrors: FormErrors = {};
       result.error.errors.forEach(err => {
-        if (err.path[0]) {
-          fieldErrors[err.path[0] as keyof FormErrors] = err.message;
-        }
+        if (err.path[0]) fieldErrors[err.path[0] as keyof FormErrors] = err.message;
       });
       setErrors(fieldErrors);
       return;
     }
 
     setIsSubmitting(true);
-
     try {
-      const { error } = await supabase
-        .from('contact_submissions')
-        .insert([{
-          name: result.data.name,
-          email: result.data.email,
-          message: result.data.message
-        }]);
-
+      const { error } = await supabase.from('contact_submissions').insert([{
+        name: result.data.name,
+        email: result.data.email,
+        message: result.data.message
+      }]);
       if (error) throw error;
-
-      toast({
-        title: "Message received",
-        description: "We'll review your inquiry and respond within 24-48 hours.",
-      });
-
+      toast({ title: "Transmission received", description: "Your briefing request has been logged. Expect response within 24-48 hours." });
       setFormData({ name: '', email: '', message: '' });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Something went wrong. Please try again.",
-        variant: "destructive",
-      });
+    } catch {
+      toast({ title: "Transmission failed", description: "System error. Retry or contact contact@aerelion.systems.", variant: "destructive" });
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#0F0F0F]">
       <SEO 
-        title="Contact AERELION – Schedule a Discovery Call"
-        description="Schedule a discovery call with AERELION Systems. Discuss your operational challenges and learn how managed automation can recover hours weekly. We respond within 24-48 hours."
-        keywords="contact AERELION, automation consultation, discovery call, managed automation inquiry, schedule call, business automation help"
+        title="Uplink Terminal – AERELION Systems"
+        description="Initiate operational briefing with AERELION Systems. Submit a transmission to discuss system stabilization and governance requirements."
         canonicalUrl="/contact"
         structuredData={[
-          schemas.breadcrumb([
-            { name: 'Home', url: '/' },
-            { name: 'Contact', url: '/contact' }
-          ]),
-          schemas.webPage("Contact AERELION Systems", "Schedule a discovery call for managed automation services", "/contact")
+          schemas.breadcrumb([{ name: 'Home', url: '/' }, { name: 'Uplink', url: '/contact' }]),
+          schemas.webPage("AERELION Uplink Terminal", "Initiate operational briefing", "/contact")
         ]}
       />
-      <LibraryNavbar />
       
-      <main className="pt-12">
-        {/* Hero */}
+      <main className="pt-8">
         <section className="section-padding">
-          <div className="container-main">
-            <ScrollReveal>
-              <div className="text-center max-w-3xl mx-auto">
-                <span className="text-xs font-semibold text-primary uppercase tracking-wide mb-4 block">
-                  Get in Touch
-                </span>
-                <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-                  Schedule a Discovery Call
-                </h1>
-                <p className="text-lg text-muted-foreground">
-                  Discuss your operational challenges and learn how AERELION can help. 
-                  We respond within 24-48 hours.
-                </p>
-              </div>
-            </ScrollReveal>
-          </div>
-        </section>
+          <div className="container-main max-w-4xl">
+            <div className="text-center max-w-3xl mx-auto mb-12">
+              <span className="font-mono text-[10px] text-[#39FF14]/50 uppercase tracking-[0.25em] mb-3 block">
+                // UPLINK TERMINAL
+              </span>
+              <h1 className="font-mono text-3xl md:text-4xl font-semibold text-[#E0E0E0] mb-4">
+                Initiate System Handoff
+              </h1>
+              <p className="font-sans text-base text-white/40">
+                Submit a transmission to discuss operational requirements. Response within 24-48 hours.
+              </p>
+            </div>
 
-        {/* Contact Grid */}
-        <section className="section-padding pt-0">
-          <div className="container-main max-w-5xl">
             <div className="grid md:grid-cols-2 gap-12">
-              {/* Contact Info */}
-              <ScrollReveal>
-                <div>
-                  <h2 className="text-xl font-semibold text-foreground mb-6">What to Expect</h2>
-                  
-                  <div className="space-y-4 mb-8">
-                    <div className="flex items-start gap-4 p-4 card-panel rounded-lg">
-                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        <Calendar className="h-5 w-5 text-primary" />
+              {/* Protocol Info */}
+              <div>
+                <span className="font-mono text-[9px] text-white/20 uppercase tracking-[0.2em] mb-4 block">
+                  ENGAGEMENT_PROTOCOL
+                </span>
+                
+                <div className="space-y-4">
+                  {[
+                    { id: '01', title: 'Operational Briefing', desc: '30-minute assessment of system topology and friction vectors' },
+                    { id: '02', title: 'Scoped Authorization', desc: 'Fixed scope, fixed parameters, outcome-governed' },
+                    { id: '03', title: 'Direct Channel', desc: 'contact@aerelion.systems' },
+                  ].map((item) => (
+                    <div key={item.id} className="flex items-start gap-4 p-4 border border-white/10">
+                      <div className="w-10 h-10 border border-[rgba(57,255,20,0.2)] flex items-center justify-center flex-shrink-0">
+                        <span className="font-mono text-xs text-[#39FF14]/50">[{item.id}]</span>
                       </div>
                       <div>
-                        <p className="font-medium text-foreground">Discovery Call</p>
-                        <p className="text-sm text-muted-foreground">30-minute conversation to understand your operations</p>
+                        <p className="font-mono text-sm text-[#E0E0E0]">{item.title}</p>
+                        <p className="font-sans text-xs text-white/30">{item.desc}</p>
                       </div>
                     </div>
-                    
-                    <div className="flex items-start gap-4 p-4 card-panel rounded-lg">
-                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        <Phone className="h-5 w-5 text-primary" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-foreground">Scoped Proposal</p>
-                        <p className="text-sm text-muted-foreground">Clear scope, timeline, and fixed pricing</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-start gap-4 p-4 card-panel rounded-lg">
-                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        <Mail className="h-5 w-5 text-primary" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-foreground">Email</p>
-                        <p className="text-sm text-muted-foreground">contact@aerlion.systems</p>
-                      </div>
-                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-6 p-4 border border-white/10">
+                  <span className="font-mono text-[9px] text-white/20 uppercase tracking-[0.2em] mb-2 block">RESPONSE_SLA</span>
+                  <p className="font-sans text-sm text-white/35">
+                    Transmissions are processed within 24-48 operational hours.
+                  </p>
+                </div>
+              </div>
+
+              {/* Transmission Form */}
+              <div className="border border-white/10 p-8">
+                <span className="font-mono text-[9px] text-[#39FF14]/40 uppercase tracking-[0.2em] mb-6 block">
+                  TRANSMISSION_FORM
+                </span>
+                
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div>
+                    <label htmlFor="name" className="font-mono text-[10px] text-white/30 uppercase tracking-wider block mb-2">
+                      TRANSMISSION_SOURCE
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      className={`input-terminal w-full ${errors.name ? 'border-red-500' : ''}`}
+                      placeholder="Entity identifier"
+                    />
+                    {errors.name && <p className="text-red-400 text-xs mt-1 font-mono">{errors.name}</p>}
                   </div>
 
-                  <div className="p-6 card-panel rounded-lg">
-                    <h3 className="font-semibold text-foreground mb-2">Response Time</h3>
-                    <p className="text-sm text-muted-foreground">
-                      We typically respond within 24-48 business hours. 
-                      For urgent matters, email us directly.
-                    </p>
+                  <div>
+                    <label htmlFor="email" className="font-mono text-[10px] text-white/30 uppercase tracking-wider block mb-2">
+                      FREQUENCY
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      className={`input-terminal w-full ${errors.email ? 'border-red-500' : ''}`}
+                      placeholder="contact@entity.com"
+                    />
+                    {errors.email && <p className="text-red-400 text-xs mt-1 font-mono">{errors.email}</p>}
                   </div>
-                </div>
-              </ScrollReveal>
 
-              {/* Contact Form */}
-              <ScrollReveal delay={0.1}>
-                <div className="card-panel p-8 rounded-lg">
-                  <h2 className="text-xl font-semibold text-foreground mb-6">Send a Message</h2>
-                  
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                    <div>
-                      <label htmlFor="name" className="block text-sm font-medium mb-2">
-                        Name
-                      </label>
-                      <input
-                        type="text"
-                        id="name"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        className={`w-full px-4 py-3 bg-background border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors ${
-                          errors.name ? 'border-destructive' : 'border-border'
-                        }`}
-                        placeholder="Your name"
-                      />
-                      {errors.name && (
-                        <p className="text-destructive text-sm mt-1">{errors.name}</p>
-                      )}
-                    </div>
+                  <div>
+                    <label htmlFor="message" className="font-mono text-[10px] text-white/30 uppercase tracking-wider block mb-2">
+                      PAYLOAD
+                    </label>
+                    <textarea
+                      id="message"
+                      name="message"
+                      value={formData.message}
+                      onChange={handleChange}
+                      rows={5}
+                      className={`input-terminal w-full resize-none ${errors.message ? 'border-red-500' : ''}`}
+                      placeholder="Describe operational requirements..."
+                    />
+                    {errors.message && <p className="text-red-400 text-xs mt-1 font-mono">{errors.message}</p>}
+                  </div>
 
-                    <div>
-                      <label htmlFor="email" className="block text-sm font-medium mb-2">
-                        Email
-                      </label>
-                      <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        className={`w-full px-4 py-3 bg-background border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors ${
-                          errors.email ? 'border-destructive' : 'border-border'
-                        }`}
-                        placeholder="your@email.com"
-                      />
-                      {errors.email && (
-                        <p className="text-destructive text-sm mt-1">{errors.email}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label htmlFor="message" className="block text-sm font-medium mb-2">
-                        Message
-                      </label>
-                      <textarea
-                        id="message"
-                        name="message"
-                        value={formData.message}
-                        onChange={handleChange}
-                        rows={5}
-                        className={`w-full px-4 py-3 bg-background border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors resize-none ${
-                          errors.message ? 'border-destructive' : 'border-border'
-                        }`}
-                        placeholder="Tell us about your operational challenges..."
-                      />
-                      {errors.message && (
-                        <p className="text-destructive text-sm mt-1">{errors.message}</p>
-                      )}
-                    </div>
-
-                    <Button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="w-full"
-                      size="lg"
-                    >
-                      {isSubmitting ? (
-                        'Sending...'
-                      ) : (
-                        <>
-                          Send Message
-                          <Send className="ml-2 h-4 w-4" />
-                        </>
-                      )}
-                    </Button>
-                  </form>
-                </div>
-              </ScrollReveal>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="btn-launch-primary w-full"
+                  >
+                    {isSubmitting ? 'TRANSMITTING...' : (
+                      <>
+                        INITIATE SYSTEM HANDOFF
+                        <Send className="ml-2 h-4 w-4" />
+                      </>
+                    )}
+                  </button>
+                </form>
+              </div>
             </div>
           </div>
         </section>
       </main>
-
-      <LibraryFooter />
     </div>
   );
 };
