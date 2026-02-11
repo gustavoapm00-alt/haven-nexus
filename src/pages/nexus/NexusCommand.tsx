@@ -4,6 +4,7 @@ import GlobalHealthStatus from '@/components/nexus/GlobalHealthStatus';
 import NexusModuleGrid from '@/components/nexus/NexusModuleGrid';
 import LiveProvenanceLog from '@/components/nexus/LiveProvenanceLog';
 import RegulatorDiagram from '@/components/nexus/RegulatorDiagram';
+import DriftSimulationPanel from '@/components/nexus/DriftSimulationPanel';
 
 function useSystemClock() {
   const [time, setTime] = useState('');
@@ -90,6 +91,11 @@ export default function NexusCommand() {
           {/* Nexus Module Grid — compact synchronized view */}
           <div className="mb-8">
             <NexusModuleGrid agentStatuses={agentStatuses} forceStabilize={forceStabilize} />
+          </div>
+
+          {/* Drift Simulation Panel — Operator Test Harness */}
+          <div className="mb-8">
+            <DriftSimulationPanel />
           </div>
 
           {/* Regulator Interface */}
