@@ -20,26 +20,30 @@ export default function LiveProvenanceLog() {
   };
 
   return (
-    <section className="px-4 py-3">
+    <section className="px-4 py-2">
+      <style>{`
+        .nexus-log-scroll::-webkit-scrollbar { width: 1px; }
+        .nexus-log-scroll::-webkit-scrollbar-track { background: transparent; }
+        .nexus-log-scroll::-webkit-scrollbar-thumb { background: #39FF14; }
+        .nexus-log-scroll { scrollbar-width: thin; scrollbar-color: #39FF14 transparent; }
+      `}</style>
+
       <h2
-        className="text-[10px] tracking-[0.3em] mb-2"
-        style={{ fontFamily: 'JetBrains Mono, monospace', color: '#39FF14' }}
+        className="text-[8px] tracking-[0.3em] mb-1 uppercase"
+        style={{ fontFamily: 'JetBrains Mono, monospace', color: '#39FF14', opacity: 0.5 }}
       >
         LIVE_PROVENANCE // TERMINAL_FEED
       </h2>
 
       <div
         ref={scrollRef}
-        className="overflow-y-auto"
-        style={{
-          background: 'transparent',
-          height: 200,
-        }}
+        className="overflow-y-auto nexus-log-scroll"
+        style={{ background: 'transparent', height: 160 }}
       >
         {isLoading && (
           <p
-            className="text-[10px] animate-pulse"
-            style={{ fontFamily: 'JetBrains Mono, monospace', color: '#39FF14' }}
+            className="text-[9px] animate-pulse uppercase"
+            style={{ fontFamily: 'JetBrains Mono, monospace', color: '#39FF14', opacity: 0.4 }}
           >
             LOADING_FEED...
           </p>
@@ -47,8 +51,8 @@ export default function LiveProvenanceLog() {
 
         {!isLoading && logs.length === 0 && (
           <p
-            className="text-[10px] opacity-40"
-            style={{ fontFamily: 'JetBrains Mono, monospace', color: '#39FF14' }}
+            className="text-[9px] uppercase"
+            style={{ fontFamily: 'JetBrains Mono, monospace', color: '#39FF14', opacity: 0.2 }}
           >
             NO_ENTRIES // AWAITING_SIGNAL
           </p>
@@ -57,26 +61,26 @@ export default function LiveProvenanceLog() {
         {logs.map((log) => (
           <div
             key={log.id}
-            className="flex gap-3 text-[10px] leading-relaxed mb-px"
+            className="flex gap-3 text-[9px] leading-relaxed mb-px"
             style={{ fontFamily: 'JetBrains Mono, monospace' }}
           >
-            <span style={{ color: '#444', minWidth: 145, flexShrink: 0 }}>
+            <span style={{ color: '#333', minWidth: 135, flexShrink: 0 }}>
               {new Date(log.created_at).toISOString().replace('T', ' ').slice(0, 19)}
             </span>
             <span
               className="uppercase"
-              style={{ color: levelColor(log.level), minWidth: 40, flexShrink: 0 }}
+              style={{ color: levelColor(log.level), minWidth: 36, flexShrink: 0 }}
             >
               {log.level}
             </span>
-            <span style={{ color: '#FFBF00', minWidth: 155, flexShrink: 0 }}>
+            <span style={{ color: '#FFBF00', minWidth: 140, flexShrink: 0, opacity: 0.7 }}>
               {log.function_name}
             </span>
-            <span style={{ color: '#39FF14', flex: 1, opacity: 0.8 }}>
+            <span style={{ color: '#39FF14', flex: 1, opacity: 0.6 }}>
               {log.message}
             </span>
             {log.status_code != null && (
-              <span style={{ color: log.status_code >= 400 ? '#FF4444' : '#555', flexShrink: 0 }}>
+              <span style={{ color: log.status_code >= 400 ? '#FF4444' : '#333', flexShrink: 0 }}>
                 [{log.status_code}]
               </span>
             )}
