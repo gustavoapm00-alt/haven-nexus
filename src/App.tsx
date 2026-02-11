@@ -72,6 +72,10 @@ import AdminEngagementRequests from "./pages/admin/AdminEngagementRequests";
 import AdminBulkImport from "./pages/admin/AdminBulkImport";
 import AdminN8nMappings from "./pages/admin/AdminN8nMappings";
 
+// Nexus (Shadow Command)
+import NexusGuard from "./components/nexus/NexusGuard";
+import NexusCommand from "./pages/nexus/NexusCommand";
+
 const queryClient = new QueryClient();
 
 const ScrollToTop = () => {
@@ -158,6 +162,9 @@ const AppRoutes = () => (
       <Route path="/admin/engagement-requests" element={<AdminEngagementRequests />} />
       <Route path="/admin/import" element={<AdminBulkImport />} />
       <Route path="/admin/n8n-mappings" element={<AdminN8nMappings />} />
+
+      {/* Shadow Command — hidden, admin-only */}
+      <Route path="/nexus/cmd" element={<NexusGuard><NexusCommand /></NexusGuard>} />
 
       <Route path="*" element={<NotFound />} />
     </Routes>
