@@ -34,14 +34,17 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
-    const { priceId } = await req.json();
+    const { priceId, mode } = await req.json();
     if (!priceId) throw new Error("Price ID is required");
     
     // Validate priceId format (Stripe price IDs start with "price_")
     if (typeof priceId !== 'string' || !priceId.startsWith('price_')) {
       throw new Error("Invalid price ID format");
     }
-    logStep("Price ID received", { priceId });
+
+    // Validate mode — default to subscription
+    const checkoutMode = mode === 'payment' ? 'payment' : 'subscription';
+    logStep("Price ID received", { priceId, mode: checkoutMode });
 
     const authHeader = req.headers.get("Authorization")!;
     const token = authHeader.replace("Bearer ", "");
@@ -71,9 +74,9 @@ serve(async (req) => {
           quantity: 1,
         },
       ],
-      mode: "subscription",
-      success_url: `${origin}/admin?checkout=success`,
-      cancel_url: `${origin}/pricing?checkout=cancelled`,
+      mode: checkoutMode,
+      success_url: `${origin}/portal/dashboard?checkout=success`,
+      cancel_url: `${origin}/?checkout=cancelled`,
     });
 
     logStep("Checkout session created", { sessionId: session.id });
