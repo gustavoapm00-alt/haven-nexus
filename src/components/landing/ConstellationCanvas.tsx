@@ -46,7 +46,6 @@ const ConstellationCanvas = () => {
       const h = canvas.offsetHeight;
       ctx.clearRect(0, 0, w, h);
 
-      // Update positions
       for (const node of nodes) {
         node.x += node.vx;
         node.y += node.vy;
@@ -54,7 +53,7 @@ const ConstellationCanvas = () => {
         if (node.y < 0 || node.y > h) node.vy *= -1;
       }
 
-      // Draw connections
+      // Draw connections — Operational Green
       for (let i = 0; i < nodes.length; i++) {
         for (let j = i + 1; j < nodes.length; j++) {
           const dx = nodes[i].x - nodes[j].x;
@@ -62,7 +61,7 @@ const ConstellationCanvas = () => {
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < CONNECTION_DIST) {
             const alpha = (1 - dist / CONNECTION_DIST) * 0.15;
-            ctx.strokeStyle = `hsla(180, 50%, 45%, ${alpha})`;
+            ctx.strokeStyle = `rgba(57, 255, 20, ${alpha})`;
             ctx.lineWidth = 0.5;
             ctx.beginPath();
             ctx.moveTo(nodes[i].x, nodes[i].y);
@@ -72,9 +71,9 @@ const ConstellationCanvas = () => {
         }
       }
 
-      // Draw nodes
+      // Draw nodes — Operational Green
       for (const node of nodes) {
-        ctx.fillStyle = 'hsla(180, 50%, 55%, 0.6)';
+        ctx.fillStyle = 'rgba(57, 255, 20, 0.5)';
         ctx.beginPath();
         ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
         ctx.fill();

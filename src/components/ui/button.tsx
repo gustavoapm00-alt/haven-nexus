@@ -9,12 +9,12 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-cyan-500 text-black border-[0.5px] border-cyan-400 hover:bg-cyan-400 hover:shadow-[0_0_20px_hsl(187_100%_50%/0.3)]",
-        destructive: "bg-destructive text-destructive-foreground border-[0.5px] border-red-500/50 hover:bg-destructive/90",
-        outline: "border-[0.5px] border-white/20 bg-transparent text-white/60 hover:border-cyan-500/50 hover:text-cyan-400 hover:bg-cyan-500/5",
-        secondary: "bg-white/5 text-white/60 border-[0.5px] border-white/10 hover:bg-white/10 hover:text-white/80",
+        default: "bg-[#39FF14] text-black border border-[#39FF14] hover:bg-[#4dff2e] hover:shadow-[0_0_20px_rgba(57,255,20,0.3)]",
+        destructive: "bg-destructive text-destructive-foreground border border-red-500/50 hover:bg-destructive/90",
+        outline: "border border-[rgba(57,255,20,0.4)] bg-transparent text-[#39FF14] hover:border-[#39FF14] hover:bg-[rgba(57,255,20,0.08)] hover:shadow-[0_0_20px_rgba(57,255,20,0.15)]",
+        secondary: "bg-white/5 text-white/60 border border-white/10 hover:bg-white/10 hover:text-white/80",
         ghost: "text-white/40 hover:bg-white/5 hover:text-white/60",
-        link: "text-cyan-400 underline-offset-4 hover:underline",
+        link: "text-[#39FF14] underline-offset-4 hover:underline",
       },
       size: {
         default: "h-10 px-5 py-2",
