@@ -212,6 +212,33 @@ export type Database = {
           },
         ]
       }
+      agent_heartbeats: {
+        Row: {
+          agent_id: string
+          created_at: string
+          id: string
+          message: string
+          metadata: Json
+          status: string
+        }
+        Insert: {
+          agent_id: string
+          created_at?: string
+          id?: string
+          message?: string
+          metadata?: Json
+          status?: string
+        }
+        Update: {
+          agent_id?: string
+          created_at?: string
+          id?: string
+          message?: string
+          metadata?: Json
+          status?: string
+        }
+        Relationships: []
+      }
       audits: {
         Row: {
           absence_test_48h: string
@@ -1326,6 +1353,7 @@ export type Database = {
       }
       cleanup_expired_oauth_states: { Args: never; Returns: undefined }
       cleanup_old_edge_logs: { Args: never; Returns: undefined }
+      cleanup_old_heartbeats: { Args: never; Returns: undefined }
       cleanup_rate_limits: { Args: never; Returns: undefined }
       get_usage_analytics: { Args: { p_user_id: string }; Returns: Json }
       has_role: {
