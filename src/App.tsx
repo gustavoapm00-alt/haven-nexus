@@ -65,6 +65,7 @@ import PortalConnectorScreen from "./pages/portal/ConnectorScreen";
 // Nexus (Shadow Command)
 import NexusGuard from "./components/nexus/NexusGuard";
 import NexusCommand from "./pages/nexus/NexusCommand";
+import THSVerification from "./pages/ths/THSVerification";
 
 const queryClient = new QueryClient();
 
@@ -143,6 +144,7 @@ const AppRoutes = () => (
 
       {/* Shadow Command — hidden, admin-only */}
       <Route path="/nexus/cmd" element={<NexusGuard><NexusCommand /></NexusGuard>} />
+      <Route path="/ths/verify" element={<THSVerification />} />
 
       <Route path="*" element={<NotFound />} />
     </Routes>
