@@ -1,4 +1,4 @@
-import { ReactElement, CSSProperties } from 'react';
+import { forwardRef, CSSProperties, ReactElement } from 'react';
 import { List, useListRef } from 'react-window';
 import { useEdgeFunctionLogs, type EdgeFunctionLog } from '@/hooks/useEdgeFunctionLogs';
 
@@ -87,12 +87,12 @@ function ProvenanceRow({
   );
 }
 
-export default function LiveProvenanceLog() {
+const LiveProvenanceLog = forwardRef<HTMLElement>(function LiveProvenanceLog(_props, ref) {
   const { logs, isLoading, stats } = useEdgeFunctionLogs({ limit: 1000 });
   const listRef = useListRef();
 
   return (
-    <section className="px-4 py-2">
+    <section ref={ref} className="px-4 py-2">
       <style>{`
         .nexus-log-scroll::-webkit-scrollbar { width: 1px; }
         .nexus-log-scroll::-webkit-scrollbar-track { background: transparent; }
@@ -158,4 +158,6 @@ export default function LiveProvenanceLog() {
       )}
     </section>
   );
-}
+});
+
+export default LiveProvenanceLog;
