@@ -1339,27 +1339,33 @@ export type Database = {
       }
       sovereign_bridge: {
         Row: {
+          behavioral_data: Json | null
           created_at: string
           id: string
           is_human_verified: boolean
           updated_at: string
           user_id: string
+          veracity_score: number | null
           verification_source: string | null
         }
         Insert: {
+          behavioral_data?: Json | null
           created_at?: string
           id?: string
           is_human_verified?: boolean
           updated_at?: string
           user_id: string
+          veracity_score?: number | null
           verification_source?: string | null
         }
         Update: {
+          behavioral_data?: Json | null
           created_at?: string
           id?: string
           is_human_verified?: boolean
           updated_at?: string
           user_id?: string
+          veracity_score?: number | null
           verification_source?: string | null
         }
         Relationships: []

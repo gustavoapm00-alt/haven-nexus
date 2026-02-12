@@ -3,7 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useTHSVerification } from '@/hooks/useTHSVerification';
 import { motion } from 'framer-motion';
 
-const THS_AUTHORIZE_URL = 'https://preview--human-veracity-layer.lovable.app/';
+const THS_AUTHORIZE_URL = '/ths/verify';
 
 function THSLockedOverlay() {
   return (
@@ -85,8 +85,6 @@ function THSLockedOverlay() {
         {/* Authorize button */}
         <a
           href={THS_AUTHORIZE_URL}
-          target="_blank"
-          rel="noopener noreferrer"
           className="group relative inline-flex items-center justify-center transition-all"
           style={{
             border: '1px solid rgba(57,255,20,0.5)',
