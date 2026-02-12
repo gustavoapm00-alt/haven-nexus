@@ -134,7 +134,7 @@ export function AuditorLastCommit({ state }: { state?: AgentState }) {
   );
 }
 
-/** AG-07 Envoy — Generate Report button (UI only) */
+/** AG-07 Envoy — Generate Report button (scrolls to AAR panel) */
 export function EnvoyReportButton() {
   return (
     <div className="mt-2">
@@ -157,7 +157,9 @@ export function EnvoyReportButton() {
           (e.target as HTMLButtonElement).style.background = 'transparent';
         }}
         onClick={() => {
-          // UI-only placeholder — future AAR integration
+          // Scroll to AAR panel
+          const el = document.querySelector('[data-aar-panel]');
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }}
       >
         [GENERATE_AAR_REPORT]

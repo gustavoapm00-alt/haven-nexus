@@ -7,6 +7,11 @@ import LiveProvenanceLog from '@/components/nexus/LiveProvenanceLog';
 import RegulatorDiagram from '@/components/nexus/RegulatorDiagram';
 import DriftSimulationPanel from '@/components/nexus/DriftSimulationPanel';
 import OperationalModeSelector from '@/components/nexus/OperationalModeSelector';
+import AARReportPanel from '@/components/nexus/AARReportPanel';
+import TelemetryTimeline from '@/components/nexus/TelemetryTimeline';
+import AutoHealPanel from '@/components/nexus/AutoHealPanel';
+import NexusAlertPanel from '@/components/nexus/NexusAlertPanel';
+import ThreatSurfaceDashboard from '@/components/nexus/ThreatSurfaceDashboard';
 
 function useSystemClock() {
   const [time, setTime] = useState('');
@@ -124,9 +129,34 @@ export default function NexusCommand() {
             <NexusModuleGrid agentStatuses={agentStatuses} forceStabilize={forceStabilize} />
           </div>
 
+          {/* Nexus Alerts */}
+          <div className="mb-8">
+            <NexusAlertPanel agentStatuses={agentStatuses} />
+          </div>
+
+          {/* Telemetry Timeline */}
+          <div className="mb-8">
+            <TelemetryTimeline />
+          </div>
+
+          {/* Auto-Healing Pipeline */}
+          <div className="mb-8">
+            <AutoHealPanel />
+          </div>
+
           {/* Drift Simulation Panel */}
           <div className="mb-8">
             <DriftSimulationPanel />
+          </div>
+
+          {/* Threat Surface Dashboard (AG-05) */}
+          <div className="mb-8">
+            <ThreatSurfaceDashboard />
+          </div>
+
+          {/* Executive Briefing Generator (AG-07) */}
+          <div className="mb-8">
+            <AARReportPanel />
           </div>
 
           {/* Regulator Interface */}
