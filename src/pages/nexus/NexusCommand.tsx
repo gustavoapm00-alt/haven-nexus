@@ -3,7 +3,7 @@ import { useAgentStatus } from '@/hooks/useAgentStatus';
 import { useNexusMode } from '@/hooks/useNexusMode';
 import GlobalHealthStatus from '@/components/nexus/GlobalHealthStatus';
 import NexusModuleGrid from '@/components/nexus/NexusModuleGrid';
-import LiveProvenanceLog from '@/components/nexus/LiveProvenanceLog';
+
 import RegulatorDiagram from '@/components/nexus/RegulatorDiagram';
 import DriftSimulationPanel from '@/components/nexus/DriftSimulationPanel';
 import OperationalModeSelector from '@/components/nexus/OperationalModeSelector';
@@ -117,7 +117,7 @@ export default function NexusCommand() {
       </div>
 
       {/* Main content */}
-      <main className="relative z-10 px-6 py-6 pb-[280px]">
+      <main className="relative z-10 px-6 py-6">
         <div className="max-w-[1440px] mx-auto">
           {/* Operational Mode Selector */}
           <div className="mb-8">
@@ -166,24 +166,6 @@ export default function NexusCommand() {
         </div>
       </main>
 
-      {/* Docked Global Provenance Trail */}
-      <div
-        className="fixed bottom-0 left-0 right-0 z-40 transition-all duration-500"
-        style={{
-          background: config.bg,
-          borderTop: `1px solid ${config.border}`,
-          backdropFilter: 'blur(6px)',
-        }}
-      >
-        <LiveProvenanceLog />
-        <div
-          className="flex items-center justify-between px-4 pb-1"
-          style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 6, letterSpacing: '0.2em' }}
-        >
-          <span style={{ color: `${config.pulse}4d` }}>/NEXUS/CMD // GLOBAL_PROVENANCE_TRAIL // MODE:{config.label}</span>
-          <span style={{ color: `${config.pulse}4d` }}>AERELION // 2026</span>
-        </div>
-      </div>
     </div>
   );
 }
