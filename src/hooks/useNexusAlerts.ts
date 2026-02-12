@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { AgentState } from '@/hooks/useAgentStatus';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 
 interface NexusAlert {
   id: string;
@@ -14,45 +15,80 @@ interface NexusAlert {
 
 const ESCALATION_THRESHOLD_MS = 10 * 60 * 1000; // 10 minutes
 
+function createAlert(agentId: string, status: string, message: string, timestamp?: string): NexusAlert {
+  return {
+    id: `${agentId}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    agent_id: agentId,
+    status,
+    message: message || `${status} detected`,
+    timestamp: timestamp || new Date().toISOString(),
+    escalated: false,
+    acknowledged: false,
+  };
+}
+
+function pushNotification(alert: NexusAlert) {
+  supabase.from('admin_notifications').insert({
+    type: 'nexus_alert',
+    title: `[${alert.agent_id}] ${alert.status} DETECTED`,
+    body: alert.message,
+    severity: alert.status === 'ERROR' ? 'critical' : 'warning',
+    metadata: { agent_id: alert.agent_id, status: alert.status },
+  }).then(() => {});
+}
+
 export function useNexusAlerts(agentStatuses: Record<string, AgentState>) {
   const [alerts, setAlerts] = useState<NexusAlert[]>([]);
   const [escalationEnabled, setEscalationEnabled] = useState(true);
+  const channelRef = useRef<RealtimeChannel | null>(null);
 
-  // Monitor agent statuses for DRIFT/ERROR and create alerts
+  // ── Realtime subscription on agent_heartbeats ──
+  useEffect(() => {
+    channelRef.current = supabase
+      .channel('nexus-alerts-heartbeats')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'agent_heartbeats' },
+        (payload) => {
+          const row = payload.new as { agent_id: string; status: string; message: string; created_at: string };
+          const upperStatus = row.status?.toUpperCase();
+          if (upperStatus === 'DRIFT' || upperStatus === 'ERROR') {
+            const alert = createAlert(row.agent_id, upperStatus, row.message, row.created_at);
+            setAlerts((prev) => {
+              // Deduplicate: skip if unacknowledged alert for same agent already exists
+              if (prev.some((a) => a.agent_id === row.agent_id && !a.acknowledged)) return prev;
+              pushNotification(alert);
+              return [alert, ...prev].slice(0, 50);
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+      }
+    };
+  }, []);
+
+  // ── Existing: Monitor prop-based agent statuses as fallback ──
   useEffect(() => {
     const newAlerts: NexusAlert[] = [];
 
     Object.entries(agentStatuses).forEach(([agentId, state]) => {
       if (state.status === 'DRIFT' || state.status === 'ERROR') {
-        // Check if we already have an unacknowledged alert for this agent
         const existing = alerts.find((a) => a.agent_id === agentId && !a.acknowledged);
         if (!existing) {
-          newAlerts.push({
-            id: `${agentId}-${Date.now()}`,
-            agent_id: agentId,
-            status: state.status,
-            message: state.message || `${state.status} detected`,
-            timestamp: new Date().toISOString(),
-            escalated: false,
-            acknowledged: false,
-          });
+          const alert = createAlert(agentId, state.status, state.message || `${state.status} detected`);
+          newAlerts.push(alert);
         }
       }
     });
 
     if (newAlerts.length > 0) {
       setAlerts((prev) => [...newAlerts, ...prev].slice(0, 50));
-
-      // Push to admin_notifications
-      newAlerts.forEach(async (alert) => {
-        await supabase.from('admin_notifications').insert({
-          type: 'nexus_alert',
-          title: `[${alert.agent_id}] ${alert.status} DETECTED`,
-          body: alert.message,
-          severity: alert.status === 'ERROR' ? 'critical' : 'warning',
-          metadata: { agent_id: alert.agent_id, status: alert.status },
-        }).then(() => {});
-      });
+      newAlerts.forEach(pushNotification);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(Object.entries(agentStatuses).map(([k, v]) => [k, v.status]))]);
