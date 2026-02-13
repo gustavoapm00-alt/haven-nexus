@@ -31,13 +31,18 @@ const ClientAuth = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [resetEmailSent, setResetEmailSent] = useState(false);
   
-  const { user, signIn, signUp, signInWithGoogle, resetPassword, isLoading } = useAuth();
+  const { user, isAdmin, signIn, signUp, signInWithGoogle, resetPassword, isLoading } = useAuth();
   const { profile, isLoading: profileLoading } = useClientProfile();
   const navigate = useNavigate();
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   useEffect(() => {
     if (user && !profileLoading) {
+      // Admin users go to Nexus Command
+      if (isAdmin) {
+        navigate('/nexus/cmd');
+        return;
+      }
       // Redirect based on onboarding status
       if (profile?.onboarding_complete) {
         navigate('/portal/dashboard');
@@ -45,7 +50,7 @@ const ClientAuth = () => {
         navigate('/portal/onboarding');
       }
     }
-  }, [user, profile, profileLoading, navigate]);
+  }, [user, isAdmin, profile, profileLoading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -157,7 +162,7 @@ const ClientAuth = () => {
     setIsGoogleLoading(true);
     try {
       const result = await lovable.auth.signInWithOAuth('google', {
-        redirect_uri: window.location.origin + '/portal/dashboard',
+        redirect_uri: window.location.origin,
       });
       if (result.error) {
         toast({

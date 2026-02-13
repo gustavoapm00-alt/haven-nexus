@@ -19,7 +19,7 @@ export const PortalRouteGuard: React.FC<PortalRouteGuardProps> = ({
   children, 
   requireOnboarding = false 
 }) => {
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isAdmin, isLoading: authLoading } = useAuth();
   const { profile, isLoading: profileLoading } = useClientProfile();
 
   // Show loading state while checking auth
@@ -36,6 +36,11 @@ export const PortalRouteGuard: React.FC<PortalRouteGuardProps> = ({
   // Redirect to auth if not logged in
   if (!user) {
     return <Navigate to="/portal/auth" replace />;
+  }
+
+  // Admin users are routed to Nexus Command, not the client portal
+  if (isAdmin) {
+    return <Navigate to="/nexus/cmd" replace />;
   }
 
   // If onboarding is required and not complete, redirect to onboarding
