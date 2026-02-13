@@ -3,14 +3,14 @@ import SEO, { schemas } from '@/components/SEO';
 
 const Security = () => {
   const practices = [
-    { icon: Server, id: 'SEC-001', title: 'Infrastructure Isolation', description: 'All automations run on AERELION-managed infrastructure. Your systems are never exposed to third-party runtimes or shared environments.' },
-    { icon: Lock, id: 'SEC-002', title: 'Credential Encryption at Rest', description: 'All credentials are encrypted using industry-standard encryption. Access tokens and authorization keys are never stored in plain text.' },
-    { icon: Key, id: 'SEC-003', title: 'Least-Privilege Access Protocol', description: 'We request only the minimum permissions required to operate your automations. No excess access is ever requested.' },
-    { icon: RefreshCw, id: 'SEC-004', title: 'Revocable Authorization', description: 'You maintain full control. Revoke access at any time through your tool settings or by contacting us directly.' },
-    { icon: Database, id: 'SEC-005', title: 'Data Retention Policy', description: 'Operational data retained only as long as necessary. Logs and temporary data are regularly purged per retention policy.' },
-    { icon: Eye, id: 'SEC-006', title: 'Zero Data Monetization', description: 'Your data is yours. We do not sell, share, or monetize customer data under any circumstances.' },
+    { icon: Lock, id: 'SEC-001', title: 'Data Transmission (TLS 1.3)', description: 'All data is transmitted via TLS 1.3 (Transport Layer Security). AERELION enforces HTTPS-only connections. No data is ever sent in plaintext over the wire.' },
+    { icon: Key, id: 'SEC-002', title: 'Credential Vaulting (AES-256-GCM)', description: 'Sensitive credentials (API keys, tokens) are isolated from application logic. Upon receipt, they are encrypted using AES-256-GCM (Galois/Counter Mode) via isolated Edge Functions before storage.' },
+    { icon: Shield, id: 'SEC-003', title: 'Zero-Trust Access (RLS + THS)', description: 'Row Level Security (RLS) and Behavioral Biometrics (The Human Signature) ensure that valid credentials cannot be used by automated bots or unauthorized actors.' },
+    { icon: RefreshCw, id: 'SEC-004', title: 'Revocability (<60 Seconds)', description: 'Client access is managed via a central identity provider. AERELION retains the ability to revoke access tokens globally in under 60 seconds, instantly severing connections to the infrastructure.' },
+    { icon: Server, id: 'SEC-005', title: 'Infrastructure Isolation', description: 'All automations run on AERELION-managed infrastructure. Your systems are never exposed to third-party runtimes or shared environments.' },
+    { icon: Database, id: 'SEC-006', title: 'Data Retention & Minimization', description: 'Operational data retained only as long as necessary. Logs and temporary data are regularly purged per retention policy. We never sell, share, or monetize customer data.' },
     { icon: Users, id: 'SEC-007', title: 'Accountable Operators', description: 'Every automation is managed by trained operators who follow documented procedures with full execution accountability.' },
-    { icon: Shield, id: 'SEC-008', title: 'Full Ownership Guarantee', description: 'You retain full ownership of your accounts, tools, and operational outcomes. We operate on your behalf—nothing more.' },
+    { icon: Eye, id: 'SEC-008', title: 'Full Ownership Guarantee', description: 'You retain full ownership of your accounts, tools, and operational outcomes. We operate on your behalf—nothing more.' },
   ];
 
   const securityStructuredData = [
@@ -71,13 +71,13 @@ const Security = () => {
               </div>
               <h3 className="font-mono text-sm font-semibold text-[#E0E0E0] mb-2">How We Handle Your Credentials</h3>
               <p className="font-sans text-sm text-white/35 leading-relaxed mb-3">
-                During activation, you provide access to the tools we'll operate on your behalf.
-                We accept OAuth connections, workspace invites, or secure authorization links—never
-                raw passwords or plaintext secrets.
+                During activation, you authorize access to the tools we operate on your behalf.
+                Credentials are transmitted exclusively via TLS 1.3 and encrypted at rest using
+                AES-256-GCM before touching any database. Plaintext secrets never exist in storage.
               </p>
               <p className="font-sans text-sm text-white/35 leading-relaxed">
-                All credentials are encrypted immediately upon receipt and stored in isolated,
-                access-controlled environments. Only authorized operators access your systems.
+                Access is governed by Row Level Security and behavioral biometrics (The Human Signature).
+                Revoke any connection globally in under 60 seconds—instantly severing infrastructure access.
               </p>
             </div>
 

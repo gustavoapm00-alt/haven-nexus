@@ -308,7 +308,7 @@
              <div className="flex items-center justify-between">
                <div className="flex items-center gap-2 text-xs text-muted-foreground">
                  <Shield className="w-3.5 h-3.5" />
-                 <span>AES-256 encrypted • Connect once, use everywhere</span>
+                 <span>TLS 1.3 • AES-256-GCM encrypted • Revocable in &lt;60s</span>
                </div>
                
                {allConnected ? (

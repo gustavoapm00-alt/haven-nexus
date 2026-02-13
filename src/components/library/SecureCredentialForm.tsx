@@ -226,8 +226,8 @@ export function SecureCredentialForm({
       <Alert className="bg-primary/5 border-primary/30">
         <Shield className="w-4 h-4 text-primary" />
         <AlertDescription className="text-sm">
-          Sent securely via HTTPS and encrypted at rest with AES-256-GCM. 
-          Never logged, emailed, or shown again after submission. Revocable at any time.
+          Transmitted via TLS 1.3 and encrypted at rest with AES-256-GCM. 
+          Never logged, emailed, or shown again after submission. Revocable globally in under 60 seconds.
         </AlertDescription>
       </Alert>
 
@@ -246,7 +246,7 @@ export function SecureCredentialForm({
         <div className="flex items-center justify-between pt-4">
           <p className="text-xs text-muted-foreground flex items-center gap-1">
             <Lock className="w-3 h-3" />
-            Sent securely and encrypted at rest
+            TLS 1.3 • AES-256-GCM • Revocable in &lt;60s
           </p>
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? (
