@@ -64,24 +64,34 @@ export default function THSVerification() {
     ctx.shadowBlur = 0;
   }, [mouseTrail]);
 
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+  const addEntropySample = useCallback((clientX: number, clientY: number) => {
     const rect = zoneRef.current?.getBoundingClientRect();
     if (!rect) return;
     const sample: MouseSample = {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
+      x: clientX - rect.left,
+      y: clientY - rect.top,
       t: Date.now(),
     };
     setMouseTrail(prev => {
       const next = [...prev, sample];
       const mouseContrib = Math.min(next.length / 50, 1) * 40;
-      setVeracityMeter(prev2 => {
+      setVeracityMeter(() => {
         const keystrokeContrib = Math.min(keystrokes.length / COMMAND.length, 1) * 60;
         return Math.round(mouseContrib + keystrokeContrib);
       });
       return next;
     });
   }, [keystrokes.length]);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    addEntropySample(e.clientX, e.clientY);
+  }, [addEntropySample]);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    if (touch) addEntropySample(touch.clientX, touch.clientY);
+  }, [addEntropySample]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key.length === 1 && !activeKeysRef.current.has(e.key)) {
@@ -193,7 +203,7 @@ export default function THSVerification() {
                 VERIFICATION_ZONE
               </div>
               <div className="text-[8px] tracking-[0.2em] leading-relaxed max-w-sm mx-auto" style={{ color: 'rgba(255,255,255,0.3)', fontFamily: MONO }}>
-                MOVE YOUR CURSOR WITHIN THE ZONE BELOW. THEN TYPE THE COMMAND STRING TO PROVE HUMAN PRESENCE.
+                MOVE YOUR CURSOR OR FINGER WITHIN THE ZONE BELOW. THEN TYPE THE COMMAND STRING TO PROVE HUMAN PRESENCE.
               </div>
             </div>
 
@@ -201,16 +211,18 @@ export default function THSVerification() {
             <div
               ref={zoneRef}
               onMouseMove={handleMouseMove}
-              className="relative cursor-crosshair"
+              onTouchMove={handleTouchMove}
+              className="relative cursor-crosshair touch-none"
               style={{
-                width: 280,
-                height: 280,
+                width: '100%',
+                maxWidth: 280,
+                aspectRatio: '1 / 1',
                 border: `1px solid ${mouseTrail.length > 20 ? 'rgba(57,255,20,0.4)' : 'rgba(255,191,0,0.3)'}`,
                 background: 'rgba(57,255,20,0.02)',
                 transition: 'border-color 0.5s',
               }}
             >
-              <canvas ref={canvasRef} width={280} height={280} className="absolute inset-0" />
+              <canvas ref={canvasRef} width={280} height={280} className="absolute inset-0 w-full h-full" />
               <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
                 <span className="text-[6px] tracking-[0.3em] uppercase" style={{ color: 'rgba(57,255,20,0.3)', fontFamily: MONO }}>
                   ENTROPY_SENSOR
