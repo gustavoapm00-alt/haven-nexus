@@ -1,21 +1,47 @@
-# Security Policy
+# Security Policy — AERELION Systems
 
 ## Supported Versions
 
-Use this section to tell people about which versions of your project are
-currently being supported with security updates.
-
 | Version | Supported          |
 | ------- | ------------------ |
-| 5.1.x   | :white_check_mark: |
-| 5.0.x   | :x:                |
-| 4.0.x   | :white_check_mark: |
-| < 4.0   | :x:                |
+| 2.x     | ✅ Active support  |
+| 1.x     | ❌ End of life     |
 
 ## Reporting a Vulnerability
 
-Use this section to tell people how to report a vulnerability.
+If you discover a security vulnerability in AERELION Systems, please report it responsibly:
 
-Tell them where to go, how often they can expect to get an update on a
-reported vulnerability, what to expect if the vulnerability is accepted or
-declined, etc.
+**Email:** security@aerelion.com  
+**Response SLA:** Initial acknowledgment within 48 hours. Status update within 5 business days.
+
+### What to include
+- Description of the vulnerability
+- Steps to reproduce
+- Potential impact assessment
+- Your contact information (for follow-up)
+
+### What to expect
+- We will acknowledge receipt within **48 hours**
+- We will provide an initial assessment within **5 business days**
+- If accepted, we will coordinate a fix timeline and credit you (if desired)
+- If declined, we will provide a rationale
+
+### Scope
+- All production endpoints at `*.aerelion.com`
+- Client portal, admin panel, and API layer
+- Edge Functions and webhook handlers
+
+### Out of Scope
+- Third-party services (Stripe, Supabase infrastructure, n8n cloud)
+- Social engineering attacks against personnel
+- Denial of service attacks
+
+## Security Architecture
+
+AERELION implements a defense-in-depth security model:
+
+1. **Data Transmission**: TLS 1.3 enforced on all connections
+2. **Credential Vaulting**: AES-256-GCM encryption via isolated Edge Functions
+3. **Zero-Trust Access**: Row Level Security (RLS) + Behavioral Biometrics (THS)
+4. **Revocability**: Token revocation capability in under 60 seconds
+5. **Audit Trail**: Immutable edge function logging with PII redaction
