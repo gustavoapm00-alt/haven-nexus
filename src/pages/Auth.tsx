@@ -29,24 +29,29 @@ const Auth = () => {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [resetEmailSent, setResetEmailSent] = useState(false);
   
-  const { user, signIn, signUp, resetPassword, isLoading } = useAuth();
+  const { user, isAdmin, signIn, signUp, resetPassword, isLoading } = useAuth();
   const navigate = useNavigate();
 
   // Get redirect destination from URL params, default to /dashboard
   const searchParams = new URLSearchParams(window.location.search);
-  const redirectTo = searchParams.get('redirect') || '/dashboard';
+  const explicitRedirect = searchParams.get('redirect');
 
   useEffect(() => {
     if (user) {
-      navigate(redirectTo);
+      // Admin users go to Nexus Command unless explicitly redirected elsewhere
+      if (isAdmin && !explicitRedirect) {
+        navigate('/nexus/cmd');
+      } else {
+        navigate(explicitRedirect || '/dashboard');
+      }
     }
-  }, [user, navigate, redirectTo]);
+  }, [user, isAdmin, navigate, explicitRedirect]);
 
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
     try {
       const result = await lovable.auth.signInWithOAuth('google', {
-        redirect_uri: window.location.origin + redirectTo,
+        redirect_uri: window.location.origin,
       });
       
       if (result.redirected) {
