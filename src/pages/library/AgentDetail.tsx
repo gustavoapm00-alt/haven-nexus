@@ -1,5 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Check, ArrowRight, Loader2 } from 'lucide-react';
+import { ArrowLeft, Check, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Accordion,
@@ -9,23 +9,11 @@ import {
 } from '@/components/ui/accordion';
 import SystemIcon from '@/components/library/SystemIcon';
 import { useAgent } from '@/hooks/useAgents';
-import { usePurchase } from '@/hooks/usePurchase';
 import SEO, { schemas } from '@/components/SEO';
 
 const AgentDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const { agent, loading, error } = useAgent(slug || '');
-  const { initiateCheckout, loading: checkoutLoading } = usePurchase();
-
-  const isPublished = agent?.status === 'published';
-  const cents = agent?.price_cents ?? 0;
-  const priceDisplay = cents > 0 ? `$${(cents / 100).toFixed(2)}` : 'Free';
-
-  const handleActivateNow = () => {
-    if (agent) {
-      initiateCheckout('agent', agent.id);
-    }
-  };
 
   const faqs = [
     {
@@ -72,7 +60,7 @@ const AgentDetail = () => {
               The specified protocol does not exist or has been decommissioned.
             </p>
             <Button asChild variant="outline" className="border-white/10 font-mono text-xs uppercase tracking-wider">
-              <Link to="/automations">RETURN_TO_REGISTRY</Link>
+              <Link to="/automations">RETURN_TO_MATRIX</Link>
             </Button>
           </div>
         </div>
@@ -86,7 +74,7 @@ const AgentDetail = () => {
     schemas.faqPage(faqs),
     schemas.breadcrumb([
       { name: 'Home', url: '/' },
-      { name: 'Protocols', url: '/automations' },
+      { name: 'Capability Matrix', url: '/automations' },
       { name: agent.name, url: `/automations/${agent.slug}` }
     ])
   ];
@@ -110,7 +98,7 @@ const AgentDetail = () => {
               className="inline-flex items-center gap-2 font-mono text-[10px] text-white/30 hover:text-[#39FF14]/60 uppercase tracking-[0.2em] mb-8 transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              RETURN_TO_REGISTRY
+              RETURN_TO_MATRIX
             </Link>
 
             {/* Header */}
@@ -258,51 +246,20 @@ const AgentDetail = () => {
                   <h3 className="font-mono text-xs text-[#E0E0E0] uppercase tracking-[0.2em] mb-2">
                     PROTOCOL_AUTHORIZATION
                   </h3>
-                  <p className="font-mono text-[10px] text-white/30 mb-4 leading-relaxed">
-                    AERELION governs all configuration, hosting, and operational oversight for this protocol.
+                  <p className="font-mono text-[10px] text-white/30 mb-6 leading-relaxed">
+                    AERELION governs all configuration, hosting, and operational oversight for this protocol. Submit a scoping request to assess alignment.
                   </p>
 
-                  {isPublished ? (
-                    <>
-                      <div className="text-center mb-4 border border-white/5 py-3">
-                        <span className="font-mono text-xl text-[#39FF14]/80">{priceDisplay}</span>
-                      </div>
-                      <Button 
-                        onClick={handleActivateNow}
-                        disabled={checkoutLoading}
-                        className="w-full mb-3 bg-[#39FF14]/10 text-[#39FF14] border border-[rgba(57,255,20,0.3)] hover:bg-[#39FF14]/20 font-mono text-[10px] uppercase tracking-wider" 
-                        size="lg"
-                      >
-                        {checkoutLoading ? (
-                          <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            PROCESSING...
-                          </>
-                        ) : (
-                          <>
-                            INITIATE_HANDOFF
-                            <ArrowRight className="w-4 h-4 ml-2" />
-                          </>
-                        )}
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <p className="font-mono text-[10px] text-white/20 mb-4">
-                        Submit authorization request to initiate parameter scoping.
-                      </p>
-                      <Button 
-                        asChild
-                        className="w-full mb-3 bg-[#39FF14]/10 text-[#39FF14] border border-[rgba(57,255,20,0.3)] hover:bg-[#39FF14]/20 font-mono text-[10px] uppercase tracking-wider" 
-                        size="lg"
-                      >
-                        <Link to="/contact">
-                          INITIATE_HANDOFF
-                          <ArrowRight className="w-4 h-4 ml-2" />
-                        </Link>
-                      </Button>
-                    </>
-                  )}
+                  <Button 
+                    asChild
+                    className="w-full mb-3 bg-[#39FF14]/10 text-[#39FF14] border border-[rgba(57,255,20,0.3)] hover:bg-[#39FF14]/20 font-mono text-[10px] uppercase tracking-wider" 
+                    size="lg"
+                  >
+                    <Link to="/contact">
+                      REQUEST_SCOPING
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Link>
+                  </Button>
                 </div>
               </div>
             </div>

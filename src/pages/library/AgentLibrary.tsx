@@ -36,15 +36,15 @@ const AgentLibrary = () => {
   const hasFilters = searchQuery || selectedSector || selectedSystem;
 
   const catalogStructuredData = [
-    schemas.service("Hosted Automation Catalog", "Browse operational automations AERELION operates.", "/automations"),
-    schemas.breadcrumb([{ name: 'Home', url: '/' }, { name: 'Protocols', url: '/automations' }])
+    schemas.service("Capability Matrix", "Operational capabilities governed by AERELION infrastructure.", "/automations"),
+    schemas.breadcrumb([{ name: 'Home', url: '/' }, { name: 'Capability Matrix', url: '/automations' }])
   ];
 
   return (
     <>
       <SEO
-        title="Active Protocols – Managed Automations | AERELION"
-        description="Browse operational automations AERELION configures, operates, and maintains."
+        title="Capability Matrix – Governed Protocols | AERELION"
+        description="Operational capabilities governed by AERELION infrastructure. Systemic de-risking for professional services."
         canonicalUrl="/automations"
         structuredData={catalogStructuredData}
       />
@@ -55,25 +55,25 @@ const AgentLibrary = () => {
             {/* Header */}
             <div className="mb-8">
               <span className="font-mono text-[10px] text-[#39FF14]/60 uppercase tracking-[0.2em] mb-2 block">
-                // PROTOCOL_DATABASE
+                // CAPABILITY_MATRIX
               </span>
               <h1 className="text-3xl md:text-4xl font-display font-semibold text-foreground mb-3">
-                Active Protocols
+                Capability Matrix
               </h1>
               <p className="text-white/40 font-mono text-sm max-w-2xl">
-                Active protocols under AERELION governance. Authenticated data provisioning.
+                Governed protocols under AERELION operational infrastructure.
               </p>
             </div>
 
             {/* Status Banner */}
             <div className="card-enterprise p-5 mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
               <div>
-                <h3 className="font-display font-semibold text-foreground mb-1">Protocol Registry</h3>
-                <p className="text-sm font-mono text-white/30">All protocols below are configured, hosted, and maintained by AERELION.</p>
+                <h3 className="font-display font-semibold text-foreground mb-1">Capability Matrix</h3>
+                <p className="text-sm font-mono text-white/30">All capabilities below are configured, hosted, and maintained by AERELION.</p>
               </div>
               <Button asChild>
                 <Link to="/contact">
-                  INITIATE BRIEFING REQUEST
+                  REQUEST SCOPING
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Link>
               </Button>

@@ -40,7 +40,7 @@ const BundleDetail = () => {
               The specified system does not exist or has been decommissioned.
             </p>
             <Button asChild variant="outline" className="border-white/10 font-mono text-xs uppercase tracking-wider">
-              <Link to="/automations">RETURN_TO_REGISTRY</Link>
+              <Link to="/automations">RETURN_TO_MATRIX</Link>
             </Button>
           </div>
         </div>
@@ -65,7 +65,7 @@ const BundleDetail = () => {
               className="inline-flex items-center gap-2 font-mono text-[10px] text-white/30 hover:text-[#39FF14]/60 uppercase tracking-[0.2em] mb-8 transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              RETURN_TO_REGISTRY
+              RETURN_TO_MATRIX
             </Link>
 
             {/* Header */}
@@ -178,7 +178,7 @@ const BundleDetail = () => {
                     size="lg"
                   >
                     <Link to="/contact">
-                      INITIATE_HANDOFF
+                      REQUEST_SCOPING
                       <ArrowRight className="w-4 h-4 ml-2" />
                     </Link>
                   </Button>
