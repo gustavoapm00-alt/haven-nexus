@@ -47,8 +47,8 @@ const ActivationWalkthrough = () => {
     <>
       <SEO
         title="Activation Walkthrough"
-        description="Learn how AERELION activates your hosted automation. Connect your tools, we configure and maintain everything."
-        keywords="activation, setup, hosted automation, walkthrough, how it works"
+        description="Learn how AERELION activates governed protocols. Authorize your systems, we configure, stabilize, and maintain everything."
+        keywords="activation, protocol deployment, governed protocol, walkthrough, operational governance"
       />
 
       <div className="min-h-screen bg-background">
@@ -62,7 +62,7 @@ const ActivationWalkthrough = () => {
                 Activation Walkthrough
               </h1>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Here's exactly what happens after you purchase a hosted automation. We handle the technical work—you stay focused on your business.
+                Here's exactly what happens after you authorize a governed protocol. We handle the technical stabilization—you stay focused on your operations.
               </p>
             </div>
 
@@ -73,9 +73,9 @@ const ActivationWalkthrough = () => {
                 What Activation Means
               </h2>
               <p className="text-muted-foreground leading-relaxed">
-                When you purchase a hosted automation from AERELION, you're not receiving files to configure yourself. 
-                Instead, we host and run the automation on our infrastructure. You connect your tools, and we take care 
-                of everything else—configuration, monitoring, maintenance, and updates.
+                When you authorize a governed protocol from AERELION, you're not receiving files to configure yourself. 
+                Instead, we deploy and operate the protocol on our infrastructure. You authorize your systems, and we take care 
+                of everything else—configuration, stabilization, governance, and maintenance.
               </p>
             </div>
 
@@ -182,7 +182,7 @@ const ActivationWalkthrough = () => {
               </Button>
               <Button asChild variant="outline" size="lg">
                 <Link to="/automations">
-                  Browse Automations
+                  VIEW CAPABILITY MATRIX
                 </Link>
               </Button>
             </div>

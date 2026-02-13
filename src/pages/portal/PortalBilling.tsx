@@ -175,7 +175,7 @@ export default function PortalBilling() {
                             'Current Plan'
                           ) : (
                             <>
-                              Get Started
+                              REQUEST SCOPING
                               <ArrowRight className="w-3.5 h-3.5" />
                             </>
                           )}

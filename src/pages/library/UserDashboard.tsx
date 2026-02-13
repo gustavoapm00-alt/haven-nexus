@@ -82,7 +82,7 @@ const UserDashboard = () => {
               <Button asChild variant="outline">
                 <Link to="/automations">
                   <Package className="w-4 h-4 mr-2" />
-                  View Automations
+                  VIEW CAPABILITY MATRIX
                 </Link>
               </Button>
               <Button variant="ghost" onClick={handleSignOut}>
@@ -250,14 +250,14 @@ const UserDashboard = () => {
                   </div>
                   <h3 className="text-lg font-semibold text-foreground mb-2">No active engagements</h3>
                   <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                    Schedule a discovery call to discuss automation solutions for your operations.
+                    Submit a scoping request to discuss governed protocol deployment for your operations.
                   </p>
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                     <Button asChild>
-                      <Link to="/contact">Schedule a Call</Link>
+                      <Link to="/contact">REQUEST SCOPING</Link>
                     </Button>
                     <Button asChild variant="outline">
-                      <Link to="/automations">View Automations</Link>
+                      <Link to="/automations">VIEW CAPABILITY MATRIX</Link>
                     </Button>
                   </div>
                 </CardContent>

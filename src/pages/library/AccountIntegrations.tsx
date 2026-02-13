@@ -309,13 +309,13 @@ export default function AccountIntegrations() {
               </div>
               <h3 className="text-lg font-semibold mb-2">No Integrations Connected</h3>
               <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                When you activate an automation, you'll be prompted to connect the required tools.
-                Those connections will appear here and can be reused for other automations.
+                When you authorize a governed protocol, you'll be prompted to connect the required systems.
+                Those connections will appear here and can be reused across protocols.
               </p>
               <Link to="/library">
                 <Button>
                   <ExternalLink className="h-4 w-4 mr-2" />
-                  Browse Automations
+                  VIEW CAPABILITY MATRIX
                 </Button>
               </Link>
             </CardContent>

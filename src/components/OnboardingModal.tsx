@@ -166,7 +166,7 @@ export const OnboardingModal = ({ isOpen, onClose, userName }: OnboardingModalPr
               >
                 {isLastStep ? (
                   <>
-                    Browse Automations
+                    VIEW CAPABILITY MATRIX
                     <Sparkles className="w-4 h-4" />
                   </>
                 ) : (
