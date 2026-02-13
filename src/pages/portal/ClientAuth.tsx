@@ -40,7 +40,7 @@ const ClientAuth = () => {
     if (user && !profileLoading) {
       // Admin users go to Nexus Command
       if (isAdmin) {
-        navigate('/nexus/cmd');
+        navigate('/ths/verify');
         return;
       }
       // Redirect based on onboarding status
