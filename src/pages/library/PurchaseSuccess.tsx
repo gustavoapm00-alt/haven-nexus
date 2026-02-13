@@ -81,7 +81,16 @@ const PurchaseSuccess = () => {
   });
 
   const sessionId = searchParams.get('session_id');
-  const debugMode = searchParams.get('debug') === '1' || import.meta.env.DEV;
+  const debugMode = import.meta.env.DEV; // Debug panel restricted to development mode only
+
+  // SECURITY: Clear session_id from URL to prevent exposure in browser history/Referer headers
+  useEffect(() => {
+    if (sessionId) {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('session_id');
+      window.history.replaceState({}, '', url.pathname + url.search);
+    }
+  }, []);
 
   useEffect(() => {
     setDiagnostics(prev => ({ ...prev, sessionId }));

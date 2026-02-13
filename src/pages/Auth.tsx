@@ -11,6 +11,25 @@ const emailSchema = z.object({
   email: z.string().trim().email('Please enter a valid email address').max(255),
 });
 
+/**
+ * SECURITY: Validates redirect paths to prevent open redirect attacks.
+ * Only allows relative paths starting with "/" and blocks protocol schemes,
+ * double slashes, path traversal, and javascript/data URIs.
+ */
+function validateRedirectPath(path: string | null): string | null {
+  if (!path) return null;
+  const decoded = decodeURIComponent(path);
+  // Block protocol schemes (http:, javascript:, data:, etc.)
+  if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/i.test(decoded)) return null;
+  // Block double slashes (//evil.com)
+  if (decoded.startsWith('//')) return null;
+  // Block path traversal
+  if (decoded.includes('..')) return null;
+  // Must start with a single forward slash
+  if (!decoded.startsWith('/')) return null;
+  return decoded;
+}
+
 type FormErrors = {
   displayName?: string;
   email?: string;
@@ -33,8 +52,10 @@ const Auth = () => {
   const navigate = useNavigate();
 
   // Get redirect destination from URL params, default to /dashboard
+  // SECURITY: Validate redirect to prevent open redirect attacks
   const searchParams = new URLSearchParams(window.location.search);
-  const explicitRedirect = searchParams.get('redirect');
+  const rawRedirect = searchParams.get('redirect');
+  const explicitRedirect = validateRedirectPath(rawRedirect);
 
   useEffect(() => {
     if (user) {

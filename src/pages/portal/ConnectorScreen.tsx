@@ -348,9 +348,30 @@ export default function PortalConnectorScreen() {
         throw new Error(result.error || 'Failed to start OAuth flow');
       }
 
-      // Redirect to the authorization URL
+      // SECURITY: Validate authorization URL domain before redirect
       if (result.authorization_url) {
-        window.location.href = result.authorization_url;
+        const ALLOWED_AUTH_DOMAINS = [
+          'accounts.google.com',
+          'app.hubspot.com',
+          'slack.com',
+          'api.notion.com',
+          'login.microsoftonline.com',
+        ];
+        try {
+          const authUrl = new URL(result.authorization_url);
+          const isDomainAllowed = ALLOWED_AUTH_DOMAINS.some(
+            domain => authUrl.hostname === domain || authUrl.hostname.endsWith('.' + domain)
+          );
+          if (!isDomainAllowed) {
+            throw new Error(`Untrusted authorization domain: ${authUrl.hostname}`);
+          }
+          window.location.href = result.authorization_url;
+        } catch (urlError) {
+          if (urlError instanceof TypeError) {
+            throw new Error('Invalid authorization URL returned');
+          }
+          throw urlError;
+        }
       } else {
         throw new Error('No authorization URL returned');
       }
