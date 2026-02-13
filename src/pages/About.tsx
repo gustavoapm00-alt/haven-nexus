@@ -227,7 +227,7 @@ const About = () => {
           <div className="container-main max-w-3xl">
             <div className="border border-white/10 bg-[#0F0F0F] p-8 md:p-10 text-center">
               <h2 className="font-mono text-sm text-[#E0E0E0] uppercase tracking-[0.2em] mb-3">
-                INITIATE_HANDOFF
+                REQUEST_SCOPING
               </h2>
               <p className="font-mono text-[10px] text-white/30 mb-6 max-w-xl mx-auto">
                 Submit an authorization request to scope operational parameters and determine system alignment.
