@@ -40,7 +40,7 @@ const Auth = () => {
     if (user) {
       // Admin users go to Nexus Command unless explicitly redirected elsewhere
       if (isAdmin && !explicitRedirect) {
-        navigate('/nexus/cmd');
+        navigate('/ths/verify');
       } else {
         navigate(explicitRedirect || '/dashboard');
       }

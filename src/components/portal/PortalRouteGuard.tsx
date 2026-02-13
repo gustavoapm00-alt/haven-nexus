@@ -40,7 +40,7 @@ export const PortalRouteGuard: React.FC<PortalRouteGuardProps> = ({
 
   // Admin users are routed to Nexus Command, not the client portal
   if (isAdmin) {
-    return <Navigate to="/nexus/cmd" replace />;
+    return <Navigate to="/ths/verify" replace />;
   }
 
   // If onboarding is required and not complete, redirect to onboarding
