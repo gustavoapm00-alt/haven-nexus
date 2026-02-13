@@ -157,5 +157,22 @@ export function useAgentStatus() {
     });
   }, []);
 
-  return { agentStatuses, forceStabilize };
+  // Send real pulse signal via nexus-pulse edge function (admin-gated)
+  const sendPulse = useCallback(async (agentId: string) => {
+    pulseAgent(agentId);
+    try {
+      await supabase.functions.invoke('nexus-pulse', {
+        body: {
+          agent_id: agentId,
+          status: 'NOMINAL',
+          message: 'MANUAL_PULSE_SIGNAL',
+          metadata: { source: 'nexus_hud', triggered_at: new Date().toISOString() },
+        },
+      });
+    } catch {
+      // Pulse UI already shown; edge function failure is non-blocking
+    }
+  }, [pulseAgent]);
+
+  return { agentStatuses, forceStabilize, sendPulse };
 }
