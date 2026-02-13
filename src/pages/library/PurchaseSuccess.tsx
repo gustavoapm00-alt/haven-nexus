@@ -441,7 +441,7 @@ const PurchaseSuccess = () => {
                 <Button asChild variant="outline">
                   <Link to="/automations">
                     <ArrowLeft className="w-4 h-4 mr-2" />
-                    Browse Automations
+                    VIEW CAPABILITY MATRIX
                   </Link>
                 </Button>
                 <Button asChild>

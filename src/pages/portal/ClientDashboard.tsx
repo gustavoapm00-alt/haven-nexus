@@ -443,16 +443,16 @@ const ClientDashboard = () => {
             ) : (
               <GlassCard className="p-10 text-center">
                 <Package className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No active automations</h3>
+                <h3 className="text-lg font-semibold mb-2">No active protocols</h3>
                 <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                  Browse our catalog to find hosted automations that AERELION will 
-                  configure, operate, and maintain for you.
+                  Review the Capability Matrix to identify governed protocols that AERELION will 
+                  configure, stabilize, and maintain on your behalf.
                 </p>
                 <Link
                   to="/automations"
                   className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
                 >
-                  Browse Automations
+                  VIEW CAPABILITY MATRIX
                   <ExternalLink className="w-4 h-4" />
                 </Link>
               </GlassCard>

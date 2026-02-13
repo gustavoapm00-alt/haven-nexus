@@ -41,13 +41,13 @@ const AdminLibraryHome = () => {
                 </div>
                 <div className="flex-1">
                   <h3 className="font-display text-xl mb-2 group-hover:text-primary transition-colors">
-                    Hosted Automations
+                    Governed Protocols
                   </h3>
                   <p className="text-muted-foreground text-sm mb-4">
-                    Manage hosted automations. Configure pricing, requirements, and publish to the marketplace.
+                    Manage governed protocols. Configure specifications, dependencies, and publish to the Capability Matrix.
                   </p>
                   <span className="text-sm text-primary font-medium">
-                    Manage Automations →
+                    Manage Protocols →
                   </span>
                 </div>
               </div>

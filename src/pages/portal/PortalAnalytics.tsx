@@ -176,13 +176,13 @@ export default function PortalAnalytics() {
                 <Package className="w-12 h-12 text-muted-foreground/40 mx-auto mb-4" />
                 <h4 className="font-medium mb-2">No activations yet</h4>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Purchase an automation to start the activation process
+                  Authorize a governed protocol to initiate the activation sequence
                 </p>
                 <Link
                   to="/automations"
                   className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
                 >
-                  Browse Automations
+                  VIEW CAPABILITY MATRIX
                 </Link>
               </div>
             )}

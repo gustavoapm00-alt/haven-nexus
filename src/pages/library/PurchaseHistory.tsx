@@ -225,14 +225,14 @@ const PurchaseHistory = () => {
               </div>
               <h2 className="text-xl font-semibold text-foreground mb-3">No Purchases Yet</h2>
               <p className="text-muted-foreground mb-6">
-                You haven't purchased any automations or bundles yet. Browse our library to find automations that fit your needs.
+                No governed protocols have been authorized yet. Review the Capability Matrix to identify protocols for your operational requirements.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                 <Button asChild>
-                  <Link to="/automations">Browse Automations</Link>
+                  <Link to="/automations">VIEW CAPABILITY MATRIX</Link>
                 </Button>
                 <Button asChild variant="outline">
-                  <Link to="/bundles">View Bundles</Link>
+                  <Link to="/bundles">VIEW SYSTEM BUNDLES</Link>
                 </Button>
               </div>
             </motion.div>
@@ -259,7 +259,7 @@ const PurchaseHistory = () => {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                           <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                            {purchase.item_type === 'bundle' ? 'System Bundle' : 'Hosted Automation'}
+                            {purchase.item_type === 'bundle' ? 'SYSTEM_BUNDLE' : 'GOVERNED_PROTOCOL'}
                           </span>
                         </div>
                         <h3 className="text-lg font-semibold text-foreground mb-1 truncate">

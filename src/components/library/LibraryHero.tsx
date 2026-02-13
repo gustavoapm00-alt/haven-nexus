@@ -21,13 +21,13 @@ const LibraryHero = () => {
               transition={{ duration: 0.6 }}
             >
               <p className="text-sm font-medium text-primary uppercase tracking-wide mb-4">
-                Managed Automation Operator
+                Autonomous Infrastructure Operator
               </p>
               <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground tracking-tight mb-6 leading-[1.15]">
-                We Operate Automations for You.
+                We Govern Your Operational Infrastructure.
               </h1>
               <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-10 max-w-2xl mx-auto">
-                AERELION delivers fully-hosted operational automations for professional services firms and compliance-driven organizations. We configure, run, and maintain everything on our infrastructure—so you don't have to.
+                AERELION deploys governed protocols for professional services firms and compliance-driven organizations. We configure, stabilize, and maintain everything on our infrastructure—so you don't have to.
               </p>
               
               {/* Bullet Points */}
@@ -49,13 +49,13 @@ const LibraryHero = () => {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Button asChild size="lg" className="text-base px-8 py-6">
                   <Link to="/contact">
-                    Schedule a Discovery Call
+                    REQUEST SCOPING
                     <ArrowRight className="ml-2 w-5 h-5" />
                   </Link>
                 </Button>
                 <Button asChild variant="outline" size="lg" className="text-base px-8 py-6">
                   <Link to="/automations">
-                    View Automations
+                    VIEW CAPABILITY MATRIX
                   </Link>
                 </Button>
               </div>

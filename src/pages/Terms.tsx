@@ -47,7 +47,7 @@ const Terms = () => {
                       <p className="font-sans text-sm text-white/35 leading-relaxed">{section.content}
                         {section.link && (
                           <a href="/contact" className="text-[#39FF14]/60 hover:text-[#39FF14] ml-1 font-mono text-xs uppercase tracking-wider">
-                            INITIATE_HANDOFF →
+                            REQUEST_SCOPING →
                           </a>
                         )}
                       </p>

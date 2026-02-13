@@ -152,8 +152,8 @@ const Admin = () => {
                   <Activity className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-display text-lg group-hover:text-primary transition-colors">Browse Automations</h3>
-                  <p className="text-muted-foreground text-sm">Explore hosted automations</p>
+                  <h3 className="font-display text-lg group-hover:text-primary transition-colors">Capability Matrix</h3>
+                  <p className="text-muted-foreground text-sm">Review governed protocols</p>
                 </div>
               </div>
             </Link>

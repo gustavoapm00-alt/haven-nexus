@@ -21,7 +21,7 @@ const BriefingRequestCTA = () => {
     <section className="section-padding bg-[#0F0F0F]">
       <div className="container-main max-w-2xl">
         <span className="font-mono text-[10px] text-[#FFBF00]/50 uppercase tracking-[0.25em] mb-3 block">
-          // INITIATE BRIEFING REQUEST
+          // REQUEST SCOPING
         </span>
 
         <div className="border border-white/10 p-6 md:p-8">
