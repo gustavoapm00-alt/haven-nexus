@@ -29,7 +29,7 @@ function relativeTime(iso: string | null): string {
 }
 
 export default function SystemGrid() {
-  const { agentStatuses, forceStabilize } = useAgentStatus();
+  const { agentStatuses, forceStabilize, sendPulse } = useAgentStatus();
 
   return (
     <section>
@@ -177,8 +177,31 @@ export default function SystemGrid() {
               {a.id === 'AG-05' && <AuditorLastCommit state={state} />}
               {a.id === 'AG-07' && <EnvoyReportButton />}
 
-              {/* FORCE_STABILIZATION — always visible on DRIFT, hover-only otherwise */}
-              <div className={`transition-opacity duration-200 ${isDrift ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+              {/* Actions — always visible on DRIFT, hover-only otherwise */}
+              <div className={`transition-opacity duration-200 space-y-[1px] ${isDrift ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+                <button
+                  onClick={() => sendPulse(a.id)}
+                  className="w-full text-[8px] tracking-[0.2em] py-1.5 uppercase transition-all"
+                  style={{
+                    fontFamily: 'JetBrains Mono, monospace',
+                    color: '#39FF14',
+                    background: 'transparent',
+                    border: '1px solid rgba(57,255,20,0.4)',
+                    borderRadius: 0,
+                    cursor: 'pointer',
+                    fontWeight: 500,
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.target as HTMLButtonElement).style.boxShadow = '0 0 15px rgba(57,255,20,0.25), inset 0 0 15px rgba(57,255,20,0.08)';
+                    (e.target as HTMLButtonElement).style.background = 'rgba(57,255,20,0.06)';
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.target as HTMLButtonElement).style.boxShadow = 'none';
+                    (e.target as HTMLButtonElement).style.background = 'transparent';
+                  }}
+                >
+                  [ SEND_PULSE ]
+                </button>
                 <button
                   onClick={() => forceStabilize(a.id)}
                   className={`w-full text-[8px] tracking-[0.2em] py-1.5 uppercase transition-all ${isDrift ? 'animate-pulse' : ''}`}
