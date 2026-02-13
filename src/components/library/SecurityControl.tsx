@@ -2,10 +2,10 @@ import { motion } from 'framer-motion';
 import { Shield, Lock, KeyRound, Eye } from 'lucide-react';
 
 const securityPoints = [
-  { icon: KeyRound, text: 'Credentials encrypted at rest and in transit' },
-  { icon: Lock, text: 'Principle-of-least-privilege access only' },
-  { icon: Eye, text: 'Full visibility and revocation at any time' },
-  { icon: Shield, text: 'Operated on controlled, auditable infrastructure' },
+  { icon: Lock, text: 'TLS 1.3 enforced — no plaintext transmission' },
+  { icon: KeyRound, text: 'AES-256-GCM credential vaulting at rest' },
+  { icon: Shield, text: 'Zero-Trust access via RLS + Behavioral Biometrics' },
+  { icon: Eye, text: 'Global revocation in under 60 seconds' },
 ];
 
 const SecurityControl = () => {
@@ -21,7 +21,7 @@ const SecurityControl = () => {
           Enterprise-Grade Security by Default
         </h2>
         <p className="text-muted-foreground mb-8">
-          We handle your credentials and data with the care expected by regulated industries.
+          All data transmitted via TLS 1.3. Credentials encrypted with AES-256-GCM. Access governed by Zero-Trust identity layers. Revocable in under 60 seconds.
         </p>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">

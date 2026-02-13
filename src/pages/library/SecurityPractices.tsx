@@ -7,28 +7,28 @@ const SecurityPractices = () => {
   const practices = [
     {
       icon: Lock,
-      title: 'Hosted Infrastructure',
-      description: 'All automations run on AERELION\'s secure infrastructure. You never need to manage servers, deployments, or technical configurations.',
+      title: 'Data Transmission (TLS 1.3)',
+      description: 'All data is transmitted via TLS 1.3. AERELION enforces HTTPS-only connections. No data is ever sent in plaintext over the wire.',
     },
     {
       icon: Database,
-      title: 'Minimal Data Retention',
-      description: 'AERELION retains operational data only as long as necessary to run your automations. Logs and temporary data are regularly purged.',
-    },
-    {
-      icon: Eye,
-      title: 'Automation Transparency',
-      description: 'You have full visibility into what your automation does. We provide clear documentation of triggers, actions, and data flows.',
-    },
-    {
-      icon: Users,
-      title: 'Access Control',
-      description: 'Automation management is restricted to authorized administrators. You maintain control over connected accounts and can revoke access at any time.',
+      title: 'Credential Vaulting (AES-256-GCM)',
+      description: 'Sensitive credentials are isolated from application logic. Upon receipt, they are encrypted using AES-256-GCM via isolated Edge Functions before storage. Plaintext secrets never exist in the database.',
     },
     {
       icon: Shield,
-      title: 'Data Minimization',
-      description: 'AERELION collects only the minimum data required to operate your automations: connection credentials (encrypted) and operational logs. We never sell customer data.',
+      title: 'Zero-Trust Access (RLS + THS)',
+      description: 'Row Level Security and Behavioral Biometrics (The Human Signature) ensure valid credentials cannot be used by automated bots or unauthorized actors.',
+    },
+    {
+      icon: Eye,
+      title: 'Revocability (<60 Seconds)',
+      description: 'Client access is managed via a central identity provider. Revoke access tokens globally in under 60 seconds, instantly severing connections to the infrastructure.',
+    },
+    {
+      icon: Users,
+      title: 'Data Minimization & Accountability',
+      description: 'AERELION collects only the minimum data required to operate your automations. Logs are regularly purged. We never sell, share, or monetize customer data.',
     },
   ];
 
@@ -67,7 +67,7 @@ const SecurityPractices = () => {
             </div>
             
             <p className="text-lg text-muted-foreground leading-relaxed mb-12">
-              AERELION is committed to transparency in how we handle data and deliver automation products. Our practices are designed to keep customers in control.
+              All data transmitted via TLS 1.3. Credentials encrypted at rest with AES-256-GCM. Access governed by Zero-Trust identity layers. Revocable in under 60 seconds.
             </p>
 
             <div className="space-y-10">
@@ -92,9 +92,9 @@ const SecurityPractices = () => {
 
             {/* Summary */}
             <div className="mt-16 p-6 bg-muted/50 rounded-lg border border-border">
-              <h3 className="font-semibold text-foreground mb-3">Summary</h3>
+              <h3 className="font-semibold text-foreground mb-3">Security Architecture Summary</h3>
               <p className="text-muted-foreground text-sm leading-relaxed">
-                AERELION operates hosted automations on our infrastructure. We securely store your credentials, run your automations, and maintain everything for you. You retain control over connected accounts and can revoke access at any time. For detailed security information, visit our <a href="/security" className="text-primary hover:underline">Security & Data Practices</a> page.
+                All data is transmitted via TLS 1.3 (HTTPS-only). Credentials are encrypted at rest using AES-256-GCM via isolated Edge Functions. Access is enforced by Row Level Security and behavioral biometrics (The Human Signature). Revoke any connection globally in under 60 seconds. For full governance protocols, visit our <a href="/security" className="text-primary hover:underline">Security & Governance Practices</a> page.
               </p>
             </div>
           </div>

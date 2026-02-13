@@ -28,10 +28,10 @@ const About = () => {
       icon: Building2,
       title: 'Infrastructure Under Governance',
       points: [
-        'Hardened protocol environments',
-        'AES-256-GCM credential governance',
-        'Continuous monitoring and alerting',
-        'Redundancy and recovery procedures',
+        'TLS 1.3 enforced — HTTPS-only transmission',
+        'AES-256-GCM credential vaulting via Edge Functions',
+        'Zero-Trust access: RLS + Behavioral Biometrics (THS)',
+        'Global token revocation in <60 seconds',
       ],
     },
     {
