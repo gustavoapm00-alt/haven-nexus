@@ -1,14 +1,45 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { checkRateLimit, getClientIp, rateLimitResponse } from "../_shared/rate-limiter.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+// ─── CORS: allowlisted origins only (no wildcard) ──────────────────────────
+const ALLOWED_ORIGINS = [
+  "https://haven-matrix.lovable.app",
+  "https://id-preview--377ae8b3-1fbe-4ba4-b701-d5100f83c90e.lovable.app",
+];
+
+function getCorsHeaders(req: Request): Record<string, string> {
+  const origin = req.headers.get("Origin") ?? "";
+  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    "Access-Control-Allow-Origin": allowedOrigin,
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Vary": "Origin",
+  };
+}
 
 const HOSTINGER_BASE = "https://api.hosting.hostinger.com/v1";
 
+// ─── SSRF guard: block private IP ranges ──────────────────────────────────
+function isPrivateIp(ip: string): boolean {
+  if (!ip) return true; // treat empty as unsafe
+  const privateRanges = [
+    /^10\./,
+    /^172\.(1[6-9]|2\d|3[01])\./,
+    /^192\.168\./,
+    /^127\./,
+    /^169\.254\./,
+    /^::1$/,
+    /^fc00:/i,
+    /^fe80:/i,
+    /^0\./,
+    /^localhost$/i,
+  ];
+  return privateRanges.some((r) => r.test(ip.trim()));
+}
+
 serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   const supabase = createClient(
@@ -17,7 +48,7 @@ serve(async (req) => {
   );
 
   try {
-    // ── Auth ──────────────────────────────────────────────────────────────────
+    // ── Auth ────────────────────────────────────────────────────────────────
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("UNAUTHORIZED");
     const token = authHeader.replace("Bearer ", "");
@@ -29,12 +60,13 @@ serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
     const { action, instance_id } = body;
+    const clientIp = getClientIp(req);
 
-    // ── Helper: ownership gate ─────────────────────────────────────────────
+    // ── Ownership gate ──────────────────────────────────────────────────────
     const assertOwnership = async (instanceId: string) => {
       const { data: inst, error: fetchErr } = await supabase
         .from("vps_instances" as any)
-        .select("virtual_machine_id, user_id, status")
+        .select("virtual_machine_id, user_id, status, ip_address")
         .eq("id", instanceId)
         .single();
 
@@ -75,7 +107,6 @@ serve(async (req) => {
     switch (action) {
 
       case "list": {
-        // Return only instances belonging to this user from our DB
         const { data: instances, error: listErr } = await supabase
           .from("vps_instances" as any)
           .select("*")
@@ -118,13 +149,21 @@ serve(async (req) => {
 
       case "reboot": {
         if (!instance_id) throw new Error("MISSING_INSTANCE_ID");
+
+        // ── Rate limit: 1 reboot per 5 min per user ──────────────────────
+        const rl = await checkRateLimit(
+          { functionName: "vps-reboot", maxRequests: 1, windowSeconds: 300 },
+          user.id,
+          clientIp
+        );
+        if (!rl.allowed) return rateLimitResponse(rl.retryAfterSeconds ?? 300);
+
         const inst = await assertOwnership(instance_id);
         const vmId = inst.virtual_machine_id;
         if (!vmId) throw new Error("VM_NOT_YET_ASSIGNED");
 
         const rebootData = await hostingerFetch(`/vps/virtual-machines/${vmId}/reboot`, "POST");
 
-        // Log the reboot action
         await supabase.from("edge_function_logs" as any).insert({
           function_name: "vps-orchestrator",
           level: "info",
@@ -133,7 +172,6 @@ serve(async (req) => {
           details: { action: "reboot", instance_id, vm_id: vmId },
         });
 
-        // Update instance status
         await supabase.from("vps_instances" as any)
           .update({ status: "rebooting", updated_at: new Date().toISOString() })
           .eq("id", instance_id);
@@ -145,11 +183,18 @@ serve(async (req) => {
 
       case "scale_request": {
         if (!instance_id) throw new Error("MISSING_INSTANCE_ID");
-        await assertOwnership(instance_id);
 
+        // ── Rate limit: 1 scale request per 10 min per user ──────────────
+        const rl = await checkRateLimit(
+          { functionName: "vps-scale-request", maxRequests: 1, windowSeconds: 600 },
+          user.id,
+          clientIp
+        );
+        if (!rl.allowed) return rateLimitResponse(rl.retryAfterSeconds ?? 600);
+
+        await assertOwnership(instance_id);
         const { message } = body;
 
-        // Insert an admin notification
         await supabase.from("admin_notifications" as any).insert({
           type: "scale_request",
           title: `SCALE_REQUEST: Node ${instance_id.slice(0, 8).toUpperCase()}`,
@@ -158,7 +203,6 @@ serve(async (req) => {
           metadata: { instance_id, user_id: user.id, requested_at: new Date().toISOString() },
         });
 
-        // Log it
         await supabase.from("edge_function_logs" as any).insert({
           function_name: "vps-orchestrator",
           level: "warn",
@@ -177,6 +221,7 @@ serve(async (req) => {
     }
 
   } catch (err) {
+    const corsHeaders = getCorsHeaders(req);
     const msg = err instanceof Error ? err.message : String(err);
     const status = msg.startsWith("UNAUTHORIZED") ? 401 : msg.startsWith("ACCESS_DENIED") ? 403 : 500;
     return new Response(JSON.stringify({ error: msg }), {

@@ -21,26 +21,18 @@ export async function checkRateLimit(
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
   );
 
-  // Determine the key based on user or IP
   let key: string;
   if (userId) {
     key = `${config.functionName}:user:${userId}`;
   } else if (clientIp) {
     key = `${config.functionName}:ip:${clientIp}`;
   } else {
-    // If no identifier, allow but log warning
     console.warn("Rate limit check called without user or IP identifier");
     return { allowed: true };
   }
 
-  const now = new Date();
-  // Calculate window start (floor to the nearest window)
-  const windowStartMs = Math.floor(now.getTime() / (config.windowSeconds * 1000)) * (config.windowSeconds * 1000);
-  const windowStart = new Date(windowStartMs).toISOString();
-
   try {
-    // Use the check_rate_limit database function
-    const { data, error } = await supabaseAdmin.rpc('check_rate_limit', {
+    const { data, error } = await supabaseAdmin.rpc("check_rate_limit", {
       p_identifier: key,
       p_action_type: config.functionName,
       p_cooldown_seconds: config.windowSeconds,
@@ -48,45 +40,48 @@ export async function checkRateLimit(
 
     if (error) {
       console.error("Rate limit check error:", error);
-      // On error, allow the request but log it
       return { allowed: true };
     }
 
-    // If the function returns false, we're rate limited
     if (data === false) {
-      return {
-        allowed: false,
-        retryAfterSeconds: config.windowSeconds,
-      };
+      return { allowed: false, retryAfterSeconds: config.windowSeconds };
     }
 
     return { allowed: true };
   } catch (err) {
     console.error("Rate limit exception:", err);
-    // On exception, allow the request
     return { allowed: true };
   }
 }
 
 export function getClientIp(req: Request): string | null {
-  // Try various headers that might contain the client IP
   const forwardedFor = req.headers.get("x-forwarded-for");
-  if (forwardedFor) {
-    // x-forwarded-for can contain multiple IPs, take the first one
-    return forwardedFor.split(",")[0].trim();
-  }
-
+  if (forwardedFor) return forwardedFor.split(",")[0].trim();
   const realIp = req.headers.get("x-real-ip");
-  if (realIp) {
-    return realIp.trim();
-  }
-
-  const cfConnectingIp = req.headers.get("cf-connecting-ip");
-  if (cfConnectingIp) {
-    return cfConnectingIp.trim();
-  }
-
+  if (realIp) return realIp.trim();
+  const cfIp = req.headers.get("cf-connecting-ip");
+  if (cfIp) return cfIp.trim();
   return null;
+}
+
+// ── Allowlisted origins helper ─────────────────────────────────────────────
+const ALLOWED_ORIGINS = [
+  "https://haven-matrix.lovable.app",
+  "https://id-preview--377ae8b3-1fbe-4ba4-b701-d5100f83c90e.lovable.app",
+];
+
+export function getAllowedOrigin(req: Request): string {
+  const origin = req.headers.get("Origin") ?? "";
+  return ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+}
+
+export function buildCorsHeaders(req: Request): Record<string, string> {
+  return {
+    "Access-Control-Allow-Origin": getAllowedOrigin(req),
+    "Access-Control-Allow-Headers":
+      "authorization, x-client-info, apikey, content-type, x-heartbeat-key",
+    "Vary": "Origin",
+  };
 }
 
 export function rateLimitResponse(retryAfterSeconds: number): Response {
@@ -100,7 +95,7 @@ export function rateLimitResponse(retryAfterSeconds: number): Response {
       headers: {
         "Content-Type": "application/json",
         "Retry-After": retryAfterSeconds.toString(),
-        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Origin": ALLOWED_ORIGINS[0],
         "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
       },
     }
