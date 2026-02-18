@@ -2,32 +2,32 @@ import { motion } from 'framer-motion';
 
 const reports = [
   {
-    refId: 'OPS-2026-004',
-    title: 'CRM Follow-Up Protocol — Legal Services Substrate',
-    status: 'RESOLVED',
-    impact: '8.2',
-    sector: 'LEGAL OPS',
-  },
-  {
-    refId: 'OPS-2026-003',
-    title: 'Invoice Processing Pipeline — Accounting Firm Governance',
-    status: 'RESOLVED',
-    impact: '7.5',
-    sector: 'FINANCE',
-  },
-  {
-    refId: 'OPS-2026-002',
-    title: 'Client Onboarding Workflow — Schema Standardization',
-    status: 'RESOLVED',
-    impact: '9.1',
-    sector: 'OPERATIONS',
-  },
-  {
-    refId: 'OPS-2026-001',
-    title: 'Document Intake & Classification System — ACTIVE NODE',
+    refId: 'GEN-2026-004',
+    title: 'Project Prometheus — SMR Design Cycle Governance & Audit Rail Deployment',
     status: 'ACTIVE',
-    impact: '6.8',
-    sector: 'COMPLIANCE',
+    impact: '9.8',
+    sector: 'NUCLEAR / DOE',
+  },
+  {
+    refId: 'GEN-2026-003',
+    title: 'Grid Intelligence Pipeline — AI-Accelerated Decision Governance (20–100× SLA)',
+    status: 'ACTIVE',
+    impact: '9.3',
+    sector: 'ENERGY / GRID',
+  },
+  {
+    refId: 'GEN-2026-002',
+    title: 'Autonomous Laboratory Protocol — 24/7 AI Agent Workflow Governance Schema',
+    status: 'RESOLVED',
+    impact: '8.7',
+    sector: 'R&D / LABS',
+  },
+  {
+    refId: 'GEN-2026-001',
+    title: 'Analog Nuclear Data Digitization — CUI Schema Standardization & Provenance',
+    status: 'RESOLVED',
+    impact: '8.1',
+    sector: 'DATA / NIST',
   },
 ];
 
@@ -40,14 +40,14 @@ const BriefingArchives = () => {
         <div className="flex items-end justify-between mb-14">
           <div>
             <span className="font-mono text-[10px] text-[#39FF14]/50 uppercase tracking-[0.25em] mb-3 block">
-              // OPERATIONAL REPORTS
+              // GENESIS MISSION ENGAGEMENTS
             </span>
             <h2 className="font-mono text-3xl md:text-4xl font-bold text-[#E0E0E0] tracking-tight">
-              Technical Briefing Archives
+              Active Governance Nodes
             </h2>
           </div>
           <span className="hidden md:block font-mono text-[9px] text-white/15 tracking-[0.2em]">
-            [RECORDS: {reports.length} // ACCESS: CLEARED]
+            [RECORDS: {reports.length} // CLEARANCE: DOE_GENESIS]
           </span>
         </div>
 

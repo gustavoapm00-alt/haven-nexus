@@ -137,14 +137,14 @@ const DualScopeRevenue = () => {
         {/* Section header */}
         <div className="text-center mb-20">
           <span className="font-mono text-[10px] text-[#39FF14]/50 uppercase tracking-[0.25em] mb-4 block">
-            // REVENUE ENGINE // DUAL-SCOPE MODEL
+            // GENESIS MISSION // ENGAGEMENT TIERS
           </span>
           <h2 className="font-mono text-3xl md:text-4xl font-bold text-[#E0E0E0] mb-5 tracking-tight">
-            System Access Levels
+            Governance Access Levels
           </h2>
           <p className="font-sans text-sm text-white/30 max-w-lg mx-auto leading-relaxed">
-            Subscription tiers represent governance levels — not product purchases.
-            Each tier grants progressively deeper access to the Nexus operational infrastructure.
+            The Genesis Mission requires operational governance partners — not vendors.
+            Each tier embeds AERELION as the federated AI governance substrate for your program node.
           </p>
         </div>
 
@@ -272,7 +272,7 @@ const DualScopeRevenue = () => {
           className="text-center mt-16"
         >
           <p className="font-mono text-[9px] text-white/15 tracking-[0.18em] uppercase">
-            ALL TIERS // IMMUTABLE PROVENANCE // AES-256-GCM ENCRYPTION // AERELION INFRASTRUCTURE
+            ALL TIERS // DOE/GENESIS-2026 ALIGNED // AES-256-GCM ENCRYPTION // IMMUTABLE PROVENANCE // AERELION INFRASTRUCTURE
           </p>
         </motion.div>
       </div>

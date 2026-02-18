@@ -3,26 +3,26 @@ import { motion } from 'framer-motion';
 const parameters = [
   {
     id: 'PARAM-001',
-    code: 'SCOPE_LOCK',
-    text: 'Engagement scope is fixed at inception. No mid-cycle feature additions without revised authorization.',
+    code: 'GENESIS_ALIGNMENT',
+    text: 'AERELION\'s governance substrate is purpose-built for the DOE Genesis Mission\'s "26 Challenges" — providing the federated AI workflow layer that connects National Labs, Primes, and platform partners like NVIDIA and Microsoft.',
     severity: 'MANDATORY',
   },
   {
     id: 'PARAM-002',
-    code: 'CRED_CHANNEL',
-    text: 'All credential handoffs must pass through encrypted intake channels. Plaintext transmission is a protocol violation.',
+    code: 'PROMETHEUS_PROTOCOL',
+    text: 'Project Prometheus requires human-in-the-loop nuclear design workflows. AERELION enforces human-in-the-loop validation gates and immutable audit trails across every AI-generated design cycle — from SMR licensing to manufacture.',
     severity: 'MANDATORY',
   },
   {
     id: 'PARAM-003',
-    code: 'DEPLOY_WINDOW',
-    text: 'Maximum deployment window: 30 calendar days from authorization. Extensions require a formal amendment.',
+    code: 'DATA_PROVENANCE_REQ',
+    text: 'The American Science and Security Platform mandates simulation-ready datasets from 80 years of analog nuclear research. AERELION\'s data ontology layer governs schema standardization and CUI handoff integrity across the entire digitization pipeline.',
     severity: 'OPERATIONAL',
   },
   {
     id: 'PARAM-004',
-    code: 'REDUNDANCY_REQ',
-    text: 'Redundancy protocols require a minimum of two integration points per workflow. Single-threaded pipelines are not supported.',
+    code: 'CONSORTIUM_GOVERNANCE',
+    text: 'Genesis Mission Consortium standards require model reliability and federated data sharing governance across 17 National Labs. AERELION provides the operational substrate — not the science, but the rails the science runs on.',
     severity: 'OPERATIONAL',
   },
 ];
@@ -39,10 +39,10 @@ const OperationalParameters = () => {
 
       <div className="container-main max-w-3xl">
         <span className="font-mono text-[10px] text-[#FFBF00]/50 uppercase tracking-[0.25em] mb-3 block">
-          // CONSTRAINTS & BOUNDARIES
+          // GENESIS MISSION COMPATIBILITY
         </span>
         <h2 className="font-mono text-3xl md:text-4xl font-bold text-[#E0E0E0] mb-14 tracking-tight">
-          Operational Parameters
+          Why AERELION Fits
         </h2>
 
         <div className="space-y-0">
