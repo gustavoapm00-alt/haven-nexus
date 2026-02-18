@@ -250,7 +250,9 @@ Deno.serve(async (req) => {
 
     // Parse body for optional action
     const body = await req.json().catch(() => ({}));
-    const action = body.action || 'deploy'; // 'deploy' | 'status' | 'activate_all'
+    // Normalize action — accept both UI-sent 'PROBE_N8N' and lowercase 'probe'
+    const rawAction: string = body.action || 'deploy';
+    const action = rawAction.toUpperCase() === 'PROBE_N8N' ? 'probe' : rawAction; // 'deploy' | 'probe' | 'status' | 'activate_all'
 
     const n8nBaseUrl = Deno.env.get('N8N_BASE_URL');
     const n8nApiKey = Deno.env.get('N8N_API_KEY');
