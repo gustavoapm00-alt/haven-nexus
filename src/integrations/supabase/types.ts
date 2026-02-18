@@ -239,6 +239,42 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_registry: {
+        Row: {
+          codename: string
+          created_at: string
+          fn_description: string
+          has_site_scan: boolean
+          id: string
+          module: string
+          ref_id: string
+          sort_order: number
+          system_impact: string
+        }
+        Insert: {
+          codename: string
+          created_at?: string
+          fn_description?: string
+          has_site_scan?: boolean
+          id: string
+          module: string
+          ref_id?: string
+          sort_order?: number
+          system_impact?: string
+        }
+        Update: {
+          codename?: string
+          created_at?: string
+          fn_description?: string
+          has_site_scan?: boolean
+          id?: string
+          module?: string
+          ref_id?: string
+          sort_order?: number
+          system_impact?: string
+        }
+        Relationships: []
+      }
       audits: {
         Row: {
           absence_test_48h: string

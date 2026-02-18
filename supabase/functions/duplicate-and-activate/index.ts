@@ -564,20 +564,58 @@ async function provisionActivation(
   
   // Step 8: Activate the workflow
   const { success: activateSuccess, error: activateError } = await activateWorkflow(workflowId);
-  
+
   if (!activateSuccess) {
     console.warn("Failed to activate workflow:", activateError);
-    // Don't fail - workflow was created, can be activated manually
+    // Don't fail — workflow was created, can be activated manually
   }
-  
+
   console.log(`Provisioning complete. Workflow: ${workflowId}, Webhook: ${webhookUrl}, Active: ${activateSuccess}`);
-  
+
   return {
     success: true,
     workflowId,
     webhookUrl,
     credentialIds: createdCredentialIds,
   };
+}
+
+// ─── Compensating rollback ────────────────────────────────────────────────────
+// Called when provisioning fails AFTER n8n resources were created, to avoid
+// orphaned workflows and credentials living in n8n with no DB mapping.
+async function rollbackN8nResources(
+  workflowId: string | undefined,
+  credentialIds: string[]
+): Promise<void> {
+  const n8nBaseUrl = getN8nBaseUrl();
+  const n8nApiKey = Deno.env.get("N8N_API_KEY");
+  if (!n8nBaseUrl || !n8nApiKey) return;
+
+  const headers = {
+    "Content-Type": "application/json",
+    "X-N8N-API-KEY": n8nApiKey,
+  };
+
+  // Deactivate then delete workflow
+  if (workflowId) {
+    try {
+      await fetch(`${n8nBaseUrl}/api/v1/workflows/${workflowId}/deactivate`, { method: "POST", headers });
+      await fetch(`${n8nBaseUrl}/api/v1/workflows/${workflowId}`, { method: "DELETE", headers });
+      console.log(`ROLLBACK: deleted workflow ${workflowId}`);
+    } catch (e) {
+      console.error("ROLLBACK: failed to delete workflow", e);
+    }
+  }
+
+  // Delete credentials
+  for (const credId of credentialIds) {
+    try {
+      await fetch(`${n8nBaseUrl}/api/v1/credentials/${credId}`, { method: "DELETE", headers });
+      console.log(`ROLLBACK: deleted credential ${credId}`);
+    } catch (e) {
+      console.error(`ROLLBACK: failed to delete credential ${credId}`, e);
+    }
+  }
 }
 
 Deno.serve(async (req) => {

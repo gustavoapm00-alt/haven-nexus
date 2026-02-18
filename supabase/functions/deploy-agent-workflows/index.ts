@@ -1,18 +1,20 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': Deno.env.get('SITE_URL') || 'https://haven-matrix.lovable.app',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const AGENTS = [
-  { id: 'AG-01', name: 'THE SENTINEL', module: 'SENTINEL', hasSiteScan: true },
-  { id: 'AG-02', name: 'THE LIBRARIAN', module: 'LIBRARIAN', hasSiteScan: false },
-  { id: 'AG-03', name: 'THE WATCHMAN', module: 'WATCHMAN', hasSiteScan: false },
-  { id: 'AG-04', name: 'THE GATEKEEPER', module: 'GATEKEEPER', hasSiteScan: false },
-  { id: 'AG-05', name: 'THE AUDITOR', module: 'AUDITOR', hasSiteScan: false },
-  { id: 'AG-06', name: 'THE CHRONICLER', module: 'CHRONICLER', hasSiteScan: false },
-  { id: 'AG-07', name: 'THE ENVOY', module: 'ENVOY', hasSiteScan: false },
+// AGENT_DEFINITIONS is now fetched from the agent_registry table at runtime.
+// Fallback to static array only when DB is unavailable.
+const AGENT_DEFINITIONS_FALLBACK = [
+  { id: 'AG-01', module: 'SENTINEL',   has_site_scan: true  },
+  { id: 'AG-02', module: 'LIBRARIAN',  has_site_scan: false },
+  { id: 'AG-03', module: 'WATCHMAN',   has_site_scan: false },
+  { id: 'AG-04', module: 'GATEKEEPER', has_site_scan: false },
+  { id: 'AG-05', module: 'AUDITOR',    has_site_scan: false },
+  { id: 'AG-06', module: 'CHRONICLER', has_site_scan: false },
+  { id: 'AG-07', module: 'ENVOY',      has_site_scan: false },
 ];
 
 /**
@@ -333,6 +335,31 @@ Deno.serve(async (req) => {
     }
 
     // ACTION: Deploy all 7 heartbeat workflows
+    // Fetch agent definitions from agent_registry (single source of truth)
+    const serviceClient = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    );
+
+    const { data: registryData } = await serviceClient
+      .from('agent_registry')
+      .select('id, module, has_site_scan')
+      .order('sort_order', { ascending: true });
+
+    const AGENTS = (registryData && registryData.length > 0)
+      ? registryData.map((r: { id: string; module: string; has_site_scan: boolean }) => ({
+          id: r.id,
+          name: `THE ${r.module}`,
+          module: r.module,
+          hasSiteScan: r.has_site_scan,
+        }))
+      : AGENT_DEFINITIONS_FALLBACK.map(r => ({
+          id: r.id,
+          name: `THE ${r.module}`,
+          module: r.module,
+          hasSiteScan: r.has_site_scan,
+        }));
+
     const deployResults = await Promise.all(
       AGENTS.map(async (agent) => {
         try {
@@ -364,10 +391,6 @@ Deno.serve(async (req) => {
           const activated = activateRes.ok;
 
           // Log deployment to edge_function_logs
-          const serviceClient = createClient(
-            Deno.env.get('SUPABASE_URL')!,
-            Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-          );
           await serviceClient.from('edge_function_logs').insert({
             function_name: 'deploy-agent-workflows',
             level: 'info',
