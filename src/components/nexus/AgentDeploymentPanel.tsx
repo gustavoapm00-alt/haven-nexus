@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { useDeployAgentWorkflows, DeployResult, WorkflowStatus } from '@/hooks/useDeployAgentWorkflows';
+import { useDeployAgentWorkflows, DeployResult, WorkflowStatus, ProbeResult } from '@/hooks/useDeployAgentWorkflows';
 
 const AGENT_LABELS: Record<string, string> = {
   'AG-01': 'THE SENTINEL',
@@ -28,13 +28,13 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 function PhaseIndicator({ phase }: { phase: string }) {
-  const phases = ['idle', 'checking', 'deploying', 'activating', 'done'];
   const messages: Record<string, string> = {
     idle: 'READY_FOR_DEPLOYMENT',
     checking: 'QUERYING_N8N_INSTANCE...',
     deploying: 'DEPLOYING_WORKFLOWS_TO_N8N...',
     activating: 'ACTIVATING_CRON_TRIGGERS...',
-    done: 'DEPLOYMENT_COMPLETE',
+    probing: 'PROBING_N8N_CONNECTIVITY...',
+    done: 'OPERATION_COMPLETE',
   };
   return (
     <div className="flex items-center gap-3">
@@ -54,6 +54,38 @@ function PhaseIndicator({ phase }: { phase: string }) {
         {messages[phase] || phase}
       </span>
     </div>
+  );
+}
+
+function ProbeResultPanel({ probe }: { probe: ProbeResult }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, height: 0 }}
+      animate={{ opacity: 1, height: 'auto' }}
+      className="px-4 py-3"
+      style={{ borderBottom: '1px solid rgba(57,255,20,0.08)', background: probe.ok ? 'rgba(57,255,20,0.03)' : 'rgba(255,68,68,0.04)' }}
+    >
+      <div className="text-[8px] tracking-[0.4em] mb-2" style={{ color: '#444' }}>N8N_CONNECTIVITY_PROBE</div>
+      <div className="grid grid-cols-2 gap-x-6 gap-y-1">
+        {[
+          { label: 'STATUS', value: `HTTP_${probe.status}`, color: probe.ok ? '#39FF14' : '#FF4444' },
+          { label: 'CONNECTIVITY', value: probe.ok ? 'AUTHENTICATED' : 'REJECTED', color: probe.ok ? '#39FF14' : '#FF4444' },
+          { label: 'N8N_BASE_URL', value: probe.n8n_base_url, color: '#888' },
+          { label: 'KEY_PREFIX', value: probe.key_prefix, color: '#888' },
+          { label: 'KEY_LENGTH', value: `${probe.key_length} CHARS`, color: '#888' },
+        ].map(({ label, value, color }) => (
+          <div key={label} className="flex items-center gap-2">
+            <span className="text-[8px] tracking-widest" style={{ color: '#444', minWidth: 80 }}>{label}</span>
+            <span className="text-[9px] tracking-wider" style={{ color, fontFamily: 'JetBrains Mono, monospace' }}>{value}</span>
+          </div>
+        ))}
+      </div>
+      {!probe.ok && probe.response_preview && (
+        <div className="mt-2 text-[8px] tracking-wider" style={{ color: '#FF4444', fontFamily: 'JetBrains Mono, monospace' }}>
+          RESPONSE: {probe.response_preview.slice(0, 200)}
+        </div>
+      )}
+    </motion.div>
   );
 }
 
@@ -128,7 +160,7 @@ function WorkflowStatusRow({ wf, index }: { wf: WorkflowStatus; index: number })
 }
 
 export default function AgentDeploymentPanel() {
-  const { isLoading, error, summary, results, existingWorkflows, phase, deployAll, checkStatus, activateAll, reset } =
+  const { isLoading, error, summary, results, existingWorkflows, probeResult, phase, deployAll, checkStatus, activateAll, probeConnection, reset } =
     useDeployAgentWorkflows();
 
   return (
@@ -181,6 +213,11 @@ export default function AgentDeploymentPanel() {
             ))}
           </motion.div>
         )}
+      </AnimatePresence>
+
+      {/* Probe Result */}
+      <AnimatePresence>
+        {probeResult && <ProbeResultPanel probe={probeResult} />}
       </AnimatePresence>
 
       {/* Error */}
@@ -263,6 +300,26 @@ export default function AgentDeploymentPanel() {
           ) : (
             '▶ DEPLOY ALL AGENTS'
           )}
+        </motion.button>
+
+        {/* Probe Connection */}
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={probeConnection}
+          disabled={isLoading}
+          className="px-4 py-2.5 text-[10px] tracking-[0.3em] uppercase transition-all"
+          style={{
+            background: 'transparent',
+            border: '1px solid rgba(255,191,0,0.25)',
+            color: isLoading ? '#FFBF0044' : '#FFBF0088',
+            cursor: isLoading ? 'not-allowed' : 'pointer',
+            fontFamily: 'JetBrains Mono, monospace',
+          }}
+        >
+          {isLoading && phase === 'probing' ? (
+            <motion.span animate={{ opacity: [1, 0.3, 1] }} transition={{ repeat: Infinity, duration: 0.6 }}>PROBING...</motion.span>
+          ) : '⬡ PROBE_N8N'}
         </motion.button>
 
         {/* Check Status */}
