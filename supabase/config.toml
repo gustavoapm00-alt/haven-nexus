@@ -5,3 +5,7 @@ verify_jwt = false
 
 [functions.agent-auto-heal]
 verify_jwt = false
+
+[functions.deploy-agent-workflows]
+verify_jwt = false
+
