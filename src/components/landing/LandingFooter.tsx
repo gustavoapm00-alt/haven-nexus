@@ -46,7 +46,7 @@ const LandingFooter = () => {
         {/* Bottom row */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="font-mono text-[9px] text-white/15 tracking-[0.15em] uppercase">
-            AERELION SYSTEMS © {new Date().getFullYear()} // ALL SYSTEMS NOMINAL // SYS.OPS.V3.00
+            AERELION SYSTEMS © {new Date().getFullYear()} // DOE/GENESIS-2026 GOVERNANCE SUBSTRATE // SYS.OPS.V3.00
           </p>
           <div className="flex items-center gap-3">
             <motion.div

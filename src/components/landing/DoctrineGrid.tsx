@@ -3,20 +3,9 @@ import { motion } from 'framer-motion';
 const protocols = [
   {
     id: 'PRTCL-001',
-    title: 'COOP LOGIC STABILIZATION',
+    title: 'FEDERATED DATA GOVERNANCE',
     description:
-      'Ensuring mission-critical resilience through hardened logic gates. Continuity of Operations compliance for federal and defense-adjacent entities.',
-    status: 'ACTIVE',
-    complexity: 'HIGH',
-    designation: 'NIST 800-34',
-    metric: '99.97%',
-    metricLabel: 'UPTIME',
-  },
-  {
-    id: 'PRTCL-002',
-    title: 'AUDITABLE DATA ONTOLOGY',
-    description:
-      'Establishing a Universal Truth for federal audits via a singular, governed schema. CUI handoff integrity between subcontractors and Primes.',
+      'The Genesis Mission demands a Universal Truth across 17 National Labs and private consortia. AERELION\'s schema-governed substrate enforces CUI handoff integrity between all nodes — from Argonne\'s Solstice to the American Science and Security Platform.',
     status: 'ACTIVE',
     complexity: 'CRITICAL',
     designation: 'NIST 800-171',
@@ -24,15 +13,26 @@ const protocols = [
     metricLabel: 'PROVENANCE',
   },
   {
-    id: 'PRTCL-003',
-    title: 'EXECUTIVE DECISION INTEGRITY',
+    id: 'PRTCL-002',
+    title: 'AUTONOMOUS LABORATORY LOGIC',
     description:
-      'Filtering raw operational noise into The Regulator schema for Program Managers. Automated stabilization and oversight through a permanent regulatory layer.',
+      'Supporting the "26 Challenges" directive — AERELION deploys hardened logic gates for AI agents that run 24/7 autonomous experiments. Human-in-the-loop workflow governance ensures auditability for Project Prometheus nuclear design cycles.',
+    status: 'ACTIVE',
+    complexity: 'HIGH',
+    designation: 'DOE/GENESIS-26',
+    metric: '24/7',
+    metricLabel: 'UPTIME',
+  },
+  {
+    id: 'PRTCL-003',
+    title: 'GRID & SUPPLY CHAIN INTEGRITY',
+    description:
+      'Genesis Mission mandates AI-driven grid decisions 20–100× faster. AERELION\'s COOP logic stabilization and supply chain monitoring provide the operational backbone for energy dominance and critical infrastructure resilience.',
     status: 'ACTIVE',
     complexity: 'HIGH',
     designation: 'CMMC L2',
-    metric: '<8H',
-    metricLabel: 'SLA',
+    metric: '100×',
+    metricLabel: 'SPEED_DELTA',
   },
 ];
 
@@ -52,14 +52,14 @@ const DoctrineGrid = () => {
         <div className="flex items-end justify-between mb-12">
           <div>
             <span className="font-mono text-[10px] text-[#39FF14]/50 uppercase tracking-[0.25em] mb-3 block">
-              // METHODOLOGY
+              // GENESIS MISSION ALIGNMENT
             </span>
             <h2 className="font-mono text-3xl md:text-4xl font-bold text-[#E0E0E0] tracking-tight">
-              The Doctrine Grid
+              The Governance Doctrine
             </h2>
           </div>
           <span className="hidden md:block font-mono text-[9px] text-white/15 tracking-[0.2em]">
-            [PROTOCOLS: 3 // STATUS: ALL_ACTIVE]
+            [DOE/GENESIS-2026 // PROTOCOLS: 3 // STATUS: ALL_ACTIVE]
           </span>
         </div>
 

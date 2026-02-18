@@ -5,9 +5,9 @@ import ConstellationCanvas from './ConstellationCanvas';
 
 const BOOT_LINES = [
   '> INITIALIZING AERELION SUBSTRATE...',
-  '> LOADING COMPLIANCE MATRIX...',
-  '> MOUNTING GOVERNANCE LAYER...',
-  '> SYSTEM NOMINAL // READY',
+  '> SYNCING GENESIS MISSION PARAMETERS [DOE/2026]...',
+  '> MOUNTING FEDERATED GOVERNANCE LAYER...',
+  '> SYSTEM NOMINAL // GENESIS_READY',
 ];
 
 const CommandCenterHero = () => {
@@ -55,7 +55,7 @@ const CommandCenterHero = () => {
             <div className="absolute inset-0 w-1.5 h-1.5 bg-[#39FF14] animate-ping opacity-50" />
           </div>
           <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-[#39FF14]/70">
-            // OPERATIONAL INFRASTRUCTURE // GOVCON_READY
+            // GENESIS MISSION // DOE OPERATIONAL GOVERNANCE LAYER // CLASSIFIED
           </span>
         </motion.div>
 
@@ -67,7 +67,7 @@ const CommandCenterHero = () => {
           className="font-display font-bold leading-[1.0] tracking-tight mb-8"
         >
           <span className="block text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-[#E0E0E0]">
-            SYSTEM
+            GENESIS
           </span>
           <span className="block text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-transparent bg-clip-text"
             style={{
@@ -76,13 +76,13 @@ const CommandCenterHero = () => {
               WebkitTextFillColor: 'transparent',
             }}
           >
-            STABILIZATION
+            MISSION
           </span>
           <span className="block text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-[#E0E0E0]/50">
-            & OPERATIONAL
+            GOVERNANCE
           </span>
           <span className="block text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-[#E0E0E0]">
-            GOVERNANCE.
+            SUBSTRATE.
           </span>
         </motion.h1>
 
@@ -93,9 +93,9 @@ const CommandCenterHero = () => {
           transition={{ duration: 0.6, delay: 0.65 }}
           className="font-sans text-base md:text-lg text-[#E0E0E0]/40 max-w-2xl mx-auto mb-4 leading-relaxed"
         >
-          Engineering the foundational logic for enterprise-scale autonomous systems.
+          The Department of Energy's Genesis Mission requires federated data governance and auditable AI workflows.
           <br />
-          We configure, deploy, and maintain. You operate.
+          AERELION is the operational substrate built for exactly that.
         </motion.p>
 
         {/* Reference line */}
@@ -105,7 +105,7 @@ const CommandCenterHero = () => {
           transition={{ delay: 0.9, duration: 0.4 }}
           className="font-mono text-[10px] text-white/20 tracking-[0.2em] mb-12"
         >
-          [REF: NIST 800-171 // CMMC L2 // CUI PROVENANCE ENFORCEMENT]
+          [REF: DOE/GENESIS-2026 // NIST 800-171 // CMMC L2 // FEDERATED AI PROVENANCE]
         </motion.p>
 
         {/* CTAs */}

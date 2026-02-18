@@ -31,13 +31,13 @@ const BriefingRequestCTA = () => {
 
       <div className="container-main max-w-2xl relative z-10">
         <span className="font-mono text-[10px] text-[#FFBF00]/50 uppercase tracking-[0.25em] mb-3 block">
-          // REQUEST SCOPING
+          // GENESIS MISSION // REQUEST SCOPING
         </span>
         <h2 className="font-mono text-3xl md:text-4xl font-bold text-[#E0E0E0] mb-3 tracking-tight">
           Initiate Engagement
         </h2>
         <p className="font-sans text-sm text-white/30 mb-12 leading-relaxed">
-          All engagements begin with a scoping session. Submit your parameters below.
+          Genesis Mission program nodes begin with a scoping session. Declare your operational domain and transmit parameters below.
         </p>
 
         <motion.div
@@ -93,10 +93,13 @@ const BriefingRequestCTA = () => {
                   onChange={(e) => setSubject(e.target.value)}
                   className="w-full bg-[#040404] border-0 border-b border-white/10 px-0 py-2.5 font-mono text-sm text-[#E0E0E0] focus:outline-none focus:border-[#39FF14] transition-all appearance-none cursor-pointer"
                 >
-                  <option value="" className="bg-[#040404]">SELECT...</option>
-                  <option value="operational-briefing" className="bg-[#040404]">Operational Briefing</option>
-                  <option value="governance-review" className="bg-[#040404]">Governance Review</option>
-                  <option value="protocol-deployment" className="bg-[#040404]">Protocol Deployment</option>
+                  <option value="" className="bg-[#040404]">SELECT_DOMAIN...</option>
+                  <option value="prometheus" className="bg-[#040404]">Project Prometheus / Nuclear SMR</option>
+                  <option value="grid" className="bg-[#040404]">Grid Intelligence / Energy Dominance</option>
+                  <option value="autonomous-lab" className="bg-[#040404]">Autonomous Laboratory Ops</option>
+                  <option value="data-digitization" className="bg-[#040404]">Historic Data Digitization / CUI</option>
+                  <option value="governance-review" className="bg-[#040404]">Federated Governance Review</option>
+                  <option value="consortium" className="bg-[#040404]">Genesis Mission Consortium</option>
                   <option value="other" className="bg-[#040404]">Other</option>
                 </select>
               </div>
