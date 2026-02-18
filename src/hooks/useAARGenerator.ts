@@ -13,13 +13,22 @@ export function useAARGenerator() {
     setState({ isGenerating: true, report: '', error: null });
 
     try {
+      // Import supabase to get the authenticated session token
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session?.access_token) {
+        setState((s) => ({ ...s, isGenerating: false, error: 'Not authenticated' }));
+        return;
+      }
+
       const resp = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-aar`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            Authorization: `Bearer ${session.access_token}`,
           },
           body: JSON.stringify({ window_hours: windowHours }),
         }

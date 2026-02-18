@@ -284,7 +284,7 @@ Deno.serve(async (req) => {
 
     // ACTION: Get status of existing AERELION workflows
     if (action === 'status') {
-      const statusRes = await fetch(`${n8nBase}/api/v1/workflows?tags=AERELION&limit=20`, {
+      const statusRes = await fetch(`${n8nBase}/api/v1/workflows?limit=100`, {
         headers: n8nHeaders,
       });
 
@@ -296,18 +296,25 @@ Deno.serve(async (req) => {
       }
 
       const statusData = await statusRes.json();
-      return new Response(JSON.stringify({ workflows: statusData.data || [], total: statusData.count || 0 }), {
+      // Filter locally for AERELION workflows by name prefix
+      const aerelionWorkflows = (statusData.data || []).filter((wf: { name: string }) =>
+        wf.name.startsWith('AERELION_')
+      );
+      return new Response(JSON.stringify({ workflows: aerelionWorkflows, total: aerelionWorkflows.length }), {
         status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
     // ACTION: Activate all existing AERELION workflows
     if (action === 'activate_all') {
-      const listRes = await fetch(`${n8nBase}/api/v1/workflows?tags=AERELION&limit=20`, {
+      const listRes = await fetch(`${n8nBase}/api/v1/workflows?limit=100`, {
         headers: n8nHeaders,
       });
       const listData = await listRes.json();
-      const workflows = listData.data || [];
+      // Filter locally for AERELION workflows by name prefix
+      const workflows = (listData.data || []).filter((wf: { name: string }) =>
+        wf.name.startsWith('AERELION_')
+      );
 
       const results = await Promise.all(
         workflows.map(async (wf: { id: string; name: string; active: boolean }) => {
