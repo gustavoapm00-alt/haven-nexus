@@ -23,13 +23,23 @@ export interface WorkflowStatus {
   updatedAt?: string;
 }
 
+export interface ProbeResult {
+  status: number;
+  ok: boolean;
+  n8n_base_url: string;
+  key_length: number;
+  key_prefix: string;
+  response_preview: string;
+}
+
 interface UseDeployState {
   isLoading: boolean;
   error: string | null;
   summary: DeploySummary | null;
   results: DeployResult[];
   existingWorkflows: WorkflowStatus[];
-  phase: 'idle' | 'deploying' | 'activating' | 'checking' | 'done';
+  probeResult: ProbeResult | null;
+  phase: 'idle' | 'deploying' | 'activating' | 'checking' | 'probing' | 'done';
 }
 
 export function useDeployAgentWorkflows() {
@@ -39,6 +49,7 @@ export function useDeployAgentWorkflows() {
     summary: null,
     results: [],
     existingWorkflows: [],
+    probeResult: null,
     phase: 'idle',
   });
 
@@ -46,6 +57,42 @@ export function useDeployAgentWorkflows() {
     const { data: { session } } = await supabase.auth.getSession();
     return session?.access_token;
   };
+
+  /**
+   * Probe n8n connectivity — validates API key without deploying
+   */
+  const probeConnection = useCallback(async () => {
+    const token = await getSession();
+    if (!token) {
+      setState(s => ({ ...s, error: 'Not authenticated' }));
+      return;
+    }
+
+    setState(s => ({ ...s, isLoading: true, error: null, phase: 'probing', probeResult: null }));
+
+    try {
+      const { data, error } = await supabase.functions.invoke('deploy-agent-workflows', {
+        body: { action: 'probe' },
+      });
+
+      if (error) throw new Error(error.message || 'Probe failed');
+
+      setState(s => ({
+        ...s,
+        isLoading: false,
+        phase: 'done',
+        probeResult: data,
+        error: data.ok ? null : `n8n rejected key with HTTP ${data.status}. Response: ${data.response_preview}`,
+      }));
+    } catch (err) {
+      setState(s => ({
+        ...s,
+        isLoading: false,
+        phase: 'idle',
+        error: err instanceof Error ? err.message : 'Probe failed',
+      }));
+    }
+  }, []);
 
   /**
    * Deploy all 7 heartbeat workflows to n8n via Zero-Touch API
@@ -160,9 +207,10 @@ export function useDeployAgentWorkflows() {
       summary: null,
       results: [],
       existingWorkflows: [],
+      probeResult: null,
       phase: 'idle',
     });
   }, []);
 
-  return { ...state, deployAll, checkStatus, activateAll, reset };
+  return { ...state, probeConnection, deployAll, checkStatus, activateAll, reset };
 }

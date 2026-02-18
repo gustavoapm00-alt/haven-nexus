@@ -264,15 +264,35 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Normalize base URL — strip trailing slash to avoid double-slash in paths
+    const n8nBase = n8nBaseUrl.replace(/\/$/, '');
     const supabaseFunctionsUrl = `${supabaseUrl}/functions/v1`;
     const n8nHeaders = {
       'X-N8N-API-KEY': n8nApiKey,
       'Content-Type': 'application/json',
     };
 
+    // ACTION: Connectivity probe — validates n8n API key before any deployment
+    if (action === 'probe') {
+      const probeRes = await fetch(`${n8nBase}/api/v1/workflows?limit=1`, {
+        headers: n8nHeaders,
+      });
+      const probeBody = await probeRes.text();
+      return new Response(JSON.stringify({
+        status: probeRes.status,
+        ok: probeRes.ok,
+        n8n_base_url: n8nBase,
+        key_length: n8nApiKey.length,
+        key_prefix: n8nApiKey.slice(0, 8) + '...',
+        response_preview: probeBody.slice(0, 300),
+      }), {
+        status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     // ACTION: Get status of existing AERELION workflows
     if (action === 'status') {
-      const statusRes = await fetch(`${n8nBaseUrl}/api/v1/workflows?tags=AERELION&limit=20`, {
+      const statusRes = await fetch(`${n8nBase}/api/v1/workflows?tags=AERELION&limit=20`, {
         headers: n8nHeaders,
       });
 
@@ -291,7 +311,7 @@ Deno.serve(async (req) => {
 
     // ACTION: Activate all existing AERELION workflows
     if (action === 'activate_all') {
-      const listRes = await fetch(`${n8nBaseUrl}/api/v1/workflows?tags=AERELION&limit=20`, {
+      const listRes = await fetch(`${n8nBase}/api/v1/workflows?tags=AERELION&limit=20`, {
         headers: n8nHeaders,
       });
       const listData = await listRes.json();
@@ -300,7 +320,7 @@ Deno.serve(async (req) => {
       const results = await Promise.all(
         workflows.map(async (wf: { id: string; name: string; active: boolean }) => {
           if (wf.active) return { id: wf.id, name: wf.name, result: 'already_active' };
-          const activateRes = await fetch(`${n8nBaseUrl}/api/v1/workflows/${wf.id}/activate`, {
+          const activateRes = await fetch(`${n8nBase}/api/v1/workflows/${wf.id}/activate`, {
             method: 'POST',
             headers: n8nHeaders,
           });
@@ -322,7 +342,7 @@ Deno.serve(async (req) => {
             : buildStandardWorkflow(agent, supabaseFunctionsUrl, heartbeatSecret);
 
           // Create workflow via n8n API
-          const createRes = await fetch(`${n8nBaseUrl}/api/v1/workflows`, {
+          const createRes = await fetch(`${n8nBase}/api/v1/workflows`, {
             method: 'POST',
             headers: n8nHeaders,
             body: JSON.stringify(workflowPayload),
@@ -330,14 +350,14 @@ Deno.serve(async (req) => {
 
           if (!createRes.ok) {
             const errText = await createRes.text();
-            return { agent_id: agent.id, status: 'error', message: errText };
+            return { agent_id: agent.id, status: 'error', message: `n8n API error: ${createRes.status} - ${errText.slice(0, 200)}` };
           }
 
           const created = await createRes.json();
           const workflowId = created.id;
 
           // Activate the workflow
-          const activateRes = await fetch(`${n8nBaseUrl}/api/v1/workflows/${workflowId}/activate`, {
+          const activateRes = await fetch(`${n8nBase}/api/v1/workflows/${workflowId}/activate`, {
             method: 'POST',
             headers: n8nHeaders,
           });
