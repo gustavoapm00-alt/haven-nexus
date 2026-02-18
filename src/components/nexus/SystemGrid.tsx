@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useCallback } from 'react';
 import { useAgentStatus, type AgentStatusEnum } from '@/hooks/useAgentStatus';
+import { useAgentRegistry } from '@/hooks/useAgentRegistry';
 import { SentinelGauge, AuditorLastCommit, EnvoyReportButton } from './AgentSpecializedWidgets';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -320,16 +321,8 @@ function HeartbeatHistoryDrawer({
   );
 }
 
-// ─── Agent data ───────────────────────────────────────────────────────────────
-const AGENTS = [
-  { id: 'AG-01', codename: 'THE SENTINEL', fn: 'CUI Handoff & NIST/CMMC Scanning', refId: 'REF-SENTINEL-800171', impact: 'NIST_800-171_COMPLIANCE' },
-  { id: 'AG-02', codename: 'THE LIBRARIAN', fn: 'Universal Data Ontology & Schema Mapping', refId: 'REF-LIBRARIAN-ONTO', impact: 'DATA_NORMALIZATION' },
-  { id: 'AG-03', codename: 'THE WATCHMAN', fn: 'COOP & Drift Detection Resilience', refId: 'REF-WATCHMAN-COOP', impact: 'CONTINUITY_ASSURANCE' },
-  { id: 'AG-04', codename: 'THE GATEKEEPER', fn: 'PoLP Access Governance & Security', refId: 'REF-GATEKEEPER-POLP', impact: 'ACCESS_CONTROL' },
-  { id: 'AG-05', codename: 'THE AUDITOR', fn: 'Threat Surface Reduction (Anti-Shadow IT)', refId: 'REF-AUDITOR-TSR', impact: 'THREAT_MITIGATION' },
-  { id: 'AG-06', codename: 'THE CHRONICLER', fn: 'Real-Time System Status Ticker', refId: 'REF-CHRONICLER-SYS', impact: 'OBSERVABILITY' },
-  { id: 'AG-07', codename: 'THE ENVOY', fn: 'Executive Briefing AI (After-Action Reports)', refId: 'REF-ENVOY-AAR', impact: 'EXECUTIVE_OVERSIGHT' },
-];
+// ─── Agent data — sourced from agent_registry (DB) ───────────────────────────
+// AGENTS constant is removed; SystemGrid now reads from useAgentRegistry hook.
 
 const STATUS_COLORS: Record<AgentStatusEnum, { border: string; pulse: string; text: string }> = {
   NOMINAL:    { border: '#1a1a1a', pulse: '#39FF14', text: '#39FF14' },
@@ -350,6 +343,7 @@ function relativeTime(iso: string | null): string {
 // ─── Main SystemGrid ──────────────────────────────────────────────────────────
 export default function SystemGrid() {
   const { agentStatuses, forceStabilize, sendPulse } = useAgentStatus();
+  const { agents: AGENTS } = useAgentRegistry();
   const [openDrawer, setOpenDrawer] = useState<{ id: string; codename: string } | null>(null);
 
   return (
@@ -434,7 +428,7 @@ export default function SystemGrid() {
 
               {/* Function */}
               <p className="text-[10px] leading-relaxed mb-2" style={{ color: '#666', fontFamily: MONO }}>
-                {a.fn}
+                {a.fn_description}
               </p>
 
               {/* Metadata tags */}
@@ -443,13 +437,13 @@ export default function SystemGrid() {
                   className="block text-[8px] px-2 py-0.5"
                   style={{ fontFamily: MONO, color: '#39FF14', background: 'rgba(57,255,20,0.03)', border: '1px solid rgba(57,255,20,0.1)', borderRadius: 0 }}
                 >
-                  [REF-ID] {a.refId}
+                  [REF-ID] {a.ref_id}
                 </code>
                 <code
                   className="block text-[8px] px-2 py-0.5"
                   style={{ fontFamily: MONO, color: '#FFBF00', background: 'rgba(255,191,0,0.03)', border: '1px solid rgba(255,191,0,0.1)', borderRadius: 0 }}
                 >
-                  [SYSTEM_IMPACT] {a.impact}
+                  [SYSTEM_IMPACT] {a.system_impact}
                 </code>
               </div>
 

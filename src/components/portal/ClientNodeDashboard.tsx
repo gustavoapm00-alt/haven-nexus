@@ -3,6 +3,7 @@ import { useVpsInstance } from '@/hooks/useVpsInstance';
 import { useNexusMode } from '@/hooks/useNexusMode';
 import { useState, useEffect } from 'react';
 import { useAgentStatus } from '@/hooks/useAgentStatus';
+import { useAgentRegistry } from '@/hooks/useAgentRegistry';
 import { useHostingerMetrics } from '@/hooks/useHostingerMetrics';
 import { useVpsOrchestrator } from '@/hooks/useVpsOrchestrator';
 import VitalityStream from './VitalityStream';
@@ -13,15 +14,7 @@ const MONO = 'JetBrains Mono, monospace';
 const CRON_CYCLE_MS = 2 * 60 * 60 * 1000;
 const VERACITY_THRESHOLD_MS = 4 * 60 * 60 * 1000;
 
-const AGENTS = [
-  { id: 'AG-01', codename: 'THE SENTINEL', fn: 'CUI Handoff & NIST/CMMC Scanning' },
-  { id: 'AG-02', codename: 'THE LIBRARIAN', fn: 'Universal Data Ontology' },
-  { id: 'AG-03', codename: 'THE WATCHMAN', fn: 'COOP & Drift Detection' },
-  { id: 'AG-04', codename: 'THE GATEKEEPER', fn: 'PoLP Access Governance' },
-  { id: 'AG-05', codename: 'THE AUDITOR', fn: 'Threat Surface Reduction' },
-  { id: 'AG-06', codename: 'THE CHRONICLER', fn: 'Real-Time System Status' },
-  { id: 'AG-07', codename: 'THE ENVOY', fn: 'Executive Briefing AI' },
-];
+// AGENTS is now sourced from useAgentRegistry hook — see ClientNodeDashboard component
 
 type AgentStatusEnum = 'NOMINAL' | 'DRIFT' | 'ERROR' | 'PROCESSING' | 'OFFLINE';
 
@@ -95,7 +88,7 @@ function ProvenanceTag({ agentId, lastSeen }: { agentId: string; lastSeen: strin
   );
 }
 
-function AgentMiniCard({ agent, status, lastSeen }: { agent: typeof AGENTS[0]; status: AgentStatusEnum; lastSeen: string | null }) {
+function AgentMiniCard({ agent, status, lastSeen }: { agent: { id: string; codename: string; fn_description: string }; status: AgentStatusEnum; lastSeen: string | null }) {
   const colors = STATUS_COLORS[status];
   const isOffline = status === 'OFFLINE';
   const isProcessing = status === 'PROCESSING';
@@ -125,7 +118,7 @@ function AgentMiniCard({ agent, status, lastSeen }: { agent: typeof AGENTS[0]; s
         {agent.codename}
       </p>
       <p className="text-[6px] truncate mb-2" style={{ fontFamily: MONO, color: '#333' }}>
-        {agent.fn}
+        {agent.fn_description}
       </p>
 
       {/* VERACITY_TTL */}
@@ -228,6 +221,7 @@ export default function ClientNodeDashboard() {
   const { instance, isLoading: vpsLoading, provision, refetch } = useVpsInstance();
   const { mode } = useNexusMode();
   const { agentStatuses } = useAgentStatus();
+  const { agents: AGENTS } = useAgentRegistry();
   const [showCredentials, setShowCredentials] = useState(false);
   const [isProvisioning, setIsProvisioning] = useState(false);
   const [provisionError, setProvisionError] = useState<string | null>(null);
