@@ -265,8 +265,11 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Normalize base URL — strip trailing slash to avoid double-slash in paths
-    const n8nBase = n8nBaseUrl.replace(/\/$/, '');
+    // Normalize base URL — ensure https:// protocol and strip trailing slash
+    const rawBase = n8nBaseUrl.replace(/\/$/, '');
+    const n8nBase = rawBase.startsWith('http://') || rawBase.startsWith('https://')
+      ? rawBase
+      : `https://${rawBase}`;
     const supabaseFunctionsUrl = `${supabaseUrl}/functions/v1`;
     const n8nHeaders = {
       'X-N8N-API-KEY': n8nApiKey,
