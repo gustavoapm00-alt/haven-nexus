@@ -1,0 +1,78 @@
+{
+  "name": "AERELION_AG-02_LIBRARIAN_HEARTBEAT",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 2
+            }
+          ]
+        }
+      },
+      "id": "librarian-schedule-trigger",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SUPABASE_FUNCTIONS_URL || 'https://chraztxdtvmipasdttbk.supabase.co/functions/v1' }}/agent-heartbeat",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "x-heartbeat-key",
+              "value": "={{ $env.HEARTBEAT_SECRET }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"agent_id\": \"AG-02\",\n  \"status\": \"NOMINAL\",\n  \"message\": \"SCHEMA_SYNC_CYCLE\",\n  \"metadata\": {\n    \"module\": \"LIBRARIAN\",\n    \"function\": \"Universal Data Ontology & Schema Mapping\",\n    \"cycle_iso\": \"{{ new Date().toISOString() }}\",\n    \"source\": \"n8n_cron\"\n  }\n}",
+        "options": {}
+      },
+      "id": "librarian-heartbeat-nominal",
+      "name": "Heartbeat NOMINAL",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [480, 300]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Heartbeat NOMINAL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": ""
+  },
+  "staticData": null,
+  "tags": [
+    { "name": "AERELION" },
+    { "name": "AG-02" },
+    { "name": "LIBRARIAN" },
+    { "name": "HEARTBEAT" }
+  ],
+  "triggerCount": 1,
+  "pinData": {}
+}

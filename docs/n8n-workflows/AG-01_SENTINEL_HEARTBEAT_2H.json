@@ -1,0 +1,153 @@
+{
+  "name": "AERELION_AG-01_SENTINEL_HEARTBEAT_2H",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 2
+            }
+          ]
+        }
+      },
+      "id": "sentinel-2h-schedule-trigger",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://aerelion.systems",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          },
+          "timeout": 15000
+        }
+      },
+      "id": "sentinel-http-scan",
+      "name": "HTTP Scan Target",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "id": "condition-status-ok",
+              "leftValue": "={{ $json.statusCode }}",
+              "rightValue": 200,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "sentinel-if-validation",
+      "name": "Validate Response",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [720, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SUPABASE_FUNCTIONS_URL || 'https://chraztxdtvmipasdttbk.supabase.co/functions/v1' }}/agent-heartbeat",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "x-heartbeat-key",
+              "value": "={{ $env.HEARTBEAT_SECRET }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"agent_id\": \"AG-01\",\n  \"status\": \"NOMINAL\",\n  \"message\": \"SCAN_COMPLETE_{{ $('HTTP Scan Target').item.json.statusCode }}_2H_CYCLE\",\n  \"metadata\": {\n    \"module\": \"SENTINEL\",\n    \"scan_percent\": 100,\n    \"ssl_valid\": {{ $('HTTP Scan Target').item.json.url && $('HTTP Scan Target').item.json.url.startsWith('https') ? true : false }},\n    \"http_status\": {{ $('HTTP Scan Target').item.json.statusCode }},\n    \"scan_target\": \"https://aerelion.systems\",\n    \"cycle_iso\": \"{{ new Date().toISOString() }}\",\n    \"source\": \"n8n_cron\"\n  }\n}",
+        "options": {}
+      },
+      "id": "sentinel-heartbeat-pass",
+      "name": "Heartbeat NOMINAL",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [960, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SUPABASE_FUNCTIONS_URL || 'https://chraztxdtvmipasdttbk.supabase.co/functions/v1' }}/agent-heartbeat",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "x-heartbeat-key",
+              "value": "={{ $env.HEARTBEAT_SECRET }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"agent_id\": \"AG-01\",\n  \"status\": \"DRIFT\",\n  \"message\": \"SCAN_FAIL_{{ $('HTTP Scan Target').item.json.statusCode || 'TIMEOUT' }}\",\n  \"metadata\": {\n    \"module\": \"SENTINEL\",\n    \"scan_percent\": 0,\n    \"ssl_valid\": false,\n    \"http_status\": {{ $('HTTP Scan Target').item.json.statusCode || 0 }},\n    \"scan_target\": \"https://aerelion.systems\",\n    \"cycle_iso\": \"{{ new Date().toISOString() }}\",\n    \"source\": \"n8n_cron\"\n  }\n}",
+        "options": {}
+      },
+      "id": "sentinel-heartbeat-fail",
+      "name": "Heartbeat DRIFT",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [960, 420]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [{ "node": "HTTP Scan Target", "type": "main", "index": 0 }]
+      ]
+    },
+    "HTTP Scan Target": {
+      "main": [
+        [{ "node": "Validate Response", "type": "main", "index": 0 }]
+      ]
+    },
+    "Validate Response": {
+      "main": [
+        [{ "node": "Heartbeat NOMINAL", "type": "main", "index": 0 }],
+        [{ "node": "Heartbeat DRIFT", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": ""
+  },
+  "staticData": null,
+  "tags": [
+    { "name": "AERELION" },
+    { "name": "AG-01" },
+    { "name": "SENTINEL" },
+    { "name": "HEARTBEAT" }
+  ],
+  "triggerCount": 1,
+  "pinData": {}
+}
