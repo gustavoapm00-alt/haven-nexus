@@ -1391,6 +1391,93 @@ export type Database = {
         }
         Relationships: []
       }
+      vps_instances: {
+        Row: {
+          activation_request_id: string | null
+          agent_deploy_error: string | null
+          agents_deployed: boolean
+          agents_deployed_at: string | null
+          created_at: string
+          credentials_viewed_at: string | null
+          encrypted_n8n_credentials: string | null
+          encrypted_ssh_private_key: string | null
+          encrypted_ssh_public_key: string | null
+          hostname: string | null
+          id: string
+          ip_address: string | null
+          n8n_encryption_iv: string | null
+          n8n_encryption_tag: string | null
+          n8n_instance_url: string | null
+          notes: string | null
+          plan: string | null
+          region: string | null
+          ssh_encryption_iv: string | null
+          ssh_encryption_tag: string | null
+          ssh_key_label: string | null
+          status: string
+          triggered_by: string | null
+          updated_at: string
+          user_id: string
+          virtual_machine_id: string | null
+        }
+        Insert: {
+          activation_request_id?: string | null
+          agent_deploy_error?: string | null
+          agents_deployed?: boolean
+          agents_deployed_at?: string | null
+          created_at?: string
+          credentials_viewed_at?: string | null
+          encrypted_n8n_credentials?: string | null
+          encrypted_ssh_private_key?: string | null
+          encrypted_ssh_public_key?: string | null
+          hostname?: string | null
+          id?: string
+          ip_address?: string | null
+          n8n_encryption_iv?: string | null
+          n8n_encryption_tag?: string | null
+          n8n_instance_url?: string | null
+          notes?: string | null
+          plan?: string | null
+          region?: string | null
+          ssh_encryption_iv?: string | null
+          ssh_encryption_tag?: string | null
+          ssh_key_label?: string | null
+          status?: string
+          triggered_by?: string | null
+          updated_at?: string
+          user_id: string
+          virtual_machine_id?: string | null
+        }
+        Update: {
+          activation_request_id?: string | null
+          agent_deploy_error?: string | null
+          agents_deployed?: boolean
+          agents_deployed_at?: string | null
+          created_at?: string
+          credentials_viewed_at?: string | null
+          encrypted_n8n_credentials?: string | null
+          encrypted_ssh_private_key?: string | null
+          encrypted_ssh_public_key?: string | null
+          hostname?: string | null
+          id?: string
+          ip_address?: string | null
+          n8n_encryption_iv?: string | null
+          n8n_encryption_tag?: string | null
+          n8n_instance_url?: string | null
+          notes?: string | null
+          plan?: string | null
+          region?: string | null
+          ssh_encryption_iv?: string | null
+          ssh_encryption_tag?: string | null
+          ssh_key_label?: string | null
+          status?: string
+          triggered_by?: string | null
+          updated_at?: string
+          user_id?: string
+          virtual_machine_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
