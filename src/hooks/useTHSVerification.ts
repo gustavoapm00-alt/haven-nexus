@@ -8,14 +8,41 @@ interface THSState {
 }
 
 /**
- * Session-scoped THS verification.
- * 
- * Every browser session requires a fresh Human Signature challenge.
- * The sovereign_bridge table stores the latest verification state,
- * but the hook only trusts it if the sessionStorage flag confirms
- * verification happened in THIS browser session.
+ * THS verification with 6-hour persistence.
+ *
+ * After a successful Human Signature challenge, the admin is considered
+ * verified for 6 hours. The expiry timestamp is stored in localStorage
+ * keyed by userId so it survives page reloads and tab reopens within
+ * the same browser, but is invalidated after 6 hours.
  */
-const THS_SESSION_KEY = 'ths_verified_session';
+const THS_STORAGE_KEY = 'ths_verified_until';
+const THS_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours
+
+function getStoredExpiry(userId: string): number | null {
+  try {
+    const raw = localStorage.getItem(`${THS_STORAGE_KEY}:${userId}`);
+    return raw ? parseInt(raw, 10) : null;
+  } catch {
+    return null;
+  }
+}
+
+function setStoredExpiry(userId: string): void {
+  try {
+    const expiresAt = Date.now() + THS_TTL_MS;
+    localStorage.setItem(`${THS_STORAGE_KEY}:${userId}`, String(expiresAt));
+  } catch {
+    // ignore storage errors
+  }
+}
+
+export function clearTHSVerification(userId: string): void {
+  try {
+    localStorage.removeItem(`${THS_STORAGE_KEY}:${userId}`);
+  } catch {
+    // ignore
+  }
+}
 
 export function useTHSVerification(userId: string | undefined): THSState {
   const [state, setState] = useState<THSState>({
@@ -24,9 +51,14 @@ export function useTHSVerification(userId: string | undefined): THSState {
     lastVerifiedAt: null,
   });
 
-  const checkSession = useCallback(() => {
+  const checkStored = useCallback((): boolean => {
     if (!userId) return false;
-    return sessionStorage.getItem(THS_SESSION_KEY) === userId;
+    const expiry = getStoredExpiry(userId);
+    if (!expiry) return false;
+    if (Date.now() < expiry) return true;
+    // Expired — clean up
+    clearTHSVerification(userId);
+    return false;
   }, [userId]);
 
   useEffect(() => {
@@ -35,13 +67,18 @@ export function useTHSVerification(userId: string | undefined): THSState {
       return;
     }
 
-    // If session flag exists, trust it immediately
-    if (checkSession()) {
-      setState({ isVerified: true, isLoading: false, lastVerifiedAt: new Date().toISOString() });
+    // If a valid unexpired token exists, trust it immediately
+    if (checkStored()) {
+      const expiry = getStoredExpiry(userId);
+      setState({
+        isVerified: true,
+        isLoading: false,
+        lastVerifiedAt: expiry ? new Date(expiry - THS_TTL_MS).toISOString() : new Date().toISOString(),
+      });
       return;
     }
 
-    // No session flag — not verified this session
+    // No valid stored token — not verified
     setState({ isVerified: false, isLoading: false, lastVerifiedAt: null });
 
     let cancelled = false;
@@ -69,7 +106,7 @@ export function useTHSVerification(userId: string | undefined): THSState {
           if (cancelled || !data) return;
 
           if (data.is_human_verified === true) {
-            sessionStorage.setItem(THS_SESSION_KEY, userId);
+            setStoredExpiry(userId);
             setState({
               isVerified: true,
               isLoading: false,
@@ -84,7 +121,7 @@ export function useTHSVerification(userId: string | undefined): THSState {
       cancelled = true;
       supabase.removeChannel(channel);
     };
-  }, [userId, checkSession]);
+  }, [userId, checkStored]);
 
   return state;
 }

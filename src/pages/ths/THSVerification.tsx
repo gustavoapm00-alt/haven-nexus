@@ -1,12 +1,14 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 
 const MONO = 'JetBrains Mono, monospace';
 const COMMAND = 'AUTHORIZE_COMMANDER';
 const FALLBACK_NEXUS = '/nexus/cmd';
+const THS_STORAGE_KEY = 'ths_verified_until';
+const THS_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours
 
 interface MouseSample { x: number; y: number; t: number; }
 interface KeystrokeSample { key: string; downAt: number; upAt: number; }
@@ -19,6 +21,7 @@ interface VerificationResult {
 
 export default function THSVerification() {
   const { user, isAdmin, isLoading: authLoading } = useAuth();
+  const navigate = useNavigate();
 
   // All hooks must be called before any conditional returns
   const [mouseTrail, setMouseTrail] = useState<MouseSample[]>([]);
@@ -151,13 +154,26 @@ export default function THSVerification() {
         return;
       }
 
-      setResult(data as VerificationResult);
-      setPhase(data.verified ? 'granted' : 'denied');
+      const verificationData = data as VerificationResult;
+      setResult(verificationData);
+
+      if (verificationData.verified && user) {
+        // Persist 6-hour verification window in localStorage
+        const expiresAt = Date.now() + THS_TTL_MS;
+        localStorage.setItem(`${THS_STORAGE_KEY}:${user.id}`, String(expiresAt));
+      }
+
+      setPhase(verificationData.verified ? 'granted' : 'denied');
+
+      // Auto-redirect to Nexus 2.5s after grant
+      if (verificationData.verified) {
+        setTimeout(() => navigate(FALLBACK_NEXUS, { replace: true }), 2500);
+      }
     } catch (err) {
       setError(String(err));
       setPhase('denied');
     }
-  }, [typedCommand, mouseTrail, keystrokes, challengeStart]);
+  }, [typedCommand, mouseTrail, keystrokes, challengeStart, user, navigate]);
 
   // Auth gates — after all hooks
   if (authLoading) return null;
@@ -410,7 +426,7 @@ export default function THSVerification() {
               <div className="w-full my-1" style={{ borderTop: '1px solid rgba(57,255,20,0.15)' }} />
 
               <div className="text-[7px] tracking-[0.15em] leading-relaxed text-center max-w-sm" style={{ color: 'rgba(255,255,255,0.3)', fontFamily: MONO }}>
-                YOUR BIOLOGICAL PRESENCE HAS BEEN CRYPTOGRAPHICALLY VERIFIED. THE NEXUS CORE IS NOW ACCESSIBLE. VERIFICATION VALID FOR THIS SESSION ONLY.
+                YOUR BIOLOGICAL PRESENCE HAS BEEN CRYPTOGRAPHICALLY VERIFIED. THE NEXUS CORE IS NOW ACCESSIBLE. VERIFICATION VALID FOR 6 HOURS. AUTO-ROUTING TO NEXUS...
               </div>
             </div>
 
