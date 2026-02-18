@@ -4,6 +4,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useClientProfile } from '@/hooks/useClientProfile';
 import { useActivationStatus, ActiveAutomation } from '@/hooks/useActivationStatus';
+import ClientNodeDashboard from '@/components/portal/ClientNodeDashboard';
+
 import { useN8nProvisioning } from '@/hooks/useN8nProvisioning';
 import { useIntegrationConnections } from '@/hooks/useIntegrationConnections';
 import { 
@@ -527,7 +529,12 @@ const ClientDashboard = () => {
             </section>
           )}
 
-          {/* Section 3: System Status (Passive Footer) */}
+          {/* Section 3: Client Node Alpha — VPS Infrastructure */}
+          <section>
+            <ClientNodeDashboard />
+          </section>
+
+          {/* Section 4: System Status */}
           <section className="pt-4 border-t border-border/20">
             <GlassCard className="p-6 bg-muted/30">
               <div className="flex items-start gap-4">
@@ -540,35 +547,15 @@ const ClientDashboard = () => {
                     All systems are hosted, monitored, and maintained by AERELION. 
                     Your credentials are encrypted and revocable at any time.
                   </p>
-                  
                   <div className="flex flex-wrap gap-4 mt-4">
-                    <Link
-                      to="/integrations"
-                      className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
-                    >
-                      <Settings className="w-4 h-4" />
-                      Manage Integrations
+                    <Link to="/integrations" className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline">
+                      <Settings className="w-4 h-4" />Manage Integrations
                     </Link>
-                    <Link
-                      to="/contact"
-                      className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
-                    >
-                      <HelpCircle className="w-4 h-4" />
-                      Contact Support
+                    <Link to="/contact" className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline">
+                      <HelpCircle className="w-4 h-4" />Contact Support
                     </Link>
-                    <Link
-                      to="/docs"
-                      className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
-                    >
-                      <FileText className="w-4 h-4" />
-                      Documentation
-                    </Link>
-                    <Link
-                      to="/purchases"
-                      className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
-                    >
-                      <Bell className="w-4 h-4" />
-                      Purchase History
+                    <Link to="/purchases" className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline">
+                      <Bell className="w-4 h-4" />Purchase History
                     </Link>
                   </div>
                 </div>

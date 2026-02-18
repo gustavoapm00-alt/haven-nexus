@@ -9,3 +9,13 @@ verify_jwt = false
 [functions.deploy-agent-workflows]
 verify_jwt = false
 
+[functions.hostinger-provision]
+verify_jwt = false
+
+[functions.hostinger-metrics]
+verify_jwt = false
+
+[functions.hostinger-credentials]
+verify_jwt = false
+
+
