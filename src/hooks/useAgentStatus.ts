@@ -8,6 +8,8 @@ export interface AgentState {
   message: string;
   lastSeen: string | null;
   metadata: Record<string, unknown>;
+  /** Heartbeat provenance source — e.g. 'n8n_cron', 'nexus_hud', 'manual', etc. */
+  source: string | null;
 }
 
 const AGENT_IDS = ['AG-01', 'AG-02', 'AG-03', 'AG-04', 'AG-05', 'AG-06', 'AG-07'] as const;
@@ -21,6 +23,7 @@ const defaultState = (): AgentState => ({
   message: '',
   lastSeen: null,
   metadata: {},
+  source: null,
 });
 
 function deriveStatus(rawStatus: string): AgentStatusEnum {
@@ -75,11 +78,13 @@ export function useAgentStatus() {
           const row = latest[id];
           if (row) {
             const age = Date.now() - new Date(row.created_at).getTime();
+            const meta = (row.metadata as Record<string, unknown>) || {};
             next[id] = {
               status: age > OFFLINE_THRESHOLD_MS ? 'OFFLINE' : deriveStatus(row.status),
               message: row.message || '',
               lastSeen: row.created_at,
-              metadata: (row.metadata as Record<string, unknown>) || {},
+              metadata: meta,
+              source: meta.source ? String(meta.source) : null,
             };
           }
         });
@@ -97,13 +102,15 @@ export function useAgentStatus() {
         { event: 'INSERT', schema: 'public', table: 'agent_heartbeats' },
         (payload) => {
           const row = payload.new as { agent_id: string; status: string; message: string; metadata: Record<string, unknown>; created_at: string };
+          const meta = row.metadata || {};
           setAgentStatuses((prev) => ({
             ...prev,
             [row.agent_id]: {
               status: deriveStatus(row.status),
               message: row.message || '',
               lastSeen: row.created_at,
-              metadata: row.metadata || {},
+              metadata: meta,
+              source: meta.source ? String(meta.source) : null,
             },
           }));
         }

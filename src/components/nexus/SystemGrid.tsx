@@ -2,6 +2,70 @@ import { motion } from 'framer-motion';
 import { useAgentStatus, type AgentStatusEnum } from '@/hooks/useAgentStatus';
 import { SentinelGauge, AuditorLastCommit, EnvoyReportButton } from './AgentSpecializedWidgets';
 
+const MONO = 'JetBrains Mono, monospace';
+
+/** CRON_PROVENANCE badge — flags whether last heartbeat came from n8n_cron or elsewhere */
+function CronProvenanceBadge({ source }: { source: string | null }) {
+  const isCron = source === 'n8n_cron';
+  const isUnknown = source === null;
+  const label = isUnknown ? 'NO_SIGNAL' : source.toUpperCase();
+  const color = isCron ? '#39FF14' : isUnknown ? '#333' : '#FFBF00';
+  const bg = isCron ? 'rgba(57,255,20,0.04)' : isUnknown ? 'rgba(255,255,255,0.01)' : 'rgba(255,191,0,0.06)';
+  const borderColor = isCron ? 'rgba(57,255,20,0.15)' : isUnknown ? '#1a1a1a' : 'rgba(255,191,0,0.25)';
+
+  return (
+    <div className="mb-1.5 flex items-center gap-1.5">
+      <div
+        className="flex items-center gap-1 px-1.5 py-0.5 flex-1"
+        style={{ background: bg, border: `1px solid ${borderColor}`, borderRadius: 0 }}
+      >
+        <span
+          className="text-[6px] uppercase tracking-[0.2em] shrink-0"
+          style={{ fontFamily: MONO, color: '#444' }}
+        >
+          CRON_PROVENANCE
+        </span>
+        <span className="flex-1" />
+        {/* Source signal indicator */}
+        <span
+          className="inline-block h-1.5 w-1.5 shrink-0"
+          style={{
+            background: color,
+            borderRadius: '50%',
+            boxShadow: isCron ? `0 0 6px ${color}88` : 'none',
+          }}
+        />
+        <code
+          className="text-[7px] uppercase tracking-wider shrink-0"
+          style={{ fontFamily: MONO, color }}
+        >
+          {label}
+        </code>
+      </div>
+      {!isCron && !isUnknown && (
+        <motion.div
+          className="px-1.5 py-0.5"
+          style={{
+            background: 'rgba(255,191,0,0.06)',
+            border: '1px solid rgba(255,191,0,0.3)',
+            borderRadius: 0,
+          }}
+          animate={{ opacity: [1, 0.4, 1] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+        >
+          <span
+            className="text-[6px] uppercase tracking-wider"
+            style={{ fontFamily: MONO, color: '#FFBF00' }}
+          >
+            ⚠ MANUAL
+          </span>
+        </motion.div>
+      )}
+    </div>
+  );
+}
+
+
 const AGENTS = [
   { id: 'AG-01', codename: 'THE SENTINEL', fn: 'CUI Handoff & NIST/CMMC Scanning', refId: 'REF-SENTINEL-800171', impact: 'NIST_800-171_COMPLIANCE' },
   { id: 'AG-02', codename: 'THE LIBRARIAN', fn: 'Universal Data Ontology & Schema Mapping', refId: 'REF-LIBRARIAN-ONTO', impact: 'DATA_NORMALIZATION' },
@@ -171,6 +235,9 @@ export default function SystemGrid() {
                   </code>
                 )}
               </div>
+
+              {/* CRON_PROVENANCE telemetry */}
+              <CronProvenanceBadge source={state?.source ?? null} />
 
               {/* Specialized per-agent widgets */}
               {a.id === 'AG-01' && <SentinelGauge state={state} />}
