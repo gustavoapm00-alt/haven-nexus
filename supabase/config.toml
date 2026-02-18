@@ -1,5 +1,11 @@
 project_id = "chraztxdtvmipasdttbk"
 
+[functions.rotate-encryption-key]
+verify_jwt = false
+
+[functions.queue-processor]
+verify_jwt = false
+
 [functions.generate-aar]
 verify_jwt = false
 

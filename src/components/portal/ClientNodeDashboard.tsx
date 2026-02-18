@@ -9,6 +9,7 @@ import { useVpsOrchestrator } from '@/hooks/useVpsOrchestrator';
 import VitalityStream from './VitalityStream';
 import CredentialDrawer from './CredentialDrawer';
 import CapabilityHistoryLog from './CapabilityHistoryLog';
+import AgentHealthPanel from './AgentHealthPanel';
 
 const MONO = 'JetBrains Mono, monospace';
 const CRON_CYCLE_MS = 2 * 60 * 60 * 1000;
@@ -411,20 +412,8 @@ export default function ClientNodeDashboard() {
           {/* Tab: System Pulse */}
           {activeTab === 'pulse' && (
             <div className="space-y-4">
-              {/* Agent grid */}
-              <div>
-                <p className="text-[7px] tracking-[0.3em] uppercase mb-2" style={{ fontFamily: MONO, color: '#39FF14', opacity: 0.4 }}>
-                  ELITE_7 // AGENT_STATUS_GRID
-                </p>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-[1px]">
-                  {AGENTS.map(agent => {
-                    const s = agentStatuses[agent.id];
-                    const status: AgentStatusEnum = (s?.status ?? 'OFFLINE') as AgentStatusEnum;
-                    const lastSeen = s?.lastSeen ?? null;
-                    return <AgentMiniCard key={agent.id} agent={agent} status={status} lastSeen={lastSeen} />;
-                  })}
-                </div>
-              </div>
+              {/* Agent Health Panel — customer-facing live telemetry */}
+              <AgentHealthPanel />
 
               {/* Vitality Stream */}
               <div>
