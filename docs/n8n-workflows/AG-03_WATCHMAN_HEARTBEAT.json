@@ -1,0 +1,78 @@
+{
+  "name": "AERELION_AG-03_WATCHMAN_HEARTBEAT",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 2
+            }
+          ]
+        }
+      },
+      "id": "watchman-schedule-trigger",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SUPABASE_FUNCTIONS_URL || 'https://chraztxdtvmipasdttbk.supabase.co/functions/v1' }}/agent-heartbeat",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "x-heartbeat-key",
+              "value": "={{ $env.HEARTBEAT_SECRET }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"agent_id\": \"AG-03\",\n  \"status\": \"NOMINAL\",\n  \"message\": \"COOP_DRIFT_CHECK_CYCLE\",\n  \"metadata\": {\n    \"module\": \"WATCHMAN\",\n    \"function\": \"COOP & Drift Detection Resilience\",\n    \"cycle_iso\": \"{{ new Date().toISOString() }}\",\n    \"source\": \"n8n_cron\"\n  }\n}",
+        "options": {}
+      },
+      "id": "watchman-heartbeat-nominal",
+      "name": "Heartbeat NOMINAL",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [480, 300]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Heartbeat NOMINAL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": ""
+  },
+  "staticData": null,
+  "tags": [
+    { "name": "AERELION" },
+    { "name": "AG-03" },
+    { "name": "WATCHMAN" },
+    { "name": "HEARTBEAT" }
+  ],
+  "triggerCount": 1,
+  "pinData": {}
+}
