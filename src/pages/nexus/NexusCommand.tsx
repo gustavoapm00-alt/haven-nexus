@@ -12,6 +12,7 @@ import TelemetryTimeline from '@/components/nexus/TelemetryTimeline';
 import AutoHealPanel from '@/components/nexus/AutoHealPanel';
 import NexusAlertPanel from '@/components/nexus/NexusAlertPanel';
 import ThreatSurfaceDashboard from '@/components/nexus/ThreatSurfaceDashboard';
+import AgentDeploymentPanel from '@/components/nexus/AgentDeploymentPanel';
 
 function useSystemClock() {
   const [time, setTime] = useState('');
@@ -147,6 +148,11 @@ export default function NexusCommand() {
           {/* Drift Simulation Panel */}
           <div className="mb-8">
             <DriftSimulationPanel />
+          </div>
+
+          {/* Zero-Touch Agent Deployment */}
+          <div className="mb-8">
+            <AgentDeploymentPanel />
           </div>
 
           {/* Threat Surface Dashboard (AG-05) */}
