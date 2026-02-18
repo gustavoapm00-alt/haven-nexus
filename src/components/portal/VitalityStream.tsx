@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { useHostingerMetrics } from '@/hooks/useHostingerMetrics';
+import GaugeChart from './GaugeChart';
 
 const MONO = 'JetBrains Mono, monospace';
 
@@ -8,59 +9,24 @@ interface Props {
   operationalMode?: string;
 }
 
-function MetricBar({
-  label,
-  percent,
-  detail,
-  isAmber = false,
-}: {
-  label: string;
-  percent: number;
-  detail: string;
-  isAmber?: boolean;
-}) {
-  const color = isAmber ? '#FFBF00' : '#39FF14';
-  const capped = Math.min(100, Math.max(0, percent));
-
-  return (
-    <div className="mb-3">
-      <div className="flex items-center justify-between mb-1">
-        <span className="text-[7px] tracking-[0.2em] uppercase" style={{ fontFamily: MONO, color: '#444' }}>
-          {label}
-        </span>
-        <div className="flex items-center gap-2">
-          <span className="text-[7px]" style={{ fontFamily: MONO, color: '#555' }}>{detail}</span>
-          <code className="text-[9px] tabular-nums" style={{ fontFamily: MONO, color }}>
-            {capped.toFixed(1)}%
-          </code>
-        </div>
-      </div>
-      <div className="w-full h-1" style={{ background: '#0a0a0a', border: '1px solid #111' }}>
-        <motion.div
-          className="h-full"
-          style={{ background: color, boxShadow: `0 0 8px ${color}55` }}
-          initial={{ width: 0 }}
-          animate={{ width: `${capped}%` }}
-          transition={{ duration: 0.8, ease: 'easeOut' }}
-        />
-      </div>
-    </div>
-  );
-}
-
 function UptimeBadge({ seconds }: { seconds: number }) {
   const d = Math.floor(seconds / 86400);
   const h = Math.floor((seconds % 86400) / 3600);
   const m = Math.floor((seconds % 3600) / 60);
   const label = d > 0 ? `${d}d ${h}h ${m}m` : `${h}h ${m}m`;
   return (
-    <div className="px-2 py-1" style={{ background: 'rgba(57,255,20,0.04)', border: '1px solid rgba(57,255,20,0.1)' }}>
-      <span className="text-[7px] tracking-[0.2em] uppercase" style={{ fontFamily: MONO, color: '#444' }}>
-        UPTIME
-      </span>
-      <code className="ml-2 text-[9px]" style={{ fontFamily: MONO, color: '#39FF14' }}>
-        {label}
-      </code>
+    <div className="px-3 py-2 text-center" style={{ background: 'rgba(57,255,20,0.04)', border: '1px solid rgba(57,255,20,0.1)' }}>
+      <span className="text-[6px] tracking-[0.2em] uppercase block mb-0.5" style={{ fontFamily: MONO, color: '#444' }}>UPTIME</span>
+      <code className="text-[10px]" style={{ fontFamily: MONO, color: '#39FF14' }}>{label}</code>
+    </div>
+  );
+}
+
+function NetStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="px-3 py-2 flex-1" style={{ background: 'rgba(57,255,20,0.03)', border: '1px solid #111' }}>
+      <span className="text-[6px] tracking-[0.2em] uppercase block mb-0.5" style={{ fontFamily: MONO, color: '#444' }}>{label}</span>
+      <code className="text-[9px]" style={{ fontFamily: MONO, color: '#39FF14' }}>{value}</code>
     </div>
   );
 }
@@ -106,13 +72,8 @@ export default function VitalityStream({ instanceId, operationalMode = 'STEALTH'
         </div>
         <div className="flex items-center gap-2">
           {modeIsEncrypted && (
-            <div
-              className="px-2 py-0.5"
-              style={{ background: 'rgba(57,255,20,0.05)', border: '1px solid rgba(57,255,20,0.15)' }}
-            >
-              <span className="text-[6px] tracking-[0.2em] uppercase" style={{ fontFamily: MONO, color: '#39FF14' }}>
-                ENCRYPTED
-              </span>
+            <div className="px-2 py-0.5" style={{ background: 'rgba(57,255,20,0.05)', border: '1px solid rgba(57,255,20,0.15)' }}>
+              <span className="text-[6px] tracking-[0.2em] uppercase" style={{ fontFamily: MONO, color: '#39FF14' }}>ENCRYPTED</span>
             </div>
           )}
           {isLoading && (
@@ -135,62 +96,76 @@ export default function VitalityStream({ instanceId, operationalMode = 'STEALTH'
       </div>
 
       {/* Body */}
-      <div className="px-4 py-3 relative z-10">
+      <div className="px-4 py-4 relative z-10">
+
+        {/* EMPTY — No node */}
         {!instanceId && (
-          <div className="flex items-center justify-center h-24">
+          <div className="flex flex-col items-center justify-center h-32 gap-2">
+            <div className="w-8 h-8 border" style={{ borderColor: '#1a1a1a' }} />
             <p className="text-[8px] tracking-widest uppercase" style={{ fontFamily: MONO, color: '#222' }}>
-              NO_NODE_ASSIGNED
+              NODE_OFFLINE // NO_INSTANCE_ASSIGNED
             </p>
           </div>
         )}
 
+        {/* CONNECTING — loading */}
+        {instanceId && isLoading && !metrics && (
+          <div className="flex flex-col items-center justify-center h-32 gap-3">
+            <motion.div
+              className="w-5 h-5 border-t"
+              style={{ borderColor: '#39FF14', borderWidth: '1px', borderRadius: '50%' }}
+              animate={{ rotate: 360 }}
+              transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
+            />
+            <p className="text-[8px] tracking-widest uppercase" style={{ fontFamily: MONO, color: '#333' }}>
+              ESTABLISHING_VITALITY_LINK...
+            </p>
+          </div>
+        )}
+
+        {/* ERROR */}
         {instanceId && error && (
-          <div className="p-3" style={{ border: '1px solid rgba(255,68,68,0.2)', background: 'rgba(255,68,68,0.03)' }}>
+          <div className="p-3 mb-3" style={{ border: '1px solid rgba(255,68,68,0.2)', background: 'rgba(255,68,68,0.03)' }}>
             <p className="text-[7px] tracking-wider uppercase" style={{ fontFamily: MONO, color: '#FF4444' }}>
               VITALITY_ERROR: {error}
             </p>
           </div>
         )}
 
+        {/* NOMINAL — gauge charts */}
         {instanceId && !error && metrics && (
           <>
-            <MetricBar
-              label="CPU_UTILIZATION"
-              percent={metrics.cpu_percent}
-              detail=""
-              isAmber={metrics.cpu_percent > 80}
-            />
-            <MetricBar
-              label="RAM_PRESSURE"
-              percent={metrics.ram_percent}
-              detail={`${metrics.ram_used_mb}/${metrics.ram_total_mb} MB`}
-              isAmber={metrics.ram_percent > 85}
-            />
-            <MetricBar
-              label="DISK_SATURATION"
-              percent={metrics.disk_percent}
-              detail={`${metrics.disk_used_gb.toFixed(1)}/${metrics.disk_total_gb} GB`}
-              isAmber={metrics.disk_percent > 80}
-            />
+            {/* Gauge row */}
+            <div className="flex items-start justify-around gap-2 mb-4">
+              <GaugeChart
+                label="CPU_UTIL"
+                percent={metrics.cpu_percent}
+                size={100}
+              />
+              <GaugeChart
+                label="RAM_PRESSURE"
+                percent={metrics.ram_percent}
+                detail={`${metrics.ram_used_mb}/${metrics.ram_total_mb}MB`}
+                size={100}
+              />
+              <GaugeChart
+                label="DISK_SAT"
+                percent={metrics.disk_percent}
+                detail={`${metrics.disk_used_gb.toFixed(1)}/${metrics.disk_total_gb}GB`}
+                size={100}
+              />
+            </div>
 
-            <div className="flex items-center justify-between mt-3 mb-2 gap-2">
-              <div className="px-2 py-1 flex-1" style={{ background: 'rgba(57,255,20,0.03)', border: '1px solid #111' }}>
-                <span className="text-[6px] tracking-[0.2em] uppercase" style={{ fontFamily: MONO, color: '#444' }}>NET_IN</span>
-                <code className="block text-[9px] mt-0.5" style={{ fontFamily: MONO, color: '#39FF14' }}>
-                  {metrics.network_in_mbps.toFixed(2)} Mbps
-                </code>
-              </div>
-              <div className="px-2 py-1 flex-1" style={{ background: 'rgba(57,255,20,0.03)', border: '1px solid #111' }}>
-                <span className="text-[6px] tracking-[0.2em] uppercase" style={{ fontFamily: MONO, color: '#444' }}>NET_OUT</span>
-                <code className="block text-[9px] mt-0.5" style={{ fontFamily: MONO, color: '#39FF14' }}>
-                  {metrics.network_out_mbps.toFixed(2)} Mbps
-                </code>
-              </div>
+            {/* Network + uptime row */}
+            <div className="flex items-stretch gap-2">
+              <NetStat label="NET_IN" value={`${metrics.network_in_mbps.toFixed(2)} Mbps`} />
+              <NetStat label="NET_OUT" value={`${metrics.network_out_mbps.toFixed(2)} Mbps`} />
               <UptimeBadge seconds={metrics.uptime_seconds} />
             </div>
           </>
         )}
 
+        {/* Awaiting first sample */}
         {instanceId && !error && !metrics && !isLoading && (
           <div className="flex items-center justify-center h-20">
             <p className="text-[8px] tracking-widest uppercase" style={{ fontFamily: MONO, color: '#222' }}>
@@ -200,7 +175,7 @@ export default function VitalityStream({ instanceId, operationalMode = 'STEALTH'
         )}
       </div>
 
-      {/* Footer: last sampled */}
+      {/* Footer */}
       {lastFetched && (
         <div
           className="px-4 py-1.5 relative z-10 flex items-center justify-between"
