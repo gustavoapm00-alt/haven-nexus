@@ -74,12 +74,6 @@ function buildStandardWorkflow(agent: { id: string; name: string; module: string
       saveManualExecutions: true,
       callerPolicy: 'workflowsFromSameOwner',
     },
-    tags: [
-      { name: 'AERELION' },
-      { name: agent.id },
-      { name: agent.module },
-      { name: 'HEARTBEAT' },
-    ],
   };
 }
 
@@ -198,12 +192,6 @@ function buildSentinelWorkflow(supabaseFunctionsUrl: string, heartbeatSecret: st
       saveManualExecutions: true,
       callerPolicy: 'workflowsFromSameOwner',
     },
-    tags: [
-      { name: 'AERELION' },
-      { name: 'AG-01' },
-      { name: 'SENTINEL' },
-      { name: 'HEARTBEAT' },
-    ],
   };
 }
 
