@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
 import { type AgentState, type AgentStatusEnum } from '@/hooks/useAgentStatus';
 
 const MODULES = [
@@ -19,6 +20,60 @@ const STATUS_COLORS: Record<AgentStatusEnum, string> = {
   OFFLINE: '#333',
 };
 
+const MONO = 'JetBrains Mono, monospace';
+const CRON_CYCLE_MS = 2 * 60 * 60 * 1000;    // 2h — expected n8n cadence
+const OFFLINE_THRESHOLD_MS = 4 * 60 * 60 * 1000; // 4h — hard offline
+
+/** Live VERACITY_TTL countdown — amber flicker once signal age > 2h cron window */
+function VeracityTTL({ lastSeen }: { lastSeen: string | null }) {
+  const [display, setDisplay] = useState('--:--:--');
+  const [isAmber, setIsAmber] = useState(false);
+
+  useEffect(() => {
+    if (!lastSeen) {
+      setDisplay('NO_SIGNAL');
+      setIsAmber(true);
+      return;
+    }
+    const tick = () => {
+      const age = Date.now() - new Date(lastSeen).getTime();
+      setIsAmber(age > CRON_CYCLE_MS);
+      if (age > OFFLINE_THRESHOLD_MS) { setDisplay('SIGNAL_EXPIRED'); return; }
+      const totalSec = Math.floor(age / 1000);
+      const h = Math.floor(totalSec / 3600);
+      const m = Math.floor((totalSec % 3600) / 60);
+      const s = totalSec % 60;
+      setDisplay(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`);
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [lastSeen]);
+
+  const color = isAmber ? '#FFBF00' : '#39FF14';
+  const border = isAmber ? 'rgba(255,191,0,0.18)' : 'rgba(57,255,20,0.08)';
+  const bg = isAmber ? 'rgba(255,191,0,0.04)' : 'rgba(57,255,20,0.02)';
+
+  return (
+    <div
+      className="flex items-center justify-between px-1.5 py-0.5 mt-1"
+      style={{ background: bg, border: `1px solid ${border}`, borderRadius: 0 }}
+    >
+      <span className="text-[5px] uppercase tracking-[0.2em]" style={{ fontFamily: MONO, color: '#383838' }}>
+        VERACITY_TTL
+      </span>
+      <motion.code
+        className="text-[7px] tabular-nums"
+        style={{ fontFamily: MONO, color }}
+        animate={isAmber ? { opacity: [1, 0.45, 1] } : { opacity: 1 }}
+        transition={isAmber ? { duration: 1.2, repeat: Infinity } : {}}
+      >
+        {display}
+      </motion.code>
+    </div>
+  );
+}
+
 function relativeTime(iso: string | null): string {
   if (!iso) return 'NEVER';
   const diff = Date.now() - new Date(iso).getTime();
@@ -37,7 +92,7 @@ export default function NexusModuleGrid({ agentStatuses, forceStabilize }: Nexus
     <section>
       <h2
         className="text-[8px] tracking-[0.3em] mb-3 uppercase"
-        style={{ fontFamily: 'JetBrains Mono, monospace', color: '#39FF14', opacity: 0.5 }}
+        style={{ fontFamily: MONO, color: '#39FF14', opacity: 0.5 }}
       >
         NEXUS_MODULES // SYNCHRONIZED_GRID
       </h2>
@@ -109,10 +164,11 @@ export default function NexusModuleGrid({ agentStatuses, forceStabilize }: Nexus
                 {m.protocol}
               </p>
 
-              {/* Last signal */}
-              <p className="text-[7px] uppercase" style={{ color: '#333' }}>
-                SIGNAL: {relativeTime(state?.lastSeen)} AGO
+              {/* Last signal + VERACITY_TTL */}
+              <p className="text-[6px] uppercase mb-0.5" style={{ fontFamily: MONO, color: '#2a2a2a' }}>
+                LAST_SIGNAL: {relativeTime(state?.lastSeen)} AGO
               </p>
+              <VeracityTTL lastSeen={state?.lastSeen ?? null} />
 
               {/* Live message on hover */}
               {state?.message && (
