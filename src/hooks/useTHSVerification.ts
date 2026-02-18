@@ -8,17 +8,15 @@ interface THSState {
 }
 
 /**
- * THS verification with 6-hour persistence.
+ * THS verification with 6-hour localStorage persistence.
  *
- * After a successful Human Signature challenge, the admin is considered
- * verified for 6 hours. The expiry timestamp is stored in localStorage
- * keyed by userId so it survives page reloads and tab reopens within
- * the same browser, but is invalidated after 6 hours.
+ * CRITICAL: initial state is resolved SYNCHRONOUSLY from localStorage so
+ * NexusGuard never flickers to "not verified" after a fresh navigate().
  */
-const THS_STORAGE_KEY = 'ths_verified_until';
-const THS_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours
+export const THS_STORAGE_KEY = 'ths_verified_until';
+export const THS_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours
 
-function getStoredExpiry(userId: string): number | null {
+export function getStoredExpiry(userId: string): number | null {
   try {
     const raw = localStorage.getItem(`${THS_STORAGE_KEY}:${userId}`);
     return raw ? parseInt(raw, 10) : null;
@@ -27,7 +25,7 @@ function getStoredExpiry(userId: string): number | null {
   }
 }
 
-function setStoredExpiry(userId: string): void {
+export function setStoredExpiry(userId: string): void {
   try {
     const expiresAt = Date.now() + THS_TTL_MS;
     localStorage.setItem(`${THS_STORAGE_KEY}:${userId}`, String(expiresAt));
@@ -44,22 +42,28 @@ export function clearTHSVerification(userId: string): void {
   }
 }
 
-export function useTHSVerification(userId: string | undefined): THSState {
-  const [state, setState] = useState<THSState>({
-    isVerified: false,
-    isLoading: true,
-    lastVerifiedAt: null,
-  });
+/** Synchronous check — safe to call outside hooks */
+export function isTHSValid(userId: string): boolean {
+  const expiry = getStoredExpiry(userId);
+  if (!expiry) return false;
+  if (Date.now() < expiry) return true;
+  clearTHSVerification(userId);
+  return false;
+}
 
-  const checkStored = useCallback((): boolean => {
-    if (!userId) return false;
-    const expiry = getStoredExpiry(userId);
-    if (!expiry) return false;
-    if (Date.now() < expiry) return true;
-    // Expired — clean up
-    clearTHSVerification(userId);
-    return false;
-  }, [userId]);
+export function useTHSVerification(userId: string | undefined): THSState {
+  // Resolve initial state SYNCHRONOUSLY to avoid a flash of isLoading on
+  // routes that navigate() to /nexus/cmd right after setting the token.
+  const [state, setState] = useState<THSState>(() => {
+    if (!userId) return { isVerified: false, isLoading: false, lastVerifiedAt: null };
+    const valid = isTHSValid(userId);
+    const expiry = valid ? getStoredExpiry(userId) : null;
+    return {
+      isVerified: valid,
+      isLoading: false,
+      lastVerifiedAt: expiry ? new Date(expiry - THS_TTL_MS).toISOString() : null,
+    };
+  });
 
   useEffect(() => {
     if (!userId) {
@@ -67,24 +71,22 @@ export function useTHSVerification(userId: string | undefined): THSState {
       return;
     }
 
-    // If a valid unexpired token exists, trust it immediately
-    if (checkStored()) {
+    // Re-check on userId change (e.g. sign-in)
+    if (isTHSValid(userId)) {
       const expiry = getStoredExpiry(userId);
       setState({
         isVerified: true,
         isLoading: false,
-        lastVerifiedAt: expiry ? new Date(expiry - THS_TTL_MS).toISOString() : new Date().toISOString(),
+        lastVerifiedAt: expiry ? new Date(expiry - THS_TTL_MS).toISOString() : null,
       });
       return;
     }
 
-    // No valid stored token — not verified
     setState({ isVerified: false, isLoading: false, lastVerifiedAt: null });
 
     let cancelled = false;
 
-    // Subscribe to realtime changes so verification propagates instantly
-    // when the user completes THS in this tab
+    // Subscribe to realtime so verification from this tab propagates instantly
     const channel = supabase
       .channel(`ths-${userId}`)
       .on(
@@ -121,7 +123,8 @@ export function useTHSVerification(userId: string | undefined): THSState {
       cancelled = true;
       supabase.removeChannel(channel);
     };
-  }, [userId, checkStored]);
+  }, [userId]);
 
   return state;
 }
+
