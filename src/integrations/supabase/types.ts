@@ -24,6 +24,7 @@ export type Database = {
           encryption_tag: string
           expires_at: string | null
           id: string
+          key_version: number
           last_verified_at: string | null
           metadata: Json | null
           request_id: string
@@ -43,6 +44,7 @@ export type Database = {
           encryption_tag: string
           expires_at?: string | null
           id?: string
+          key_version?: number
           last_verified_at?: string | null
           metadata?: Json | null
           request_id: string
@@ -62,6 +64,7 @@ export type Database = {
           encryption_tag?: string
           expires_at?: string | null
           id?: string
+          key_version?: number
           last_verified_at?: string | null
           metadata?: Json | null
           request_id?: string
@@ -1014,6 +1017,7 @@ export type Database = {
           expires_at: string | null
           granted_scopes: string[] | null
           id: string
+          key_version: number
           provider: string
           status: string
           updated_at: string
@@ -1029,6 +1033,7 @@ export type Database = {
           expires_at?: string | null
           granted_scopes?: string[] | null
           id?: string
+          key_version?: number
           provider: string
           status?: string
           updated_at?: string
@@ -1044,6 +1049,7 @@ export type Database = {
           expires_at?: string | null
           granted_scopes?: string[] | null
           id?: string
+          key_version?: number
           provider?: string
           status?: string
           updated_at?: string
@@ -1307,6 +1313,65 @@ export type Database = {
         }
         Relationships: []
       }
+      provisioning_queue: {
+        Row: {
+          action: string
+          activation_request_id: string | null
+          attempt_count: number
+          completed_at: string | null
+          created_at: string
+          id: string
+          last_error: string | null
+          max_attempts: number
+          payload: Json
+          scheduled_at: string
+          started_at: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          activation_request_id?: string | null
+          attempt_count?: number
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          max_attempts?: number
+          payload?: Json
+          scheduled_at?: string
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          activation_request_id?: string | null
+          attempt_count?: number
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          max_attempts?: number
+          payload?: Json
+          scheduled_at?: string
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provisioning_queue_activation_request_id_fkey"
+            columns: ["activation_request_id"]
+            isOneToOne: false
+            referencedRelation: "installation_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       purchases: {
         Row: {
           amount_cents: number
@@ -1444,12 +1509,14 @@ export type Database = {
           n8n_encryption_iv: string | null
           n8n_encryption_tag: string | null
           n8n_instance_url: string | null
+          n8n_key_version: number
           notes: string | null
           plan: string | null
           region: string | null
           ssh_encryption_iv: string | null
           ssh_encryption_tag: string | null
           ssh_key_label: string | null
+          ssh_key_version: number
           status: string
           triggered_by: string | null
           updated_at: string
@@ -1472,12 +1539,14 @@ export type Database = {
           n8n_encryption_iv?: string | null
           n8n_encryption_tag?: string | null
           n8n_instance_url?: string | null
+          n8n_key_version?: number
           notes?: string | null
           plan?: string | null
           region?: string | null
           ssh_encryption_iv?: string | null
           ssh_encryption_tag?: string | null
           ssh_key_label?: string | null
+          ssh_key_version?: number
           status?: string
           triggered_by?: string | null
           updated_at?: string
@@ -1500,12 +1569,14 @@ export type Database = {
           n8n_encryption_iv?: string | null
           n8n_encryption_tag?: string | null
           n8n_instance_url?: string | null
+          n8n_key_version?: number
           notes?: string | null
           plan?: string | null
           region?: string | null
           ssh_encryption_iv?: string | null
           ssh_encryption_tag?: string | null
           ssh_key_label?: string | null
+          ssh_key_version?: number
           status?: string
           triggered_by?: string | null
           updated_at?: string
@@ -1531,6 +1602,7 @@ export type Database = {
       cleanup_expired_oauth_states: { Args: never; Returns: undefined }
       cleanup_old_edge_logs: { Args: never; Returns: undefined }
       cleanup_old_heartbeats: { Args: never; Returns: undefined }
+      cleanup_provisioning_queue: { Args: never; Returns: undefined }
       cleanup_rate_limits: { Args: never; Returns: undefined }
       get_usage_analytics: { Args: { p_user_id: string }; Returns: Json }
       has_role: {
