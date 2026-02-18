@@ -3,12 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { setStoredExpiry } from '@/hooks/useTHSVerification';
 
 const MONO = 'JetBrains Mono, monospace';
 const COMMAND = 'AUTHORIZE_COMMANDER';
 const FALLBACK_NEXUS = '/nexus/cmd';
-const THS_STORAGE_KEY = 'ths_verified_until';
-const THS_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours
 
 interface MouseSample { x: number; y: number; t: number; }
 interface KeystrokeSample { key: string; downAt: number; upAt: number; }
@@ -158,22 +157,23 @@ export default function THSVerification() {
       setResult(verificationData);
 
       if (verificationData.verified && user) {
-        // Persist 6-hour verification window in localStorage
-        const expiresAt = Date.now() + THS_TTL_MS;
-        localStorage.setItem(`${THS_STORAGE_KEY}:${user.id}`, String(expiresAt));
+        // Persist 6-hour verification window using shared helper
+        setStoredExpiry(user.id);
       }
 
       setPhase(verificationData.verified ? 'granted' : 'denied');
-
-      // Auto-redirect to Nexus 2.5s after grant
-      if (verificationData.verified) {
-        setTimeout(() => navigate(FALLBACK_NEXUS, { replace: true }), 2500);
-      }
     } catch (err) {
       setError(String(err));
       setPhase('denied');
     }
-  }, [typedCommand, mouseTrail, keystrokes, challengeStart, user, navigate]);
+  }, [typedCommand, mouseTrail, keystrokes, challengeStart, user]);
+
+  // Auto-redirect to Nexus once granted — useEffect avoids stale-closure race
+  useEffect(() => {
+    if (phase !== 'granted') return;
+    const timer = setTimeout(() => navigate(FALLBACK_NEXUS, { replace: true }), 2000);
+    return () => clearTimeout(timer);
+  }, [phase, navigate]);
 
   // Auth gates — after all hooks
   if (authLoading) return null;
