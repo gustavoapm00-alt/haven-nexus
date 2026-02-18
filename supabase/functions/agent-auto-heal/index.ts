@@ -13,7 +13,40 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, serviceKey);
+
+    // SECURITY: Validate JWT and enforce admin role — unauthenticated heal writes are not allowed
+    const authHeader = req.headers.get("authorization") || "";
+    const token = authHeader.replace("Bearer ", "");
+    if (!token) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const adminSupabase = createClient(supabaseUrl, serviceKey);
+    const { data: { user }, error: userError } = await adminSupabase.auth.getUser(token);
+    if (userError || !user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Enforce admin role
+    const { data: roleData } = await adminSupabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("role", "admin")
+      .maybeSingle();
+
+    if (!roleData) {
+      return new Response(JSON.stringify({ error: "Forbidden: Admin role required" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const { agent_id, action = "stabilize" } = await req.json();
 
@@ -34,7 +67,7 @@ serve(async (req) => {
     }
 
     // Check current state
-    const { data: latest } = await supabase
+    const { data: latest } = await adminSupabase
       .from("agent_heartbeats")
       .select("status, message, created_at")
       .eq("agent_id", agent_id)
@@ -45,8 +78,7 @@ serve(async (req) => {
     const healActions: string[] = [];
 
     if (action === "stabilize") {
-      // Insert a NOMINAL heartbeat
-      await supabase.from("agent_heartbeats").insert({
+      await adminSupabase.from("agent_heartbeats").insert({
         agent_id,
         status: "NOMINAL",
         message: "AUTO_HEAL: Stabilization protocol executed",
@@ -54,32 +86,31 @@ serve(async (req) => {
           previous_status: currentStatus,
           heal_type: "auto_stabilize",
           triggered_at: new Date().toISOString(),
+          triggered_by: user.id,
         },
       });
       healActions.push("FORCE_STABILIZATION");
     } else if (action === "restart") {
-      // Simulate restart sequence: PROCESSING -> NOMINAL
-      await supabase.from("agent_heartbeats").insert({
+      await adminSupabase.from("agent_heartbeats").insert({
         agent_id,
         status: "PROCESSING",
         message: "AUTO_HEAL: Restart sequence initiated",
-        metadata: { heal_type: "restart_init", previous_status: currentStatus },
+        metadata: { heal_type: "restart_init", previous_status: currentStatus, triggered_by: user.id },
       });
 
-      // Schedule NOMINAL after brief delay (simulate restart)
       await new Promise((r) => setTimeout(r, 2000));
 
-      await supabase.from("agent_heartbeats").insert({
+      await adminSupabase.from("agent_heartbeats").insert({
         agent_id,
         status: "NOMINAL",
         message: "AUTO_HEAL: Restart complete — module online",
-        metadata: { heal_type: "restart_complete", previous_status: currentStatus },
+        metadata: { heal_type: "restart_complete", previous_status: currentStatus, triggered_by: user.id },
       });
       healActions.push("RESTART_SEQUENCE");
     }
 
     // Log the healing action
-    await supabase.from("edge_function_logs").insert({
+    await adminSupabase.from("edge_function_logs").insert({
       function_name: "agent-auto-heal",
       level: "info",
       message: `Auto-heal executed for ${agent_id}: ${healActions.join(", ")}`,
@@ -88,16 +119,17 @@ serve(async (req) => {
         action,
         previous_status: currentStatus,
         heal_actions: healActions,
+        triggered_by: user.id,
       },
     });
 
     // Insert admin notification for visibility
-    await supabase.from("admin_notifications").insert({
+    await adminSupabase.from("admin_notifications").insert({
       type: "auto_heal",
       title: `Auto-Heal: ${agent_id}`,
       body: `${agent_id} was auto-healed from ${currentStatus}. Action: ${action.toUpperCase()}.`,
       severity: currentStatus === "ERROR" ? "warning" : "info",
-      metadata: { agent_id, action, previous_status: currentStatus },
+      metadata: { agent_id, action, previous_status: currentStatus, triggered_by: user.id },
     });
 
     return new Response(
