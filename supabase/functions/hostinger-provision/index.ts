@@ -5,6 +5,7 @@ import { checkRateLimit, getClientIp, rateLimitResponse } from "../_shared/rate-
 // ─── CORS: allowlisted origins only ───────────────────────────────────────
 const ALLOWED_ORIGINS = [
   "https://haven-matrix.lovable.app",
+  "https://app.aerelion.systems",
   "https://id-preview--377ae8b3-1fbe-4ba4-b701-d5100f83c90e.lovable.app",
 ];
 
