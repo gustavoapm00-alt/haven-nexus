@@ -365,7 +365,7 @@ Deno.serve(async (req) => {
   } catch (error) {
     // Don't log the full error as it might contain sensitive info
     console.error("OAuth callback error occurred");
-    const siteUrl = Deno.env.get("SITE_URL") || "https://haven-matrix.lovable.app";
+    const siteUrl = Deno.env.get("SITE_URL") || "https://aerelion.systems";
     return Response.redirect(`${siteUrl}/integrations?error=internal_error`, 302);
   }
 });
