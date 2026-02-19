@@ -39,8 +39,9 @@ export async function checkRateLimit(
     });
 
     if (error) {
-      console.error("Rate limit check error:", error);
-      return { allowed: true };
+      // Fail closed: a DB error must not silently grant access to rate-limited operations.
+      console.error("Rate limit check error — failing closed:", error);
+      return { allowed: false, retryAfterSeconds: config.windowSeconds };
     }
 
     if (data === false) {
@@ -49,8 +50,9 @@ export async function checkRateLimit(
 
     return { allowed: true };
   } catch (err) {
-    console.error("Rate limit exception:", err);
-    return { allowed: true };
+    // Fail closed on any unexpected exception.
+    console.error("Rate limit exception — failing closed:", err);
+    return { allowed: false, retryAfterSeconds: config.windowSeconds };
   }
 }
 
