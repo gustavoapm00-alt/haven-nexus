@@ -65,15 +65,20 @@ export function getClientIp(req: Request): string | null {
 }
 
 // ── Allowlisted origins helper ─────────────────────────────────────────────
-const ALLOWED_ORIGINS = [
+const STATIC_ALLOWED_ORIGINS = [
   "https://aerelion.systems",
   "https://haven-matrix.lovable.app",
   Deno.env.get("SITE_URL") || "",
 ].filter(Boolean);
 
+function isLovablePreview(origin: string): boolean {
+  return /^https:\/\/id-preview--[a-z0-9-]+\.lovable\.app$/.test(origin);
+}
+
 export function getAllowedOrigin(req: Request): string {
   const origin = req.headers.get("Origin") ?? "";
-  return ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  if (STATIC_ALLOWED_ORIGINS.includes(origin) || isLovablePreview(origin)) return origin;
+  return STATIC_ALLOWED_ORIGINS[0];
 }
 
 export function buildCorsHeaders(req: Request): Record<string, string> {

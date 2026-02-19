@@ -1,15 +1,20 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
-const ALLOWED_ORIGINS = [
+const STATIC_ALLOWED_ORIGINS = [
   "https://aerelion.systems",
   "https://haven-matrix.lovable.app",
   Deno.env.get("SITE_URL") || "",
 ].filter(Boolean);
 
+function isLovablePreview(origin: string): boolean {
+  return /^https:\/\/id-preview--[a-z0-9-]+\.lovable\.app$/.test(origin);
+}
+
 function getCorsHeaders(req: Request): Record<string, string> {
   const origin = req.headers.get("Origin") ?? "";
-  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  const allowedOrigin = (STATIC_ALLOWED_ORIGINS.includes(origin) || isLovablePreview(origin))
+    ? origin : STATIC_ALLOWED_ORIGINS[0];
   return {
     "Access-Control-Allow-Origin": allowedOrigin,
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
