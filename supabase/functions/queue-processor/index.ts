@@ -23,20 +23,38 @@ const corsHeaders = {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
-  // Validate cron secret
+  // Validate cron secret OR require an admin JWT for manual invocation.
   const cronSecret = Deno.env.get("CRON_SECRET");
   const authHeader = req.headers.get("Authorization");
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-    // Also allow admin token for manual trigger
+  const isCron = cronSecret && authHeader === `Bearer ${cronSecret}`;
+
+  if (!isCron) {
+    // Manual trigger path: require a valid admin JWT (not just any authenticated user)
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const token = authHeader?.replace("Bearer ", "") || "";
-    const tempClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
-      global: { headers: { Authorization: `Bearer ${token}` } },
-    });
-    const { data: user } = await tempClient.auth.getUser(token);
-    if (!user?.user) {
+    if (!token) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const serviceClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+    const { data: { user } } = await serviceClient.auth.getUser(token);
+    if (!user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const { data: roleData } = await serviceClient
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("role", "admin")
+      .maybeSingle();
+    if (!roleData) {
+      return new Response(JSON.stringify({ error: "Forbidden: admin role required" }), {
+        status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -47,18 +65,13 @@ Deno.serve(async (req) => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
   );
 
-  // Claim up to 5 queued/retrying jobs atomically
-  const now = new Date().toISOString();
+  // Claim up to 5 queued/retrying jobs atomically via FOR UPDATE SKIP LOCKED.
+  // Using a DB function avoids the race window of a separate select + update.
   const { data: jobs, error: claimError } = await supabase
-    .from("provisioning_queue")
-    .select("*")
-    .in("status", ["queued", "retrying"])
-    .lte("scheduled_at", now)
-    .order("scheduled_at", { ascending: true })
-    .limit(5);
+    .rpc("claim_provisioning_jobs", { p_limit: 5 });
 
   if (claimError) {
-    console.error("[queue-processor] Failed to fetch jobs:", claimError);
+    console.error("[queue-processor] Failed to claim jobs:", claimError);
     return new Response(JSON.stringify({ error: "Failed to fetch queue" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -77,13 +90,7 @@ Deno.serve(async (req) => {
   const results: Array<{ id: string; action: string; status: string; error?: string }> = [];
 
   for (const job of jobs) {
-    // Mark as processing
-    await supabase.from("provisioning_queue").update({
-      status: "processing",
-      started_at: now,
-      attempt_count: job.attempt_count + 1,
-    }).eq("id", job.id);
-
+    // Job is already marked 'processing' by claim_provisioning_jobs (atomic).
     try {
       let outcome = "completed";
       let errorMsg: string | null = null;

@@ -189,8 +189,8 @@ Deno.serve(async (req) => {
     // Composite veracity score (weighted: 40% mouse, 60% keystroke)
     const veracityScore = Math.round(mouseResult.score * 0.4 + keystrokeResult.score * 0.6);
 
-    // Threshold: 25+ is considered human (generous for MVP testing)
-    const VERACITY_THRESHOLD = 25;
+    // Threshold: 45+ required (raised from the original MVP value of 25)
+    const VERACITY_THRESHOLD = 45;
     const isHuman = veracityScore >= VERACITY_THRESHOLD;
 
     const behavioralData = {
@@ -243,15 +243,30 @@ Deno.serve(async (req) => {
         );
       }
 
-      // Generate a verification token (timestamp-based, not cryptographic for MVP)
-      const verificationToken = btoa(
-        JSON.stringify({
-          uid: user.id,
-          score: veracityScore,
-          ts: Date.now(),
-          sig: "THS_V1",
-        })
+      // Generate a cryptographically signed verification token (HMAC-SHA256)
+      const tokenPayload = JSON.stringify({
+        uid: user.id,
+        score: veracityScore,
+        ts: Date.now(),
+        v: 2,
+      });
+      const payloadB64 = btoa(tokenPayload);
+
+      const signingSecret = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+      const keyMaterial = await crypto.subtle.importKey(
+        "raw",
+        new TextEncoder().encode(signingSecret),
+        { name: "HMAC", hash: "SHA-256" },
+        false,
+        ["sign"]
       );
+      const sigBuffer = await crypto.subtle.sign(
+        "HMAC",
+        keyMaterial,
+        new TextEncoder().encode(payloadB64)
+      );
+      const sigB64 = btoa(String.fromCharCode(...new Uint8Array(sigBuffer)));
+      const verificationToken = `${payloadB64}.${sigB64}`;
 
       return new Response(
         JSON.stringify({

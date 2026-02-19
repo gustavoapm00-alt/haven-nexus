@@ -87,22 +87,95 @@ serve(async (req) => {
       });
       healActions.push("FORCE_STABILIZATION");
     } else if (action === "restart") {
+      // Look up the n8n workflow ID mapped to this agent
+      const { data: mappings } = await adminSupabase
+        .from("n8n_mappings")
+        .select("workflow_id, n8n_base_url")
+        .eq("agent_id", agent_id)
+        .eq("status", "active")
+        .limit(5);
+
+      const n8nBaseUrl = Deno.env.get("N8N_BASE_URL");
+      const n8nApiKey = Deno.env.get("N8N_API_KEY");
+
+      if (!n8nBaseUrl || !n8nApiKey) {
+        return new Response(
+          JSON.stringify({ error: "N8N_BASE_URL or N8N_API_KEY not configured" }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const workflowIds: string[] = (mappings ?? [])
+        .map((m: { workflow_id: string }) => m.workflow_id)
+        .filter(Boolean);
+
+      if (workflowIds.length === 0) {
+        return new Response(
+          JSON.stringify({
+            error: `No active n8n workflow mappings found for ${agent_id}. Cannot restart.`,
+          }),
+          { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
       await adminSupabase.from("agent_heartbeats").insert({
         agent_id,
         status: "PROCESSING",
-        message: "AUTO_HEAL: Restart sequence initiated",
-        metadata: { heal_type: "restart_init", previous_status: currentStatus, triggered_by: user.id },
+        message: `AUTO_HEAL: Reactivating ${workflowIds.length} workflow(s) via n8n API`,
+        metadata: { heal_type: "restart_init", previous_status: currentStatus, triggered_by: user.id, workflow_ids: workflowIds },
       });
 
-      await new Promise((r) => setTimeout(r, 2000));
+      const reactivationResults: Array<{ workflow_id: string; ok: boolean; error?: string }> = [];
+      for (const workflowId of workflowIds) {
+        try {
+          // Deactivate then re-activate to ensure a clean restart
+          await fetch(`${n8nBaseUrl}/api/v1/workflows/${workflowId}/deactivate`, {
+            method: "POST",
+            headers: { "X-N8N-API-KEY": n8nApiKey },
+          });
 
+          const activateResp = await fetch(
+            `${n8nBaseUrl}/api/v1/workflows/${workflowId}/activate`,
+            { method: "POST", headers: { "X-N8N-API-KEY": n8nApiKey } }
+          );
+
+          if (!activateResp.ok) {
+            const text = await activateResp.text();
+            throw new Error(`n8n activate returned ${activateResp.status}: ${text.slice(0, 200)}`);
+          }
+
+          // Verify activation via GET
+          const verifyResp = await fetch(
+            `${n8nBaseUrl}/api/v1/workflows/${workflowId}`,
+            { headers: { "X-N8N-API-KEY": n8nApiKey } }
+          );
+          const workflow = await verifyResp.json();
+          if (!workflow?.active) {
+            throw new Error(`Workflow ${workflowId} did not activate — active=${workflow?.active}`);
+          }
+
+          reactivationResults.push({ workflow_id: workflowId, ok: true });
+        } catch (restartErr) {
+          const msg = restartErr instanceof Error ? restartErr.message : String(restartErr);
+          reactivationResults.push({ workflow_id: workflowId, ok: false, error: msg });
+        }
+      }
+
+      const allOk = reactivationResults.every((r) => r.ok);
       await adminSupabase.from("agent_heartbeats").insert({
         agent_id,
-        status: "NOMINAL",
-        message: "AUTO_HEAL: Restart complete — module online",
-        metadata: { heal_type: "restart_complete", previous_status: currentStatus, triggered_by: user.id },
+        status: allOk ? "NOMINAL" : "ERROR",
+        message: allOk
+          ? `AUTO_HEAL: All ${workflowIds.length} workflow(s) reactivated successfully`
+          : `AUTO_HEAL: Partial restart — ${reactivationResults.filter((r) => !r.ok).length} workflow(s) failed`,
+        metadata: {
+          heal_type: "restart_complete",
+          previous_status: currentStatus,
+          triggered_by: user.id,
+          reactivation_results: reactivationResults,
+        },
       });
-      healActions.push("RESTART_SEQUENCE");
+      healActions.push("N8N_WORKFLOW_RESTART");
     }
 
     // Log the healing action
