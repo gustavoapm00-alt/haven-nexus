@@ -13,6 +13,7 @@ import AutoHealPanel from '@/components/nexus/AutoHealPanel';
 import NexusAlertPanel from '@/components/nexus/NexusAlertPanel';
 import ThreatSurfaceDashboard from '@/components/nexus/ThreatSurfaceDashboard';
 import AgentDeploymentPanel from '@/components/nexus/AgentDeploymentPanel';
+import WorkflowStabilizationReport from '@/components/nexus/WorkflowStabilizationReport';
 
 function useSystemClock() {
   const [time, setTime] = useState('');
@@ -155,6 +156,11 @@ export default function NexusCommand() {
             <AgentDeploymentPanel />
           </div>
 
+          {/* Workflow Stabilization Report — Orphan Detection / Latency Audit / COOP Integrity */}
+          <div className="mb-8">
+            <WorkflowStabilizationReport />
+          </div>
+
           {/* Threat Surface Dashboard (AG-05) */}
           <div className="mb-8">
             <ThreatSurfaceDashboard />
@@ -175,3 +181,4 @@ export default function NexusCommand() {
     </div>
   );
 }
+
