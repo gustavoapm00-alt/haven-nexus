@@ -247,14 +247,44 @@ Deno.serve(async (req) => {
         );
       }
 
-      // Generate a verification token (timestamp-based, not cryptographic for MVP)
+      // Generate a signed verification token using dedicated THS_SIGNING_SECRET.
+      // NEVER use SUPABASE_SERVICE_ROLE_KEY here — key rotation would kill all sessions.
+      const thsSecret = Deno.env.get("THS_SIGNING_SECRET");
+      if (!thsSecret) {
+        throw new Error("THS_SIGNING_SECRET not configured");
+      }
+
+      const now = Date.now();
+      const exp = now + 24 * 60 * 60 * 1000; // 24-hour expiry claim
+
+      const tokenPayload = JSON.stringify({
+        uid: user.id,
+        score: veracityScore,
+        ts: now,
+        exp,
+        sig: "THS_V1",
+      });
+
+      // HMAC-SHA256 sign the payload with the dedicated secret
+      const encoder = new TextEncoder();
+      const keyMaterial = await crypto.subtle.importKey(
+        "raw",
+        encoder.encode(thsSecret),
+        { name: "HMAC", hash: "SHA-256" },
+        false,
+        ["sign"]
+      );
+      const signature = await crypto.subtle.sign(
+        "HMAC",
+        keyMaterial,
+        encoder.encode(tokenPayload)
+      );
+      const sigHex = Array.from(new Uint8Array(signature))
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
+
       const verificationToken = btoa(
-        JSON.stringify({
-          uid: user.id,
-          score: veracityScore,
-          ts: Date.now(),
-          sig: "THS_V1",
-        })
+        JSON.stringify({ payload: tokenPayload, hmac: sigHex })
       );
 
       return new Response(

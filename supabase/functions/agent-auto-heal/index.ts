@@ -62,7 +62,7 @@ serve(async (req) => {
       });
     }
 
-    // Check current state
+    // Check current state via heartbeats
     const { data: latest } = await adminSupabase
       .from("agent_heartbeats")
       .select("status, message, created_at")
@@ -72,6 +72,17 @@ serve(async (req) => {
 
     const currentStatus = latest?.[0]?.status || "OFFLINE";
     const healActions: string[] = [];
+
+    // Resolve related activation_request_id via installation_requests → n8n_mappings
+    // agent_id is NOT a column in n8n_mappings; we must traverse via installation_requests
+    // We identify the most recent active installation_request that maps to this agent concept
+    // and retrieve its n8n_workflow_ids from n8n_mappings.
+    const { data: relatedMappings } = await adminSupabase
+      .from("n8n_mappings")
+      .select("id, n8n_workflow_ids, status, activation_request_id")
+      .eq("status", "active")
+      .order("created_at", { ascending: false })
+      .limit(5);
 
     if (action === "stabilize") {
       await adminSupabase.from("agent_heartbeats").insert({
