@@ -307,6 +307,171 @@ Deno.serve(async (req) => {
       });
     }
 
+    // ACTION: AUTONOMOUS_REMEDIATION — Deep Purge + Re-deploy from master template
+    if (action === 'remediate_agent') {
+      const agentId: string = body.agent_id;
+      const driftType: 'ORPHAN' | 'LATENCY' | 'ERROR' = body.drift_type || 'ERROR';
+
+      if (!agentId) {
+        return new Response(JSON.stringify({ error: 'INVALID_REQUEST: agent_id is required' }), {
+          status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      // Generate a unique CORRECTION_ID linking the failure to its remediation
+      const correctionId = `COR-${agentId}-${Date.now().toString(36).toUpperCase()}`;
+      const remediationStart = Date.now();
+
+      const serviceClientR = createClient(
+        Deno.env.get('SUPABASE_URL')!,
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+      );
+
+      try {
+        // Step 1: Log REMEDIATION_INITIATED
+        await serviceClientR.from('edge_function_logs').insert({
+          function_name: 'deploy-agent-workflows',
+          level: 'warn',
+          message: `AUTONOMOUS_REMEDIATION_INITIATED: ${agentId} // CORRECTION_ID: ${correctionId}`,
+          details: {
+            correction_id: correctionId,
+            agent_id: agentId,
+            drift_type: driftType,
+            phase: 'DEEP_PURGE',
+            source: 'remediate_agent',
+          },
+        });
+
+        // Step 2: DEEP_PURGE — find and delete all existing AERELION workflows for this agent
+        const listRes = await fetch(`${n8nBase}/api/v1/workflows?limit=100`, { headers: n8nHeaders });
+        if (!listRes.ok) throw new Error(`N8N_LIST_FAILED: ${listRes.status}`);
+
+        const listData = await listRes.json();
+        const targetPrefix = `AERELION_${agentId}_`;
+        const toDelete = (listData.data || []).filter((wf: { name: string }) =>
+          wf.name.startsWith(targetPrefix)
+        );
+
+        const purgeResults: string[] = [];
+        for (const wf of toDelete) {
+          // Deactivate first (required before delete on some n8n versions)
+          await fetch(`${n8nBase}/api/v1/workflows/${wf.id}/deactivate`, {
+            method: 'POST', headers: n8nHeaders,
+          }).catch(() => {});
+
+          const delRes = await fetch(`${n8nBase}/api/v1/workflows/${wf.id}`, {
+            method: 'DELETE', headers: n8nHeaders,
+          });
+          purgeResults.push(`${wf.id}:${delRes.ok ? 'PURGED' : 'PURGE_FAILED'}`);
+        }
+
+        // Step 3: Fetch agent definition from registry
+        const { data: agentDef } = await serviceClientR
+          .from('agent_registry')
+          .select('id, module, has_site_scan')
+          .eq('id', agentId)
+          .single();
+
+        const fallbackDef = AGENT_DEFINITIONS_FALLBACK.find(a => a.id === agentId);
+        const moduleName = agentDef?.module || fallbackDef?.module || agentId.replace('AG-0', 'AGENT_');
+        const hasSiteScan = agentDef?.has_site_scan ?? fallbackDef?.has_site_scan ?? false;
+
+        // Step 4: RE-DEPLOY from master AERELION template
+        const workflowPayload = hasSiteScan
+          ? buildSentinelWorkflow(supabaseFunctionsUrl, heartbeatSecret)
+          : buildStandardWorkflow(
+              { id: agentId, name: `THE ${moduleName}`, module: moduleName },
+              supabaseFunctionsUrl,
+              heartbeatSecret
+            );
+
+        const createRes = await fetch(`${n8nBase}/api/v1/workflows`, {
+          method: 'POST',
+          headers: n8nHeaders,
+          body: JSON.stringify(workflowPayload),
+        });
+
+        if (!createRes.ok) {
+          const errText = await createRes.text();
+          throw new Error(`REDEPLOY_CREATION_FAILED: ${createRes.status} - ${errText.slice(0, 200)}`);
+        }
+
+        const created = await createRes.json();
+        const newWorkflowId = created.id;
+
+        // Step 5: Activate the freshly-deployed workflow
+        const activateRes = await fetch(`${n8nBase}/api/v1/workflows/${newWorkflowId}/activate`, {
+          method: 'POST', headers: n8nHeaders,
+        });
+
+        const activated = activateRes.ok;
+        const duration = Date.now() - remediationStart;
+
+        if (!activated) {
+          throw new Error(`REDEPLOY_ACTIVATION_FAILED: workflow ${newWorkflowId} created but not activated`);
+        }
+
+        // Step 6: IMMUTABLE AUDIT — log REMEDIATION_SUCCESS with CORRECTION_ID
+        await serviceClientR.from('edge_function_logs').insert({
+          function_name: 'deploy-agent-workflows',
+          level: 'info',
+          message: `REMEDIATION_SUCCESS: ${agentId} // CORRECTION_ID: ${correctionId}`,
+          details: {
+            correction_id: correctionId,
+            agent_id: agentId,
+            drift_type: driftType,
+            purged_workflows: purgeResults,
+            new_workflow_id: newWorkflowId,
+            duration_ms: duration,
+            source: 'autonomous_remediation',
+          },
+          duration_ms: duration,
+          status_code: 200,
+        });
+
+        return new Response(JSON.stringify({
+          success: true,
+          correction_id: correctionId,
+          agent_id: agentId,
+          drift_type: driftType,
+          purged_count: toDelete.length,
+          new_workflow_id: newWorkflowId,
+          duration_ms: duration,
+          status: 'REMEDIATION_SUCCESS',
+        }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+
+      } catch (err) {
+        const errMsg = err instanceof Error ? err.message : 'Unknown remediation error';
+        const duration = Date.now() - remediationStart;
+
+        // IMMUTABLE AUDIT — log REMEDIATION_FAILURE with CORRECTION_ID
+        await serviceClientR.from('edge_function_logs').insert({
+          function_name: 'deploy-agent-workflows',
+          level: 'error',
+          message: `REMEDIATION_FAILURE: ${agentId} // CORRECTION_ID: ${correctionId}`,
+          details: {
+            correction_id: correctionId,
+            agent_id: agentId,
+            drift_type: driftType,
+            error: errMsg,
+            duration_ms: duration,
+            source: 'autonomous_remediation',
+          },
+          duration_ms: duration,
+          status_code: 500,
+        }).catch(() => {});
+
+        return new Response(JSON.stringify({
+          success: false,
+          correction_id: correctionId,
+          agent_id: agentId,
+          drift_type: driftType,
+          error: errMsg,
+          status: 'REMEDIATION_FAILURE',
+        }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+    }
+
     // ACTION: Activate all existing AERELION workflows
     if (action === 'activate_all') {
       const listRes = await fetch(`${n8nBase}/api/v1/workflows?limit=100`, {

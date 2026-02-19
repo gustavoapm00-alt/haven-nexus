@@ -54,6 +54,20 @@ export interface StabilizationReport {
   integrity_status: 'NOMINAL' | 'WARN' | 'CRITICAL';
 }
 
+/** Result of a single autonomous remediation event */
+export interface RemediationEvent {
+  agent_id: string;
+  drift_type: 'ORPHAN' | 'LATENCY' | 'ERROR';
+  correction_id: string;
+  status: 'REMEDIATION_SUCCESS' | 'REMEDIATION_FAILURE' | 'PENDING_CONSENT';
+  duration_ms?: number;
+  error?: string;
+  timestamp: string;
+}
+
+/** Governance tier controlling healing autonomy */
+export type HealingTier = 'GHOST' | 'OPERATOR';
+
 const AERELION_AGENT_IDS = ['AG-01', 'AG-02', 'AG-03', 'AG-04', 'AG-05', 'AG-06', 'AG-07'];
 const LATENCY_THRESHOLD_MS = 500;
 
@@ -65,7 +79,11 @@ interface UseDeployState {
   existingWorkflows: WorkflowStatus[];
   probeResult: ProbeResult | null;
   stabilizationReport: StabilizationReport | null;
-  phase: 'idle' | 'deploying' | 'activating' | 'checking' | 'probing' | 'scanning' | 'done';
+  phase: 'idle' | 'deploying' | 'activating' | 'checking' | 'probing' | 'scanning' | 'healing' | 'done';
+  remediationLog: RemediationEvent[];
+  healingTier: HealingTier;
+  pendingConsent: RemediationEvent[];
+  isHealing: boolean;
 }
 
 export function useDeployAgentWorkflows() {
@@ -78,6 +96,10 @@ export function useDeployAgentWorkflows() {
     probeResult: null,
     stabilizationReport: null,
     phase: 'idle',
+    remediationLog: [],
+    healingTier: 'OPERATOR',
+    pendingConsent: [],
+    isHealing: false,
   });
 
   const getSession = async () => {
@@ -352,7 +374,7 @@ export function useDeployAgentWorkflows() {
   }, []);
 
   const reset = useCallback(() => {
-    setState({
+    setState(s => ({
       isLoading: false,
       error: null,
       summary: null,
@@ -361,9 +383,138 @@ export function useDeployAgentWorkflows() {
       probeResult: null,
       stabilizationReport: null,
       phase: 'idle',
-    });
+      remediationLog: s.remediationLog, // preserve audit log across reset
+      healingTier: s.healingTier,
+      pendingConsent: [],
+      isHealing: false,
+    }));
   }, []);
 
-  return { ...state, probeConnection, deployAll, checkStatus, activateAll, runStabilizationScan, reset };
+  /** Set the governing healing tier (GHOST = autonomous, OPERATOR = manual consent) */
+  const setHealingTier = useCallback((tier: HealingTier) => {
+    setState(s => ({ ...s, healingTier: tier }));
+  }, []);
+
+  /**
+   * Invoke the remediate_agent action for a single agent.
+   * Returns the RemediationEvent for immutable audit logging.
+   */
+  const remediateAgent = useCallback(async (
+    agentId: string,
+    driftType: 'ORPHAN' | 'LATENCY' | 'ERROR'
+  ): Promise<RemediationEvent> => {
+    const { data, error } = await supabase.functions.invoke('deploy-agent-workflows', {
+      body: { action: 'remediate_agent', agent_id: agentId, drift_type: driftType },
+    });
+
+    const event: RemediationEvent = {
+      agent_id: agentId,
+      drift_type: driftType,
+      correction_id: data?.correction_id || `COR-${agentId}-${Date.now().toString(36).toUpperCase()}`,
+      status: (!error && data?.success) ? 'REMEDIATION_SUCCESS' : 'REMEDIATION_FAILURE',
+      duration_ms: data?.duration_ms,
+      error: error?.message || data?.error,
+      timestamp: new Date().toISOString().replace('T', ' ').slice(0, 19),
+    };
+
+    setState(s => ({
+      ...s,
+      remediationLog: [event, ...s.remediationLog.slice(0, 49)],
+    }));
+
+    return event;
+  }, []);
+
+  /**
+   * SENTINEL_LOOP — Scans, detects CRITICAL integrity status, then either:
+   * - GHOST tier: Fully autonomous healing — immediately remediates all flagged agents.
+   * - OPERATOR tier: Queues agents as PENDING_CONSENT, requiring manual HUD confirmation.
+   */
+  const triggerSelfHealing = useCallback(async () => {
+    if (state.isHealing) return;
+
+    setState(s => ({ ...s, isHealing: true, pendingConsent: [], phase: 'healing' }));
+
+    // Build the list of agents requiring remediation from the current report
+    const report = state.stabilizationReport;
+    if (!report || report.integrity_status !== 'CRITICAL') {
+      setState(s => ({ ...s, isHealing: false, phase: 'done' }));
+      return;
+    }
+
+    const agentsToHeal: Array<{ id: string; drift: 'ORPHAN' | 'LATENCY' | 'ERROR' }> = [];
+
+    // Critical orphans (AERELION agents not reporting)
+    report.orphans
+      .filter(o => o.risk === 'CRITICAL' && o.parsed_agent_id)
+      .forEach(o => agentsToHeal.push({ id: o.parsed_agent_id!, drift: 'ORPHAN' }));
+
+    // High latency agents (>2 qualify as CRITICAL threshold)
+    if (report.high_latency_agents.length > 2) {
+      report.high_latency_agents.forEach(id => {
+        if (!agentsToHeal.find(a => a.id === id)) {
+          agentsToHeal.push({ id, drift: 'LATENCY' });
+        }
+      });
+    }
+
+    if (state.healingTier === 'GHOST') {
+      // FULLY_AUTONOMOUS: Heal without consent
+      for (const agent of agentsToHeal) {
+        await remediateAgent(agent.id, agent.drift);
+      }
+      setState(s => ({ ...s, isHealing: false, phase: 'done' }));
+    } else {
+      // OPERATOR_TIER: Queue for manual consent
+      const pendingEvents: RemediationEvent[] = agentsToHeal.map(agent => ({
+        agent_id: agent.id,
+        drift_type: agent.drift,
+        correction_id: `COR-${agent.id}-${Date.now().toString(36).toUpperCase()}`,
+        status: 'PENDING_CONSENT',
+        timestamp: new Date().toISOString().replace('T', ' ').slice(0, 19),
+      }));
+
+      setState(s => ({
+        ...s,
+        isHealing: false,
+        phase: 'done',
+        pendingConsent: pendingEvents,
+        remediationLog: [...pendingEvents, ...s.remediationLog.slice(0, 49 - pendingEvents.length)],
+      }));
+    }
+  }, [state.isHealing, state.stabilizationReport, state.healingTier, remediateAgent]);
+
+  /**
+   * OPERATOR_CONSENT — Manual approval of a pending remediation event.
+   * Executes the actual remediate_agent call after the operator clicks consent in the HUD.
+   */
+  const approveRemediation = useCallback(async (correctionId: string) => {
+    const pending = state.pendingConsent.find(e => e.correction_id === correctionId);
+    if (!pending) return;
+
+    // Remove from pending queue
+    setState(s => ({
+      ...s,
+      pendingConsent: s.pendingConsent.filter(e => e.correction_id !== correctionId),
+      isHealing: true,
+    }));
+
+    await remediateAgent(pending.agent_id, pending.drift_type);
+    setState(s => ({ ...s, isHealing: false }));
+  }, [state.pendingConsent, remediateAgent]);
+
+  return {
+    ...state,
+    probeConnection,
+    deployAll,
+    checkStatus,
+    activateAll,
+    runStabilizationScan,
+    reset,
+    setHealingTier,
+    remediateAgent,
+    triggerSelfHealing,
+    approveRemediation,
+  };
 }
 
