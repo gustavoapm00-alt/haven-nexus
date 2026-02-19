@@ -426,7 +426,7 @@ export default function THSVerification() {
               <div className="w-full my-1" style={{ borderTop: '1px solid rgba(57,255,20,0.15)' }} />
 
               <div className="text-[7px] tracking-[0.15em] leading-relaxed text-center max-w-sm" style={{ color: 'rgba(255,255,255,0.3)', fontFamily: MONO }}>
-                YOUR BIOLOGICAL PRESENCE HAS BEEN CRYPTOGRAPHICALLY VERIFIED. THE NEXUS CORE IS NOW ACCESSIBLE. VERIFICATION VALID FOR 6 HOURS. AUTO-ROUTING TO NEXUS...
+                YOUR BIOLOGICAL PRESENCE HAS BEEN CRYPTOGRAPHICALLY VERIFIED. THE NEXUS CORE IS NOW ACCESSIBLE. VERIFICATION VALID FOR 24 HOURS. AUTO-ROUTING TO NEXUS...
               </div>
             </div>
 

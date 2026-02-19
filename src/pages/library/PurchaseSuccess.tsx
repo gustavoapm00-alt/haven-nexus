@@ -166,7 +166,7 @@ const PurchaseSuccess = () => {
 
       if (existingRequest) {
         setActivationRequestId(existingRequest.id);
-        console.log('✅ Found existing activation request:', existingRequest.id);
+        // PROVENANCE: Existing activation node located in registry
         return;
       }
 
@@ -185,13 +185,12 @@ const PurchaseSuccess = () => {
 
       if (recheckRequest) {
         setActivationRequestId(recheckRequest.id);
-        console.log('✅ Found activation request after delay:', recheckRequest.id);
+        // PROVENANCE: Activation node confirmed after stabilization delay
         return;
       }
 
-      // Still no activation - create one as fallback
-      // The webhook has a 1500ms head start, so if we're here, it likely failed
-      console.log('Creating fallback activation request - webhook may have failed');
+      // PROVENANCE: Initiating fallback activation node — webhook delivery unconfirmed
+      // Primary webhook granted 1500ms stabilization window
       
       const insertData = {
         user_id: user.id,
@@ -214,7 +213,6 @@ const PurchaseSuccess = () => {
 
       if (newRequest && !createError) {
         setActivationRequestId(newRequest.id);
-        console.log('✅ Fallback activation request created:', newRequest.id);
       } else if (createError) {
         // If duplicate key error, try to fetch the existing one
         if (createError.message?.includes('duplicate') || createError.code === '23505') {
@@ -228,7 +226,7 @@ const PurchaseSuccess = () => {
           
           if (dupRequest) {
             setActivationRequestId(dupRequest.id);
-            console.log('✅ Found existing activation after duplicate error:', dupRequest.id);
+            // PROVENANCE: Activation node recovered from deduplication gate
           }
         } else {
           console.error('Failed to create activation request:', createError);
@@ -295,8 +293,7 @@ const PurchaseSuccess = () => {
       // Automatically fetch download links
       await fetchDownloads(data.item_type, data.item_id);
     } catch (err) {
-      console.error('Verify purchase error:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Failed to verify purchase';
+      const errorMessage = err instanceof Error ? err.message : 'PURCHASE_VERIFICATION_FAULT';
       setError(errorMessage);
       setDiagnostics(prev => ({
         ...prev,

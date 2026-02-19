@@ -218,8 +218,18 @@ Deno.serve(async (req) => {
     };
 
     if (isHuman) {
-      // Use service role to upsert sovereign_bridge
       const adminClient = createClient(supabaseUrl, supabaseServiceKey);
+
+      // SECURITY: Store only binary veracity status + score. Raw behavioral entropy
+      // is NEVER persisted. The substrate holds only the cryptographic outcome.
+      const sanitizedData = {
+        composite: veracityScore,
+        threshold: VERACITY_THRESHOLD,
+        mouse_sample_count: payload.mouseTrail.length,
+        keystroke_sample_count: payload.keystrokes.length,
+        challenge_duration_ms: payload.challengeDurationMs,
+        evaluated_at: new Date().toISOString(),
+      };
 
       const { error: upsertError } = await adminClient
         .from("sovereign_bridge")
@@ -228,7 +238,8 @@ Deno.serve(async (req) => {
             user_id: user.id,
             is_human_verified: true,
             veracity_score: veracityScore,
-            behavioral_data: behavioralData,
+            // Only store aggregate metadata — no raw mouse/keystroke sequences
+            behavioral_data: sanitizedData,
             verification_source: "THS_BEHAVIORAL_ENTROPY",
             updated_at: new Date().toISOString(),
           },
@@ -236,26 +247,28 @@ Deno.serve(async (req) => {
         );
 
       if (upsertError) {
-        console.error("sovereign_bridge upsert failed:", upsertError);
         return new Response(
           JSON.stringify({
             error: "BRIDGE_WRITE_FAILED",
-            message: "Failed to record verification",
+            message: "GOVERNANCE_SUBSTRATE_UNAVAILABLE",
             verified: false,
           }),
           { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
-      // Generate a signed verification token using dedicated THS_SIGNING_SECRET.
-      // NEVER use SUPABASE_SERVICE_ROLE_KEY here — key rotation would kill all sessions.
+      // Generate a signed verification token (HMAC-SHA256 / THS_SIGNING_SECRET).
+      // THS_TTL: 24-hour hard expiry enforced at token issuance and at NexusGuard
+      // client layer (localStorage expiry). The sovereign_bridge row remains
+      // authoritative — clients cannot extend or forge the window.
       const thsSecret = Deno.env.get("THS_SIGNING_SECRET");
       if (!thsSecret) {
-        throw new Error("THS_SIGNING_SECRET not configured");
+        throw new Error("THS_SIGNING_SECRET not provisioned in Governance Vault");
       }
 
+      const THS_TTL_MS = 24 * 60 * 60 * 1000; // 24-hour hard limit — NOT configurable
       const now = Date.now();
-      const exp = now + 24 * 60 * 60 * 1000; // 24-hour expiry claim
+      const exp = now + THS_TTL_MS;
 
       const tokenPayload = JSON.stringify({
         uid: user.id,
@@ -263,9 +276,9 @@ Deno.serve(async (req) => {
         ts: now,
         exp,
         sig: "THS_V1",
+        ttl: THS_TTL_MS,
       });
 
-      // HMAC-SHA256 sign the payload with the dedicated secret
       const encoder = new TextEncoder();
       const keyMaterial = await crypto.subtle.importKey(
         "raw",
@@ -292,28 +305,31 @@ Deno.serve(async (req) => {
           verified: true,
           veracityScore,
           token: verificationToken,
-          analysis: behavioralData,
+          // Return sanitized metadata only — no raw entropy in response
+          analysis: sanitizedData,
           message: "HUMAN_SIGNATURE_CONFIRMED",
+          expiresAt: new Date(exp).toISOString(),
         }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Failed verification
+    // Insufficient entropy — identity veracity unconfirmed
     return new Response(
       JSON.stringify({
         verified: false,
         veracityScore,
-        analysis: behavioralData,
-        message: "INSUFFICIENT_ENTROPY",
-        hint: "Move your cursor more naturally and type with varied cadence",
+        message: "IDENTITY_VERACITY_UNCONFIRMED",
+        governance_note: "ENTROPY_THRESHOLD_NOT_MET — RE-INITIALIZE_HANDSHAKE",
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
-    console.error("verify-human-signature error:", err);
     return new Response(
-      JSON.stringify({ error: "INTERNAL_ERROR", message: String(err) }),
+      JSON.stringify({
+        error: "GOVERNANCE_SUBSTRATE_ERROR",
+        message: "CREDENTIAL_HANDSHAKE_REJECTED",
+      }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

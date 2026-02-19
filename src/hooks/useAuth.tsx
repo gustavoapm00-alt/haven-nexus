@@ -25,8 +25,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isInitialized, setIsInitialized] = useState(false);
 
   const checkAdminRole = async (userId: string) => {
-    // SECURITY: Admin status is determined ONLY via user_roles table
-    // No fallback to client-exposed environment variables
+    // SECURITY: Governance role resolved strictly via user_roles table.
+    // No client-side environment variable fallback permitted.
     const { data } = await supabase
       .from('user_roles')
       .select('role')
@@ -76,8 +76,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (session?.user) {
           await checkAdminRole(session.user.id);
         }
-      } catch (error) {
-        console.error('Auth initialization error:', error);
+      } catch {
+        // GOVERNANCE: Identity substrate initialization fault — silent fail-closed
       } finally {
         if (isMounted) {
           setIsInitialized(true);

@@ -14,7 +14,9 @@ interface THSState {
  * NexusGuard never flickers to "not verified" after a fresh navigate().
  */
 export const THS_STORAGE_KEY = 'ths_verified_until';
-export const THS_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours
+// DOCTRINE: 24-hour hard TTL — aligned with HMAC token expiry issued by verify-human-signature.
+// This window is NOT negotiable. If elapsed, Nexus access is severed regardless of DB state.
+export const THS_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours — hard enforced
 
 export function getStoredExpiry(userId: string): number | null {
   try {
