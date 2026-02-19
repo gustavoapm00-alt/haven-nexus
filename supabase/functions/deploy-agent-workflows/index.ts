@@ -376,41 +376,101 @@ Deno.serve(async (req) => {
 
           if (!createRes.ok) {
             const errText = await createRes.text();
-            return { agent_id: agent.id, status: 'error', message: `n8n API error: ${createRes.status} - ${errText.slice(0, 200)}` };
+            const errMsg = `n8n API error: ${createRes.status} - ${errText.slice(0, 200)}`;
+
+            // COOP: Log LOGIC_DRIFT alert to immutable provenance — no silent failures
+            await serviceClient.from('edge_function_logs').insert({
+              function_name: 'deploy-agent-workflows',
+              level: 'error',
+              message: `LOGIC_DRIFT: ${agent.id} // WORKFLOW_CREATION_FAILED`,
+              details: {
+                agent_id: agent.id,
+                module: agent.module,
+                n8n_status: createRes.status,
+                error_preview: errText.slice(0, 500),
+                source: 'zero_touch_deployment',
+                drift_type: 'PIPELINE_CREATION_FAILURE',
+              },
+              status_code: createRes.status,
+            }).catch(() => { /* log write is non-blocking */ });
+
+            return { agent_id: agent.id, status: 'error', message: errMsg };
           }
 
           const created = await createRes.json();
           const workflowId = created.id;
 
-          // Activate the workflow
+          // Activate the workflow — track latency for stabilization reporting
+          const activateStart = Date.now();
           const activateRes = await fetch(`${n8nBase}/api/v1/workflows/${workflowId}/activate`, {
             method: 'POST',
             headers: n8nHeaders,
           });
+          const activateLatencyMs = Date.now() - activateStart;
 
           const activated = activateRes.ok;
 
-          // Log deployment to edge_function_logs
+          // COOP: Log activation failure as LOGIC_DRIFT — no silent failures
+          if (!activated) {
+            const activateErrText = await activateRes.text().catch(() => 'UNREADABLE_RESPONSE');
+            await serviceClient.from('edge_function_logs').insert({
+              function_name: 'deploy-agent-workflows',
+              level: 'warn',
+              message: `LOGIC_DRIFT: ${agent.id} // ACTIVATION_FAILED_AFTER_CREATION`,
+              details: {
+                agent_id: agent.id,
+                module: agent.module,
+                workflow_id: workflowId,
+                n8n_status: activateRes.status,
+                error_preview: activateErrText.slice(0, 300),
+                drift_type: 'PIPELINE_ACTIVATION_FAILURE',
+                source: 'zero_touch_deployment',
+              },
+              status_code: activateRes.status,
+            }).catch(() => { /* non-blocking */ });
+          }
+
+          // Log successful deployment with latency telemetry
           await serviceClient.from('edge_function_logs').insert({
             function_name: 'deploy-agent-workflows',
-            level: 'info',
-            message: `WORKFLOW_DEPLOYED: ${agent.id} // ${agent.module}`,
+            level: activated ? 'info' : 'warn',
+            message: `WORKFLOW_DEPLOYED: ${agent.id} // ${agent.module} // ${activated ? 'ACTIVE' : 'INACTIVE'}`,
             details: {
               agent_id: agent.id,
               workflow_id: workflowId,
               activated,
+              activate_latency_ms: activateLatencyMs,
+              latency_flag: activateLatencyMs > 500 ? 'HIGH_LATENCY' : 'NOMINAL',
               source: 'zero_touch_deployment',
             },
             status_code: 200,
+            duration_ms: activateLatencyMs,
           });
 
           return {
             agent_id: agent.id,
             name: agent.name,
             workflow_id: workflowId,
+            activated,
+            latency_ms: activateLatencyMs,
             status: activated ? 'deployed_and_active' : 'deployed_inactive',
           };
         } catch (err) {
+          // COOP: Catch-all — every exception becomes an immutable LOGIC_DRIFT record
+          await serviceClient.from('edge_function_logs').insert({
+            function_name: 'deploy-agent-workflows',
+            level: 'error',
+            message: `LOGIC_DRIFT: ${agent.id} // UNHANDLED_EXCEPTION`,
+            details: {
+              agent_id: agent.id,
+              module: agent.module,
+              error: err instanceof Error ? err.message : 'Unknown error',
+              drift_type: 'UNHANDLED_PIPELINE_EXCEPTION',
+              source: 'zero_touch_deployment',
+            },
+            status_code: 500,
+          }).catch(() => { /* non-blocking */ });
+
           return {
             agent_id: agent.id,
             name: agent.name,
