@@ -63,7 +63,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "={{ $env.SUPABASE_FUNCTIONS_URL || 'https://chraztxdtvmipasdttbk.supabase.co/functions/v1' }}/agent-heartbeat",
+        "url": "={{ $env.SUPABASE_FUNCTIONS_URL }}/agent-heartbeat",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -91,7 +91,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "={{ $env.SUPABASE_FUNCTIONS_URL || 'https://chraztxdtvmipasdttbk.supabase.co/functions/v1' }}/agent-heartbeat",
+        "url": "={{ $env.SUPABASE_FUNCTIONS_URL }}/agent-heartbeat",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [

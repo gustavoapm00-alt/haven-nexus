@@ -194,7 +194,7 @@ All managed via `n8n-provision` Edge Function:
 
 | Secret | Purpose |
 |--------|---------|
-| `N8N_BASE_URL` | n8n instance URL (e.g., `https://n8n.srv1297251.hstgr.cloud`) |
+| `N8N_BASE_URL` | n8n instance URL (e.g., `https://<YOUR_N8N_HOSTNAME>`) |
 | `N8N_API_KEY` | n8n API authentication |
 | `CREDENTIAL_ENCRYPTION_KEY` | 32-byte base64 key for AES-256-GCM |
 | `SUPABASE_URL` | Supabase project URL |

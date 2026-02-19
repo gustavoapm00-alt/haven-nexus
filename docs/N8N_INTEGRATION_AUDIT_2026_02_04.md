@@ -110,7 +110,7 @@ The "Connect Once. Run Many." architecture is correctly implemented:
 
 ### Immediate Actions Required
 1. **Add OAuth Client Secrets**: Configure Google, HubSpot, Slack OAuth credentials in Cloud Secrets
-2. **Add SITE_URL Secret**: Set to `https://haven-matrix.lovable.app` for OAuth callback redirects
+2. **Add SITE_URL Secret**: Set to `https://aerelion.systems` for OAuth callback redirects
 
 ### Future Improvements
 1. **Token Refresh**: Implement automatic OAuth token refresh before expiry

@@ -24,7 +24,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "https://haven-matrix.lovable.app/functions/v1/refresh-oauth-tokens",
+        "url": "={{ $env.SUPABASE_FUNCTIONS_URL }}/refresh-oauth-tokens",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
