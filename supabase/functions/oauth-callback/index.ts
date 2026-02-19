@@ -172,7 +172,7 @@ async function fetchUserInfo(provider: string, accessToken: string): Promise<{ e
 }
 
 Deno.serve(async (req) => {
-  const siteUrl = Deno.env.get("SITE_URL") || "https://haven-matrix.lovable.app";
+  const siteUrl = Deno.env.get("SITE_URL") || "https://aerelion.systems";
   
   try {
     const url = new URL(req.url);
