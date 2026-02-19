@@ -2,11 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { createLogger, getClientIP } from "../_shared/edge-logger.ts";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { buildCorsHeaders } from "../_shared/rate-limiter.ts";
 
 // Retry helper with exponential backoff and jitter
 async function withRetry<T>(
@@ -68,6 +64,7 @@ function defaultShouldRetry(error: unknown): boolean {
 }
 
 serve(async (req) => {
+  const corsHeaders = buildCorsHeaders(req);
   const logger = createLogger('check-subscription', req);
   
   if (req.method === "OPTIONS") {

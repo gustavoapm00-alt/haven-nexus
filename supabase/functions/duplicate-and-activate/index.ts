@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { buildCorsHeaders } from "../_shared/rate-limiter.ts";
 
 /**
  * Duplicate-and-Activate Edge Function
@@ -27,11 +28,6 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
  * Templates are NEVER modified or executed directly.
  * Each activation creates a UNIQUE isolated workflow.
  */
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
 
 // Types
 interface N8nWorkflowNode {
@@ -619,8 +615,10 @@ async function rollbackN8nResources(
 }
 
 Deno.serve(async (req) => {
+  // Use buildCorsHeaders to allow requests from the allowed origins
+  const corsHeaders = buildCorsHeaders(req);
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+    return new Response(null, { headers: corsHeaders });
   }
   
   try {

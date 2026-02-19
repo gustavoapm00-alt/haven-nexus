@@ -1,23 +1,12 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { buildCorsHeaders } from "../_shared/rate-limiter.ts";
 
 /**
  * Runtime Credentials Endpoint
  *
  * CONNECT ONCE. RUN MANY.
- *
- * Called by n8n at execution time to resolve tenant credentials.
- * Authenticates via N8N_API_KEY bearer token (server-to-server only).
- * Resolves user via direct user_id lookup — no email-based fallback.
- *
- * Request:
- *   GET /functions/v1/runtime-credentials?activation_id=UUID
- *   Authorization: Bearer <N8N_API_KEY>
+...
  */
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*", // n8n server-side — no browser origin needed
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
 
 // AES-256-GCM decryption
 async function decryptCredentials(
@@ -63,6 +52,7 @@ function safeEqual(a: string, b: string): boolean {
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = buildCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
