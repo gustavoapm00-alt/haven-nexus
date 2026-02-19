@@ -59,7 +59,7 @@ Full URL:    {N8N_BASE_URL}/webhook/aerelion/{activation_request_id}
 
 Example:
 - activation_request_id: 550e8400-e29b-41d4-a716-446655440000
-- webhook_url: https://n8n.srv1297251.hstgr.cloud/webhook/aerelion/550e8400-e29b-41d4-a716-446655440000
+- webhook_url: https://<YOUR_N8N_HOSTNAME>/webhook/aerelion/550e8400-e29b-41d4-a716-446655440000
 ```
 
 ### Implementation Details

@@ -9,7 +9,7 @@ Complete, reproducible test procedure for Option A webhook isolation.
 ```bash
 # Login to get token (or use browser devtools)
 USER_TOKEN="<JWT_TOKEN>"
-BASE_URL="https://chraztxdtvmipasdttbk.supabase.co/functions/v1"
+BASE_URL="https://<YOUR_PROJECT_REF>.supabase.co/functions/v1"
 ```
 
 ### 2. SQL Preflight Checks
@@ -58,7 +58,7 @@ curl -X POST "$BASE_URL/n8n-provision" \
 {
   "success": true,
   "workflowId": "abc123...",
-  "webhookUrl": "https://n8n.srv1297251.hstgr.cloud/webhook/aerelion/<ACTIVATION_UUID>",
+  "webhookUrl": "https://<YOUR_N8N_HOSTNAME>/webhook/aerelion/<ACTIVATION_UUID>",
   "message": "Automation activated successfully"
 }
 ```
@@ -77,7 +77,7 @@ Expected: `status=active`, `request_status=live`, `webhook_url` populated.
 ### Step 2: Trigger Webhook
 
 ```bash
-curl -X POST "https://n8n.srv1297251.hstgr.cloud/webhook/aerelion/<ACTIVATION_UUID>" \
+curl -X POST "https://<YOUR_N8N_HOSTNAME>/webhook/aerelion/<ACTIVATION_UUID>" \
   -H "Content-Type: application/json" \
   -d '{
     "activation_id": "<ACTIVATION_UUID>",
@@ -129,7 +129,7 @@ curl -X POST "$BASE_URL/n8n-provision" \
 {
   "success": true,
   "message": "Automation resumed",
-  "webhookUrl": "https://n8n.srv1297251.hstgr.cloud/webhook/aerelion/<ACTIVATION_UUID>"
+  "webhookUrl": "https://<YOUR_N8N_HOSTNAME>/webhook/aerelion/<ACTIVATION_UUID>"
 }
 ```
 
@@ -228,7 +228,7 @@ WHERE slug IN ('client-onboarding-pack', 'customer-support-triage', 'weekly-kpi-
 N8N_API_KEY="<API_KEY>"
 WORKFLOW_ID="<ID_FROM_ACTIVATION>"
 
-curl "https://n8n.srv1297251.hstgr.cloud/api/v1/workflows/$WORKFLOW_ID" \
+curl "https://<YOUR_N8N_HOSTNAME>/api/v1/workflows/$WORKFLOW_ID" \
   -H "X-N8N-API-KEY: $N8N_API_KEY" | jq '{id, name, active}'
 ```
 
