@@ -3,30 +3,34 @@ import { motion } from 'framer-motion';
 const reports = [
   {
     refId: 'GEN-2026-004',
-    title: 'Project Prometheus — SMR Design Cycle Governance & Audit Rail Deployment',
+    title: 'Project Prometheus — SMR Design Cycle Governance, CUI Audit Rail & Logic Integrity Enforcement Across 14,000+ Compliance Nodes',
     status: 'ACTIVE',
     impact: '9.8',
+    impactLabel: '0.00% Logic Drift / 14K Nodes',
     sector: 'NUCLEAR / DOE',
   },
   {
     refId: 'GEN-2026-003',
-    title: 'Grid Intelligence Pipeline — AI-Accelerated Decision Governance (20–100× SLA)',
+    title: 'Grid Intelligence Pipeline — Autonomous Decision Governance Eliminating $2.4B Annual Latency Risk in Critical Energy Infrastructure',
     status: 'ACTIVE',
     impact: '9.3',
+    impactLabel: '$2.4B Risk Surface Neutralized',
     sector: 'ENERGY / GRID',
   },
   {
     refId: 'GEN-2026-002',
-    title: 'Autonomous Laboratory Protocol — 24/7 AI Agent Workflow Governance Schema',
+    title: 'Sovereign Laboratory Protocol — Continuous 24/7 Governance Schema Across Distributed Research Nodes; Zero Human Intervention Since Activation',
     status: 'RESOLVED',
     impact: '8.7',
+    impactLabel: '100% Autonomous / Zero Downtime',
     sector: 'R&D / LABS',
   },
   {
     refId: 'GEN-2026-001',
-    title: 'Analog Nuclear Data Digitization — CUI Schema Standardization & Provenance',
+    title: 'Analog Nuclear Data Digitization — NIST-Aligned CUI Schema Standardization Governing 40-Year Historical Provenance Chain',
     status: 'RESOLVED',
     impact: '8.1',
+    impactLabel: '40yr Provenance Chain Hardened',
     sector: 'DATA / NIST',
   },
 ];
@@ -94,15 +98,20 @@ const BriefingArchives = () => {
                   {report.status}
                 </span>
               </span>
-              <div className="md:col-span-2 flex items-center gap-2">
-                <div className="flex-1 h-px bg-white/10 relative overflow-hidden">
-                  <div
-                    className="absolute left-0 top-0 h-full bg-[#39FF14]/40"
-                    style={{ width: `${(parseFloat(report.impact) / 10) * 100}%` }}
-                  />
+              <div className="md:col-span-2 flex flex-col gap-1">
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 h-px bg-white/10 relative overflow-hidden">
+                    <div
+                      className="absolute left-0 top-0 h-full bg-[#39FF14]/40"
+                      style={{ width: `${(parseFloat(report.impact) / 10) * 100}%` }}
+                    />
+                  </div>
+                  <span className="font-mono text-[10px] text-white/30 shrink-0">
+                    {report.impact}
+                  </span>
                 </div>
-                <span className="font-mono text-[10px] text-white/30 shrink-0">
-                  {report.impact}
+                <span className="font-mono text-[8px] text-[#39FF14]/30 tracking-[0.1em] leading-tight">
+                  {report.impactLabel}
                 </span>
               </div>
             </motion.div>

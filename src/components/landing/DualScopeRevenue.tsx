@@ -118,7 +118,8 @@ const DualScopeRevenue = () => {
     }
   };
 
-  const tierKeys: TierKey[] = ['pulse', 'operator', 'ghost'];
+  // Primary tiers — Operator and Ghost only. Pulse exists but is not promoted here.
+  const tierKeys: TierKey[] = ['operator', 'ghost'];
 
   return (
     <section className="section-padding bg-[#040404] relative overflow-hidden">
@@ -137,19 +138,19 @@ const DualScopeRevenue = () => {
         {/* Section header */}
         <div className="text-center mb-20">
           <span className="font-mono text-[10px] text-[#39FF14]/50 uppercase tracking-[0.25em] mb-4 block">
-            // GENESIS MISSION // ENGAGEMENT TIERS
+            // GENESIS MISSION // SOVEREIGN ENGAGEMENT TIERS
           </span>
           <h2 className="font-mono text-3xl md:text-4xl font-bold text-[#E0E0E0] mb-5 tracking-tight">
-            Governance Access Levels
+            Command Access Levels
           </h2>
           <p className="font-sans text-sm text-white/30 max-w-lg mx-auto leading-relaxed">
-            The Genesis Mission requires operational governance partners — not vendors.
-            Each tier embeds AERELION as the federated AI governance substrate for your program node.
+            AERELION does not offer software subscriptions. It offers a permanent governance substrate —
+            embedded in your operational architecture and invisible to everyone who shouldn't see it.
           </p>
         </div>
 
-        {/* Tier cards */}
-        <div className="grid lg:grid-cols-3 gap-0">
+        {/* Tier cards — Operator + Ghost only. Pulse access is available via dedicated SMB intake. */}
+        <div className="grid lg:grid-cols-2 gap-0 max-w-4xl mx-auto">
           {tierKeys.map((tierKey, i) => {
             const stripe = STRIPE_TIERS[tierKey];
             const meta = tierMeta[tierKey];
@@ -263,16 +264,39 @@ const DualScopeRevenue = () => {
           })}
         </div>
 
+        {/* SMB / Pulse footnote */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.5 }}
+          className="mt-14 border border-white/[0.05] p-6 max-w-4xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
+        >
+          <div>
+            <span className="font-mono text-[9px] text-[#FFBF00]/40 tracking-[0.2em] block mb-1">TIER-01 // SENTINEL_ACCESS</span>
+            <p className="font-mono text-xs text-white/25 leading-relaxed max-w-xl">
+              An SMB-grade self-serve intake exists for organizations that require governed workflow protocols without full
+              infrastructure embedding. Available at $99/mo — separate onboarding pathway.
+            </p>
+          </div>
+          <button
+            onClick={() => navigate('/auth?intent=pulse')}
+            className="shrink-0 font-mono text-[10px] tracking-[0.15em] text-white/20 border border-white/[0.08] px-4 py-2 hover:text-white/40 hover:border-white/20 transition-all duration-200"
+          >
+            SMB INTAKE →
+          </button>
+        </motion.div>
+
         {/* Bottom attestation */}
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          transition={{ delay: 0.6 }}
-          className="text-center mt-16"
+          transition={{ delay: 0.7 }}
+          className="text-center mt-10"
         >
-          <p className="font-mono text-[9px] text-white/15 tracking-[0.18em] uppercase">
-            ALL TIERS // DOE/GENESIS-2026 ALIGNED // AES-256-GCM ENCRYPTION // IMMUTABLE PROVENANCE // AERELION INFRASTRUCTURE
+          <p className="font-mono text-[9px] text-white/10 tracking-[0.18em] uppercase">
+            DOE/GENESIS-2026 ALIGNED // AES-256-GCM ENCRYPTION // IMMUTABLE PROVENANCE // AIR-GAP DEPLOYMENT AVAILABLE // AERELION GOVERNANCE COUNCIL
           </p>
         </motion.div>
       </div>
