@@ -145,10 +145,12 @@ export default function NexusCommand() {
             <AutoHealPanel />
           </div>
 
-          {/* Drift Simulation Panel */}
-          <div className="mb-8">
-            <DriftSimulationPanel />
-          </div>
+          {/* Drift Simulation Panel — dev only (test/demo tool, not for production) */}
+          {import.meta.env.DEV && (
+            <div className="mb-8">
+              <DriftSimulationPanel />
+            </div>
+          )}
 
           {/* Zero-Touch Agent Deployment */}
           <div className="mb-8">

@@ -1,10 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { buildCorsHeaders } from "../_shared/rate-limiter.ts";
 
 async function decryptPayload(encBase64: string, ivBase64: string, tagBase64: string, keyBase64: string): Promise<string> {
   const raw = Uint8Array.from(atob(keyBase64), c => c.charCodeAt(0));
@@ -21,6 +17,7 @@ async function decryptPayload(encBase64: string, ivBase64: string, tagBase64: st
 }
 
 serve(async (req) => {
+  const corsHeaders = buildCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   const supabase = createClient(

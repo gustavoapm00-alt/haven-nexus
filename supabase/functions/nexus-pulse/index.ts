@@ -55,7 +55,14 @@ Deno.serve(async (req) => {
     const body = await req.json();
     const { agent_id, status = "NOMINAL", message = "MANUAL_PULSE_SIGNAL", metadata = {} } = body;
 
-    if (!agent_id || !VALID_AGENTS.includes(agent_id)) {
+    // Validate agent ID against canonical agent_registry table (single source of truth).
+    // Note: VALID_AGENTS was previously an undefined reference — fixed here.
+    const { data: registryEntry } = await supabase
+      .from("agent_registry")
+      .select("id")
+      .eq("id", agent_id)
+      .maybeSingle();
+    if (!agent_id || !registryEntry) {
       return new Response(JSON.stringify({ error: "Invalid agent_id" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },

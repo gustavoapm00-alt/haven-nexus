@@ -53,9 +53,13 @@ serve(async (req) => {
       });
     }
 
-    // Validate agent ID
-    const validAgents = ["AG-01", "AG-02", "AG-03", "AG-04", "AG-05", "AG-06", "AG-07"];
-    if (!validAgents.includes(agent_id)) {
+    // Validate agent ID against canonical agent_registry table (single source of truth)
+    const { data: registryRows } = await adminSupabase
+      .from("agent_registry")
+      .select("id")
+      .eq("id", agent_id)
+      .maybeSingle();
+    if (!registryRows) {
       return new Response(JSON.stringify({ error: "Invalid agent_id" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },

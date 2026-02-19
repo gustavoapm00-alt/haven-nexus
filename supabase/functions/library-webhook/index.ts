@@ -1,13 +1,9 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
-import { checkRateLimit, getClientIp, rateLimitResponse } from "../_shared/rate-limiter.ts";
+import { checkRateLimit, getClientIp, rateLimitResponse, buildCorsHeaders } from "../_shared/rate-limiter.ts";
 import { PURCHASE_SUCCESS_STATUS } from "../_shared/purchase-constants.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, stripe-signature",
-};
 
 // Helper to send purchase confirmation email
 async function sendPurchaseEmail(
@@ -55,6 +51,7 @@ async function sendPurchaseEmail(
 }
 
 serve(async (req) => {
+  const corsHeaders = buildCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }

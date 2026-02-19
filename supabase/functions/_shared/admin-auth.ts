@@ -109,18 +109,17 @@ export function requireCronSecret(req: Request): AuthResult {
 
   const providedSecret = authHeader.replace("Bearer ", "");
   
-  // Constant-time comparison to prevent timing attacks
-  if (providedSecret.length !== cronSecret.length) {
-    return {
-      authorized: false,
-      error: "Invalid cron secret",
-      statusCode: 403,
-    };
-  }
-  
-  let mismatch = 0;
-  for (let i = 0; i < cronSecret.length; i++) {
-    mismatch |= cronSecret.charCodeAt(i) ^ providedSecret.charCodeAt(i);
+  // Constant-time comparison to prevent timing attacks.
+  // The loop always runs for the full secret length regardless of provided length,
+  // preventing timing side-channels that would reveal the secret's length.
+  const secretLen = cronSecret.length;
+  const providedLen = providedSecret.length;
+  // Mark as mismatch if lengths differ, but still run the full loop below.
+  let mismatch = secretLen !== providedLen ? 1 : 0;
+  for (let i = 0; i < secretLen; i++) {
+    // Access provided char at position i; use 0 if out-of-bounds to avoid NaN from charCodeAt.
+    const providedChar = i < providedLen ? providedSecret.charCodeAt(i) : 0;
+    mismatch |= cronSecret.charCodeAt(i) ^ providedChar;
   }
   
   if (mismatch !== 0) {

@@ -23,10 +23,7 @@ import { requireAdminAuth } from "../_shared/admin-auth.ts";
  * Returns: { results: [{ slug, status, message, automationAgentId? }] }
  */
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { buildCorsHeaders } from "../_shared/rate-limiter.ts";
 
 // Node type to provider mapping
 const NODE_TO_PROVIDER: Record<string, string> = {
@@ -112,6 +109,7 @@ function detectTriggerType(nodes: Array<{ type?: string }>): string | null {
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = buildCorsHeaders(req);
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
