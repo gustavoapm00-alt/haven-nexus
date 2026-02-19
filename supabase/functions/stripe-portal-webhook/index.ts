@@ -205,7 +205,7 @@ serve(async (req) => {
               `<h2>Payment Received</h2>
                <p>Your payment of <strong>$${(invoice.amount_paid / 100).toFixed(2)}</strong> has been processed.</p>
                <p>Thank you for your continued trust in AERELION.</p>
-               <p><a href="https://haven-matrix.lovable.app/portal/dashboard">View Dashboard</a></p>`
+               <p><a href="https://aerelion.systems/portal/dashboard">View Dashboard</a></p>`
             );
           }
         }
@@ -234,7 +234,7 @@ serve(async (req) => {
               'Action Required: Payment Failed - AERELION',
               `<h2>Payment Failed</h2>
                <p>We were unable to process your payment.</p>
-               <p>Please <a href="https://haven-matrix.lovable.app/portal/dashboard">update your payment method</a> to continue using AERELION services.</p>`
+               <p>Please <a href="https://aerelion.systems/portal/dashboard">update your payment method</a> to continue using AERELION services.</p>`
             );
           }
         }
@@ -313,7 +313,7 @@ serve(async (req) => {
               'Subscription Canceled - AERELION',
               `<h2>Your Subscription Has Been Canceled</h2>
                <p>We're sorry to see you go. Your access will continue until your billing period ends.</p>
-               <p>You can resubscribe anytime from your <a href="https://haven-matrix.lovable.app/portal/dashboard">dashboard</a>.</p>`
+               <p>You can resubscribe anytime from your <a href="https://aerelion.systems/portal/dashboard">dashboard</a>.</p>`
             );
           }
         }

@@ -20,7 +20,7 @@ import { requireAdminAuth } from "../_shared/admin-auth.ts";
  */
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": Deno.env.get("SITE_URL") || "https://haven-matrix.lovable.app",
+  "Access-Control-Allow-Origin": Deno.env.get("SITE_URL") || "https://aerelion.systems",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
