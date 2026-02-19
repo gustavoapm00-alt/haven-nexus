@@ -1,15 +1,22 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-// CORS: Accept both the production domain and Lovable preview origins
-const ALLOWED_ORIGINS = [
+// CORS: Accept production domain, all Lovable preview/published URLs, and SITE_URL
+const STATIC_ALLOWED_ORIGINS = [
   'https://aerelion.systems',
   'https://haven-matrix.lovable.app',
   Deno.env.get('SITE_URL') || '',
 ].filter(Boolean);
 
+function isAllowedOrigin(origin: string): boolean {
+  if (STATIC_ALLOWED_ORIGINS.includes(origin)) return true;
+  // Allow all Lovable preview subdomains (id-preview--*.lovable.app)
+  if (/^https:\/\/id-preview--[a-z0-9-]+\.lovable\.app$/.test(origin)) return true;
+  return false;
+}
+
 function buildCorsHeaders(req: Request) {
   const origin = req.headers.get('origin') || '';
-  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  const allowedOrigin = isAllowedOrigin(origin) ? origin : STATIC_ALLOWED_ORIGINS[0];
   return {
     'Access-Control-Allow-Origin': allowedOrigin,
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
