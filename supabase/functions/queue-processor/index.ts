@@ -77,11 +77,12 @@ Deno.serve(async (req) => {
   const results: Array<{ id: string; action: string; status: string; error?: string }> = [];
 
   for (const job of jobs) {
-    // Mark as processing
+    // Mark as processing — do NOT increment attempt_count here;
+    // claim_provisioning_jobs SQL function already handles the atomic increment
+    // to prevent double-counting (would cause max_attempts=2 jobs to fail immediately).
     await supabase.from("provisioning_queue").update({
       status: "processing",
       started_at: now,
-      attempt_count: job.attempt_count + 1,
     }).eq("id", job.id);
 
     try {
