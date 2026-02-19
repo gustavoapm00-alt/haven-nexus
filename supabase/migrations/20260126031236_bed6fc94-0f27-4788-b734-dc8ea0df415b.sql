@@ -71,10 +71,10 @@ SELECT cron.schedule(
   '0 */6 * * *',
   $$
   SELECT net.http_post(
-    url := 'https://chraztxdtvmipasdttbk.supabase.co/functions/v1/send-activation-reminders',
+    url := 'https://YOUR_PROJECT_REF.supabase.co/functions/v1/send-activation-reminders',
     headers := jsonb_build_object(
       'Content-Type', 'application/json',
-      'Authorization', 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNocmF6dHhkdHZtaXBhc2R0dGJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzMDUwMjAsImV4cCI6MjA4MDg4MTAyMH0.t7gfdsGEXkMyq5wLO-kU0iy9urf42TXG_XiY0NJvwRw'
+      'Authorization', 'Bearer YOUR_SUPABASE_ANON_KEY'
     ),
     body := jsonb_build_object('triggered_at', now()::text)
   ) AS request_id;

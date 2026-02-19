@@ -9,7 +9,7 @@ Complete, reproducible test procedure for Option A webhook isolation.
 ```bash
 # Login to get token (or use browser devtools)
 USER_TOKEN="<JWT_TOKEN>"
-BASE_URL="https://chraztxdtvmipasdttbk.supabase.co/functions/v1"
+BASE_URL="https://YOUR_PROJECT_REF.supabase.co/functions/v1"
 ```
 
 ### 2. SQL Preflight Checks

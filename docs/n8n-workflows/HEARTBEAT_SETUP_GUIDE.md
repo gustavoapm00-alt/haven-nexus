@@ -16,7 +16,7 @@ In your n8n instance, go to **Settings → Variables** and create:
 | Variable Name | Value |
 |---|---|
 | `HEARTBEAT_SECRET` | *(your secret — same value as stored in Lovable Cloud secrets)* |
-| `SUPABASE_FUNCTIONS_URL` | `https://chraztxdtvmipasdttbk.supabase.co/functions/v1` |
+| `SUPABASE_FUNCTIONS_URL` | `https://YOUR_PROJECT_REF.supabase.co/functions/v1` |
 
 > ⚠️ The `HEARTBEAT_SECRET` must exactly match the `HEARTBEAT_SECRET` stored in your Lovable Cloud backend secrets.
 
@@ -85,7 +85,7 @@ Body (JSON):
 ## Heartbeat Endpoint
 
 ```
-POST https://chraztxdtvmipasdttbk.supabase.co/functions/v1/agent-heartbeat
+POST https://YOUR_PROJECT_REF.supabase.co/functions/v1/agent-heartbeat
 ```
 
 **Required header:**

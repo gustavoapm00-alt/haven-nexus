@@ -80,7 +80,7 @@ WHERE status NOT IN ('archived', 'revoked');
 **Test Steps (via Edge Function):**
 ```bash
 curl -X GET \
-  "https://chraztxdtvmipasdttbk.supabase.co/functions/v1/runtime-credentials?activation_id=<UUID>" \
+  "https://YOUR_PROJECT_REF.supabase.co/functions/v1/runtime-credentials?activation_id=<UUID>" \
   -H "Authorization: Bearer <N8N_API_KEY>"
 ```
 
