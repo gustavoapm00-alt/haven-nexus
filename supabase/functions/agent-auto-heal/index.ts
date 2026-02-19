@@ -2,6 +2,8 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { buildCorsHeaders } from "../_shared/rate-limiter.ts";
 
+const VALID_AGENTS = ["AG-01", "AG-02", "AG-03", "AG-04", "AG-05", "AG-06", "AG-07"];
+
 serve(async (req) => {
   const corsHeaders = buildCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -53,9 +55,7 @@ serve(async (req) => {
       });
     }
 
-    // Validate agent ID
-    const validAgents = ["AG-01", "AG-02", "AG-03", "AG-04", "AG-05", "AG-06", "AG-07"];
-    if (!validAgents.includes(agent_id)) {
+    if (!VALID_AGENTS.includes(agent_id)) {
       return new Response(JSON.stringify({ error: "Invalid agent_id" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -73,17 +73,6 @@ serve(async (req) => {
     const currentStatus = latest?.[0]?.status || "OFFLINE";
     const healActions: string[] = [];
 
-    // Resolve related activation_request_id via installation_requests → n8n_mappings
-    // agent_id is NOT a column in n8n_mappings; we must traverse via installation_requests
-    // We identify the most recent active installation_request that maps to this agent concept
-    // and retrieve its n8n_workflow_ids from n8n_mappings.
-    const { data: relatedMappings } = await adminSupabase
-      .from("n8n_mappings")
-      .select("id, n8n_workflow_ids, status, activation_request_id")
-      .eq("status", "active")
-      .order("created_at", { ascending: false })
-      .limit(5);
-
     if (action === "stabilize") {
       await adminSupabase.from("agent_heartbeats").insert({
         agent_id,
@@ -97,6 +86,56 @@ serve(async (req) => {
         },
       });
       healActions.push("FORCE_STABILIZATION");
+
+      // ── OUTCOME VERIFICATION ─────────────────────────────────────────────
+      // Re-read the latest heartbeat to confirm the write landed correctly.
+      const { data: verifyData, error: verifyError } = await adminSupabase
+        .from("agent_heartbeats")
+        .select("status, created_at")
+        .eq("agent_id", agent_id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single();
+
+      const verifiedStatus = verifyData?.status;
+      const healed = !verifyError && verifiedStatus === "NOMINAL";
+
+      if (!healed) {
+        // CRITICAL ALERT — stabilization write did not confirm
+        await adminSupabase.from("edge_function_logs").insert({
+          function_name: "agent-auto-heal",
+          level: "error",
+          message: `CRITICAL: Stabilization FAILED for ${agent_id} — post-heal verification returned ${verifiedStatus ?? "NULL"}`,
+          details: {
+            agent_id,
+            action,
+            previous_status: currentStatus,
+            verified_status: verifiedStatus ?? null,
+            verify_error: verifyError?.message ?? null,
+            triggered_by: user.id,
+          },
+        });
+
+        await adminSupabase.from("admin_notifications").insert({
+          type: "auto_heal_failure",
+          title: `CRITICAL: Auto-Heal FAILED — ${agent_id}`,
+          body: `Stabilization protocol for ${agent_id} did NOT confirm NOMINAL state. Immediate manual intervention required.`,
+          severity: "critical",
+          metadata: { agent_id, action, previous_status: currentStatus, triggered_by: user.id },
+        });
+
+        return new Response(
+          JSON.stringify({
+            success: false,
+            agent_id,
+            previous_status: currentStatus,
+            verified_status: verifiedStatus ?? null,
+            error: "POST_HEAL_VERIFICATION_FAILED",
+          }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
     } else if (action === "restart") {
       await adminSupabase.from("agent_heartbeats").insert({
         agent_id,
@@ -105,6 +144,7 @@ serve(async (req) => {
         metadata: { heal_type: "restart_init", previous_status: currentStatus, triggered_by: user.id },
       });
 
+      // Allow n8n-side restart window (2 s) before verifying
       await new Promise((r) => setTimeout(r, 2000));
 
       await adminSupabase.from("agent_heartbeats").insert({
@@ -114,27 +154,78 @@ serve(async (req) => {
         metadata: { heal_type: "restart_complete", previous_status: currentStatus, triggered_by: user.id },
       });
       healActions.push("RESTART_SEQUENCE");
+
+      // ── OUTCOME VERIFICATION ─────────────────────────────────────────────
+      // Wait a further 1 s to let the DB commit propagate, then re-read.
+      await new Promise((r) => setTimeout(r, 1000));
+
+      const { data: verifyData, error: verifyError } = await adminSupabase
+        .from("agent_heartbeats")
+        .select("status, created_at")
+        .eq("agent_id", agent_id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single();
+
+      const verifiedStatus = verifyData?.status;
+      const healed = !verifyError && verifiedStatus === "NOMINAL";
+
+      if (!healed) {
+        // CRITICAL ALERT — restart did not resolve to NOMINAL
+        await adminSupabase.from("edge_function_logs").insert({
+          function_name: "agent-auto-heal",
+          level: "error",
+          message: `CRITICAL: Restart FAILED for ${agent_id} — post-restart state is ${verifiedStatus ?? "NULL"}. MANUAL INTERVENTION REQUIRED.`,
+          details: {
+            agent_id,
+            action,
+            previous_status: currentStatus,
+            verified_status: verifiedStatus ?? null,
+            verify_error: verifyError?.message ?? null,
+            triggered_by: user.id,
+          },
+        });
+
+        await adminSupabase.from("admin_notifications").insert({
+          type: "auto_heal_failure",
+          title: `CRITICAL: Restart FAILED — ${agent_id}`,
+          body: `Restart sequence for ${agent_id} could not confirm NOMINAL state after 3 s. Last observed status: ${verifiedStatus ?? "NULL"}. Escalate immediately.`,
+          severity: "critical",
+          metadata: { agent_id, action, previous_status: currentStatus, triggered_by: user.id },
+        });
+
+        return new Response(
+          JSON.stringify({
+            success: false,
+            agent_id,
+            previous_status: currentStatus,
+            verified_status: verifiedStatus ?? null,
+            error: "POST_RESTART_VERIFICATION_FAILED",
+          }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
     }
 
-    // Log the healing action
+    // ── SUCCESS PATH — log only after verification passes ─────────────────
     await adminSupabase.from("edge_function_logs").insert({
       function_name: "agent-auto-heal",
       level: "info",
-      message: `Auto-heal executed for ${agent_id}: ${healActions.join(", ")}`,
+      message: `Auto-heal VERIFIED for ${agent_id}: ${healActions.join(", ")} → NOMINAL`,
       details: {
         agent_id,
         action,
         previous_status: currentStatus,
+        new_status: "NOMINAL",
         heal_actions: healActions,
         triggered_by: user.id,
       },
     });
 
-    // Insert admin notification for visibility
     await adminSupabase.from("admin_notifications").insert({
       type: "auto_heal",
-      title: `Auto-Heal: ${agent_id}`,
-      body: `${agent_id} was auto-healed from ${currentStatus}. Action: ${action.toUpperCase()}.`,
+      title: `Auto-Heal Verified: ${agent_id}`,
+      body: `${agent_id} was auto-healed from ${currentStatus} and CONFIRMED NOMINAL. Action: ${action.toUpperCase()}.`,
       severity: currentStatus === "ERROR" ? "warning" : "info",
       metadata: { agent_id, action, previous_status: currentStatus, triggered_by: user.id },
     });
