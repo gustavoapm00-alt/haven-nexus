@@ -1,9 +1,21 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': Deno.env.get('SITE_URL') || 'https://aerelion.systems',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+// CORS: Accept both the production domain and Lovable preview origins
+const ALLOWED_ORIGINS = [
+  'https://aerelion.systems',
+  'https://haven-matrix.lovable.app',
+  Deno.env.get('SITE_URL') || '',
+].filter(Boolean);
+
+function buildCorsHeaders(req: Request) {
+  const origin = req.headers.get('origin') || '';
+  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  };
+}
 
 // AGENT_DEFINITIONS is now fetched from the agent_registry table at runtime.
 // Fallback to static array only when DB is unavailable.
@@ -198,6 +210,8 @@ function buildSentinelWorkflow(supabaseFunctionsUrl: string, heartbeatSecret: st
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = buildCorsHeaders(req);
+
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -322,9 +336,15 @@ Deno.serve(async (req) => {
       const correctionId = `COR-${agentId}-${Date.now().toString(36).toUpperCase()}`;
       const remediationStart = Date.now();
 
+      // BUG-FIX: Use AERELION_SERVICE_ROLE_KEY (the configured secret name) with
+      // SUPABASE_SERVICE_ROLE_KEY as fallback for compatibility.
+      const serviceRoleKey =
+        Deno.env.get('AERELION_SERVICE_ROLE_KEY') ||
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+
       const serviceClientR = createClient(
         Deno.env.get('SUPABASE_URL')!,
-        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+        serviceRoleKey
       );
 
       try {
@@ -354,15 +374,24 @@ Deno.serve(async (req) => {
 
         const purgeResults: string[] = [];
         for (const wf of toDelete) {
-          // Deactivate first (required before delete on some n8n versions)
-          await fetch(`${n8nBase}/api/v1/workflows/${wf.id}/deactivate`, {
+          // BUG-FIX: MUST await deactivate before delete — n8n returns 409 Conflict
+          // if you attempt to DELETE an active workflow. The previous .catch(() => {})
+          // was swallowing this silently, causing the re-deploy to collide with the
+          // undead workflow and throw REDEPLOY_CREATION_FAILED on duplicate names.
+          const deactivateRes = await fetch(`${n8nBase}/api/v1/workflows/${wf.id}/deactivate`, {
             method: 'POST', headers: n8nHeaders,
-          }).catch(() => {});
+          });
+          if (!deactivateRes.ok) {
+            // Consume body to avoid resource leak, then log as non-fatal
+            await deactivateRes.text().catch(() => {});
+          }
 
           const delRes = await fetch(`${n8nBase}/api/v1/workflows/${wf.id}`, {
             method: 'DELETE', headers: n8nHeaders,
           });
-          purgeResults.push(`${wf.id}:${delRes.ok ? 'PURGED' : 'PURGE_FAILED'}`);
+          // Consume body to prevent Deno resource leak
+          await delRes.text().catch(() => {});
+          purgeResults.push(`${wf.id}:${delRes.ok ? 'PURGED' : `PURGE_FAILED_${delRes.status}`}`);
         }
 
         // Step 3: Fetch agent definition from registry
@@ -501,9 +530,13 @@ Deno.serve(async (req) => {
 
     // ACTION: Deploy all 7 heartbeat workflows
     // Fetch agent definitions from agent_registry (single source of truth)
+    // BUG-FIX: Use correct secret name — AERELION_SERVICE_ROLE_KEY with fallback
+    const deployServiceKey =
+      Deno.env.get('AERELION_SERVICE_ROLE_KEY') ||
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
     const serviceClient = createClient(
       Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+      deployServiceKey
     );
 
     const { data: registryData } = await serviceClient
