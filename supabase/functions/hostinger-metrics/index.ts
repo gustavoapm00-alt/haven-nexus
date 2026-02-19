@@ -3,8 +3,9 @@ import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
 const ALLOWED_ORIGINS = [
   "https://aerelion.systems",
-  "https://id-preview--377ae8b3-1fbe-4ba4-b701-d5100f83c90e.lovable.app",
-];
+  "https://haven-matrix.lovable.app",
+  Deno.env.get("SITE_URL") || "",
+].filter(Boolean);
 
 function getCorsHeaders(req: Request): Record<string, string> {
   const origin = req.headers.get("Origin") ?? "";
