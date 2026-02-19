@@ -1065,6 +1065,48 @@ export type Database = {
           },
         ]
       }
+      n8n_instances: {
+        Row: {
+          api_key_secret: string | null
+          created_at: string
+          current_load: number
+          id: string
+          instance_url: string
+          label: string | null
+          last_ping_at: string | null
+          max_capacity: number
+          region: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          api_key_secret?: string | null
+          created_at?: string
+          current_load?: number
+          id?: string
+          instance_url: string
+          label?: string | null
+          last_ping_at?: string | null
+          max_capacity?: number
+          region?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          api_key_secret?: string | null
+          created_at?: string
+          current_load?: number
+          id?: string
+          instance_url?: string
+          label?: string | null
+          last_ping_at?: string | null
+          max_capacity?: number
+          region?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       n8n_mappings: {
         Row: {
           activation_request_id: string | null
@@ -1468,6 +1510,39 @@ export type Database = {
           user_id?: string
           veracity_score?: number | null
           verification_source?: string | null
+        }
+        Relationships: []
+      }
+      system_registry: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_secret: boolean
+          key: string
+          namespace: string
+          updated_at: string
+          value: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_secret?: boolean
+          key: string
+          namespace: string
+          updated_at?: string
+          value?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_secret?: boolean
+          key?: string
+          namespace?: string
+          updated_at?: string
+          value?: string | null
         }
         Relationships: []
       }
