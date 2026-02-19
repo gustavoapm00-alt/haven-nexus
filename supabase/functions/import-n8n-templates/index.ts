@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import { requireAdminAuth } from "../_shared/admin-auth.ts";
+import { buildCorsHeaders } from "../_shared/rate-limiter.ts";
 
 /**
  * Import n8n Templates Edge Function
@@ -215,6 +216,7 @@ function detectTriggerType(nodes: N8nNode[]): string | null {
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = buildCorsHeaders(req);
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });

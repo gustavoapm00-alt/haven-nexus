@@ -1,13 +1,8 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
-import { checkRateLimit, getClientIp, rateLimitResponse } from "../_shared/rate-limiter.ts";
+import { checkRateLimit, getClientIp, rateLimitResponse, buildCorsHeaders } from "../_shared/rate-limiter.ts";
 import { SUCCESS_STATUSES } from "../_shared/purchase-constants.ts";
 import { CANONICAL_FILE_TYPES, getFileTypeLabel } from "../_shared/file-types.ts";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
 
 interface DownloadRequest {
   item_type: "agent" | "bundle";
@@ -22,6 +17,7 @@ interface DownloadLink {
 }
 
 serve(async (req) => {
+  const corsHeaders = buildCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
