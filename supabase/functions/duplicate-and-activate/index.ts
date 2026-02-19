@@ -63,17 +63,71 @@ interface ProvisioningResult {
   error?: string;
 }
 
-// Get normalized n8n base URL (origin only)
-function getN8nBaseUrl(): string | null {
-  let n8nBaseUrl = Deno.env.get("N8N_BASE_URL");
-  if (!n8nBaseUrl) return null;
-  
+// ── Least-Load n8n Instance Router ───────────────────────────────────────────
+// Queries the n8n_instances table and returns the URL of the instance with the
+// most available capacity (max_capacity - current_load). Falls back to the
+// N8N_BASE_URL env variable for backward-compatibility.
+// deno-lint-ignore no-explicit-any
+async function getLeastLoadedN8nUrl(supabase: any): Promise<string | null> {
   try {
-    const urlObj = new URL(n8nBaseUrl);
-    return urlObj.origin;
-  } catch {
-    return n8nBaseUrl.replace(/\/+$/, "");
+    const { data, error } = await supabase
+      .from("n8n_instances")
+      .select("instance_url, current_load, max_capacity")
+      .eq("status", "active")
+      .order("current_load", { ascending: true })
+      .limit(10);
+
+    if (error || !data || data.length === 0) {
+      console.warn("n8n_instances query failed or empty — falling back to N8N_BASE_URL env");
+      return getN8nBaseUrlEnv();
+    }
+
+    // Select instance with most headroom: lowest (current_load / max_capacity) ratio
+    const best = (data as { instance_url: string; current_load: number; max_capacity: number }[])
+      .filter(i => i.max_capacity > 0 && i.current_load < i.max_capacity)
+      .sort((a, b) => (a.current_load / a.max_capacity) - (b.current_load / b.max_capacity))[0];
+
+    if (!best) {
+      console.warn("All n8n instances at capacity — falling back to N8N_BASE_URL env");
+      return getN8nBaseUrlEnv();
+    }
+
+    console.log(`[ROUTING] Selected n8n instance: ${best.instance_url} (load: ${best.current_load}/${best.max_capacity})`);
+    return normalizeN8nUrl(best.instance_url);
+  } catch (err) {
+    console.error("getLeastLoadedN8nUrl error:", err);
+    return getN8nBaseUrlEnv();
   }
+}
+
+// Increment load counter for an n8n instance after routing a workflow to it
+// deno-lint-ignore no-explicit-any
+async function incrementInstanceLoad(supabase: any, instanceUrl: string): Promise<void> {
+  await supabase
+    .from("n8n_instances")
+    .update({ current_load: supabase.rpc("n8n_instances_load_incr") })
+    .eq("instance_url", instanceUrl);
+  // Soft failure: non-critical telemetry, don't throw
+}
+
+function normalizeN8nUrl(url: string): string {
+  try {
+    return new URL(url).origin;
+  } catch {
+    return url.replace(/\/+$/, "");
+  }
+}
+
+// Get normalized n8n base URL from env (legacy fallback)
+function getN8nBaseUrlEnv(): string | null {
+  const n8nBaseUrl = Deno.env.get("N8N_BASE_URL");
+  if (!n8nBaseUrl) return null;
+  return normalizeN8nUrl(n8nBaseUrl);
+}
+
+// Legacy shim used by rollback helpers that don't have supabase context
+function getN8nBaseUrl(): string | null {
+  return getN8nBaseUrlEnv();
 }
 
 // AES-256-GCM decryption
@@ -128,13 +182,14 @@ function getN8nCredentialType(provider: string): string {
   return typeMap[provider.toLowerCase()] || `${provider}Api`;
 }
 
-// n8n API helper
+// n8n API helper — accepts an explicit baseUrl for multi-instance routing
 async function n8nApiCall<T>(
   method: string,
   endpoint: string,
-  body?: unknown
+  body?: unknown,
+  overrideBaseUrl?: string
 ): Promise<{ data?: T; error?: string }> {
-  const n8nBaseUrl = getN8nBaseUrl();
+  const n8nBaseUrl = overrideBaseUrl ?? getN8nBaseUrl();
   const n8nApiKey = Deno.env.get("N8N_API_KEY");
   
   if (!n8nBaseUrl || !n8nApiKey) {
@@ -181,10 +236,12 @@ function computeWebhookUrl(activationId: string): string | null {
 }
 
 // Create workflow in n8n with deterministic webhook path
+// callN8n is a bound helper scoped to the routed instance URL
 async function createWorkflow(
   templateJson: N8nWorkflow,
   clientName: string,
-  activationId: string
+  activationId: string,
+  callN8n: <T>(method: string, endpoint: string, body?: unknown) => Promise<{ data?: T; error?: string }>
 ): Promise<{ workflowId?: string; error?: string }> {
   const webhookPath = computeWebhookPath(activationId);
   
@@ -227,7 +284,7 @@ async function createWorkflow(
   
   console.log(`Creating workflow with ${workflow.nodes.length} nodes, connections: ${Object.keys(workflow.connections).length} keys`);
   
-  const result = await n8nApiCall<{ id: string }>("POST", "/workflows", workflow);
+  const result = await callN8n<{ id: string }>("POST", "/workflows", workflow);
   
   if (result.error) {
     return { error: result.error };
@@ -236,11 +293,12 @@ async function createWorkflow(
   return { workflowId: result.data?.id };
 }
 
-// Create credential in n8n
+// Create credential in n8n (routed via callN8n)
 async function createCredential(
   type: string,
   name: string,
-  data: Record<string, unknown>
+  data: Record<string, unknown>,
+  callN8n: <T>(method: string, endpoint: string, body?: unknown) => Promise<{ data?: T; error?: string }>
 ): Promise<{ credentialId?: string; error?: string }> {
   const credential: N8nCredentialType = {
     name,
@@ -248,7 +306,7 @@ async function createCredential(
     data,
   };
   
-  const result = await n8nApiCall<{ id: string }>("POST", "/credentials", credential);
+  const result = await callN8n<{ id: string }>("POST", "/credentials", credential);
   
   if (result.error) {
     return { error: result.error };
@@ -257,11 +315,12 @@ async function createCredential(
   return { credentialId: result.data?.id };
 }
 
-// Patch workflow to use new credentials
+// Patch workflow to use new credentials (routed via callN8n)
 async function patchWorkflowCredentials(
   workflowId: string,
   templateJson: N8nWorkflow,
-  credentialMap: Record<string, { id: string; name: string; type: string }>
+  credentialMap: Record<string, { id: string; name: string; type: string }>,
+  callN8n: <T>(method: string, endpoint: string, body?: unknown) => Promise<{ data?: T; error?: string }>
 ): Promise<{ success: boolean; error?: string }> {
   // Map node types to their credential requirements
   const nodeCredentialTypes: Record<string, string[]> = {
@@ -301,8 +360,8 @@ async function patchWorkflowCredentials(
     return node;
   });
   
-  // Update the workflow
-  const result = await n8nApiCall<{ id: string }>("PATCH", `/workflows/${workflowId}`, {
+  // Update the workflow on the routed n8n instance
+  const result = await callN8n<{ id: string }>("PATCH", `/workflows/${workflowId}`, {
     nodes: patchedNodes,
   });
   
@@ -313,11 +372,12 @@ async function patchWorkflowCredentials(
   return { success: true };
 }
 
-// Activate workflow in n8n
+// Activate workflow in n8n (routed via callN8n)
 async function activateWorkflow(
-  workflowId: string
+  workflowId: string,
+  callN8n: <T>(method: string, endpoint: string, body?: unknown) => Promise<{ data?: T; error?: string }>
 ): Promise<{ success: boolean; error?: string }> {
-  const result = await n8nApiCall<{ active: boolean }>(
+  const result = await callN8n<{ active: boolean }>(
     "POST", 
     `/workflows/${workflowId}/activate`
   );
@@ -384,9 +444,20 @@ async function provisionActivation(
   }
   
   console.log(`Starting provisioning for activation: ${activationId}`);
-  
-  // Compute deterministic webhook URL upfront
-  const webhookUrl = computeWebhookUrl(activationId);
+
+  // ── STAGE_2: Resolve least-loaded n8n instance ──────────────────────
+  const resolvedN8nUrl = await getLeastLoadedN8nUrl(supabase);
+  if (!resolvedN8nUrl) {
+    return { success: false, error: "Cannot resolve n8n instance — no active nodes available" };
+  }
+  console.log(`[ROUTING] Resolved n8n base URL: ${resolvedN8nUrl}`);
+
+  // Override n8nApiCall base URL via closure for this activation scope
+  const callN8n = <T>(method: string, endpoint: string, body?: unknown) =>
+    n8nApiCall<T>(method, endpoint, body, resolvedN8nUrl);
+
+  // Compute deterministic webhook URL against the routed instance
+  const webhookUrl = `${resolvedN8nUrl}/webhook/aerelion/${activationId}`;
   if (!webhookUrl) {
     return { success: false, error: "Cannot compute webhook URL - N8N_BASE_URL not configured" };
   }
@@ -479,12 +550,13 @@ async function provisionActivation(
     console.log("No required integrations - proceeding without credentials");
   }
   
-  // Step 5: Create workflow in n8n with deterministic webhook path
+  // Step 5: Create workflow in n8n with deterministic webhook path (routed to least-loaded instance)
   const clientName = activation.company || activation.name || userEmail.split("@")[0];
   const { workflowId, error: workflowError } = await createWorkflow(
     templateJson,
     clientName,
-    activationId
+    activationId,
+    callN8n
   );
   
   if (workflowError || !workflowId) {
@@ -523,7 +595,8 @@ async function provisionActivation(
       const { credentialId, error: credError } = await createCredential(
         credentialType,
         credentialName,
-        credentialData
+        credentialData,
+        callN8n
       );
       
       if (credError || !credentialId) {
@@ -549,17 +622,17 @@ async function provisionActivation(
     const { success: patchSuccess, error: patchError } = await patchWorkflowCredentials(
       workflowId,
       templateJson,
-      credentialMap
+      credentialMap,
+      callN8n
     );
     
     if (!patchSuccess) {
       console.error("Failed to patch workflow credentials:", patchError);
-      // Continue anyway - workflow can be manually configured
     }
   }
   
-  // Step 8: Activate the workflow
-  const { success: activateSuccess, error: activateError } = await activateWorkflow(workflowId);
+  // Step 8: Activate the workflow on the routed instance
+  const { success: activateSuccess, error: activateError } = await activateWorkflow(workflowId, callN8n);
 
   if (!activateSuccess) {
     console.warn("Failed to activate workflow:", activateError);
