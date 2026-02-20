@@ -2,6 +2,8 @@ import { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useEngagementRequests, type EngagementRequest } from '@/hooks/useEngagementRequests';
+import { useAgentRecommendations } from '@/hooks/useAgentRecommendations';
+import { AgentRecommendationPanel } from '@/components/admin/AgentRecommendationPanel';
 import { toast } from '@/hooks/use-toast';
 import { 
   Loader2, LogOut, ArrowLeft, RefreshCw, Filter, Search, Download,
@@ -147,6 +149,7 @@ const AdminEngagementRequests = () => {
   const { user, isAdmin, isLoading: authLoading, signOut } = useAuth();
   const navigate = useNavigate();
   const { requests, newCount, isLoading, refresh, updateRequest, markAsSeen, markContacted } = useEngagementRequests();
+  const { result: aiResult, isLoading: aiLoading, error: aiError, getRecommendations, clear: clearRecommendations } = useAgentRecommendations();
   
   const [filter, setFilter] = useState<'all' | 'new'>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -325,6 +328,7 @@ const AdminEngagementRequests = () => {
     setSelectedRequest(null);
     setEditingNotes('');
     setEditingStatus('');
+    clearRecommendations();
   };
 
   const handleSave = async () => {
@@ -637,6 +641,14 @@ const AdminEngagementRequests = () => {
                     </p>
                   </div>
                 )}
+
+                {/* AI Agent Recommendations */}
+                <AgentRecommendationPanel
+                  result={aiResult}
+                  isLoading={aiLoading}
+                  error={aiError}
+                  onGenerate={() => getRecommendations(selectedRequest.id)}
+                />
 
                 {/* Timestamps */}
                 <div className="text-xs text-muted-foreground space-y-1">
