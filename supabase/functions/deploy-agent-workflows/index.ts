@@ -246,15 +246,26 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Admin role check
-    const { data: roleData } = await supabase
+    // Admin role check — use service role to bypass RLS for role verification
+    const serviceKey = Deno.env.get('AERELION_SERVICE_ROLE_KEY') || Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+    const serviceClient = createClient(Deno.env.get('SUPABASE_URL')!, serviceKey);
+
+    const { data: roleData, error: roleError } = await serviceClient
       .from('user_roles')
       .select('role')
       .eq('user_id', user.id)
       .eq('role', 'admin')
-      .single();
+      .maybeSingle();
+
+    if (roleError) {
+      console.error('ROLE_CHECK_FAILED:', roleError.message);
+      return new Response(JSON.stringify({ error: 'Role verification failed', detail: roleError.message }), {
+        status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     if (!roleData) {
+      console.warn('NON_ADMIN_ACCESS_ATTEMPT:', user.id);
       return new Response(JSON.stringify({ error: 'Forbidden: Admin role required' }), {
         status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
