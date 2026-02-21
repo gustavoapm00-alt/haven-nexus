@@ -9,8 +9,9 @@ const STATIC_ALLOWED_ORIGINS = [
 
 function isAllowedOrigin(origin: string): boolean {
   if (STATIC_ALLOWED_ORIGINS.includes(origin)) return true;
-  // Allow all Lovable preview subdomains (id-preview--*.lovable.app)
+  // Allow all Lovable preview subdomains (id-preview--*.lovable.app and *.lovableproject.com)
   if (/^https:\/\/id-preview--[a-z0-9-]+\.lovable\.app$/.test(origin)) return true;
+  if (/^https:\/\/[a-z0-9-]+\.lovableproject\.com$/.test(origin)) return true;
   return false;
 }
 
