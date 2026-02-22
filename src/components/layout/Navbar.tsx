@@ -7,7 +7,7 @@ const NAV_LINKS = [
   { label: 'Services', to: '/services' },
   { label: 'Process', to: '/how-it-works' },
   { label: 'About', to: '/about' },
-  { label: 'Proof', to: '/case-studies' },
+  { label: 'Confirmed Results', to: '/case-studies' },
 ];
 
 const Navbar = () => {
@@ -17,8 +17,9 @@ const Navbar = () => {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
       <nav className="max-w-6xl mx-auto flex items-center justify-between px-6 md:px-12 h-16">
-        <Link to="/" className="font-display text-xl text-foreground tracking-tight">
-          AERELION
+        <Link to="/" className="flex flex-col">
+          <span className="font-display text-xl text-foreground tracking-tight leading-none">AERELION</span>
+          <span className="text-[9px] font-mono uppercase tracking-[0.2em] text-muted-foreground leading-none mt-0.5">Managed Automation Operator</span>
         </Link>
 
         {/* Desktop nav */}

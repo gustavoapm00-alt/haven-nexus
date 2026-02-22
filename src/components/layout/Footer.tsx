@@ -23,7 +23,7 @@ const Footer = () => {
               <Link to="/services" className="text-sm text-secondary-foreground hover:text-foreground transition-colors">Services</Link>
               <Link to="/how-it-works" className="text-sm text-secondary-foreground hover:text-foreground transition-colors">Process</Link>
               <Link to="/about" className="text-sm text-secondary-foreground hover:text-foreground transition-colors">About</Link>
-              <Link to="/case-studies" className="text-sm text-secondary-foreground hover:text-foreground transition-colors">Proof</Link>
+              <Link to="/case-studies" className="text-sm text-secondary-foreground hover:text-foreground transition-colors">Confirmed Results</Link>
               <Link to="/contact" className="text-sm text-secondary-foreground hover:text-foreground transition-colors">Contact</Link>
             </div>
           </div>
@@ -42,13 +42,18 @@ const Footer = () => {
         </div>
 
         {/* Bottom */}
-        <div className="border-t border-border pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} AERELION Systems. All rights reserved.
+        <div className="border-t border-border pt-8 flex flex-col items-center gap-4">
+          <p className="text-sm text-muted-foreground italic text-center">
+            AERELION does not take every engagement. We take the right ones.
           </p>
-          <p className="text-xs text-muted-foreground">
-            contact@aerelion.systems
-          </p>
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 w-full">
+            <p className="text-xs text-muted-foreground">
+              © {new Date().getFullYear()} AERELION Systems. All rights reserved.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              contact@aerelion.systems
+            </p>
+          </div>
         </div>
       </div>
     </footer>
