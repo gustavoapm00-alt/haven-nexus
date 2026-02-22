@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, Loader2, CheckCircle } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 import { supabase } from '@/integrations/supabase/client';
 import type { Variants } from 'framer-motion';
 
@@ -31,6 +32,9 @@ const ContactPage = () => {
   if (submitted) {
     return (
       <main className="pt-24">
+        <Helmet>
+          <title>Briefing Submitted — AERELION</title>
+        </Helmet>
         <section className="section-padding min-h-[60vh] flex items-center justify-center">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center max-w-lg">
             <CheckCircle className="w-12 h-12 text-primary mx-auto mb-6" />
@@ -44,6 +48,12 @@ const ContactPage = () => {
 
   return (
     <main className="pt-24">
+      <Helmet>
+        <title>Contact — AERELION | Request a Briefing</title>
+        <meta name="description" content="Tell us about your business and the operational friction you're experiencing. We'll respond within 48 hours with a confidential assessment." />
+        <link rel="canonical" href="https://aerelion.systems/contact" />
+      </Helmet>
+
       <section className="section-padding">
         <div className="max-w-4xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">

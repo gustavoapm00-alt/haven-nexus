@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 import type { Variants } from 'framer-motion';
 
 const fadeUp: Variants = {
@@ -14,6 +15,12 @@ const fadeUp: Variants = {
 const AboutPage = () => {
   return (
     <main className="pt-24">
+      <Helmet>
+        <title>About — AERELION | Founder-Led Managed Automation</title>
+        <meta name="description" content="Founded by Gustavo, a systems architect and AI integration specialist. AERELION removes the operational ceiling from ambitious operators." />
+        <link rel="canonical" href="https://aerelion.systems/about" />
+      </Helmet>
+
       <section className="section-padding pb-16">
         <div className="container-narrow">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp}>
