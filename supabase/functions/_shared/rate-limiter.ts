@@ -85,7 +85,7 @@ export function buildCorsHeaders(req: Request): Record<string, string> {
   return {
     "Access-Control-Allow-Origin": getAllowedOrigin(req),
     "Access-Control-Allow-Headers":
-      "authorization, x-client-info, apikey, content-type, x-heartbeat-key",
+      "authorization, x-client-info, apikey, content-type, x-heartbeat-key, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
     "Vary": "Origin",
   };
 }
@@ -101,8 +101,8 @@ export function rateLimitResponse(retryAfterSeconds: number): Response {
       headers: {
         "Content-Type": "application/json",
         "Retry-After": retryAfterSeconds.toString(),
-        "Access-Control-Allow-Origin": ALLOWED_ORIGINS[0],
-        "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+        "Access-Control-Allow-Origin": STATIC_ALLOWED_ORIGINS[0],
+        "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
       },
     }
   );
