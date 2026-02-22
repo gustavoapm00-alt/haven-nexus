@@ -40,11 +40,6 @@
     {
       "parameters": {
         "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict"
-          },
           "conditions": [
             {
               "id": "condition-status-ok",
