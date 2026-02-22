@@ -35,8 +35,7 @@ const AboutPage = () => {
       <section className="px-6 md:px-12 lg:px-20 pb-20">
         <div className="container-narrow">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp}
-            className="card-premium p-8 md:p-12 border-primary/20"
-          >
+            className="card-premium p-8 md:p-12 border-primary/20">
             <p className="text-xs font-mono uppercase tracking-[0.25em] text-primary mb-6">Mission</p>
             <blockquote className="font-display text-2xl md:text-3xl text-foreground leading-snug italic">
               "We remove the operational ceiling from ambitious operators by installing AI systems
@@ -57,6 +56,7 @@ const AboutPage = () => {
               <p>AERELION was founded by Gustavo, a systems architect and AI integration specialist with a deep background in operational design for lean professional service businesses.</p>
               <p>He founded AERELION on a single thesis: that the compounding operational cost of manual workflows in small service businesses represents one of the most underaddressed infrastructure crises in modern commerce — and that AI has finally crossed the accessibility threshold required to solve it at scale.</p>
               <p>His operating philosophy is rooted in precision over volume. He selects clients who are ready to move, builds systems that outlast the engagement, and measures success exclusively by outcomes.</p>
+              <p>AERELION does not pursue volume. Every engagement begins with a mutual readiness assessment — not because clients must qualify for a premium tier, but because a system installed in the wrong environment will not perform to benchmark. Selectivity is not positioning theater. It is the reason the benchmark confirmation rate is 100%.</p>
               <p className="text-foreground font-medium">AERELION reflects his belief that premium positioning is not a pricing strategy — it is an integrity standard.</p>
             </motion.div>
           </div>
@@ -84,6 +84,7 @@ const AboutPage = () => {
             <h2 className="font-display text-3xl md:text-4xl mb-6">Ready to meet?</h2>
             <p className="text-muted-foreground text-lg max-w-xl mx-auto mb-10">Book a confidential briefing to discuss your operational challenges.</p>
             <Link to="/contact" className="btn-primary">Request a Briefing <ArrowRight className="w-4 h-4" /></Link>
+            <p className="text-[11px] text-muted-foreground mt-4">Confidential. No pitch. No obligation.</p>
           </motion.div>
         </div>
       </section>

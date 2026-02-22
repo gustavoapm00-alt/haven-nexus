@@ -15,6 +15,14 @@ const TIERS = [
   { tier: '03', name: 'Full Operating System Install', price: '$28,000 – $45,000', timeline: '60-day delivery guarantee', benchmark: 'Owner\'s operational time on admin tasks reduced by minimum 60%', description: 'End-to-end operational redesign. AERELION architects and installs a complete AI-native workflow infrastructure covering intake, delivery, reporting, billing triggers, and client communications.', includes: ['All Tier 1 and Tier 2 components', 'Reporting dashboards', 'Billing automation', 'AI meeting summaries', '30-day post-install support'] },
 ];
 
+const TRIGGERS = [
+  'A client left because your delivery process failed. You know nothing structural has changed.',
+  'You hired to absorb the load. The load returned to you. The hire didn\'t fix the system.',
+  'You\'re at capacity. Revenue isn\'t reflecting it. Process is consuming what growth should keep.',
+  'A freelancer built automation. It broke. Nobody knows why. You rebuilt manually and absorbed the loss.',
+  'You are the operational ceiling of your own business. Nothing scales past you until a system exists that doesn\'t need you.',
+];
+
 const ICP = [
   { attribute: 'Annual Revenue', value: '$300K – $3M' },
   { attribute: 'Team Size', value: '1–8 people' },
@@ -43,6 +51,7 @@ const Services = () => {
         </div>
       </section>
 
+      {/* Tier Cards */}
       <section className="px-6 md:px-12 lg:px-20 pb-20">
         <div className="container-narrow space-y-8">
           {TIERS.map((tier, i) => (
@@ -67,8 +76,12 @@ const Services = () => {
                 <div className="lg:w-64 shrink-0 lg:border-l lg:border-border lg:pl-8 flex flex-col justify-between">
                   <div className="space-y-4">
                     <div><p className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-1">Investment</p><p className="font-display text-xl text-foreground">{tier.price}</p></div>
-                    <div><p className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-1">Timeline</p><p className="text-sm text-foreground">{tier.timeline}</p></div>
+                    <div>
+                      <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-1">Timeline</p>
+                      <p className="text-sm font-mono font-medium text-primary bg-primary/10 px-3 py-1 border border-primary/20 inline-block">{tier.timeline}</p>
+                    </div>
                     <div><p className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-1">Benchmark</p><p className="text-sm text-primary">{tier.benchmark}</p></div>
+                    <p className="text-[11px] text-muted-foreground italic">If we don't hit the benchmark, we keep working. No additional charge.</p>
                   </div>
                   <Link to="/contact" className="btn-primary mt-8 text-center text-xs">Discuss This Tier <ArrowRight className="w-4 h-4" /></Link>
                 </div>
@@ -78,21 +91,52 @@ const Services = () => {
         </div>
       </section>
 
+      {/* Retainer */}
       <section className="section-padding bg-card border-y border-border">
         <div className="container-narrow">
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp} className="flex flex-col md:flex-row items-start justify-between gap-8">
-            <div>
-              <p className="text-xs font-mono uppercase tracking-[0.25em] text-primary mb-4">Post-Install</p>
-              <h2 className="font-display text-2xl md:text-3xl mb-3">Maintenance & Optimization Retainer</h2>
-              <p className="text-muted-foreground max-w-lg">Ongoing system monitoring, optimization, and expansion. Available to all post-install clients.</p>
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp}
+            className="card-premium p-8 md:p-12 border-primary/20">
+            <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-8">
+              <div>
+                <p className="text-xs font-mono uppercase tracking-[0.25em] text-primary mb-4">Post-Install</p>
+                <h2 className="font-display text-2xl md:text-3xl mb-3">Maintenance & Optimization Retainer</h2>
+              </div>
+              <p className="font-display text-2xl text-foreground shrink-0">$1,200 – $3,500/mo</p>
             </div>
-            <p className="font-display text-2xl text-foreground shrink-0">$1,200 – $3,500/mo</p>
+            <div className="space-y-6 text-muted-foreground leading-relaxed mb-8">
+              <p>Every installed system is a living infrastructure. As your business evolves, your automation architecture should too. The retainer keeps your system monitored, calibrated, and expanding — without requiring you to manage it.</p>
+              <p>Coverage includes monthly system performance review, automation failure monitoring and repair, workflow expansion as your operation grows, and priority access for new tier engagements.</p>
+            </div>
+            <div className="border border-primary/30 p-6 mb-6">
+              <p className="text-foreground text-sm leading-relaxed">The retainer is not a support ticket system. Monitoring is continuous. Failures are flagged and repaired without requiring client initiation. This is operational stewardship, not reactive maintenance.</p>
+            </div>
+            <p className="text-foreground italic text-sm mb-6">Unlike subscription-based studios that require ongoing payment to keep your system functional — AERELION installs systems you own. The retainer is an expansion service. It is never a dependency.</p>
+            <p className="text-[11px] text-muted-foreground">Available exclusively to post-install clients. Not offered as a standalone service.</p>
           </motion.div>
         </div>
       </section>
 
-      {/* Ideal Client Profile */}
+      {/* Activation Signal */}
       <section className="section-padding">
+        <div className="container-narrow">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp} className="mb-12">
+            <p className="text-xs font-mono uppercase tracking-[0.25em] text-primary mb-4">Activation Signal</p>
+            <h2 className="font-display text-3xl md:text-4xl mb-6 max-w-4xl">You're ready for AERELION when the cost of waiting exceeds the cost of acting.</h2>
+          </motion.div>
+          <div className="space-y-4">
+            {TRIGGERS.map((t, i) => (
+              <motion.div key={i} initial="hidden" whileInView="visible" viewport={{ once: true }} custom={i} variants={fadeUp}
+                className="p-6 border border-border flex gap-4 md:gap-6 items-start">
+                <span className="font-display text-2xl text-primary/40 shrink-0">{String(i + 1).padStart(2, '0')}</span>
+                <p className="text-foreground text-sm leading-relaxed">{t}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ICP */}
+      <section className="section-padding bg-card border-y border-border">
         <div className="container-narrow">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp} className="mb-12">
             <p className="text-xs font-mono uppercase tracking-[0.25em] text-primary mb-4">Ideal Client Profile</p>
@@ -111,7 +155,8 @@ const Services = () => {
         </div>
       </section>
 
-      <section className="section-padding bg-card border-y border-border">
+      {/* Pricing Philosophy */}
+      <section className="section-padding">
         <div className="container-narrow">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp} className="max-w-3xl">
             <p className="text-xs font-mono uppercase tracking-[0.25em] text-primary mb-4">Pricing Philosophy</p>
@@ -124,12 +169,14 @@ const Services = () => {
         </div>
       </section>
 
-      <section className="section-padding text-center">
+      {/* CTA */}
+      <section className="section-padding bg-card border-t border-border text-center">
         <div className="container-narrow">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp}>
             <h2 className="font-display text-3xl md:text-4xl mb-6">Find the right tier for your operation.</h2>
             <p className="text-muted-foreground text-lg max-w-xl mx-auto mb-10">Book a briefing and we'll identify which installation tier matches your operational pressure.</p>
             <Link to="/contact" className="btn-primary">Request a Briefing <ArrowRight className="w-4 h-4" /></Link>
+            <p className="text-[11px] text-muted-foreground mt-4">Confidential. No pitch. No obligation.</p>
           </motion.div>
         </div>
       </section>

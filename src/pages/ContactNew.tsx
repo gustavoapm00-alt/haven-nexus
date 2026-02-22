@@ -111,6 +111,7 @@ const ContactPage = () => {
                 <button type="submit" disabled={loading} className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed">
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Submit Briefing Request <ArrowRight className="w-4 h-4" /></>}
                 </button>
+                <p className="text-[11px] text-muted-foreground text-center mt-2">Confidential. No pitch. No obligation.</p>
               </form>
             </motion.div>
           </div>
