@@ -1,142 +1,191 @@
 
-# AERELION // LIFE_INFUSION_PROTOCOL (V2.06)
 
-## Objective
+# AERELION Personality-Calibrated Upgrade — Implementation Plan
 
-Transform the Elite 7 Agent Grid from static UI cards into **state-aware, reactive logic circuits** powered by Supabase Realtime subscriptions. Each agent will listen to live database events, transition between operational states (NOMINAL, PROCESSING, DRIFT, ERROR), and display animated visual feedback.
-
----
-
-## 1. Database Foundation -- `agent_heartbeats` Table
-
-Create a new `agent_heartbeats` table to serve as the central nervous system for all agent state tracking. This table receives status signals from n8n cron jobs and internal system events.
-
-**Schema:**
-| Column | Type | Default |
-|---|---|---|
-| id | uuid | gen_random_uuid() |
-| agent_id | text | required (e.g. AG-01) |
-| status | text | 'NOMINAL' |
-| message | text | '' |
-| metadata | jsonb | {} |
-| created_at | timestamptz | now() |
-
-**RLS:** Admin-only SELECT. Service role INSERT (via edge functions). No public access.
-
-**Realtime:** Enable via `ALTER PUBLICATION supabase_realtime ADD TABLE public.agent_heartbeats;`
-
-This gives every agent a dedicated data channel to listen on.
+This plan implements all 12 tasks from the strategy brief, transforming the current site into an Assertive-primary / Analytical-secondary conversion machine. No new pages are created — all work targets existing files.
 
 ---
 
-## 2. Agent State Hook -- `useAgentStatus.ts`
+## Phase 1: Homepage Overhaul (Tasks 1–6)
 
-Create `src/hooks/useAgentStatus.ts` -- a single hook that manages the state of all 7 agents.
+### Task 1 — Hero: Assertive Above-the-Fold
 
-**Logic:**
-- On mount, fetch the latest heartbeat row per agent_id from `agent_heartbeats`
-- Subscribe to Supabase Realtime on `agent_heartbeats` for INSERT events
-- When a new heartbeat arrives, update the corresponding agent's state
-- Derive a status enum per agent: `NOMINAL` (green), `PROCESSING` (green pulse), `DRIFT` (amber border + button flash), `ERROR` (red border)
-- Expose: `agentStatuses: Record<string, { status, message, lastSeen, metadata }>`
+**File: `src/pages/Home.tsx`**
 
-**Fallback:** If no heartbeat has been received for an agent in the last 10 minutes, auto-degrade to `OFFLINE` (dim gray).
+- Add italic gold subline beneath headline: *"The only automation studio that signs your performance benchmark before you sign our invoice."*
+- Add three-column trust bar (no cards, no borders — just spaced text columns): BENCHMARK SIGNED FIRST | KEEP WORKING IF WE MISS IT | YOU OWN THE SYSTEM FOREVER
+- Add "Confidential. No pitch. No obligation." in 11px muted text beneath the CTA button
+- CTA buttons already correct ("Request a Briefing" + "See Our Process") — no change needed
 
----
+### Task 2 — Timeline Badges on Tier Cards
 
-## 3. Agent Subscriptions -- Dual-Channel Listeners
+**File: `src/pages/Home.tsx`**
 
-In addition to the `agent_heartbeats` channel, two agents get secondary listeners:
+- Restructure each tier card to show delivery timeline as a prominent gold badge/highlighted line near the top (not buried in stats at bottom)
+- Add muted text beneath each badge: *"If we don't hit the benchmark, we keep working. No additional charge."*
 
-- **AG-06 (Chronicler) and AG-07 (Envoy)**: Also subscribe to `edge_function_logs` (already enabled for Realtime). When a new log arrives, AG-06's "last event" counter increments and its status pulses to PROCESSING for 2 seconds before returning to NOMINAL.
+### Task 3 — Accountability Standard Section (NEW)
 
-This leverages the existing `useEdgeFunctionLogs` hook and the Realtime subscription already configured for that table.
+**File: `src/pages/Home.tsx`**
 
----
+- Insert new full-width section between the Problem section and the Tier cards section
+- Label: THE ACCOUNTABILITY STANDARD
+- Headline: "Every other studio promises results. We sign them."
+- Prose body about the Performance Confirmation Protocol
+- Three stat callouts: 100% | 0 | 30 Days
+- Gold-bordered contrast box with ownership statement
 
-## 4. SystemGrid Refactor -- Reactive Cards
+### Task 4 — Assertive-Optimized ICP Section (REBUILD)
 
-Refactor `SystemGrid.tsx` to consume the `useAgentStatus` hook and render state-driven visuals:
+**File: `src/pages/Home.tsx`**
 
-**Per-card state rendering:**
-- **NOMINAL**: Current green pulse (unchanged)
-- **PROCESSING**: Framer-motion scanline animation (a 1px green line sweeping horizontally across the card, 2s duration, repeat)
-- **DRIFT**: Border transitions to amber (`#FFBF00`), `[FORCE_STABILIZATION]` button becomes permanently visible and flashes at 2Hz using a CSS animation
-- **ERROR**: Border transitions to red (`#FF4444`), pulse dot turns red
-- **OFFLINE**: All colors dim to `#222`, pulse stops
+- Replace the current missing/nonexistent ICP section on homepage with frustration-led trigger statements
+- Label: THE RIGHT CLIENT
+- Headline: "You're ready for AERELION when the cost of doing nothing finally exceeds the cost of changing."
+- Five dark-bordered cards with gold number labels and activation trigger copy
+- Italic closer: *"If you recognized yourself in more than one of these — the briefing call is the next step."*
+- Demographics data follows underneath as supporting detail
 
-**Additional per-card data:**
-- Display `LAST_SIGNAL: {relative time}` below the SYSTEM_IMPACT tag
-- Show the latest heartbeat message as a one-line truncated status string
+### Task 5 — Rebuilt Competitive Table
 
-**Animations** (framer-motion):
-- Scanline sweep on PROCESSING state using `motion.div` with `animate={{ x: ['0%', '100%'] }}`
-- Border color transitions using `animate={{ borderColor }}` with 0.3s spring
+**File: `src/pages/Home.tsx`**
 
----
+- Replace the current 4-column comparison table with a full 5-competitor-column table (AERELION | Automation Agencies | AI SaaS Tools | Freelancers | Consultancies)
+- Add 7 rows: Pricing Model, Performance Benchmark, Delivery Timeline, What You Own After, If It Doesn't Work, Client Selectivity, Post-Engagement
+- "Performance Benchmark" row visually highlighted (gold bg on AERELION cell, larger text)
+- AERELION column header in gold; others muted
 
-## 5. FORCE_STABILIZATION Button Logic
+### Task 6 — Content Signal Section (NEW)
 
-When clicked, the `[FORCE_STABILIZATION]` button will:
-1. Insert a row into `agent_heartbeats` with `status: 'NOMINAL'` and `message: 'MANUAL_STABILIZATION'` for that agent
-2. Visually reset the card to NOMINAL state
-3. Show a brief flash confirmation (green glow pulse, 500ms)
+**File: `src/pages/Home.tsx`**
 
-This requires the admin user to have INSERT permission on `agent_heartbeats`, so the RLS policy will allow authenticated admins to insert.
+- Add above the final CTA section
+- Label: OPERATOR INTELLIGENCE
+- Three article preview cards (dark bg, gold category tag, title, description, "Read Teardown" link)
+- LinkedIn follow link placeholder beneath
 
----
+### Task 12 (partial) — Homepage Stats Update
 
-## 6. Heartbeat Edge Function -- `agent-heartbeat`
+**File: `src/pages/Home.tsx`**
 
-Create `supabase/functions/agent-heartbeat/index.ts`:
-- Accepts POST with `{ agent_id, status, message, metadata }`
-- Validates the agent_id is one of AG-01 through AG-07
-- Inserts into `agent_heartbeats` using service role
-- Returns 200 with the inserted row
-
-This endpoint can be called by n8n cron jobs to send periodic NOMINAL signals, or by internal processes to report DRIFT/ERROR states. The function uses `verify_jwt = false` in config.toml but validates a shared secret header (`X-Heartbeat-Key`) to prevent unauthorized inserts.
-
----
-
-## 7. Cleanup -- Auto-Purge Old Heartbeats
-
-Add a database function `cleanup_old_heartbeats()` that deletes heartbeats older than 24 hours, similar to the existing `cleanup_old_edge_logs()` pattern.
+- Update stat labels to declarative versions:
+  - "$16.6B" -> "Lost annually to manual process overhead in U.S. professional services"
+  - "1.2M+" -> "Target operators in the United States"
+  - "30 Days" -> "Standard system delivery guarantee"
+  - "60%+" -> "Minimum admin reduction benchmark"
 
 ---
 
-## Technical Details
+## Phase 2: Proof Page Full Build (Task 7)
 
-### Files to Create
-| File | Purpose |
-|---|---|
-| `src/hooks/useAgentStatus.ts` | Realtime agent state management hook |
-| `supabase/functions/agent-heartbeat/index.ts` | Heartbeat ingestion endpoint for n8n |
+### Complete Case Studies Page Rebuild
 
-### Files to Edit
-| File | Change |
-|---|---|
-| `src/components/nexus/SystemGrid.tsx` | Consume useAgentStatus, add framer-motion animations, state-driven rendering |
-| `supabase/config.toml` | Add `[functions.agent-heartbeat]` with `verify_jwt = false` |
+**File: `src/pages/CaseStudies.tsx`**
 
-### Database Changes
-| Change | SQL |
-|---|---|
-| Create `agent_heartbeats` table | CREATE TABLE with RLS policies |
-| Enable Realtime | ALTER PUBLICATION |
-| Cleanup function | CREATE FUNCTION cleanup_old_heartbeats() |
+- Replace the placeholder content with three full case study cards
+- Page header: Label "PERFORMANCE CONFIRMATION", Headline "Results we stand behind.", Subtext about documented outcomes
+- Each card structure: CLIENT PROFILE, THE PROBLEM, WHAT WAS INSTALLED, PRE-AGREED BENCHMARK, CONFIRMED RESULT, gold "BENCHMARK CONFIRMED" badge
+- Card 1: Boutique Legal Practice (Tier 1) — 94% autonomous, 27 days
+- Card 2: Independent Financial Advisory (Tier 2) — 63% reduction, 41 days
+- Card 3: Marketing Consultancy (Tier 3) — 71% admin reduction, 58 days
+- Performance Confirmation Protocol explainer section: THE MECHANISM headline, three precision callouts (What counts as confirmed? / Who measures it? / What if window passes?)
+- Gold-bordered contrast block
+- Final CTA with "Confidential. No pitch. No obligation." sub-text
 
-### What Remains Untouched
-- NexusCommand.tsx layout (no changes needed)
-- LiveProvenanceLog.tsx (already functional)
-- RegulatorDiagram.tsx (unchanged)
-- All public-facing pages
-- All existing admin functionality
+---
 
-### Secret Required
-- `HEARTBEAT_SECRET`: A shared key for the agent-heartbeat edge function. You will be prompted to set this before deployment.
+## Phase 3: Process Page Analytical Build (Task 8)
 
-### n8n Integration (Post-Build)
-After this build, you can create a simple n8n workflow:
-1. Cron trigger (every 5 minutes)
-2. HTTP Request node: POST to `{SUPABASE_URL}/functions/v1/agent-heartbeat` with header `X-Heartbeat-Key: {secret}` and body `{ "agent_id": "AG-06", "status": "NOMINAL", "message": "HEARTBEAT_CYCLE" }`
-3. Watch AG-06 (The Chronicler) light up in the Shadow Command Center
+### 8A — Phase Precision Outputs
+
+**File: `src/pages/HowItWorks.tsx`**
+
+- Add "Output:" line to each of the five phase cards with specific deliverable language
+
+### 8B — "What We Don't Do" Section (NEW)
+
+**File: `src/pages/HowItWorks.tsx`**
+
+- Label: SCOPE CLARITY
+- Four numbered cards with declarative statements about what AERELION never does
+
+### 8C — FAQ Accordion (NEW)
+
+**File: `src/pages/HowItWorks.tsx`**
+
+- Label: COMMON QUESTIONS
+- Collapsible accordion with 10 Q&A pairs covering: tool replacement, Protocol details, missed benchmarks, time requirements, ownership, tools used, competitive differentiation, complexity, tier progression, longevity
+- Uses existing Accordion component from `@radix-ui/react-accordion`
+- Add "Confidential. No pitch. No obligation." beneath final CTA
+
+---
+
+## Phase 4: Services Page Updates (Tasks 9–10)
+
+### Task 9 — Activation Signal Module (NEW)
+
+**File: `src/pages/Services.tsx`**
+
+- Insert above the existing ICP section
+- Label: ACTIVATION SIGNAL
+- Five cards with gold numbers and trigger event copy
+
+### Task 10 — Retainer Section Rebuild
+
+**File: `src/pages/Services.tsx`**
+
+- Replace current single-line retainer mention with full card including:
+  - Price display, prose body, coverage description
+  - Gold-bordered Analytical callout (operational stewardship, not reactive maintenance)
+  - Italic Assertive callout (expansion service, never a dependency)
+  - Exclusivity note in muted text
+- Add "Confidential. No pitch. No obligation." beneath final CTA
+
+---
+
+## Phase 5: About Page + Sitewide Micro-copy (Tasks 11–12)
+
+### Task 11 — About Page Selectivity Paragraph
+
+**File: `src/pages/AboutNew.tsx`**
+
+- Add one paragraph after the existing Gustavo body copy about selectivity and benchmark confirmation rate
+
+### Task 12 — Sitewide Micro-copy
+
+**File: `src/components/layout/Navbar.tsx`**
+- Rename "Proof" nav link to "Confirmed Results"
+- Add "Managed Automation Operator" in small muted text beneath the AERELION logo
+
+**File: `src/components/layout/Footer.tsx`**
+- Rename "Proof" to "Confirmed Results"
+- Add italic centered line above copyright: *"AERELION does not take every engagement. We take the right ones."*
+
+**File: `src/pages/ContactNew.tsx`**
+- Add "Confidential. No pitch. No obligation." beneath the submit button
+
+**All CTA sections across all pages:**
+- Add "Confidential. No pitch. No obligation." in 11px muted text beneath every CTA button
+
+---
+
+## Technical Notes
+
+- No new dependencies required — uses existing framer-motion, react-router-dom, lucide-react, react-helmet-async, and radix accordion
+- No database changes needed
+- No new pages created — all modifications to existing files
+- All new sections use existing CSS classes: `section-padding`, `container-narrow`, `card-premium`, `btn-primary`, `btn-outline`
+- Accordion for FAQ uses the already-installed `@radix-ui/react-accordion` component at `src/components/ui/accordion.tsx`
+- All sections fully responsive using existing Tailwind breakpoint patterns
+- Motion uses the existing `fadeUp` variant pattern consistently
+
+---
+
+## Execution Order
+
+1. Home.tsx (Tasks 1, 2, 3, 4, 5, 6, partial 12) — largest file, highest impact
+2. CaseStudies.tsx (Task 7) — critical gap, currently empty
+3. HowItWorks.tsx (Task 8) — Analytical conversion surface
+4. Services.tsx (Tasks 9, 10) — activation signals + retainer
+5. AboutNew.tsx (Task 11) — single paragraph addition
+6. Navbar.tsx + Footer.tsx + ContactNew.tsx (Task 12) — micro-copy sweep
