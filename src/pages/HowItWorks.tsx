@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 import type { Variants } from 'framer-motion';
 
 const fadeUp: Variants = {
@@ -22,9 +23,21 @@ const STANDARDS = [
   'Every benchmark must be measurable within 30 days of activation.',
 ];
 
+const TECH_STACK = [
+  { category: 'Orchestration', tools: 'Make.com, n8n, Zapier — selected per client stack' },
+  { category: 'AI Layer', tools: 'OpenAI GPT-4 / Claude API for conversational and generative components' },
+  { category: 'CRM Integration', tools: 'HubSpot, GoHighLevel, Salesforce, Notion — per client environment' },
+];
+
 const HowItWorks = () => {
   return (
     <main className="pt-24">
+      <Helmet>
+        <title>How It Works — AERELION | Five-Phase Installation Protocol</title>
+        <meta name="description" content="Every AERELION engagement follows a disciplined five-phase installation protocol: System Audit, Architecture Design, Build, Activation, and Benchmark Confirmation." />
+        <link rel="canonical" href="https://aerelion.systems/how-it-works" />
+      </Helmet>
+
       <section className="section-padding pb-16">
         <div className="container-narrow">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp}>
@@ -62,7 +75,27 @@ const HowItWorks = () => {
         </div>
       </section>
 
-      <section className="section-padding bg-card border-y border-border">
+      {/* Technology Stack */}
+      <section className="section-padding border-y border-border">
+        <div className="container-narrow">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp} className="mb-12">
+            <p className="text-xs font-mono uppercase tracking-[0.25em] text-primary mb-4">Technology Stack</p>
+            <h2 className="font-display text-3xl md:text-4xl mb-6">Built with your tools, not ours.</h2>
+            <p className="text-muted-foreground text-lg max-w-2xl leading-relaxed">We install inside your existing infrastructure. No rip-and-replace. No vendor lock-in.</p>
+          </motion.div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {TECH_STACK.map((item, i) => (
+              <motion.div key={i} initial="hidden" whileInView="visible" viewport={{ once: true }} custom={i} variants={fadeUp}
+                className="card-premium p-8">
+                <p className="text-xs font-mono uppercase tracking-widest text-primary mb-3">{item.category}</p>
+                <p className="text-foreground text-sm leading-relaxed">{item.tools}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section-padding bg-card border-b border-border">
         <div className="container-narrow">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp}>
             <p className="text-xs font-mono uppercase tracking-[0.25em] text-primary mb-4">Non-Negotiable Standards</p>

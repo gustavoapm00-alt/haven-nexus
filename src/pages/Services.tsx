@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Check } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 import type { Variants } from 'framer-motion';
 
 const fadeUp: Variants = {
@@ -14,9 +15,24 @@ const TIERS = [
   { tier: '03', name: 'Full Operating System Install', price: '$28,000 – $45,000', timeline: '60-day delivery guarantee', benchmark: 'Owner\'s operational time on admin tasks reduced by minimum 60%', description: 'End-to-end operational redesign. AERELION architects and installs a complete AI-native workflow infrastructure covering intake, delivery, reporting, billing triggers, and client communications.', includes: ['All Tier 1 and Tier 2 components', 'Reporting dashboards', 'Billing automation', 'AI meeting summaries', '30-day post-install support'] },
 ];
 
+const ICP = [
+  { attribute: 'Annual Revenue', value: '$300K – $3M' },
+  { attribute: 'Team Size', value: '1–8 people' },
+  { attribute: 'Industry', value: 'Consulting, coaching, legal, financial advisory, marketing agencies, real estate' },
+  { attribute: 'Mindset', value: 'Performance-obsessed; views operational friction as a solved problem they haven\'t solved yet' },
+  { attribute: 'Decision Driver', value: 'Speed and certainty — not cost. Wants the outcome guaranteed, not the work quoted' },
+  { attribute: 'Engagement Trigger', value: 'Recent bottleneck — hiring failure, delivery breakdown, or client churn due to process gaps' },
+];
+
 const Services = () => {
   return (
     <main className="pt-24">
+      <Helmet>
+        <title>Services — AERELION | AI Automation Installation Tiers</title>
+        <meta name="description" content="Three tiers of operational intelligence: Intake Engine ($4,500–$7,500), Delivery Stack ($12,000–$22,000), Full OS Install ($28,000–$45,000). Fixed-scope with performance benchmarks." />
+        <link rel="canonical" href="https://aerelion.systems/services" />
+      </Helmet>
+
       <section className="section-padding pb-16">
         <div className="container-narrow">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp}>
@@ -75,7 +91,27 @@ const Services = () => {
         </div>
       </section>
 
+      {/* Ideal Client Profile */}
       <section className="section-padding">
+        <div className="container-narrow">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp} className="mb-12">
+            <p className="text-xs font-mono uppercase tracking-[0.25em] text-primary mb-4">Ideal Client Profile</p>
+            <h2 className="font-display text-3xl md:text-4xl mb-6">Is this you?</h2>
+            <p className="text-muted-foreground text-lg max-w-2xl leading-relaxed">AERELION serves a specific type of operator. Here's how we identify mutual fit.</p>
+          </motion.div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {ICP.map((item, i) => (
+              <motion.div key={i} initial="hidden" whileInView="visible" viewport={{ once: true }} custom={i} variants={fadeUp}
+                className="card-premium p-6">
+                <p className="text-xs font-mono uppercase tracking-widest text-primary mb-2">{item.attribute}</p>
+                <p className="text-foreground text-sm leading-relaxed">{item.value}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section-padding bg-card border-y border-border">
         <div className="container-narrow">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp} className="max-w-3xl">
             <p className="text-xs font-mono uppercase tracking-[0.25em] text-primary mb-4">Pricing Philosophy</p>
@@ -88,7 +124,7 @@ const Services = () => {
         </div>
       </section>
 
-      <section className="section-padding bg-card border-y border-border text-center">
+      <section className="section-padding text-center">
         <div className="container-narrow">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp}>
             <h2 className="font-display text-3xl md:text-4xl mb-6">Find the right tier for your operation.</h2>

@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 import type { Variants } from 'framer-motion';
 
 const fadeUp: Variants = {
@@ -11,6 +12,12 @@ const fadeUp: Variants = {
 const CaseStudies = () => {
   return (
     <main className="pt-24">
+      <Helmet>
+        <title>Case Studies — AERELION | Proof of Work</title>
+        <meta name="description" content="Every AERELION engagement produces measurable transformation. Case studies with documented benchmarks publishing Q2 2026." />
+        <link rel="canonical" href="https://aerelion.systems/case-studies" />
+      </Helmet>
+
       <section className="section-padding">
         <div className="container-narrow">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} custom={0} variants={fadeUp}>
