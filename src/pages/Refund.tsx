@@ -1,66 +1,44 @@
-import ScrollReveal from '@/components/ScrollReveal';
-import SEO, { schemas } from '@/components/SEO';
+import { Helmet } from 'react-helmet-async';
 
-const Refund = () => {
-  return (
-    <div className="min-h-screen bg-[#0F0F0F]">
-      <SEO 
-        title="Refund Policy – AERELION Systems"
-        description="Refund Policy for AERELION managed automation services."
-        canonicalUrl="/refund"
-        structuredData={schemas.breadcrumb([
-          { name: 'Home', url: '/' },
-          { name: 'Refund Policy', url: '/refund' }
-        ])}
-      />
-      
-      <main className="pt-8">
-        <section className="section-padding">
-          <div className="container-main max-w-3xl">
-            <ScrollReveal>
-              <span className="font-mono text-[10px] text-[#39FF14]/50 uppercase tracking-[0.25em] mb-3 block">
-                // FINANCIAL GOVERNANCE
-              </span>
-              <h1 className="font-mono text-3xl md:text-4xl font-semibold text-[#E0E0E0] mb-2">
-                Refund Policy
-              </h1>
-              <p className="font-mono text-xs text-white/20 mb-10">
-                Last updated: December 2024
-              </p>
-            </ScrollReveal>
+const SECTIONS = [
+  { title: '1. Completed Engagements', content: 'Completed automation engagements are final once deployment begins. Due to the nature of managed infrastructure, refunds are not available once system configuration has been initiated.' },
+  { title: '2. Refund Eligibility', list: ['Infrastructure was unavailable for an extended period due to AERELION fault.', 'Billing errors resulting in overcharges.', 'Systems were not delivered as specified in the engagement scope.'] },
+  { title: '3. Process', content: 'To request a refund, contact contact@aerelion.com with engagement details and reason. All requests reviewed within 5–7 business days.' },
+  { title: '4. Processing', content: 'Approved refunds processed within 10 business days. Additional time depends on payment provider.' },
+  { title: '5. Non-Refundable', list: ['Activated systems once configuration has begun.', 'Deployment services already rendered.', 'Third-party costs incurred on your behalf.'] },
+  { title: '6. Disputes', content: 'Contact contact@aerelion.com before escalation to payment providers.' },
+];
 
-            <ScrollReveal delay={0.1}>
-              <div className="space-y-8">
-                {[
-                  { title: '1. Activated Protocols', content: 'Activated automation protocols are final once deployment begins. Due to the nature of managed infrastructure, refunds are not available once protocol configuration has been initiated.' },
-                  { title: '2. Refund Eligibility', content: null, list: ['Infrastructure was unavailable for an extended period due to AERELION fault.', 'Billing errors resulting in overcharges.', 'Protocols were not delivered as specified in the engagement authorization.'] },
-                  { title: '3. Process', content: 'To request a refund, contact contact@aerelion.systems with engagement details and reason. All requests reviewed within 5-7 operational days.' },
-                  { title: '4. Processing', content: 'Approved refunds processed within 10 operational days. Additional time depends on payment provider.' },
-                  { title: '5. Non-Refundable', content: null, list: ['Activated protocol systems once configuration has begun.', 'Activation and deployment services already rendered.', 'Third-party costs incurred on your behalf.'] },
-                  { title: '6. Disputes', content: 'Contact contact@aerelion.systems before escalation to payment providers.' },
-                ].map((section, i) => (
-                  <div key={i} className="border-b border-white/5 pb-6">
-                    <h2 className="font-mono text-sm font-semibold text-[#E0E0E0] mb-3">{section.title}</h2>
-                    {section.content && <p className="font-sans text-sm text-white/35 leading-relaxed">{section.content}</p>}
-                    {section.list && (
-                      <ul className="space-y-2">
-                        {section.list.map((item, j) => (
-                          <li key={j} className="flex items-start gap-2 text-sm text-white/35 font-sans">
-                            <span className="font-mono text-[10px] text-[#39FF14]/30 mt-1">▸</span>
-                            <span>{item}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
+const Refund = () => (
+  <main className="pt-32 pb-20">
+    <Helmet>
+      <title>Refund Policy – AERELION</title>
+      <meta name="description" content="Refund Policy for AERELION automation services." />
+    </Helmet>
+    <div className="max-w-3xl mx-auto px-6 md:px-12">
+      <p className="text-xs font-mono uppercase tracking-[0.25em] text-primary mb-4">Legal</p>
+      <h1 className="font-display text-3xl md:text-4xl mb-2">Refund Policy</h1>
+      <p className="text-sm text-muted-foreground mb-12">Last updated: February 2026</p>
+      <div className="space-y-8">
+        {SECTIONS.map((s, i) => (
+          <div key={i} className="border-b border-border pb-6">
+            <h2 className="text-sm font-semibold text-foreground mb-3">{s.title}</h2>
+            {s.content && <p className="text-sm text-muted-foreground leading-relaxed">{s.content}</p>}
+            {s.list && (
+              <ul className="space-y-2">
+                {s.list.map((item, j) => (
+                  <li key={j} className="flex items-start gap-2 text-sm text-muted-foreground">
+                    <span className="text-primary mt-0.5">—</span>
+                    <span>{item}</span>
+                  </li>
                 ))}
-              </div>
-            </ScrollReveal>
+              </ul>
+            )}
           </div>
-        </section>
-      </main>
+        ))}
+      </div>
     </div>
-  );
-};
+  </main>
+);
 
 export default Refund;
