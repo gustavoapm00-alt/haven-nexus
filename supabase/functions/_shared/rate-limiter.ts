@@ -101,7 +101,7 @@ export function rateLimitResponse(retryAfterSeconds: number): Response {
       headers: {
         "Content-Type": "application/json",
         "Retry-After": retryAfterSeconds.toString(),
-        "Access-Control-Allow-Origin": ALLOWED_ORIGINS[0],
+        "Access-Control-Allow-Origin": STATIC_ALLOWED_ORIGINS[0],
         "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
       },
     }

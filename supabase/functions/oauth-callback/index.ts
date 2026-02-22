@@ -75,10 +75,11 @@ async function encryptData(data: string, keyBase64: string): Promise<{ encrypted
   const encoder = new TextEncoder();
   const dataBuffer = encoder.encode(data);
   
-  // Decode base64 key with proper handling
+  // Decode base64 key — only normalize if URL-safe characters are present
   let keyBytes: Uint8Array;
   try {
-    const normalizedKey = keyBase64.replace(/-/g, '+').replace(/_/g, '/');
+    const needsNormalization = keyBase64.includes('-') || keyBase64.includes('_');
+    const normalizedKey = needsNormalization ? keyBase64.replace(/-/g, '+').replace(/_/g, '/') : keyBase64;
     const binaryString = atob(normalizedKey);
     keyBytes = new Uint8Array(binaryString.length);
     for (let i = 0; i < binaryString.length; i++) {
@@ -272,6 +273,10 @@ Deno.serve(async (req) => {
     
     // Get user info from provider
     const accessToken = tokens.access_token || tokens.authed_user?.access_token;
+    if (!accessToken) {
+      console.error(`No access token received from ${provider}`);
+      return Response.redirect(`${siteUrl}/integrations?error=no_access_token`, 302);
+    }
     const userInfo = await fetchUserInfo(provider, accessToken);
 
     // Encrypt credentials
