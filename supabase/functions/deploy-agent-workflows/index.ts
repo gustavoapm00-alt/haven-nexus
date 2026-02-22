@@ -550,13 +550,7 @@ Deno.serve(async (req) => {
     // ACTION: Deploy all 7 heartbeat workflows
     // Fetch agent definitions from agent_registry (single source of truth)
     // BUG-FIX: Use correct secret name — AERELION_SERVICE_ROLE_KEY with fallback
-    const deployServiceKey =
-      Deno.env.get('AERELION_SERVICE_ROLE_KEY') ||
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
-    const serviceClient = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      deployServiceKey
-    );
+    // Reuse serviceClient already declared above (line 251)
 
     const { data: registryData } = await serviceClient
       .from('agent_registry')
