@@ -19,10 +19,14 @@ const SectionBand = ({ variant = 'light', children, className, id, enableParalla
     offset: ["start end", "end start"]
   });
 
-  // Parallax transforms for the ink variant
+  // All useTransform calls BEFORE any conditional return
   const gridY = useTransform(scrollYProgress, [0, 1], ["0%", "15%"]);
   const glowOpacity = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0.3, 1, 1, 0.3]);
   const contentY = useTransform(scrollYProgress, [0, 1], ["5%", "-5%"]);
+  const orbOneY = useTransform(scrollYProgress, [0, 1], ["-20%", "20%"]);
+  const orbTwoY = useTransform(scrollYProgress, [0, 1], ["30%", "-30%"]);
+  const scanLineTop = useTransform(scrollYProgress, [0, 1], ["10%", "90%"]);
+  const scanLineOpacity = useTransform(scrollYProgress, [0, 0.1, 0.9, 1], [0, 0.6, 0.6, 0]);
 
   const variantStyles = {
     light: 'bg-background',
@@ -51,7 +55,7 @@ const SectionBand = ({ variant = 'light', children, className, id, enableParalla
           style={{ 
             background: 'radial-gradient(circle, hsl(220 65% 50% / 0.15), transparent 70%)',
             opacity: glowOpacity,
-            y: useTransform(scrollYProgress, [0, 1], ["-20%", "20%"])
+            y: orbOneY,
           }}
         />
         <motion.div 
@@ -59,7 +63,7 @@ const SectionBand = ({ variant = 'light', children, className, id, enableParalla
           style={{ 
             background: 'radial-gradient(circle, hsl(240 60% 45% / 0.12), transparent 70%)',
             opacity: glowOpacity,
-            y: useTransform(scrollYProgress, [0, 1], ["30%", "-30%"])
+            y: orbTwoY,
           }}
         />
         
@@ -67,8 +71,8 @@ const SectionBand = ({ variant = 'light', children, className, id, enableParalla
         <motion.div 
           className="absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent pointer-events-none"
           style={{
-            top: useTransform(scrollYProgress, [0, 1], ["10%", "90%"]),
-            opacity: useTransform(scrollYProgress, [0, 0.1, 0.9, 1], [0, 0.6, 0.6, 0])
+            top: scanLineTop,
+            opacity: scanLineOpacity,
           }}
         />
         

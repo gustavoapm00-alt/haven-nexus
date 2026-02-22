@@ -19,10 +19,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
  * - activation_request_id: Optional activation context for post-connect redirect
  */
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { buildCorsHeaders } from "../_shared/rate-limiter.ts";
 
 interface ProviderConfig {
   authUrl: string;
@@ -124,6 +121,7 @@ function validateRedirectPath(path: string | null): string {
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = buildCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }

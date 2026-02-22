@@ -83,14 +83,16 @@ async function getLeastLoadedN8nUrl(supabase: any): Promise<string | null> {
     }
 
     // Select instance with most headroom: lowest (current_load / max_capacity) ratio
-    const best = (data as { instance_url: string; current_load: number; max_capacity: number }[])
+    const candidates = (data as { instance_url: string; current_load: number; max_capacity: number }[])
       .filter(i => i.max_capacity > 0 && i.current_load < i.max_capacity)
-      .sort((a, b) => (a.current_load / a.max_capacity) - (b.current_load / b.max_capacity))[0];
+      .sort((a, b) => (a.current_load / a.max_capacity) - (b.current_load / b.max_capacity));
 
-    if (!best) {
+    if (candidates.length === 0) {
       console.warn("All n8n instances at capacity — falling back to N8N_BASE_URL env");
       return getN8nBaseUrlEnv();
     }
+
+    const best = candidates[0];
 
     console.log(`[ROUTING] Selected n8n instance: ${best.instance_url} (load: ${best.current_load}/${best.max_capacity})`);
     return normalizeN8nUrl(best.instance_url);
@@ -103,11 +105,23 @@ async function getLeastLoadedN8nUrl(supabase: any): Promise<string | null> {
 // Increment load counter for an n8n instance after routing a workflow to it
 // deno-lint-ignore no-explicit-any
 async function incrementInstanceLoad(supabase: any, instanceUrl: string): Promise<void> {
-  await supabase
-    .from("n8n_instances")
-    .update({ current_load: supabase.rpc("n8n_instances_load_incr") })
-    .eq("instance_url", instanceUrl);
-  // Soft failure: non-critical telemetry, don't throw
+  try {
+    // Fetch current load, then increment
+    const { data } = await supabase
+      .from("n8n_instances")
+      .select("current_load")
+      .eq("instance_url", instanceUrl)
+      .maybeSingle();
+    
+    const newLoad = (data?.current_load ?? 0) + 1;
+    await supabase
+      .from("n8n_instances")
+      .update({ current_load: newLoad })
+      .eq("instance_url", instanceUrl);
+  } catch (err) {
+    // Soft failure: non-critical telemetry, don't throw
+    console.warn("incrementInstanceLoad failed:", err);
+  }
 }
 
 function normalizeN8nUrl(url: string): string {

@@ -62,7 +62,7 @@ const AmbientEffects = () => {
           const isGlowing = dist < RADIUS * 0.6;
           if (isGlowing) ctx.strokeStyle = `rgba(57,255,20,${0.06 - (dist / (RADIUS * 0.6)) * 0.04})`;
           else ctx.strokeStyle = 'rgba(57,255,20,0.022)';
-          y === 0 ? ctx.moveTo(x + ox, y) : ctx.lineTo(x + ox, y);
+          if (y === 0) { ctx.moveTo(x + ox, y); } else { ctx.lineTo(x + ox, y); }
         }
         ctx.stroke();
       }
@@ -75,7 +75,7 @@ const AmbientEffects = () => {
           const dist = Math.sqrt(dx * dx + dy * dy);
           const pull = dist < RADIUS ? (1 - dist / RADIUS) * PULL : 0;
           const oy = pull > 0 ? (dy / (dist || 1)) * pull * -1 : 0;
-          x === 0 ? ctx.moveTo(x, y + oy) : ctx.lineTo(x, y + oy);
+          if (x === 0) { ctx.moveTo(x, y + oy); } else { ctx.lineTo(x, y + oy); }
         }
         ctx.stroke();
       }
