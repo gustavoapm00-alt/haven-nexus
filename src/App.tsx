@@ -2,153 +2,45 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { HelmetProvider } from "react-helmet-async";
-import { AuthProvider, useAuth } from "@/hooks/useAuth";
-import { SubscriptionProvider } from "@/hooks/useSubscription";
 
-import AmbientEffects from "@/components/landing/AmbientEffects";
-import SystemStatusTicker from "@/components/landing/SystemStatusTicker";
-import HUDNavbar from "@/components/landing/HUDNavbar";
-import TerminalFooter from "@/components/landing/TerminalFooter";
-import PageTransition from "@/components/landing/PageTransition";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 
-// Pages
-import RequestAccess from "./pages/RequestAccess";
+import Home from "./pages/Home";
+import Services from "./pages/Services";
+import HowItWorks from "./pages/HowItWorks";
+import AboutPage from "./pages/AboutNew";
+import CaseStudies from "./pages/CaseStudies";
+import ContactPage from "./pages/ContactNew";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import Refund from "./pages/Refund";
-import Auth from "./pages/Auth";
-// Admin decommissioned — all routes redirect to /nexus/cmd
-import ResetPassword from "./pages/ResetPassword";
-import Sanctuary from "./pages/Sanctuary";
 import NotFound from "./pages/NotFound";
-import Careers from "./pages/Careers";
-import About from "./pages/About";
-import Enterprise from "./pages/Enterprise";
-
-// Library pages
-import LibraryHome from "./pages/library/LibraryHome";
-import AgentLibrary from "./pages/library/AgentLibrary";
-import AgentDetail from "./pages/library/AgentDetail";
-import BundleDetail from "./pages/library/BundleDetail";
-import DeploymentOverview from "./pages/library/DeploymentOverview";
-import SecurityPractices from "./pages/library/SecurityPractices";
-import Security from "./pages/library/Security";
-import Documentation from "./pages/library/Documentation";
-import InstallationAssistance from "./pages/library/InstallationAssistance";
-import LibraryContact from "./pages/library/LibraryContact";
-import PurchaseSuccess from "./pages/library/PurchaseSuccess";
-import ActivationSetup from "./pages/library/ActivationSetup";
-import ActivationWalkthrough from "./pages/library/ActivationWalkthrough";
-import ActivationRequestDetail from "./pages/library/ActivationRequestDetail";
-import CredentialIntake from "./pages/library/CredentialIntake";
-import PurchaseHistory from "./pages/library/PurchaseHistory";
-import UserDashboard from "./pages/library/UserDashboard";
-import ConnectorScreen from "./pages/library/ConnectorScreen";
-import AccountIntegrations from "./pages/library/AccountIntegrations";
-
-// Client Portal pages
-import ClientAuth from "./pages/portal/ClientAuth";
-import ClientOnboarding from "./pages/portal/ClientOnboarding";
-import ClientDashboard from "./pages/portal/ClientDashboard";
-import PortalBilling from "./pages/portal/PortalBilling";
-import PortalAnalytics from "./pages/portal/PortalAnalytics";
-import PortalNotifications from "./pages/portal/PortalNotifications";
-import PortalRouteGuard from "./components/portal/PortalRouteGuard";
-import PortalConnectorScreen from "./pages/portal/ConnectorScreen";
-
-// Admin pages
-// Admin page imports decommissioned — Nexus Command is the sole admin interface
-
-// Nexus (Shadow Command)
-import NexusGuard from "./components/nexus/NexusGuard";
-import NexusCommand from "./pages/nexus/NexusCommand";
-import THSVerification from "./pages/ths/THSVerification";
 
 const queryClient = new QueryClient();
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
-  
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
-  
+  useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
   return null;
 };
 
 const AppRoutes = () => (
-  <PageTransition>
-    <Routes>
-      {/* Primary Site Routes */}
-      <Route path="/" element={<LibraryHome />} />
-      <Route path="/automations" element={<AgentLibrary />} />
-      <Route path="/automations/:slug" element={<AgentDetail />} />
-      <Route path="/bundles/:slug" element={<BundleDetail />} />
-      <Route path="/how-it-works" element={<DeploymentOverview />} />
-      <Route path="/security" element={<Security />} />
-      <Route path="/security-practices" element={<SecurityPractices />} />
-      <Route path="/docs" element={<Documentation />} />
-      <Route path="/install" element={<InstallationAssistance />} />
-      <Route path="/contact" element={<LibraryContact />} />
-      <Route path="/purchase-success" element={<PurchaseSuccess />} />
-      <Route path="/activation-setup" element={<ActivationSetup />} />
-      <Route path="/activation-walkthrough" element={<ActivationWalkthrough />} />
-      <Route path="/activation-request/:id" element={<ActivationRequestDetail />} />
-      <Route path="/credentials/:id" element={<CredentialIntake />} />
-      <Route path="/connect/:requestId" element={<ConnectorScreen />} />
-      <Route path="/purchases" element={<PurchaseHistory />} />
-      <Route path="/dashboard" element={<UserDashboard />} />
-      <Route path="/integrations" element={<AccountIntegrations />} />
-      <Route path="/enterprise" element={<Enterprise />} />
-      <Route path="/careers" element={<Careers />} />
-
-      {/* Client Portal routes */}
-      <Route path="/portal/auth" element={<ClientAuth />} />
-      <Route path="/portal/onboarding" element={<PortalRouteGuard><ClientOnboarding /></PortalRouteGuard>} />
-      <Route path="/portal/dashboard" element={<PortalRouteGuard><ClientDashboard /></PortalRouteGuard>} />
-      <Route path="/portal/connect/:automationSlug" element={<PortalRouteGuard><PortalConnectorScreen /></PortalRouteGuard>} />
-      <Route path="/portal/billing" element={<PortalRouteGuard><PortalBilling /></PortalRouteGuard>} />
-      <Route path="/portal/activity" element={<PortalRouteGuard><PortalAnalytics /></PortalRouteGuard>} />
-      <Route path="/portal/notifications" element={<PortalRouteGuard><PortalNotifications /></PortalRouteGuard>} />
-
-      {/* Legacy redirects */}
-      <Route path="/bundles" element={<Navigate to="/automations" replace />} />
-      <Route path="/packs" element={<Navigate to="/automations" replace />} />
-      <Route path="/packs/:slug" element={<Navigate to="/automations" replace />} />
-      <Route path="/agents" element={<Navigate to="/automations" replace />} />
-      <Route path="/pricing" element={<Navigate to="/contact" replace />} />
-      <Route path="/deployment" element={<Navigate to="/how-it-works" replace />} />
-      <Route path="/capabilities" element={<Navigate to="/how-it-works" replace />} />
-      <Route path="/get-started" element={<Navigate to="/contact" replace />} />
-      <Route path="/services" element={<Navigate to="/automations" replace />} />
-      <Route path="/old-home" element={<Navigate to="/" replace />} />
-      <Route path="/about" element={<About />} />
-      <Route path="/reliability" element={<Navigate to="/security" replace />} />
-      <Route path="/proof" element={<Navigate to="/how-it-works" replace />} />
-      <Route path="/portal/analytics" element={<Navigate to="/portal/activity" replace />} />
-
-      {/* Legal pages */}
-      <Route path="/terms" element={<Terms />} />
-      <Route path="/privacy" element={<Privacy />} />
-      <Route path="/refund" element={<Refund />} />
-      <Route path="/auth" element={<Auth />} />
-      <Route path="/sanctuary" element={<Sanctuary />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
-
-      {/* Admin routes — decommissioned, force-redirect to Nexus Command Node */}
-      <Route path="/admin" element={<Navigate to="/nexus/cmd" replace />} />
-      <Route path="/admin/*" element={<Navigate to="/nexus/cmd" replace />} />
-
-      {/* Shadow Command — hidden, admin-only */}
-      <Route path="/nexus/cmd" element={<NexusGuard><NexusCommand /></NexusGuard>} />
-      <Route path="/ths/verify" element={<THSVerification />} />
-
-      <Route path="*" element={<NotFound />} />
-    </Routes>
-  </PageTransition>
+  <Routes>
+    <Route path="/" element={<Home />} />
+    <Route path="/services" element={<Services />} />
+    <Route path="/how-it-works" element={<HowItWorks />} />
+    <Route path="/about" element={<AboutPage />} />
+    <Route path="/case-studies" element={<CaseStudies />} />
+    <Route path="/contact" element={<ContactPage />} />
+    <Route path="/terms" element={<Terms />} />
+    <Route path="/privacy" element={<Privacy />} />
+    <Route path="/refund" element={<Refund />} />
+    <Route path="*" element={<NotFound />} />
+  </Routes>
 );
 
 const App = () => (
@@ -157,25 +49,11 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        
         <BrowserRouter>
           <ScrollToTop />
-          <AuthProvider>
-            <SubscriptionProvider>
-              {/* Global ambient effects layer */}
-              <AmbientEffects />
-              
-              {/* Persistent HUD shell */}
-              <div className="relative z-10 min-h-screen pb-7">
-                <SystemStatusTicker />
-                <HUDNavbar />
-                <AppRoutes />
-              </div>
-              
-              {/* Persistent terminal footer */}
-              <TerminalFooter />
-            </SubscriptionProvider>
-          </AuthProvider>
+          <Navbar />
+          <AppRoutes />
+          <Footer />
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
